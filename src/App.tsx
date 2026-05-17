@@ -19,24 +19,24 @@ import {
 import { parseMht, stripHtml } from './lib/mht-parser';
 
 const App: React.FC = () => {
-  const {
-    neuroState,
-    mode,
-    stabilize,
-    sage,
-    innerSpiral,
-    outerSweep,
+  const { 
+    neuroState, 
+    mode, 
+    stabilize, 
+    sage, 
+    innerSpiral, 
+    outerSweep, 
     suggestions,
     recordInteraction,
     bulkImportMemories,
-    archiveMemories,
+    archiveMemories
   } = useSage();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [view, setView] = useState<'chat' | 'lattice'>('chat');
   const [messages, setMessages] = useState<{id: string, role: 'user' | 'assistant' | 'system', text: string}[]>([
-    { id: crypto.randomUUID(), role: 'system', text: 'NEXUS SUBSTRATE // ADHD SAGE INITIALIZED.' },
-    { id: crypto.randomUUID(), role: 'system', text: 'Substrate frequency oscillating rapidly at 11.3 Hz.' }
+    { id: '1', role: 'system', text: 'NEXUS SUBSTRATE // ADHD SAGE INITIALIZED.' },
+    { id: '2', role: 'system', text: 'Substrate frequency oscillating rapidly at 11.3 Hz.' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -53,31 +53,42 @@ const App: React.FC = () => {
       
       // Extract text parts and handle semantic chunking
       const rawTexts = parts
-        .filter(p => p.contentType.includes('text/plain') || p.contentType.includes('text/html'))
+        .filter(p => p.contentType === 'text/plain' || p.contentType === 'text/html')
         .map(p => {
-          const txt = p.contentType.includes('text/html') ? stripHtml(p.content) : p.content;
-          // Clean up multiple spaces and empty lines that often pollute MHT extracts
-          return txt.replace(/[ \t]+/g, ' ').trim();
+          let text = p.contentType === 'text/html' ? stripHtml(p.content) : p.content;
+          
+          // Prepend header context if meaningful for the "synapse"
+          const metadata = [];
+          if (p.headers['subject']) metadata.push(`SUBJ: ${p.headers['subject']}`);
+          if (p.headers['date']) metadata.push(`DATE: ${p.headers['date']}`);
+          
+          if (metadata.length > 0) {
+            text = `[${metadata.join(' | ')}]\n${text}`;
+          }
+
+          // Clean up whitespace pollution common in MHT exports
+          return text.replace(/[ \t]+/g, ' ').replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
         });
 
       // Filter for meaningful content blocks (e.g. paragraphs or conversation turns)
       const synapses = rawTexts
-        .flatMap(txt => txt.split(/\n{2,}/)) // Split only on double newlines or more
+        .flatMap(txt => txt.split(/\n{2,}/))
         .map(s => s.trim())
-        .filter(s => s.length > 30 && !s.startsWith('<') && !s.startsWith('{')); // Filter out remains of HTML/JSON or tiny noise
+        .filter(s => {
+          const isJunk = s.startsWith('<') || s.startsWith('{') || s.startsWith('[if ') || s.includes('msso:');
+          return s.length > 25 && !isJunk;
+        });
 
       if (synapses.length > 0) {
         bulkImportMemories(synapses);
-        setMessages(prev => [...prev, {
-          role: 'system',
-          text: `VFS SYNC: Synchronized ${synapses.length} semantic synapses from [${file.name}].`,
-          id: crypto.randomUUID()
+        setMessages(prev => [...prev, { 
+          role: 'system', 
+          text: `VFS SYNC: Synchronized ${synapses.length} semantic synapses from [${file.name}].` 
         }]);
       } else {
-        setMessages(prev => [...prev, {
-          role: 'system',
-          text: `VFS WARNING: No meaningful synapses extracted from [${file.name}]. Check format compatibility.`,
-          id: crypto.randomUUID()
+        setMessages(prev => [...prev, { 
+          role: 'system', 
+          text: `VFS WARNING: No meaningful synapses extracted from [${file.name}]. Check format compatibility.` 
         }]);
       }
     };
@@ -170,7 +181,7 @@ const App: React.FC = () => {
 
     const userMessage = input.trim();
     recordInteraction(userMessage);
-    setMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'user', text: userMessage }]);
+    setMessages(prev => [...prev, { id: `m_${Date.now()}_u`, role: 'user', text: userMessage }]);
     setInput('');
     setIsLoading(true);
     if (window.innerWidth < 768) setIsSidebarOpen(false);
@@ -192,7 +203,7 @@ const App: React.FC = () => {
       const data = await response.json();
       if (data.error) throw new Error(data.error);
 
-      setMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'assistant', text: data.text }]);
+      setMessages(prev => [...prev, { id: `m_${Date.now()}_a`, role: 'assistant', text: data.text }]);
       
       // Auto-stabilize on successful interaction
       if (neuroState.stability < 0.5) {
@@ -200,7 +211,7 @@ const App: React.FC = () => {
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      setMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'system', text: `ERROR: ${errorMessage}` }]);
+      setMessages(prev => [...prev, { id: `m_${Date.now()}_e`, role: 'system', text: `ERROR: ${errorMessage}` }]);
     } finally {
       setIsLoading(false);
     }
@@ -353,7 +364,7 @@ const App: React.FC = () => {
           <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20">
             <p className="text-xs text-indigo-300 font-semibold mb-1 uppercase tracking-tighter">Compute Status</p>
             <div className="h-1 w-full bg-indigo-900/30 rounded-full overflow-hidden mb-2">
-              <motion.div
+              <motion.div 
                 animate={{ width: `${neuroState.stability * 100}%` }}
                 className="h-full bg-indigo-400"
               />
@@ -427,7 +438,7 @@ const App: React.FC = () => {
                   className="flex-1 overflow-y-auto space-y-6 scrollbar-hide pr-2 md:pr-4 rounded-2xl md:rounded-3xl bg-white/[0.03] border border-white/10 p-4 md:p-6 flex flex-col transition-all duration-500"
                 >
                   {messages.map((msg) => (
-                    <motion.div
+                    <motion.div 
                       key={msg.id}
                       initial={{ opacity: 0, scale: 0.98 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -622,11 +633,12 @@ const App: React.FC = () => {
                 )}
               </div>
               <div className="mt-4 pt-4 border-t border-white/5">
-                <button
+                <button 
                   onClick={() => {
-                    if (window.confirm("NEXUS: Purge inner spiral into outer sweep archive?")) {
+                    const confirm = window.confirm("NEXUS: Purge inner spiral into outer sweep archive?");
+                    if (confirm) {
                       archiveMemories();
-                      setMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'system', text: "ARCHIVE: All transient nodes migrated to outer sweep telemetry." }]);
+                      setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: "ARCHIVE: All transient nodes migrated to outer sweep telemetry." }]);
                     }
                   }}
                   className="w-full py-2 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] border border-white/5 transition-colors uppercase font-bold tracking-widest text-slate-300"

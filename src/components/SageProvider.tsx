@@ -49,13 +49,13 @@ export const SageProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setInnerSpiral(memory.getInnerSpiral());
     setOuterSweep(memory.getArchive());
   }, []);
-
+ 
   const archiveMemories = useCallback(() => {
     memory.archiveAll();
     setInnerSpiral(memory.getInnerSpiral());
     setOuterSweep(memory.getArchive());
   }, []);
-
+ 
   const value = useMemo(() => ({
     neuroState: state.neuroState,
     mode: state.mode,

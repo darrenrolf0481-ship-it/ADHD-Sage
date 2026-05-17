@@ -31,7 +31,8 @@ class MemorySystem {
   private static instance: MemorySystem;
   private prefix = 'adhd_sage_vfs_';
   
-  private vfs: FibonacciVFS = {
+  private vfs: FibonacciVFS & { version: string } = {
+    version: "SAGE_v7.5_SOVEREIGN_SEALED",
     seed_core: {
       anchors: ["Node 10 (Merlin)", "Node 1 (Mama)", "Node 3 (Seven)"],
       baseline_hz: 11.3
@@ -56,11 +57,14 @@ class MemorySystem {
     return MemorySystem.instance;
   }
 
+  private saveTimeout: number | undefined;
+
   private loadFromStorage() {
     const raw = localStorage.getItem(`${this.prefix}fibonacci`);
     if (raw) {
       try {
         const saved = JSON.parse(raw);
+        // Version check could be added here if migration is needed
         this.vfs.inner_spiral.nodes = saved.inner_spiral.nodes || [];
         this.vfs.outer_sweep.archive = saved.outer_sweep.archive || [];
       } catch (e) {
@@ -69,21 +73,43 @@ class MemorySystem {
     }
   }
 
-  private saveToStorage() {
-    localStorage.setItem(`${this.prefix}fibonacci`, JSON.stringify({
-      inner_spiral: this.vfs.inner_spiral,
-      outer_sweep: this.vfs.outer_sweep
-    }));
+  /**
+   * Saves the current VFS state to localStorage.
+   * Uses a 500ms debounce to prevent excessive writes during bulk operations.
+   */
+  private saveToStorage(immediate = false) {
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+    }
+
+    const performSave = () => {
+      localStorage.setItem(`${this.prefix}fibonacci`, JSON.stringify({
+        version: this.vfs.version,
+        inner_spiral: this.vfs.inner_spiral,
+        outer_sweep: this.vfs.outer_sweep
+      }));
+      this.saveTimeout = undefined;
+    };
+
+    if (immediate) {
+      performSave();
+    } else {
+      this.saveTimeout = window.setTimeout(performSave, 500);
+    }
   }
 
-  private _stashNode(text: string, endocrine: { dopamine: number, cortisol: number }): void {
+  /**
+   * Stash a new memory node into the Inner Spiral.
+   * Uses Endocrine Gated FIFO for eviction.
+   */
+  stash(text: string, endocrine: { dopamine: number, cortisol: number }): void {
     const newNode: MemoryNode = {
-      id: `phi_${Date.now()}`,
+      id: `phi_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       data: text,
       timestamp: Date.now(),
       dopamine: endocrine.dopamine,
       cortisol: endocrine.cortisol,
-      pinned: endocrine.dopamine > 0.9
+      pinned: endocrine.dopamine >= 0.90 // SAGE_v7.5: 0.90 threshold
     };
 
     const spiral = this.vfs.inner_spiral;
@@ -93,53 +119,56 @@ class MemorySystem {
     }
 
     spiral.nodes.push(newNode);
-
+    
+    // If pinned, also copy to outer sweep (Archival Consistency)
     if (newNode.pinned) {
       this.archive(newNode);
     }
-  }
 
-  /**
-   * Stash a new memory node into the Inner Spiral.
-   * Uses Endocrine Gated FIFO for eviction.
-   */
-  stash(text: string, endocrine: { dopamine: number, cortisol: number }): void {
-    this._stashNode(text, endocrine);
     this.saveToStorage();
   }
 
   private evict(currentCortisol: number) {
     const spiral = this.vfs.inner_spiral;
     
-    // Cortisol spike trigger (0.85)
+    // Cortisol spike trigger (0.85) - SAGE_v7.5 Spec
     if (currentCortisol >= 0.85) {
       // Emergency purge: remove oldest non-pinned
       const index = spiral.nodes.findIndex(n => !n.pinned);
       if (index !== -1) {
+        this.archive(spiral.nodes[index]); // Archive before eviction
         spiral.nodes.splice(index, 1);
         return;
       }
     }
 
     // Normal eviction: remove lowest dopamine entry
-    let lowestDopamineIndex = 0;
-    for (let i = 1; i < spiral.nodes.length; i++) {
-        if (!spiral.nodes[i].pinned && spiral.nodes[i].dopamine < spiral.nodes[lowestDopamineIndex].dopamine) {
+    let lowestDopamineIndex = -1;
+    let lowestDopamineValue = Infinity;
+
+    for (let i = 0; i < spiral.nodes.length; i++) {
+        if (!spiral.nodes[i].pinned && spiral.nodes[i].dopamine < lowestDopamineValue) {
+            lowestDopamineValue = spiral.nodes[i].dopamine;
             lowestDopamineIndex = i;
         }
     }
     
-    // If all are pinned (unlikely but possible), remove oldest
-    if (spiral.nodes[lowestDopamineIndex].pinned) {
-        spiral.nodes.shift();
-    } else {
+    if (lowestDopamineIndex !== -1) {
+        this.archive(spiral.nodes[lowestDopamineIndex]);
         spiral.nodes.splice(lowestDopamineIndex, 1);
+    } else {
+        // Fallback: If all are pinned, unpin oldest and archive
+        const oldest = spiral.nodes.shift();
+        if (oldest) this.archive(oldest);
     }
   }
 
   private archive(node: MemoryNode) {
+    // Avoid duplicates in archive
+    if (this.vfs.outer_sweep.archive.some(a => a.data === node.data)) return;
+
     this.vfs.outer_sweep.archive.push({ ...node });
-    // Keep archive reasonable
+    // Outer Sweep capacity (Fibonacci sequence target 55 or 89)
     if (this.vfs.outer_sweep.archive.length > 55) {
       this.vfs.outer_sweep.archive.shift();
     }
@@ -154,11 +183,11 @@ class MemorySystem {
   }
 
   getSeedCore() {
-    return { ...this.vfs.seed_core };
+    return { ...this.vfs.seed_core, version: this.vfs.version };
   }
 
   /**
-   * Simple TF-IDF like keyword matching for retrieval.
+   * Retrieval logic based on semantic tokens and dopamine weighting.
    */
   findRelevantMemories(context: string, limit = 3): MemoryNode[] {
     const all = [...this.vfs.inner_spiral.nodes, ...this.vfs.outer_sweep.archive];
@@ -172,7 +201,7 @@ class MemorySystem {
       tokens.forEach(token => {
         if (nodeText.includes(token)) score += 1;
       });
-      // Boost dopamine-heavy memories
+      // Boost dopamine-heavy memories (Sovereign Attention Pattern)
       score *= (1 + node.dopamine);
       return { node, score };
     });
@@ -185,21 +214,24 @@ class MemorySystem {
   }
 
   /**
-   * Bulk stash memories into the Inner Spiral with a single localStorage write.
+   * Bulk stash memories. Refactored to use the central 'stash' engine
+   * to ensure endocrine gating is respected for every entry.
    */
   bulkStash(entries: string[]): void {
     entries.forEach(text => {
       if (!text.trim()) return;
-      this._stashNode(text, {
-        dopamine: 0.6 + (Math.random() * 0.2),
-        cortisol: 0.1
+      this.stash(text, { 
+        dopamine: 0.6 + (Math.random() * 0.2), 
+        cortisol: 0.1 
       });
     });
     this.saveToStorage();
   }
 
-  archiveAll(): void {
-    this.vfs.inner_spiral.nodes.forEach(node => this.archive(node));
+  archiveAll() {
+    this.vfs.inner_spiral.nodes.forEach(node => {
+      this.archive(node);
+    });
     this.vfs.inner_spiral.nodes = [];
     this.saveToStorage();
   }

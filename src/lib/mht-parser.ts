@@ -6,17 +6,21 @@
 export interface MhtPart {
   contentType: string;
   encoding: string;
+  headers: Record<string, string>;
   content: string;
 }
 
 export function parseMht(raw: string): MhtPart[] {
-  const boundaryMatch = raw.match(/boundary="?([^";\n]+)"?/i);
+  // Extract the boundary string more robustly
+  const boundaryMatch = raw.match(/boundary\s*=\s*("?)([^";\r\n]+)\1/i);
+  
   if (!boundaryMatch) {
     // Treat as plain text if no boundary
-    return [{ contentType: 'text/plain', encoding: '7bit', content: raw }];
+    return [{ contentType: 'text/plain', encoding: '7bit', headers: {}, content: raw }];
   }
 
-  const boundary = boundaryMatch[1];
+  const boundary = boundaryMatch[2].trim();
+  // MIME parts are separated by --boundary. The last part ends with --boundary--
   const parts = raw.split(`--${boundary}`);
   const parsedParts: MhtPart[] = [];
 
@@ -29,11 +33,16 @@ export function parseMht(raw: string): MhtPart[] {
     const headerSec = part.substring(0, splitIndex);
     const body = part.substring(splitIndex).trim();
     
-    const contentTypeMatch = headerSec.match(/Content-Type:\s*([^;\n\r]+)/i);
-    const encodingMatch = headerSec.match(/Content-Transfer-Encoding:\s*([^;\n\r]+)/i);
+    const headers: Record<string, string> = {};
+    headerSec.split(/\r?\n/).forEach(line => {
+      const match = line.match(/^([^:]+):\s*(.*)$/);
+      if (match) {
+        headers[match[1].toLowerCase()] = match[2].trim();
+      }
+    });
 
-    const contentType = contentTypeMatch ? contentTypeMatch[1].trim() : 'text/plain';
-    const encoding = encodingMatch ? encodingMatch[1].trim().toLowerCase() : '7bit';
+    const contentType = (headers['content-type'] || 'text/plain').split(';')[0].trim().toLowerCase();
+    const encoding = (headers['content-transfer-encoding'] || '7bit').trim().toLowerCase();
 
     let cleanedBody = body;
     try {
@@ -42,7 +51,7 @@ export function parseMht(raw: string): MhtPart[] {
       } else if (encoding === 'base64') {
         // Remove whitespace which is common in base64 blocks
         const base64 = body.replace(/\s/g, '');
-        const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+        const bytes = Uint8Array.from(window.atob(base64), c => c.charCodeAt(0));
         cleanedBody = new TextDecoder().decode(bytes);
       }
     } catch (e) {
@@ -53,6 +62,7 @@ export function parseMht(raw: string): MhtPart[] {
     parsedParts.push({
       contentType,
       encoding,
+      headers,
       content: cleanedBody
     });
   }
