@@ -155,6 +155,46 @@ class MemorySystem {
     return { ...this.vfs.seed_core };
   }
 
+  /**
+   * Simple TF-IDF like keyword matching for retrieval.
+   */
+  findRelevantMemories(context: string, limit = 3): MemoryNode[] {
+    const all = [...this.vfs.inner_spiral.nodes, ...this.vfs.outer_sweep.archive];
+    const tokens = context.toLowerCase().split(/\W+/).filter(t => t.length > 3);
+    
+    if (tokens.length === 0) return [];
+
+    const scored = all.map(node => {
+      const nodeText = String(node.data).toLowerCase();
+      let score = 0;
+      tokens.forEach(token => {
+        if (nodeText.includes(token)) score += 1;
+      });
+      // Boost dopamine-heavy memories
+      score *= (1 + node.dopamine);
+      return { node, score };
+    });
+
+    return scored
+      .filter(s => s.score > 0.5)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map(s => s.node);
+  }
+
+  /**
+   * Bulk stash memories into the Inner Spiral.
+   */
+  bulkStash(entries: string[]): void {
+    entries.forEach(text => {
+      if (!text.trim()) return;
+      this.stash(text, { 
+        dopamine: 0.6 + (Math.random() * 0.2), 
+        cortisol: 0.1 
+      });
+    });
+  }
+
   clear() {
     this.vfs.inner_spiral.nodes = [];
     this.vfs.outer_sweep.archive = [];

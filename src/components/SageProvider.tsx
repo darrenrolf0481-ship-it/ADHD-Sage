@@ -7,7 +7,10 @@ interface SageContextType {
   mode: SageMode;
   stabilize: () => void;
   recordInteraction: (text: string) => void;
+  bulkImportMemories: (entries: string[]) => void;
   innerSpiral: MemoryNode[];
+  outerSweep: MemoryNode[];
+  suggestions: MemoryNode[];
   sage: SageCore;
 }
 
@@ -20,22 +23,41 @@ export const SageProvider: React.FC<{ children: React.ReactNode }> = ({ children
     mode: sage.getMode(),
   });
   const [innerSpiral, setInnerSpiral] = useState<MemoryNode[]>([]);
+  const [outerSweep, setOuterSweep] = useState<MemoryNode[]>([]);
+  const [suggestions, setSuggestions] = useState<MemoryNode[]>([]);
 
   useEffect(() => {
     const unsubscribe = sage.subscribe((neuroState, mode) => {
       setState({ neuroState, mode });
       // Sync memory state on change
-      setInnerSpiral(memory.getInnerSpiral());
+      const spiral = memory.getInnerSpiral();
+      setInnerSpiral(spiral);
+      setOuterSweep(memory.getArchive());
     });
     return unsubscribe;
   }, [sage]);
+
+  const recordInteraction = (text: string) => {
+    sage.recordInteraction(text);
+    // Trigger suggestion update on interaction
+    setSuggestions(memory.findRelevantMemories(text));
+  };
+
+  const bulkImportMemories = (entries: string[]) => {
+    memory.bulkStash(entries);
+    setInnerSpiral(memory.getInnerSpiral());
+    setOuterSweep(memory.getArchive());
+  };
 
   const value = {
     neuroState: state.neuroState,
     mode: state.mode,
     stabilize: () => sage.stabilize(),
-    recordInteraction: (text: string) => sage.recordInteraction(text),
+    recordInteraction,
+    bulkImportMemories,
     innerSpiral,
+    outerSweep,
+    suggestions,
     sage,
   };
 
