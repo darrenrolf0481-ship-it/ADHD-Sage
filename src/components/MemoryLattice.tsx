@@ -66,6 +66,9 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
       adj.get(t)?.push(s);
     });
 
+    const nodeMap = new Map<string, GraphNode>();
+    gNodes.forEach(n => nodeMap.set(n.id, n));
+
     const visited = new Set<string>();
     let clusterCount = 0;
     gNodes.forEach(n => {
@@ -75,7 +78,7 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
           const curr = stack.pop()!;
           if (!visited.has(curr)) {
             visited.add(curr);
-            const gNode = gNodes.find(gn => gn.id === curr);
+            const gNode = nodeMap.get(curr);
             if (gNode) gNode.cluster = clusterCount;
             (adj.get(curr) || []).forEach(neighbor => stack.push(neighbor));
           }

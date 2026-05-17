@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"node server.ts\"",
-    "build": "vite build",
-    "start": "node server.ts",
+    "dev": "tsx server.ts",
+    "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "start": "node dist/server.cjs",
     "lint": "eslint .",
     "clean": "rm -rf dist"
   },
@@ -25,6 +25,7 @@
     "cors": "^2.8.6",
     "d3": "^7.9.0",
     "dotenv": "^17.4.2",
+    "esbuild": "^0.28.0",
     "express": "^5.2.1",
     "lucide-react": "^0.553.0",
     "motion": "^12.23.24",
@@ -32,6 +33,7 @@
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "tailwind-merge": "^3.3.1",
+    "tsx": "^4.22.1",
     "vite": "^8.0.13"
   },
   "devDependencies": {

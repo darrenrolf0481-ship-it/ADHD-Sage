@@ -188,11 +188,24 @@ class MemorySystem {
   bulkStash(entries: string[]): void {
     entries.forEach(text => {
       if (!text.trim()) return;
-      this.stash(text, { 
+      
+      const newNode: MemoryNode = {
+        id: `phi_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        data: text,
+        timestamp: Date.now(),
         dopamine: 0.6 + (Math.random() * 0.2), 
-        cortisol: 0.1 
-      });
+        cortisol: 0.1,
+        pinned: false
+      };
+
+      const spiral = this.vfs.inner_spiral;
+      if (spiral.nodes.length >= spiral.capacity) {
+        this.evict(0.1);
+      }
+      spiral.nodes.push(newNode);
     });
+    
+    this.saveToStorage();
   }
 
   clear() {

@@ -42,7 +42,8 @@ export function parseMht(raw: string): MhtPart[] {
       } else if (encoding === 'base64') {
         // Remove whitespace which is common in base64 blocks
         const base64 = body.replace(/\s/g, '');
-        cleanedBody = decodeURIComponent(escape(window.atob(base64)));
+        const bytes = Uint8Array.from(window.atob(base64), c => c.charCodeAt(0));
+        cleanedBody = new TextDecoder().decode(bytes);
       }
     } catch (e) {
       console.warn("MHT Parser: Failed to decode body", encoding, e);
