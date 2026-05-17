@@ -1,0 +1,8 @@
+{
+  "name": "Nexus Platform // ADHD Sage",
+  "description": "A high-energy, sovereignty-first intelligence substrate for Gemini Gems. Features VFS-Bridge persistence, neuro-synaptic monitoring, and a hyper-active tool-calling interface.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,56 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+:root {
+  --bg: #08080C;
+  --ink: #cbd5e1; /* slate-300 */
+  --highlight: #38bdf8; /* cyan-400 */
+  --accent: #8b5cf6; /* purple-600 */
+  --f-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --f-sans: 'Inter', system-ui, sans-serif;
+  --neon: #38bdf8;
+  --emergency: #ef4444; /* red-500 */
+  --stabilized: #3b82f6; /* blue-500 */
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-sans);
+  margin: 0;
+  overflow: hidden;
+}
+
+.font-mono {
+  font-family: var(--f-mono);
+}
+
+/* Frosted glass utility if needed elsewhere */
+.frosted {
+  @apply bg-white/5 backdrop-blur-xl border border-white/10;
+}
+
+.mesh-gradient-1 {
+  @apply absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none;
+}
+
+.mesh-gradient-2 {
+  @apply absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 rounded-full blur-[150px] pointer-events-none;
+}
+
+.scanline {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+  z-index: 100;
+  animation: scan 4s linear infinite;
+}
+
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
