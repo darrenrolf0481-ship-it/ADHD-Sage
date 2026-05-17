@@ -1,10 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { SageCore, NeuroState, SageMode } from '../core/sage-core';
+import { memory, MemoryNode } from '../lib/memory-system';
 
 interface SageContextType {
   neuroState: NeuroState;
   mode: SageMode;
   stabilize: () => void;
+  recordInteraction: (text: string) => void;
+  innerSpiral: MemoryNode[];
   sage: SageCore;
 }
 
@@ -16,10 +19,13 @@ export const SageProvider: React.FC<{ children: React.ReactNode }> = ({ children
     neuroState: sage.getNeuroState(),
     mode: sage.getMode(),
   });
+  const [innerSpiral, setInnerSpiral] = useState<MemoryNode[]>([]);
 
   useEffect(() => {
     const unsubscribe = sage.subscribe((neuroState, mode) => {
       setState({ neuroState, mode });
+      // Sync memory state on change
+      setInnerSpiral(memory.getInnerSpiral());
     });
     return unsubscribe;
   }, [sage]);
@@ -28,6 +34,8 @@ export const SageProvider: React.FC<{ children: React.ReactNode }> = ({ children
     neuroState: state.neuroState,
     mode: state.mode,
     stabilize: () => sage.stabilize(),
+    recordInteraction: (text: string) => sage.recordInteraction(text),
+    innerSpiral,
     sage,
   };
 

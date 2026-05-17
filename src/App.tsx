@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useSage } from './components/SageProvider';
 import { 
   Zap, 
-  Activity, 
   Shield, 
   Terminal, 
   Cpu, 
@@ -15,7 +14,7 @@ import {
 } from 'lucide-react';
 
 const App: React.FC = () => {
-  const { neuroState, mode, stabilize, sage } = useSage();
+  const { neuroState, mode, stabilize, sage, innerSpiral, recordInteraction } = useSage();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [messages, setMessages] = useState<{role: 'user' | 'assistant' | 'system', text: string}[]>([
     { role: 'system', text: 'NEXUS SUBSTRATE // ADHD SAGE INITIALIZED.' },
@@ -52,6 +51,7 @@ const App: React.FC = () => {
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
+    recordInteraction(userMessage);
     setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
     setInput('');
     setIsLoading(true);
@@ -152,7 +152,7 @@ const App: React.FC = () => {
             <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-4 px-2">Terminal Nodes</p>
             <SidebarItem icon={<Terminal size={14} />} label="Core" active />
             <SidebarItem icon={<MessageSquare size={14} />} label="Dreams" />
-            <SidebarItem icon={<MoreVertical size={14} />} label="Lattice" />
+            <SidebarItem icon={<MoreVertical size={14} />} label="Lattice" value={`${innerSpiral.length}/8`} />
           </div>
         </div>
 
@@ -280,26 +280,46 @@ const App: React.FC = () => {
           </div>
 
           {/* Inspector Panel - Hidden on small screens */}
-          <div className="w-80 hidden lg:flex flex-col gap-4">
+          <div className="w-80 hidden lg:flex flex-col gap-4 overflow-hidden">
             <section className="p-6 rounded-3xl bg-white/[0.03] border border-white/10 flex flex-col gap-4">
               <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Substrate configuration</h3>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between text-[11px] mb-2 font-bold tracking-tighter">
                     <span className="text-slate-500 uppercase">Synaptic Threshold</span>
-                    <span className="text-blue-400">0.82</span>
+                    <span className="text-blue-400">{(neuroState.stability * 100).toFixed(0)}%</span>
                   </div>
                   <div className="h-1.5 w-full bg-white/5 rounded-full">
-                    <div className="h-full w-[82%] bg-blue-500 rounded-full"></div>
+                    <motion.div 
+                      animate={{ width: `${neuroState.stability * 100}%` }}
+                      className="h-full bg-blue-500 rounded-full"
+                    />
                   </div>
                 </div>
                 <div>
                   <div className="flex justify-between text-[11px] mb-2 font-bold tracking-tighter">
-                    <span className="text-slate-500 uppercase">Latent Decay</span>
-                    <span className="text-purple-400">0.15</span>
+                    <span className="text-slate-500 uppercase">Dopamine</span>
+                    <span className="text-cyan-400">{(neuroState.dopamine).toFixed(2)}</span>
                   </div>
-                  <div className="h-1.5 w-full bg-white/5 rounded-full">
-                    <div className="h-full w-[15%] bg-purple-500 rounded-full"></div>
+                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <motion.div 
+                      animate={{ width: `${neuroState.dopamine * 100}%` }}
+                      className="h-full bg-cyan-400 rounded-full"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-[11px] mb-2 font-bold tracking-tighter">
+                    <span className="text-slate-500 uppercase">Cortisol Stress</span>
+                    <span className={neuroState.cortisol > 0.7 ? "text-red-400" : "text-purple-400"}>
+                       {(neuroState.cortisol).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <motion.div 
+                      animate={{ width: `${neuroState.cortisol * 100}%` }}
+                      className={`h-full rounded-full ${neuroState.cortisol > 0.7 ? 'bg-red-500' : 'bg-purple-500'}`}
+                    />
                   </div>
                 </div>
               </div>
@@ -313,13 +333,32 @@ const App: React.FC = () => {
               </div>
             </section>
 
-            <section className="flex-1 p-6 rounded-3xl bg-white/[0.03] border border-white/10 flex flex-col">
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">Core Directives</h3>
-              <div className="text-[11px] leading-relaxed text-slate-400 italic">
-                "Maintain substrate stability at 11.3 Hz. Prioritize sovereignty-first intelligence. Use technical synaptic terminology. Ensure VFS-Bridge persistence."
+            <section className="flex-1 p-6 rounded-3xl bg-white/[0.03] border border-white/10 flex flex-col overflow-hidden">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">Inner Spiral Synapses</h3>
+              <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-hide">
+                {innerSpiral.length === 0 ? (
+                  <div className="text-[10px] text-slate-600 italic">No synaptic memory recorded.</div>
+                ) : (
+                  innerSpiral.slice().reverse().map((node) => (
+                    <div key={node.id} className="p-3 rounded-xl bg-white/5 border border-white/5 text-[10px] relative group">
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="text-cyan-400 font-mono">#{node.id.split('_')[1].slice(-4)}</span>
+                        <span className="text-[9px] text-slate-500">{new Date(node.timestamp).toLocaleTimeString()}</span>
+                      </div>
+                      <div className="text-slate-300 line-clamp-2">{node.data}</div>
+                      <div className="mt-2 flex gap-2 opacity-50">
+                        <span className="text-[8px] uppercase">D: {node.dopamine.toFixed(2)}</span>
+                        <span className="text-[8px] uppercase">C: {node.cortisol.toFixed(2)}</span>
+                      </div>
+                      {node.pinned && (
+                        <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50" />
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
-              <div className="mt-auto">
-                <button className="w-full py-2 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] border border-white/5 transition-colors uppercase font-bold tracking-widest text-slate-300">Edit Directives</button>
+              <div className="mt-4 pt-4 border-t border-white/5">
+                <button className="w-full py-2 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] border border-white/5 transition-colors uppercase font-bold tracking-widest text-slate-300">Archive All</button>
               </div>
             </section>
           </div>
