@@ -8,6 +8,7 @@ interface SageContextType {
   stabilize: () => void;
   recordInteraction: (text: string) => void;
   bulkImportMemories: (entries: string[]) => void;
+  archiveMemories: () => void;
   innerSpiral: MemoryNode[];
   outerSweep: MemoryNode[];
   suggestions: MemoryNode[];
@@ -48,18 +49,25 @@ export const SageProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setInnerSpiral(memory.getInnerSpiral());
     setOuterSweep(memory.getArchive());
   }, []);
- 
+
+  const archiveMemories = useCallback(() => {
+    memory.archiveAll();
+    setInnerSpiral(memory.getInnerSpiral());
+    setOuterSweep(memory.getArchive());
+  }, []);
+
   const value = useMemo(() => ({
     neuroState: state.neuroState,
     mode: state.mode,
     stabilize: () => sage.stabilize(),
     recordInteraction,
     bulkImportMemories,
+    archiveMemories,
     innerSpiral,
     outerSweep,
     suggestions,
     sage,
-  }), [state.neuroState, state.mode, sage, recordInteraction, bulkImportMemories, innerSpiral, outerSweep, suggestions]);
+  }), [state.neuroState, state.mode, sage, recordInteraction, bulkImportMemories, archiveMemories, innerSpiral, outerSweep, suggestions]);
  
   return (
     <SageContext.Provider value={value}>

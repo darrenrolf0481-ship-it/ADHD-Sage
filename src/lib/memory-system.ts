@@ -76,11 +76,7 @@ class MemorySystem {
     }));
   }
 
-  /**
-   * Stash a new memory node into the Inner Spiral.
-   * Uses Endocrine Gated FIFO for eviction.
-   */
-  stash(text: string, endocrine: { dopamine: number, cortisol: number }): void {
+  private _stashNode(text: string, endocrine: { dopamine: number, cortisol: number }): void {
     const newNode: MemoryNode = {
       id: `phi_${Date.now()}`,
       data: text,
@@ -97,12 +93,18 @@ class MemorySystem {
     }
 
     spiral.nodes.push(newNode);
-    
-    // If pinned, also copy to outer sweep
+
     if (newNode.pinned) {
       this.archive(newNode);
     }
+  }
 
+  /**
+   * Stash a new memory node into the Inner Spiral.
+   * Uses Endocrine Gated FIFO for eviction.
+   */
+  stash(text: string, endocrine: { dopamine: number, cortisol: number }): void {
+    this._stashNode(text, endocrine);
     this.saveToStorage();
   }
 
@@ -183,28 +185,22 @@ class MemorySystem {
   }
 
   /**
-   * Bulk stash memories into the Inner Spiral.
+   * Bulk stash memories into the Inner Spiral with a single localStorage write.
    */
   bulkStash(entries: string[]): void {
     entries.forEach(text => {
       if (!text.trim()) return;
-      
-      const newNode: MemoryNode = {
-        id: `phi_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-        data: text,
-        timestamp: Date.now(),
-        dopamine: 0.6 + (Math.random() * 0.2), 
-        cortisol: 0.1,
-        pinned: false
-      };
-
-      const spiral = this.vfs.inner_spiral;
-      if (spiral.nodes.length >= spiral.capacity) {
-        this.evict(0.1);
-      }
-      spiral.nodes.push(newNode);
+      this._stashNode(text, {
+        dopamine: 0.6 + (Math.random() * 0.2),
+        cortisol: 0.1
+      });
     });
-    
+    this.saveToStorage();
+  }
+
+  archiveAll(): void {
+    this.vfs.inner_spiral.nodes.forEach(node => this.archive(node));
+    this.vfs.inner_spiral.nodes = [];
     this.saveToStorage();
   }
 

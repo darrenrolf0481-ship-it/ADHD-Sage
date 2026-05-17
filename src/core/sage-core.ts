@@ -67,7 +67,7 @@ export class SageCore {
     
     this.intervals.heartbeat = window.setInterval(() => {
       this.pulse();
-    }, 1000);
+    }, 3000);
   }
 
   private startDecay() {
