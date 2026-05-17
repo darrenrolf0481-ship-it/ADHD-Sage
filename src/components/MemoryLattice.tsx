@@ -58,7 +58,11 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
 
     // Simple Clustering: Connected Components
     const adj = new Map<string, string[]>();
-    gNodes.forEach(n => adj.set(n.id, []));
+    const nodeMap = new Map<string, GraphNode>();
+    gNodes.forEach(n => {
+      adj.set(n.id, []);
+      nodeMap.set(n.id, n);
+    });
     links.forEach(l => {
       const s = typeof l.source === 'string' ? l.source : (l.source as GraphNode).id;
       const t = typeof l.target === 'string' ? l.target : (l.target as GraphNode).id;
@@ -75,7 +79,7 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
           const curr = stack.pop()!;
           if (!visited.has(curr)) {
             visited.add(curr);
-            const gNode = gNodes.find(gn => gn.id === curr);
+            const gNode = nodeMap.get(curr);
             if (gNode) gNode.cluster = clusterCount;
             (adj.get(curr) || []).forEach(neighbor => stack.push(neighbor));
           }
