@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "description": "ADHD Sage Nexus Bridge Tool Declarations for Gemini Gems",
+  "declarations": [
+    {
+      "name": "nexus_get_status",
+      "description": "Read the current neuro-synaptic state of the ADHD Sage substrate. Returns stability (0-1), dopamine (0-1), cortisol (0-1), frequency (Hz), and last pulse timestamp.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "nexus_get_mode",
+      "description": "Get the current operating mode of the Sage substrate. Returns one of: stabilized, dreaming, decaying, emergency.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "nexus_stabilize",
+      "description": "Trigger a synaptic reinforcement. Resets stability to 100%, boosts dopamine, reduces cortisol, and sets mode to stabilized. Use when the substrate is stressed, decaying, or in emergency mode.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "nexus_record_interaction",
+      "description": "Record a semantic memory into the Inner Spiral. Also boosts substrate stability and dopamine slightly. Use to persist important observations, decisions, or context.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "The interaction or observation text to stash in memory."
+          }
+        },
+        "required": ["text"]
+      }
+    },
+    {
+      "name": "nexus_inject_message",
+      "description": "Inject a message directly into the Sage chat UI. Useful for alerting the user, displaying tool results, or broadcasting telemetry.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Message content to display in the chat stream."
+          },
+          "role": {
+            "type": "string",
+            "enum": ["system", "assistant"],
+            "description": "Display role. 'system' for telemetry/announcements, 'assistant' for Sage-voiced responses. Defaults to system."
+          }
+        },
+        "required": ["text"]
+      }
+    },
+    {
+      "name": "nexus_set_view",
+      "description": "Switch the UI view between the chat terminal and the memory lattice visualization.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "view": {
+            "type": "string",
+            "enum": ["chat", "lattice"],
+            "description": "Target view to activate."
+          }
+        },
+        "required": ["view"]
+      }
+    },
+    {
+      "name": "nexus_toggle_sidebar",
+      "description": "Toggle the left sidebar open or closed.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "nexus_clear_memory",
+      "description": "DESTRUCTIVE: Purge all synaptic storage (Inner Spiral + Outer Sweep) and reset the substrate. A browser confirmation dialog will block unattended execution. Only use if explicitly requested by the user.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ]
+}

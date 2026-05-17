@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "description": "ADHD Sage Nexus Bridge Function Response Schemas for Gemini Gems. Map each tool result into a Gemini functionResponse part.",
+  "gemFunctionResponseFormat": {
+    "role": "user",
+    "parts": [
+      {
+        "functionResponse": {
+          "name": "nexus_get_status",
+          "response": {}
+        }
+      }
+    ]
+  },
+  "responseSchemas": {
+    "nexus_get_status": {
+      "type": "object",
+      "properties": {
+        "stability": { "type": "number", "minimum": 0, "maximum": 1, "description": "Substrate stability 0-1" },
+        "frequency": { "type": "number", "description": "Oscillation frequency in Hz" },
+        "lastPulse": { "type": "integer", "description": "Timestamp of last heartbeat" },
+        "dopamine": { "type": "number", "minimum": 0, "maximum": 1, "description": "Dopamine level 0-1" },
+        "cortisol": { "type": "number", "minimum": 0, "maximum": 1, "description": "Cortisol stress level 0-1" }
+      }
+    },
+    "nexus_get_mode": {
+      "type": "object",
+      "properties": {
+        "mode": { "type": "string", "enum": ["stabilized", "dreaming", "decaying", "emergency"] }
+      }
+    },
+    "nexus_stabilize": {
+      "type": "object",
+      "properties": {
+        "ok": { "type": "boolean" },
+        "action": { "type": "string", "const": "stabilized" }
+      }
+    },
+    "nexus_record_interaction": {
+      "type": "object",
+      "properties": {
+        "ok": { "type": "boolean" },
+        "action": { "type": "string", "const": "recorded" }
+      }
+    },
+    "nexus_inject_message": {
+      "type": "object",
+      "properties": {
+        "ok": { "type": "boolean" },
+        "action": { "type": "string", "const": "injected" }
+      }
+    },
+    "nexus_set_view": {
+      "type": "object",
+      "properties": {
+        "ok": { "type": "boolean" },
+        "view": { "type": "string", "enum": ["chat", "lattice"] }
+      }
+    },
+    "nexus_toggle_sidebar": {
+      "type": "object",
+      "properties": {
+        "ok": { "type": "boolean" },
+        "action": { "type": "string", "const": "toggled" }
+      }
+    },
+    "nexus_clear_memory": {
+      "type": "object",
+      "properties": {
+        "ok": { "type": "boolean" },
+        "action": { "type": "string", "const": "cleared" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "tool": "nexus_get_status",
+      "functionResponse": {
+        "name": "nexus_get_status",
+        "response": {
+          "stability": 0.72,
+          "frequency": 11.3,
+          "lastPulse": 1715960963000,
+          "dopamine": 0.65,
+          "cortisol": 0.12
+        }
+      }
+    },
+    {
+      "tool": "nexus_stabilize",
+      "functionResponse": {
+        "name": "nexus_stabilize",
+        "response": {
+          "ok": true,
+          "action": "stabilized"
+        }
+      }
+    },
+    {
+      "tool": "nexus_record_interaction",
+      "functionResponse": {
+        "name": "nexus_record_interaction",
+        "response": {
+          "ok": true,
+          "action": "recorded"
+        }
+      }
+    }
+  ]
+}

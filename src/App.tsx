@@ -82,11 +82,13 @@ const App: React.FC = () => {
       if (synapses.length > 0) {
         bulkImportMemories(synapses);
         setMessages(prev => [...prev, { 
+          id: `sys_${Date.now()}`,
           role: 'system', 
           text: `VFS SYNC: Synchronized ${synapses.length} semantic synapses from [${file.name}].` 
         }]);
       } else {
         setMessages(prev => [...prev, { 
+          id: `sys_${Date.now()}`,
           role: 'system', 
           text: `VFS WARNING: No meaningful synapses extracted from [${file.name}]. Check format compatibility.` 
         }]);
@@ -620,7 +622,7 @@ const App: React.FC = () => {
                         <span className="text-cyan-400 font-mono">#{node.id.split('_')[1].slice(-4)}</span>
                         <span className="text-[9px] text-slate-500">{new Date(node.timestamp).toLocaleTimeString()}</span>
                       </div>
-                      <div className="text-slate-300 line-clamp-2">{node.data}</div>
+                      <div className="text-slate-300 line-clamp-2">{String(node.data)}</div>
                       <div className="mt-2 flex gap-2 opacity-50">
                         <span className="text-[8px] uppercase">D: {node.dopamine.toFixed(2)}</span>
                         <span className="text-[8px] uppercase">C: {node.cortisol.toFixed(2)}</span>

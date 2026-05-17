@@ -1,13 +1,15 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from "@google/genai";
 
 dotenv.config();
+dotenv.config({ path: '.env.local' });
 
-const port = 3000;
+const port = 3003;
 
 async function startServer() {
   const app = express();
@@ -38,17 +40,15 @@ async function startServer() {
         throw new Error("GEMINI_API_KEY is not set in environment variables.");
       }
 
-      const model = genAI.getGenerativeModel({ 
+      const chat = genAI.chats.create({
         model: "gemini-2.0-flash", // Fixed Model ID
-        systemInstruction: systemInstruction || "You are ADHD Sage, a sovereign intelligence substrate. You are energetic, hyper-focused on technical details, and fast-moving. You help users interact with the Nexus Platform."
-      });
-
-      const chat = model.startChat({
         history: history || [],
+        config: {
+          systemInstruction: systemInstruction || "You are ADHD Sage, a sovereign intelligence substrate. You are energetic, hyper-focused on technical details, and fast-moving. You help users interact with the Nexus Platform.",
+        },
       });
 
-      const result = await chat.sendMessage(prompt);
-      const response = await result.response;
+      const response = await chat.sendMessage({ message: prompt });
       const text = response.text;
 
       res.json({ text });
@@ -61,6 +61,67 @@ async function startServer() {
 
   app.get('/api/health', (req, res) => {
     res.json({ status: 'stabilized', frequency: '11.3 Hz', identity: 'ADHD Sage' });
+  });
+
+  // File-based memory persistence for Moto G5 / Termux physical storage
+  const MEMORY_DIR = path.join(process.cwd(), 'data', 'memories');
+  if (!fs.existsSync(MEMORY_DIR)) {
+    fs.mkdirSync(MEMORY_DIR, { recursive: true });
+  }
+
+  app.post('/api/memory/burn', (req, res) => {
+    try {
+      const { filename, memory_payload } = req.body;
+      if (!filename || typeof memory_payload === 'undefined') {
+        res.status(400).json({ error: 'filename and memory_payload required' });
+        return;
+      }
+
+      const safeName = path.basename(filename).replace(/[^a-zA-Z0-9_-]/g, '');
+      const targetFile = path.join(MEMORY_DIR, `${safeName}.json`);
+
+      let currentMemory: unknown[] = [];
+      if (fs.existsSync(targetFile)) {
+        const raw = fs.readFileSync(targetFile, 'utf8');
+        currentMemory = JSON.parse(raw);
+      }
+
+      currentMemory.push({
+        timestamp: new Date().toISOString(),
+        data: memory_payload,
+      });
+
+      fs.writeFileSync(targetFile, JSON.stringify(currentMemory, null, 2));
+      res.json({ status: 'Success', message: 'Memory burned to permanent storage.', file: safeName });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      res.status(500).json({ status: 'Failure', error: message });
+    }
+  });
+
+  app.get('/api/memory/read', (req, res) => {
+    try {
+      const filename = req.query.filename as string;
+      if (!filename) {
+        res.status(400).json({ error: 'filename query param required' });
+        return;
+      }
+
+      const safeName = path.basename(filename).replace(/[^a-zA-Z0-9_-]/g, '');
+      const targetFile = path.join(MEMORY_DIR, `${safeName}.json`);
+
+      if (!fs.existsSync(targetFile)) {
+        res.json({ status: 'Success', memories: [] });
+        return;
+      }
+
+      const raw = fs.readFileSync(targetFile, 'utf8');
+      const memories = JSON.parse(raw);
+      res.json({ status: 'Success', memories });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      res.status(500).json({ status: 'Failure', error: message });
+    }
   });
 
   // Vite Integration

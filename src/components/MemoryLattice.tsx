@@ -108,7 +108,7 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
       .force("link", d3.forceLink<GraphNode, GraphLink>(graphData.links).id(d => d.id).distance(80))
       .force("charge", d3.forceManyBody().strength(-200))
       .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("collision", d3.forceCollide().radius(d => 15 + d.dopamine * 10))
+      .force("collision", d3.forceCollide().radius(d => 15 + (d as GraphNode).dopamine * 10))
       .force("x", d3.forceX(width / 2).strength(0.05))
       .force("y", d3.forceY(height / 2).strength(0.05));
 
@@ -139,7 +139,8 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
           if (!event.active) simulation.alphaTarget(0);
           d.fx = null;
           d.fy = null;
-        }));
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        }) as any);
 
     node.append("circle")
       .attr("r", d => 6 + d.dopamine * 8)
