@@ -34,9 +34,9 @@ const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [view, setView] = useState<'chat' | 'lattice'>('chat');
-  const [messages, setMessages] = useState<{role: 'user' | 'assistant' | 'system', text: string, id: string}[]>([
-    { role: 'system', text: 'NEXUS SUBSTRATE // ADHD SAGE INITIALIZED.', id: crypto.randomUUID() },
-    { role: 'system', text: 'Substrate frequency oscillating rapidly at 11.3 Hz.', id: crypto.randomUUID() }
+  const [messages, setMessages] = useState<{id: string, role: 'user' | 'assistant' | 'system', text: string}[]>([
+    { id: crypto.randomUUID(), role: 'system', text: 'NEXUS SUBSTRATE // ADHD SAGE INITIALIZED.' },
+    { id: crypto.randomUUID(), role: 'system', text: 'Substrate frequency oscillating rapidly at 11.3 Hz.' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -142,7 +142,7 @@ const App: React.FC = () => {
           getMode: () => sage.getMode(),
           recordInteraction: (text: string) => recordInteraction(text),
           injectMessage: (text: string, role: 'system' | 'assistant' = 'system') => {
-            setMessages(prev => [...prev, { role, text: `[EXTERNAL_CALL] ${text}` }]);
+            setMessages(prev => [...prev, { id: `ext_${Date.now()}_${Math.random()}`, role, text: `[EXTERNAL_CALL] ${text}` }]);
           },
           clearMemory: () => {
             // Sensitivity check: preventing accidental purge from automated scripts
@@ -170,7 +170,7 @@ const App: React.FC = () => {
 
     const userMessage = input.trim();
     recordInteraction(userMessage);
-    setMessages(prev => [...prev, { role: 'user', text: userMessage, id: crypto.randomUUID() }]);
+    setMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'user', text: userMessage }]);
     setInput('');
     setIsLoading(true);
     if (window.innerWidth < 768) setIsSidebarOpen(false);
@@ -192,7 +192,7 @@ const App: React.FC = () => {
       const data = await response.json();
       if (data.error) throw new Error(data.error);
 
-      setMessages(prev => [...prev, { role: 'assistant', text: data.text, id: crypto.randomUUID() }]);
+      setMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'assistant', text: data.text }]);
       
       // Auto-stabilize on successful interaction
       if (neuroState.stability < 0.5) {
@@ -200,7 +200,7 @@ const App: React.FC = () => {
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      setMessages(prev => [...prev, { role: 'system', text: `ERROR: ${errorMessage}`, id: crypto.randomUUID() }]);
+      setMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'system', text: `ERROR: ${errorMessage}` }]);
     } finally {
       setIsLoading(false);
     }
@@ -337,7 +337,7 @@ const App: React.FC = () => {
                   <div onClick={() => setView('chat')}>
                     <SidebarItem icon={<Terminal size={14} />} label="Core" active={view === 'chat'} />
                   </div>
-                  <div onClick={() => {}}>
+                  <div onClick={() => setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: "DREAM_STATE: Accessing subconscious synaptic storage... Access Denied." }])}>
                     <SidebarItem icon={<MessageSquare size={14} />} label="Dreams" />
                   </div>
                   <div onClick={() => setView('lattice')}>
@@ -353,7 +353,10 @@ const App: React.FC = () => {
           <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20">
             <p className="text-xs text-indigo-300 font-semibold mb-1 uppercase tracking-tighter">Compute Status</p>
             <div className="h-1 w-full bg-indigo-900/30 rounded-full overflow-hidden mb-2">
-              <motion.div animate={{ width: `${neuroState.stability * 100}%` }} className="h-full bg-indigo-400" />
+              <motion.div
+                animate={{ width: `${neuroState.stability * 100}%` }}
+                className="h-full bg-indigo-400"
+              />
             </div>
             <button 
               onClick={() => {
@@ -397,8 +400,18 @@ const App: React.FC = () => {
               <p className="text-xs font-mono text-slate-300 tracking-widest">MERLIN_A</p>
             </div>
             <div className="flex gap-2">
-              <button className="px-3 md:px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors">Settings</button>
-              <button className="hidden sm:block px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-blue-500/20 transition-all">Stream</button>
+              <button 
+                onClick={() => setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: "SETTINGS: Core frequency already optimized at 11.3 Hz. No further adjustments possible." }])}
+                className="px-3 md:px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors"
+              >
+                Settings
+              </button>
+              <button 
+                onClick={() => setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: "STREAM: Uplink connected. Broadcasting synaptic telemetry..." }])}
+                className="hidden sm:block px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-blue-500/20 transition-all"
+              >
+                Stream
+              </button>
             </div>
           </div>
         </header>
@@ -609,7 +622,17 @@ const App: React.FC = () => {
                 )}
               </div>
               <div className="mt-4 pt-4 border-t border-white/5">
-                <button onClick={archiveMemories} className="w-full py-2 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] border border-white/5 transition-colors uppercase font-bold tracking-widest text-slate-300">Archive All</button>
+                <button
+                  onClick={() => {
+                    if (window.confirm("NEXUS: Purge inner spiral into outer sweep archive?")) {
+                      archiveMemories();
+                      setMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'system', text: "ARCHIVE: All transient nodes migrated to outer sweep telemetry." }]);
+                    }
+                  }}
+                  className="w-full py-2 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] border border-white/5 transition-colors uppercase font-bold tracking-widest text-slate-300"
+                >
+                  Archive All
+                </button>
               </div>
             </section>
           </div>

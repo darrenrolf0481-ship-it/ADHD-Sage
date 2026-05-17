@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { SageCore, NeuroState, SageMode } from '../core/sage-core';
 import { memory, MemoryNode } from '../lib/memory-system';
 
@@ -56,7 +56,7 @@ export const SageProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setOuterSweep(memory.getArchive());
   }, []);
 
-  const value = React.useMemo(() => ({
+  const value = useMemo(() => ({
     neuroState: state.neuroState,
     mode: state.mode,
     stabilize: () => sage.stabilize(),
