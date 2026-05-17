@@ -23,20 +23,30 @@ export function parseMht(raw: string): MhtPart[] {
   for (const part of parts) {
     if (!part.trim() || part.trim() === '--') continue;
 
-    const [headerSec, ...bodySec] = part.split(/\n\s*\n/);
-    const body = bodySec.join('\n\n').trim();
+    const splitIndex = part.search(/\r?\n\s*\r?\n/);
+    if (splitIndex === -1) continue;
+
+    const headerSec = part.substring(0, splitIndex);
+    const body = part.substring(splitIndex).trim();
     
-    const contentTypeMatch = headerSec.match(/Content-Type:\s*([^;\n]+)/i);
-    const encodingMatch = headerSec.match(/Content-Transfer-Encoding:\s*([^;\n]+)/i);
+    const contentTypeMatch = headerSec.match(/Content-Type:\s*([^;\n\r]+)/i);
+    const encodingMatch = headerSec.match(/Content-Transfer-Encoding:\s*([^;\n\r]+)/i);
 
     const contentType = contentTypeMatch ? contentTypeMatch[1].trim() : 'text/plain';
-    const encoding = encodingMatch ? encodingMatch[1].trim() : '7bit';
+    const encoding = encodingMatch ? encodingMatch[1].trim().toLowerCase() : '7bit';
 
-    // Basic cleaning (we don't handle full Quoted-Printable/Base64 here for simplicity, 
-    // but we can clean up standard MHT artifacts)
     let cleanedBody = body;
-    if (encoding.toLowerCase() === 'quoted-printable') {
-      cleanedBody = body.replace(/=\n/g, '').replace(/=([0-9A-F]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+    try {
+      if (encoding === 'quoted-printable') {
+        cleanedBody = body.replace(/=\r?\n/g, '').replace(/=([0-9A-F]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+      } else if (encoding === 'base64') {
+        // Remove whitespace which is common in base64 blocks
+        const base64 = body.replace(/\s/g, '');
+        cleanedBody = decodeURIComponent(escape(window.atob(base64)));
+      }
+    } catch (e) {
+      console.warn("MHT Parser: Failed to decode body", encoding, e);
+      // Fallback to raw body if decoding fails
     }
 
     parsedParts.push({

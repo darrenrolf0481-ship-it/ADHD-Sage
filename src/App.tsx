@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSage } from './components/SageProvider';
 import MemoryLattice from './components/MemoryLattice';
@@ -41,7 +41,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -50,65 +50,116 @@ const App: React.FC = () => {
       const content = event.target?.result as string;
       const parts = parseMht(content);
       
-      // Extract text parts and chunk them reasonably
-      const texts = parts
+      // Extract text parts and handle semantic chunking
+      const rawTexts = parts
         .filter(p => p.contentType.includes('text/plain') || p.contentType.includes('text/html'))
-        .map(p => p.contentType.includes('text/html') ? stripHtml(p.content) : p.content)
-        .flatMap(txt => txt.split(/\n\s*\n/).filter(line => line.trim().length > 10));
+        .map(p => {
+          const txt = p.contentType.includes('text/html') ? stripHtml(p.content) : p.content;
+          // Clean up multiple spaces and empty lines that often pollute MHT extracts
+          return txt.replace(/[ \t]+/g, ' ').trim();
+        });
 
-      if (texts.length > 0) {
-        bulkImportMemories(texts);
-        // Add a system notification
+      // Filter for meaningful content blocks (e.g. paragraphs or conversation turns)
+      const synapses = rawTexts
+        .flatMap(txt => txt.split(/\n{2,}/)) // Split only on double newlines or more
+        .map(s => s.trim())
+        .filter(s => s.length > 30 && !s.startsWith('<') && !s.startsWith('{')); // Filter out remains of HTML/JSON or tiny noise
+
+      if (synapses.length > 0) {
+        bulkImportMemories(synapses);
         setMessages(prev => [...prev, { 
           role: 'system', 
-          text: `VFS SYNC: Extracted ${texts.length} synapses from [${file.name}].` 
+          text: `VFS SYNC: Synchronized ${synapses.length} semantic synapses from [${file.name}].` 
+        }]);
+      } else {
+        setMessages(prev => [...prev, { 
+          role: 'system', 
+          text: `VFS WARNING: No meaningful synapses extracted from [${file.name}]. Check format compatibility.` 
         }]);
       }
     };
     reader.readAsText(file);
-  };
+  }, [bulkImportMemories]);
 
-  const allMemories = [...innerSpiral, ...outerSweep];
   const [sortBy, setSortBy] = useState<'timestamp' | 'dopamine' | 'cortisol'>('timestamp');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  const sortMemories = (mems: typeof allMemories) => {
+  const allMemories = useMemo(() => [...innerSpiral, ...outerSweep], [innerSpiral, outerSweep]);
+
+  const sortMemories = useCallback((mems: typeof allMemories) => {
     return [...mems].sort((a, b) => {
       const valA = a[sortBy] as number;
       const valB = b[sortBy] as number;
       return sortOrder === 'desc' ? valB - valA : valA - valB;
     });
-  };
+  }, [sortBy, sortOrder]);
 
-  const searchResults = searchQuery.trim() 
-    ? sortMemories(allMemories.filter(m => String(m.data).toLowerCase().includes(searchQuery.toLowerCase())))
-    : [];
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase();
+    const filtered = allMemories.filter(m => String(m.data).toLowerCase().includes(query));
+    return sortMemories(filtered);
+  }, [searchQuery, allMemories, sortMemories]);
 
-  const sortedInnerSpiral = sortMemories(innerSpiral);
+  const sortedInnerSpiral = useMemo(() => sortMemories(innerSpiral), [innerSpiral, sortMemories]);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (view === 'chat' && scrollRef.current) {
+      const scroll = () => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      };
+      
+      // Execute immediately and then again after paint to ensure correct height
+      scroll();
+      const rafId = requestAnimationFrame(scroll);
+      return () => cancelAnimationFrame(rafId);
     }
   }, [messages, isLoading, view]);
 
-  // Expose Tool Calling API to Window for Gemini Gems
+  // Expose Tool Calling API to Window for Gemini Gems with Security Handshake
   useEffect(() => {
+    const NEXUS_SECRET = import.meta.env.VITE_NEXUS_SECRET || 'nexus_default_protocol_77';
+
     (window as unknown as Record<string, unknown>).nexus = {
-      stabilize,
-      getStatus: () => sage.getNeuroState(),
-      getMode: () => sage.getMode(),
-      injectMessage: (text: string, role: 'system' | 'assistant' = 'system') => {
-        setMessages(prev => [...prev, { role, text: `[EXTERNAL_CALL] ${text}` }]);
-      },
-      clearMemory: () => {
-        localStorage.clear();
-        window.location.reload();
-      },
-      toggleSidebar: () => setIsSidebarOpen(prev => !prev),
-      setView: (v: 'chat' | 'lattice') => setView(v)
+      protocol: "1.0.0",
+      connect: (token: string) => {
+        if (token !== NEXUS_SECRET) {
+          console.error("NEXUS: Authorization failed. Handshake token mismatch.");
+          return null;
+        }
+
+        console.log("NEXUS: Secure bridge established. Terminal link active.");
+        
+        const bridge = {
+          stabilize,
+          getStatus: () => sage.getNeuroState(),
+          getMode: () => sage.getMode(),
+          recordInteraction: (text: string) => recordInteraction(text),
+          injectMessage: (text: string, role: 'system' | 'assistant' = 'system') => {
+            setMessages(prev => [...prev, { role, text: `[EXTERNAL_CALL] ${text}` }]);
+          },
+          clearMemory: () => {
+            // Sensitivity check: preventing accidental purge from automated scripts
+            const confirm = window.confirm("NEXUS: CRITICAL OVERRIDE. Purge all synaptic storage and reset substrate?");
+            if (confirm) {
+              localStorage.clear();
+              window.location.reload();
+            }
+          },
+          toggleSidebar: () => setIsSidebarOpen(prev => !prev),
+          setView: (v: 'chat' | 'lattice') => setView(v)
+        };
+
+        return Object.freeze(bridge);
+      }
     };
-  }, [stabilize, sage]);
+
+    return () => {
+      delete (window as unknown as Record<string, unknown>).nexus;
+    };
+  }, [stabilize, sage, recordInteraction]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -126,7 +177,7 @@ const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           prompt: userMessage,
-          history: messages.filter(m => m.role !== 'system').map(m => ({
+          history: messages.slice(-15).filter(m => m.role !== 'system').map(m => ({
             role: m.role === 'user' ? 'user' : 'model',
             parts: [{ text: m.text }]
           })),

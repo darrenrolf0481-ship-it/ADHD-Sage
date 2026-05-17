@@ -31,25 +31,25 @@ export const SageProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setState({ neuroState, mode });
       // Sync memory state on change
       const spiral = memory.getInnerSpiral();
-      setInnerSpiral(spiral);
+      setInnerSpiral( spiral);
       setOuterSweep(memory.getArchive());
     });
     return unsubscribe;
   }, [sage]);
-
-  const recordInteraction = (text: string) => {
+ 
+  const recordInteraction = useCallback((text: string) => {
     sage.recordInteraction(text);
     // Trigger suggestion update on interaction
     setSuggestions(memory.findRelevantMemories(text));
-  };
-
-  const bulkImportMemories = (entries: string[]) => {
+  }, [sage]);
+ 
+  const bulkImportMemories = useCallback((entries: string[]) => {
     memory.bulkStash(entries);
     setInnerSpiral(memory.getInnerSpiral());
     setOuterSweep(memory.getArchive());
-  };
-
-  const value = {
+  }, []);
+ 
+  const value = React.useMemo(() => ({
     neuroState: state.neuroState,
     mode: state.mode,
     stabilize: () => sage.stabilize(),
@@ -59,8 +59,8 @@ export const SageProvider: React.FC<{ children: React.ReactNode }> = ({ children
     outerSweep,
     suggestions,
     sage,
-  };
-
+  }), [state.neuroState, state.mode, sage, recordInteraction, bulkImportMemories, innerSpiral, outerSweep, suggestions]);
+ 
   return (
     <SageContext.Provider value={value}>
       {children}
