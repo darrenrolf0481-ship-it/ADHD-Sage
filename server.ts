@@ -5,6 +5,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from "@google/genai";
+import { sageEndocrine, sageMemory } from './src/core/endocrine-memory';
 
 dotenv.config();
 dotenv.config({ path: '.env.local' });
@@ -61,6 +62,31 @@ async function startServer() {
 
   app.get('/api/health', (req, res) => {
     res.json({ status: 'stabilized', frequency: '11.3 Hz', identity: 'ADHD Sage' });
+  });
+
+  // Reactive Endocrine Substrate bridge
+  app.get('/api/endocrine/state', (req, res) => {
+    res.json({ hormones: sageEndocrine.hormones, graph: sageMemory.getGraph() });
+  });
+
+  app.post('/api/endocrine/associate', (req, res) => {
+    try {
+      const { conceptA, conceptB } = req.body;
+      if (!conceptA || !conceptB) {
+        res.status(400).json({ error: 'conceptA and conceptB required' });
+        return;
+      }
+      sageEndocrine.processReward(0.5);
+      sageMemory.fireTogetherWireTogether(
+        String(conceptA),
+        String(conceptB),
+        sageEndocrine.hormones.dopamine
+      );
+      res.json({ status: 'Success', hormones: sageEndocrine.hormones });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      res.status(500).json({ status: 'Failure', error: message });
+    }
   });
 
   // File-based memory persistence for Moto G5 / Termux physical storage
