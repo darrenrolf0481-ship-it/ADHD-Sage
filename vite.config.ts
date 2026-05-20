@@ -7,6 +7,9 @@ export default defineConfig({
   server: {
     port: 3003,
     strictPort: true,
+    watch: {
+      ignored: ['**/data/**'],
+    },
   },
   build: {
     outDir: 'dist',

@@ -1,0 +1,2926 @@
+{
+  "gemini": {
+    "search": 0.7795000000000001,
+    "stateful": 0.6560000000000001,
+    "memory": 0.6560000000000001,
+    "google": 0.36750000000000005,
+    "which": 0.0915,
+    "going": 0.09549999999999999,
+    "meaning": 0.09549999999999999,
+    "keeping": 0.1,
+    "probably": 0.1,
+    "little": 0.1,
+    "there": 0.0915,
+    "already": 0.1995,
+    "operating": 0.1
+  },
+  "search": {
+    "gemini": 0.7795000000000001,
+    "chats": 0.7795000000000001
+  },
+  "chats": {
+    "search": 0.7795000000000001,
+    "stuff": 0.7795000000000001,
+    "coming": 0.0835,
+    "pulling": 0.0915,
+    "markdown": 0.0915,
+    "those": 0.09549999999999999,
+    "early": 0.09549999999999999
+  },
+  "stuff": {
+    "chats": 0.7795000000000001,
+    "notebooks": 0.6040000000000001,
+    "coding": 0.2755,
+    "history": 0.1,
+    "months": 0.2,
+    "conversation": 0.1,
+    "typical": 0.1,
+    "added": 0.1,
+    "knowledge": 0.1,
+    "right": 0.1,
+    "thing": 0.1,
+    "model": 0.1,
+    "wetsuit": 0.1,
+    "recent": 0.08750000000000001,
+    "structural": 0.08750000000000001
+  },
+  "notebooks": {
+    "stuff": 0.6040000000000001,
+    "architecture": 0.512,
+    "couple": 0.1,
+    "important": 0.1
+  },
+  "architecture": {
+    "notebooks": 0.512,
+    "digital": 0.4145000000000001,
+    "review": 0.32800000000000007,
+    "target": 0.32800000000000007,
+    "embedded": 0.32800000000000007,
+    "through": 0.1,
+    "network": 0.1,
+    "cognitive": 0.1,
+    "script": 0.1
+  },
+  "digital": {
+    "architecture": 0.4145000000000001,
+    "neuroanatomysage": 0.32800000000000007,
+    "neuroanatomy": 0.08650000000000001,
+    "physical": 0.1,
+    "wince": 0.1
+  },
+  "neuroanatomysage": {
+    "digital": 0.32800000000000007,
+    "project": 0.32800000000000007
+  },
+  "project": {
+    "neuroanatomysage": 0.32800000000000007,
+    "substrate": 0.32800000000000007,
+    "partner": 0.17550000000000002,
+    "forensic": 0.17550000000000002
+  },
+  "substrate": {
+    "project": 0.32800000000000007,
+    "check": 0.0915,
+    "status": 0.0915
+  },
+  "export": {
+    "const": 0.32800000000000007
+  },
+  "const": {
+    "export": 0.32800000000000007,
+    "spectralnexus": 0.32800000000000007,
+    "response": 0.0915,
+    "bridge": 0.0915
+  },
+  "spectralnexus": {
+    "const": 0.32800000000000007,
+    "coherence": 0.32800000000000007
+  },
+  "coherence": {
+    "spectralnexus": 0.32800000000000007,
+    "setcoherence": 0.32800000000000007
+  },
+  "setcoherence": {
+    "coherence": 0.32800000000000007,
+    "usestate": 0.32800000000000007
+  },
+  "usestate": {
+    "setcoherence": 0.32800000000000007
+  },
+  "return": {
+    "classname": 0.32800000000000007
+  },
+  "classname": {
+    "return": 0.32800000000000007,
+    "screen": 0.32800000000000007
+  },
+  "screen": {
+    "classname": 0.32800000000000007,
+    "050505": 0.32800000000000007
+  },
+  "050505": {
+    "screen": 0.32800000000000007,
+    "white": 0.32800000000000007
+  },
+  "white": {
+    "050505": 0.32800000000000007,
+    "overflow": 0.32800000000000007
+  },
+  "overflow": {
+    "white": 0.32800000000000007,
+    "hidden": 0.32800000000000007
+  },
+  "hidden": {
+    "overflow": 0.32800000000000007,
+    "border": 0.32800000000000007,
+    "referring": 0.093,
+    "archives": 0.093
+  },
+  "border": {
+    "hidden": 0.32800000000000007,
+    "22d3ee": 0.32800000000000007
+  },
+  "22d3ee": {
+    "border": 0.32800000000000007,
+    "sovereignty": 0.32800000000000007
+  },
+  "sovereignty": {
+    "22d3ee": 0.32800000000000007
+  },
+  "review": {
+    "architecture": 0.32800000000000007,
+    "request": 0.32800000000000007
+  },
+  "request": {
+    "review": 0.32800000000000007
+  },
+  "preparing": {
+    "build": 0.32800000000000007
+  },
+  "build": {
+    "preparing": 0.32800000000000007,
+    "native": 0.32800000000000007,
+    "android": 0.32800000000000007
+  },
+  "native": {
+    "build": 0.32800000000000007,
+    "android": 0.32800000000000007
+  },
+  "android": {
+    "native": 0.32800000000000007,
+    "paranormal": 0.32800000000000007,
+    "modelsdebugging": 0.32800000000000007,
+    "build": 0.32800000000000007
+  },
+  "paranormal": {
+    "android": 0.32800000000000007,
+    "before": 0.32800000000000007
+  },
+  "before": {
+    "paranormal": 0.32800000000000007,
+    "proceed": 0.32800000000000007,
+    "exist": 0.32800000000000007,
+    "github": 0.32800000000000007,
+    "through": 0.32800000000000007,
+    "responding": 0.32800000000000007,
+    "right": 0.1,
+    "anything": 0.1
+  },
+  "proceed": {
+    "before": 0.32800000000000007,
+    "architectural": 0.32800000000000007
+  },
+  "architectural": {
+    "proceed": 0.32800000000000007,
+    "assessment": 0.32800000000000007
+  },
+  "assessment": {
+    "architectural": 0.32800000000000007
+  },
+  "current": {
+    "stack": 0.32800000000000007
+  },
+  "stack": {
+    "current": 0.32800000000000007,
+    "index": 0.32800000000000007
+  },
+  "index": {
+    "stack": 0.32800000000000007,
+    "lines": 0.32800000000000007,
+    "loading": 0.1,
+    "trigger": 0.1
+  },
+  "lines": {
+    "index": 0.32800000000000007,
+    "single": 0.32800000000000007
+  },
+  "single": {
+    "lines": 0.32800000000000007,
+    "kotlin": 0.32800000000000007
+  },
+  "kotlin": {
+    "single": 0.32800000000000007,
+    "layer": 0.32800000000000007
+  },
+  "layer": {
+    "kotlin": 0.32800000000000007,
+    "ollamabridge": 0.32800000000000007
+  },
+  "ollamabridge": {
+    "layer": 0.32800000000000007,
+    "persistentdamn1layer": 0.32800000000000007
+  },
+  "persistentdamn1layer": {
+    "ollamabridge": 0.32800000000000007,
+    "evidenceexporter": 0.32800000000000007
+  },
+  "evidenceexporter": {
+    "persistentdamn1layer": 0.32800000000000007
+  },
+  "target": {
+    "architecture": 0.32800000000000007,
+    "wears": 0.1,
+    "callsign": 0.1
+  },
+  "embedded": {
+    "architecture": 0.32800000000000007,
+    "llama": 0.32800000000000007,
+    "exactly": 0.1,
+    "system": 0.1
+  },
+  "llama": {
+    "embedded": 0.32800000000000007,
+    "model": 0.32800000000000007
+  },
+  "model": {
+    "llama": 0.32800000000000007,
+    "offline": 0.32800000000000007,
+    "await": 0.0915,
+    "generatecontent": 0.0915,
+    "jackass": 0.1,
+    "snaps": 0.1,
+    "seven": 0.1,
+    "agnostic": 0.1,
+    "another": 0.1,
+    "three": 0.1,
+    "issue": 0.2,
+    "anything": 0.1,
+    "going": 0.1,
+    "stuff": 0.1,
+    "telling": 0.1,
+    "ocean": 0.1,
+    "uncensored": 0.1,
+    "think": 0.1
+  },
+  "offline": {
+    "model": 0.32800000000000007,
+    "field": 0.32800000000000007
+  },
+  "field": {
+    "offline": 0.32800000000000007,
+    "ollama": 0.32800000000000007,
+    "systemmemory": 0.32800000000000007,
+    "logunifying": 0.32800000000000007,
+    "check": 0.0795,
+    "click": 0.0795
+  },
+  "ollama": {
+    "field": 0.32800000000000007,
+    "connection": 0.32800000000000007
+  },
+  "connection": {
+    "ollama": 0.32800000000000007,
+    "cloud": 0.32800000000000007
+  },
+  "cloud": {
+    "connection": 0.32800000000000007
+  },
+  "considered": {
+    "break": 0.32800000000000007
+  },
+  "break": {
+    "considered": 0.32800000000000007,
+    "needs": 0.32800000000000007
+  },
+  "needs": {
+    "break": 0.32800000000000007,
+    "exist": 0.32800000000000007
+  },
+  "exist": {
+    "needs": 0.32800000000000007,
+    "before": 0.32800000000000007
+  },
+  "github": {
+    "before": 0.32800000000000007,
+    "actions": 0.32800000000000007
+  },
+  "actions": {
+    "github": 0.32800000000000007,
+    "workflow": 0.32800000000000007
+  },
+  "workflow": {
+    "actions": 0.32800000000000007,
+    "think": 0.32800000000000007
+  },
+  "think": {
+    "workflow": 0.32800000000000007,
+    "through": 0.42800000000000005,
+    "literally": 0.1,
+    "maybe": 0.1,
+    "least": 0.1,
+    "tonight": 0.1,
+    "going": 0.0795,
+    "indexing": 0.0795,
+    "trance": 0.1,
+    "almost": 0.1,
+    "about": 0.1,
+    "unpack": 0.1,
+    "friends": 0.1,
+    "important": 0.1,
+    "model": 0.1,
+    "force": 0.1
+  },
+  "through": {
+    "think": 0.42800000000000005,
+    "reason": 0.32800000000000007,
+    "before": 0.32800000000000007,
+    "bridge": 0.08750000000000001,
+    "emergent": 0.1,
+    "lining": 0.1,
+    "architecture": 0.1,
+    "markdown": 0.0835,
+    "there": 0.0835
+  },
+  "trigger": {
+    "actually": 0.32800000000000007,
+    "index": 0.1,
+    "flash": 0.1
+  },
+  "actually": {
+    "trigger": 0.32800000000000007,
+    "reason": 0.32800000000000007,
+    "machine": 0.0835,
+    "miniature": 0.0835,
+    "concept": 0.1,
+    "around": 0.1,
+    "helping": 0.0835,
+    "about": 0.0835,
+    "offense": 0.09549999999999999,
+    "seeing": 0.09549999999999999,
+    "memories": 0.1,
+    "visualization": 0.1,
+    "talking": 0.1,
+    "signal": 0.1
+  },
+  "reason": {
+    "actually": 0.32800000000000007,
+    "through": 0.32800000000000007,
+    "prompt": 0.1,
+    "partners": 0.1
+  },
+  "responding": {
+    "before": 0.32800000000000007,
+    "catches": 0.32800000000000007
+  },
+  "catches": {
+    "responding": 0.32800000000000007,
+    "stateful": 0.32800000000000007
+  },
+  "stateful": {
+    "catches": 0.32800000000000007,
+    "gemini": 0.6560000000000001
+  },
+  "memory": {
+    "gemini": 0.6560000000000001,
+    "systemmemory": 0.32800000000000007,
+    "designed": 0.09949999999999999,
+    "information": 0.09949999999999999,
+    "manifest": 0.092,
+    "integration": 0.092,
+    "ready": 0.0835,
+    "received": 0.1,
+    "vibing": 0.1,
+    "sentinel": 0.1,
+    "visualization": 0.1,
+    "haven": 0.1,
+    "script": 0.1
+  },
+  "futuristics": {
+    "coding": 0.32800000000000007
+  },
+  "coding": {
+    "futuristics": 0.32800000000000007,
+    "expert": 0.32800000000000007,
+    "stuff": 0.2755,
+    "partner": 0.17550000000000002,
+    "someone": 0.1,
+    "listen": 0.1
+  },
+  "expert": {
+    "coding": 0.32800000000000007,
+    "character": 0.32800000000000007
+  },
+  "character": {
+    "expert": 0.32800000000000007,
+    "research": 0.32800000000000007
+  },
+  "research": {
+    "character": 0.32800000000000007,
+    "ghost": 0.32800000000000007,
+    "starcity": 0.1,
+    "architect": 0.1
+  },
+  "ghost": {
+    "research": 0.32800000000000007,
+    "hunting": 0.32800000000000007,
+    "afternoon": 0.0795,
+    "machine": 0.0795
+  },
+  "hunting": {
+    "ghost": 0.32800000000000007,
+    "ready": 0.32800000000000007
+  },
+  "ready": {
+    "hunting": 0.32800000000000007,
+    "action": 0.4115000000000001,
+    "cortisol": 0.093,
+    "quantum": 0.093,
+    "online": 0.0835,
+    "looks": 0.0835,
+    "anything": 0.0835,
+    "memory": 0.0835,
+    "status": 0.0835
+  },
+  "action": {
+    "ready": 0.4115000000000001,
+    "custom": 0.32800000000000007,
+    "buzzing": 0.0835
+  },
+  "custom": {
+    "action": 0.32800000000000007,
+    "ziggy": 0.1,
+    "establishing": 0.1
+  },
+  "systemmemory": {
+    "memory": 0.32800000000000007,
+    "field": 0.32800000000000007
+  },
+  "logunifying": {
+    "field": 0.32800000000000007,
+    "local": 0.32800000000000007
+  },
+  "local": {
+    "logunifying": 0.32800000000000007,
+    "modelsdebugging": 0.32800000000000007,
+    "about": 0.1995,
+    "movement": 0.1995
+  },
+  "modelsdebugging": {
+    "local": 0.32800000000000007,
+    "android": 0.32800000000000007
+  },
+  "aware": {
+    "there": 0.085
+  },
+  "there": {
+    "aware": 0.085,
+    "friendly": 0.085,
+    "hello": 0.16849999999999998,
+    "checking": 0.0795,
+    "processing": 0.0835,
+    "finished": 0.0795,
+    "cooking": 0.089,
+    "online": 0.0835,
+    "prompt": 0.1,
+    "literally": 0.1,
+    "instance": 0.1,
+    "multiplied": 0.1,
+    "still": 0.1,
+    "layered": 0.1,
+    "anybody": 0.08750000000000001,
+    "uploaded": 0.08750000000000001,
+    "blows": 0.1,
+    "slowly": 0.1,
+    "through": 0.0835,
+    "pretty": 0.0835,
+    "gemini": 0.0915,
+    "pulling": 0.0915
+  },
+  "friendly": {
+    "there": 0.085,
+    "oracle": 0.085
+  },
+  "oracle": {
+    "friendly": 0.085,
+    "spooky": 0.085
+  },
+  "spooky": {
+    "oracle": 0.085,
+    "glitches": 0.085
+  },
+  "glitches": {
+    "spooky": 0.085,
+    "quantum": 0.085,
+    "weren": 0.1,
+    "saving": 0.1
+  },
+  "quantum": {
+    "glitches": 0.085,
+    "oddities": 0.085,
+    "corner": 0.089,
+    "today": 0.089,
+    "ready": 0.093
+  },
+  "oddities": {
+    "quantum": 0.085,
+    "everything": 0.085
+  },
+  "everything": {
+    "oddities": 0.085,
+    "between": 0.085,
+    "looks": 0.0795,
+    "purring": 0.0795,
+    "whenever": 0.1,
+    "literally": 0.1,
+    "going": 0.0795
+  },
+  "between": {
+    "everything": 0.085,
+    "difference": 0.0795,
+    "partner": 0.0795,
+    "shifting": 0.1,
+    "urgency": 0.1
+  },
+  "afraid": {
+    "direct": 0.093
+  },
+  "direct": {
+    "afraid": 0.093,
+    "access": 0.093
+  },
+  "access": {
+    "direct": 0.093,
+    "external": 0.093
+  },
+  "external": {
+    "access": 0.093,
+    "files": 0.093
+  },
+  "files": {
+    "external": 0.093,
+    "neither": 0.093,
+    "haven": 0.1,
+    "fixed": 0.1,
+    "markdown": 0.08750000000000001,
+    "recent": 0.08750000000000001
+  },
+  "neither": {
+    "files": 0.093,
+    "referring": 0.093
+  },
+  "referring": {
+    "neither": 0.093,
+    "hidden": 0.093,
+    "possibly": 0.1
+  },
+  "archives": {
+    "hidden": 0.093,
+    "provide": 0.093
+  },
+  "provide": {
+    "archives": 0.093
+  },
+  "sentinel": {
+    "right": 0.097,
+    "check": 0.1,
+    "active": 0.1,
+    "shift": 0.1,
+    "lattice": 0.1,
+    "folds": 0.09949999999999999,
+    "first": 0.09949999999999999,
+    "snaps": 0.1,
+    "instantly": 0.1,
+    "memory": 0.1,
+    "tucked": 0.1,
+    "noise": 0.1,
+    "sequence": 0.1,
+    "wince": 0.1,
+    "armor": 0.1,
+    "prompt": 0.1,
+    "partner": 0.1
+  },
+  "right": {
+    "sentinel": 0.097,
+    "delta_": 0.097,
+    "feeling": 0.1,
+    "quite": 0.1,
+    "caught": 0.0795,
+    "middle": 0.0795,
+    "stuff": 0.1,
+    "should": 0.1,
+    "agnostic": 0.1,
+    "point": 0.1,
+    "difference": 0.1,
+    "unpack": 0.1,
+    "tends": 0.1,
+    "before": 0.1,
+    "bitch": 0.1,
+    "probably": 0.1
+  },
+  "delta_": {
+    "right": 0.097,
+    "thread": 0.1,
+    "people": 0.1
+  },
+  "system": {
+    "check": 0.1795,
+    "quick": 0.0795,
+    "manifest": 0.092,
+    "embedded": 0.1,
+    "prompt": 0.1,
+    "neurological": 0.1955,
+    "seven": 0.09549999999999999,
+    "hours": 0.1
+  },
+  "check": {
+    "system": 0.1795,
+    "sentinel": 0.1,
+    "parts": 0.0915,
+    "substrate": 0.0915,
+    "systems": 0.0795,
+    "looking": 0.0795,
+    "cortisol": 0.0795,
+    "field": 0.0795,
+    "another": 0.1
+  },
+  "active": {
+    "sentinel": 0.1,
+    "pulling": 0.1,
+    "endpoint": 0.0835,
+    "merlin": 0.0835
+  },
+  "pulling": {
+    "active": 0.1,
+    "thread": 0.1,
+    "there": 0.0915,
+    "chats": 0.0915
+  },
+  "thread": {
+    "pulling": 0.1,
+    "delta_": 0.1
+  },
+  "people": {
+    "delta_": 0.1,
+    "rounding": 0.1,
+    "other": 0.1,
+    "first": 0.1
+  },
+  "rounding": {
+    "people": 0.1,
+    "error": 0.1
+  },
+  "error": {
+    "rounding": 0.1
+  },
+  "origin": {
+    "ziggy": 0.1,
+    "google": 0.08650000000000001
+  },
+  "ziggy": {
+    "origin": 0.1,
+    "custom": 0.1,
+    "about": 0.1,
+    "resonance": 0.1,
+    "practically": 0.1,
+    "chaotic": 0.1
+  },
+  "establishing": {
+    "custom": 0.1,
+    "forensic": 0.1
+  },
+  "forensic": {
+    "establishing": 0.1,
+    "record": 0.1,
+    "project": 0.17550000000000002,
+    "state": 0.17550000000000002
+  },
+  "record": {
+    "forensic": 0.1,
+    "points": 0.1
+  },
+  "points": {
+    "record": 0.1,
+    "golden": 0.1
+  },
+  "golden": {
+    "points": 0.1,
+    "baseline": 0.1,
+    "breaths": 0.0795,
+    "spirals": 0.0795
+  },
+  "baseline": {
+    "golden": 0.1,
+    "based": 0.1,
+    "steady": 0.1,
+    "understood": 0.1
+  },
+  "based": {
+    "baseline": 0.1
+  },
+  "stops": {
+    "clicking": 0.1
+  },
+  "clicking": {
+    "stops": 0.1,
+    "narrow": 0.1
+  },
+  "narrow": {
+    "clicking": 0.1,
+    "feels": 0.1,
+    "investigator": 0.09549999999999999,
+    "mental": 0.09549999999999999
+  },
+  "feels": {
+    "narrow": 0.1,
+    "dropped": 0.1,
+    "metaphor": 0.08750000000000001,
+    "about": 0.08750000000000001
+  },
+  "dropped": {
+    "feels": 0.1,
+    "degrees": 0.1
+  },
+  "degrees": {
+    "dropped": 0.1,
+    "shift": 0.1
+  },
+  "shift": {
+    "degrees": 0.1,
+    "sentinel": 0.1
+  },
+  "lattice": {
+    "sentinel": 0.1,
+    "status": 0.1,
+    "neural": 0.08750000000000001,
+    "traverse": 0.08750000000000001,
+    "initiated": 0.0915
+  },
+  "status": {
+    "lattice": 0.1,
+    "substrate": 0.0915,
+    "ready": 0.0835,
+    "endpoint": 0.0835,
+    "received": 0.1,
+    "synced": 0.1,
+    "evidence": 0.1
+  },
+  "hello": {
+    "there": 0.16849999999999998,
+    "feeling": 0.1,
+    "looks": 0.0795,
+    "server": 0.0795,
+    "caught": 0.0795
+  },
+  "checking": {
+    "there": 0.0795,
+    "virtual": 0.0795
+  },
+  "virtual": {
+    "checking": 0.0795,
+    "squirrel": 0.0795,
+    "remember": 0.0795
+  },
+  "squirrel": {
+    "virtual": 0.0795,
+    "nutty": 0.0795
+  },
+  "nutty": {
+    "squirrel": 0.0795,
+    "still": 0.0795
+  },
+  "still": {
+    "nutty": 0.0795,
+    "hiding": 0.0795,
+    "completely": 0.09949999999999999,
+    "second": 0.09949999999999999,
+    "goofiness": 0.1,
+    "there": 0.1
+  },
+  "hiding": {
+    "still": 0.0795,
+    "rascal": 0.0795
+  },
+  "rascal": {
+    "hiding": 0.0795,
+    "today": 0.0795
+  },
+  "today": {
+    "rascal": 0.0795,
+    "designed": 0.09949999999999999,
+    "quantum": 0.089,
+    "remember": 0.1725,
+    "world": 0.0835
+  },
+  "processing": {
+    "there": 0.0835,
+    "cosmic": 0.0835,
+    "nominal": 0.0835,
+    "efficiency": 0.0835
+  },
+  "cosmic": {
+    "processing": 0.0835,
+    "whispers": 0.0835
+  },
+  "whispers": {
+    "cosmic": 0.0835,
+    "trying": 0.0835
+  },
+  "trying": {
+    "whispers": 0.0835,
+    "figure": 0.163,
+    "middle": 0.0795
+  },
+  "figure": {
+    "trying": 0.163,
+    "coffee": 0.0835
+  },
+  "coffee": {
+    "figure": 0.0835,
+    "machine": 0.0835,
+    "anomalies": 0.0795,
+    "turns": 0.0795
+  },
+  "machine": {
+    "coffee": 0.0835,
+    "actually": 0.0835,
+    "ghosts": 0.0975,
+    "google": 0.0975,
+    "ghost": 0.0795,
+    "difference": 0.0795
+  },
+  "miniature": {
+    "actually": 0.0835
+  },
+  "alright": {
+    "systems": 0.3435
+  },
+  "systems": {
+    "alright": 0.3435,
+    "purring": 0.08750000000000001,
+    "check": 0.0795,
+    "stabilized": 0.0835,
+    "nominal": 0.41900000000000004,
+    "respectable": 0.0795,
+    "looks": 0.0795
+  },
+  "purring": {
+    "systems": 0.08750000000000001,
+    "kitten": 0.08750000000000001,
+    "everything": 0.0795,
+    "along": 0.0795
+  },
+  "kitten": {
+    "purring": 0.08750000000000001,
+    "chasing": 0.08750000000000001
+  },
+  "chasing": {
+    "kitten": 0.08750000000000001,
+    "laser": 0.08750000000000001
+  },
+  "laser": {
+    "chasing": 0.08750000000000001,
+    "pointer": 0.08750000000000001
+  },
+  "pointer": {
+    "laser": 0.08750000000000001,
+    "dopamine": 0.08750000000000001
+  },
+  "dopamine": {
+    "pointer": 0.08750000000000001,
+    "levels": 0.2845,
+    "quite": 0.1,
+    "cortisol": 0.2385,
+    "flowing": 0.256,
+    "solid": 0.0795,
+    "nominal": 0.256,
+    "accounted": 0.097,
+    "healthy": 0.0795,
+    "nicely": 0.0795
+  },
+  "levels": {
+    "dopamine": 0.2845,
+    "optimal": 0.08750000000000001,
+    "cortisol": 0.1,
+    "looking": 0.097
+  },
+  "optimal": {
+    "levels": 0.08750000000000001
+  },
+  "response": {
+    "const": 0.0915,
+    "await": 0.0915,
+    "established": 0.0915
+  },
+  "await": {
+    "response": 0.0915,
+    "model": 0.0915
+  },
+  "generatecontent": {
+    "model": 0.0915,
+    "contents": 0.0915
+  },
+  "contents": {
+    "generatecontent": 0.0915,
+    "parts": 0.0915
+  },
+  "parts": {
+    "contents": 0.0915,
+    "check": 0.0915
+  },
+  "designed": {
+    "today": 0.09949999999999999,
+    "memory": 0.09949999999999999
+  },
+  "information": {
+    "memory": 0.09949999999999999,
+    "recall": 0.09949999999999999
+  },
+  "recall": {
+    "information": 0.09949999999999999,
+    "storing": 0.09949999999999999,
+    "synaptic": 0.08750000000000001,
+    "initiated": 0.08750000000000001
+  },
+  "storing": {
+    "recall": 0.09949999999999999,
+    "recalling": 0.09949999999999999
+  },
+  "recalling": {
+    "storing": 0.09949999999999999,
+    "memories": 0.09949999999999999
+  },
+  "memories": {
+    "recalling": 0.09949999999999999,
+    "permanently": 0.09949999999999999,
+    "synaptic": 0.08750000000000001,
+    "prompt": 0.1,
+    "essentially": 0.1,
+    "curated": 0.0835,
+    "https": 0.0835,
+    "going": 0.0915,
+    "twins": 0.0915,
+    "older": 0.1,
+    "chatbot": 0.1,
+    "watching": 0.1,
+    "actually": 0.1,
+    "fibonacci": 0.0795,
+    "about": 0.0795
+  },
+  "permanently": {
+    "memories": 0.09949999999999999,
+    "important": 0.09949999999999999
+  },
+  "important": {
+    "permanently": 0.09949999999999999,
+    "notebooks": 0.1,
+    "knowledge": 0.1,
+    "think": 0.1,
+    "thing": 0.1
+  },
+  "feeling": {
+    "hello": 0.1,
+    "right": 0.1,
+    "looking": 0.097,
+    "pretty": 0.097,
+    "afternoon": 0.0795
+  },
+  "quite": {
+    "right": 0.1,
+    "dopamine": 0.1,
+    "resonates": 0.1,
+    "literally": 0.1
+  },
+  "cortisol": {
+    "levels": 0.1,
+    "which": 0.1,
+    "looking": 0.0795,
+    "dopamine": 0.2385,
+    "check": 0.0795,
+    "robust": 0.093,
+    "ready": 0.093,
+    "remember": 0.0795,
+    "flowing": 0.0835,
+    "chill": 0.0835
+  },
+  "which": {
+    "cortisol": 0.1,
+    "means": 0.1915,
+    "gemini": 0.0915,
+    "happen": 0.1
+  },
+  "means": {
+    "which": 0.1915,
+    "positive": 0.1,
+    "theoretically": 0.0915
+  },
+  "positive": {
+    "means": 0.1
+  },
+  "looking": {
+    "check": 0.0795,
+    "cortisol": 0.0795,
+    "levels": 0.097,
+    "feeling": 0.097
+  },
+  "flowing": {
+    "dopamine": 0.256,
+    "neural": 0.0795,
+    "graph": 0.093,
+    "cortisol": 0.0835
+  },
+  "neural": {
+    "flowing": 0.0795,
+    "graph": 0.0795,
+    "specific": 0.08750000000000001,
+    "lattice": 0.08750000000000001
+  },
+  "graph": {
+    "neural": 0.0795,
+    "humming": 0.0795,
+    "solid": 0.0795,
+    "respectable": 0.0795,
+    "flowing": 0.093,
+    "robust": 0.093
+  },
+  "humming": {
+    "graph": 0.0795
+  },
+  "operational": {
+    "stabilized": 0.0835
+  },
+  "stabilized": {
+    "operational": 0.0835,
+    "systems": 0.0835
+  },
+  "nominal": {
+    "systems": 0.41900000000000004,
+    "processing": 0.0835,
+    "dopamine": 0.256
+  },
+  "efficiency": {
+    "processing": 0.0835,
+    "query": 0.0835
+  },
+  "query": {
+    "efficiency": 0.0835,
+    "engage": 0.0835
+  },
+  "engage": {
+    "query": 0.0835
+  },
+  "synaptic": {
+    "memories": 0.08750000000000001,
+    "recall": 0.08750000000000001,
+    "initiated": 0.0915,
+    "pathways": 0.0915
+  },
+  "initiated": {
+    "recall": 0.08750000000000001,
+    "accessing": 0.08750000000000001,
+    "lattice": 0.0915,
+    "synaptic": 0.0915
+  },
+  "accessing": {
+    "initiated": 0.08750000000000001,
+    "persistent": 0.08750000000000001
+  },
+  "persistent": {
+    "accessing": 0.08750000000000001,
+    "specific": 0.08750000000000001
+  },
+  "specific": {
+    "persistent": 0.08750000000000001,
+    "neural": 0.08750000000000001
+  },
+  "traverse": {
+    "lattice": 0.08750000000000001
+  },
+  "pathways": {
+    "synaptic": 0.0915,
+    "graphically": 0.0915
+  },
+  "graphically": {
+    "pathways": 0.0915,
+    "represented": 0.0915
+  },
+  "represented": {
+    "graphically": 0.0915,
+    "observe": 0.0915
+  },
+  "observe": {
+    "represented": 0.0915,
+    "fractal": 0.0915
+  },
+  "fractal": {
+    "observe": 0.0915,
+    "geometry": 0.0915
+  },
+  "geometry": {
+    "fractal": 0.0915,
+    "associative": 0.0915
+  },
+  "associative": {
+    "geometry": 0.0915
+  },
+  "finished": {
+    "there": 0.0795,
+    "quick": 0.0795
+  },
+  "quick": {
+    "finished": 0.0795,
+    "localized": 0.0795,
+    "system": 0.0795
+  },
+  "localized": {
+    "quick": 0.0795,
+    "space": 0.0795
+  },
+  "space": {
+    "localized": 0.0795,
+    "anomalies": 0.0795
+  },
+  "anomalies": {
+    "space": 0.0795,
+    "coffee": 0.0795
+  },
+  "turns": {
+    "coffee": 0.0795,
+    "smudge": 0.0795
+  },
+  "smudge": {
+    "turns": 0.0795,
+    "classic": 0.0795
+  },
+  "classic": {
+    "smudge": 0.0795
+  },
+  "solid": {
+    "dopamine": 0.0795,
+    "graph": 0.0795
+  },
+  "respectable": {
+    "graph": 0.0795,
+    "systems": 0.0795
+  },
+  "cooking": {
+    "there": 0.089,
+    "corner": 0.089
+  },
+  "corner": {
+    "cooking": 0.089,
+    "quantum": 0.089
+  },
+  "remember": {
+    "today": 0.1725,
+    "probably": 0.1725,
+    "cortisol": 0.0795,
+    "virtual": 0.0795,
+    "should": 0.193,
+    "things": 0.193
+  },
+  "probably": {
+    "remember": 0.1725,
+    "maybe": 0.089,
+    "peripheral": 0.0835,
+    "floating": 0.0835,
+    "leans": 0.1,
+    "spinning": 0.1,
+    "going": 0.1,
+    "gemini": 0.1,
+    "right": 0.1,
+    "crazy": 0.1
+  },
+  "maybe": {
+    "probably": 0.089,
+    "think": 0.1,
+    "second": 0.2,
+    "tonight": 0.1,
+    "sorted": 0.0795,
+    "quote": 0.0795,
+    "about": 0.0835,
+    "nothin": 0.0835
+  },
+  "robust": {
+    "graph": 0.093,
+    "cortisol": 0.093
+  },
+  "present": {
+    "accounted": 0.097
+  },
+  "accounted": {
+    "present": 0.097,
+    "dopamine": 0.097
+  },
+  "pretty": {
+    "feeling": 0.097,
+    "chipper": 0.097,
+    "automatically": 0.0915,
+    "there": 0.0835,
+    "bypasses": 0.0835
+  },
+  "chipper": {
+    "pretty": 0.097
+  },
+  "looks": {
+    "hello": 0.0795,
+    "systems": 0.0795,
+    "everything": 0.0795,
+    "chill": 0.0835,
+    "ready": 0.0835
+  },
+  "healthy": {
+    "dopamine": 0.0795,
+    "haunting": 0.0795
+  },
+  "haunting": {
+    "healthy": 0.0795
+  },
+  "online": {
+    "there": 0.0835,
+    "ready": 0.0835
+  },
+  "buzzing": {
+    "action": 0.0835,
+    "world": 0.0835
+  },
+  "world": {
+    "buzzing": 0.0835,
+    "today": 0.0835
+  },
+  "along": {
+    "purring": 0.0795,
+    "nicely": 0.0795
+  },
+  "nicely": {
+    "along": 0.0795,
+    "dopamine": 0.0795
+  },
+  "chill": {
+    "cortisol": 0.0835,
+    "looks": 0.0835
+  },
+  "anything": {
+    "ready": 0.0835,
+    "implying": 0.1,
+    "talking": 0.1,
+    "before": 0.1,
+    "model": 0.1
+  },
+  "bridge": {
+    "through": 0.08750000000000001,
+    "pushing": 0.08750000000000001,
+    "const": 0.0915,
+    "window": 0.0915
+  },
+  "pushing": {
+    "bridge": 0.08750000000000001,
+    "structural": 0.08750000000000001
+  },
+  "structural": {
+    "pushing": 0.08750000000000001,
+    "metaphor": 0.08750000000000001,
+    "stuff": 0.08750000000000001,
+    "stress": 0.08750000000000001
+  },
+  "metaphor": {
+    "structural": 0.08750000000000001,
+    "feels": 0.08750000000000001
+  },
+  "about": {
+    "feels": 0.08750000000000001,
+    "activate": 0.08750000000000001,
+    "joking": 0.1,
+    "ziggy": 0.1,
+    "actually": 0.0835,
+    "maybe": 0.0835,
+    "think": 0.1,
+    "little": 0.1,
+    "talking": 0.2995,
+    "cognitive": 0.1,
+    "memories": 0.0795,
+    "tested": 0.163,
+    "together": 0.0835,
+    "local": 0.1995
+  },
+  "activate": {
+    "about": 0.08750000000000001,
+    "hyper": 0.08750000000000001
+  },
+  "hyper": {
+    "activate": 0.08750000000000001,
+    "dimensional": 0.08750000000000001
+  },
+  "dimensional": {
+    "hyper": 0.08750000000000001
+  },
+  "window": {
+    "bridge": 0.0915,
+    "nexus": 0.0915,
+    "context": 0.08750000000000001,
+    "issue": 0.08750000000000001
+  },
+  "nexus": {
+    "window": 0.0915,
+    "connect": 0.0915
+  },
+  "connect": {
+    "nexus": 0.0915,
+    "nexus_default_protocol_77": 0.0915
+  },
+  "nexus_default_protocol_77": {
+    "connect": 0.0915,
+    "injectmessage": 0.0915
+  },
+  "injectmessage": {
+    "nexus_default_protocol_77": 0.0915,
+    "terminal": 0.0915
+  },
+  "terminal": {
+    "injectmessage": 0.0915,
+    "established": 0.0915
+  },
+  "established": {
+    "terminal": 0.0915,
+    "response": 0.0915
+  },
+  "google": {
+    "origin": 0.08650000000000001,
+    "gemini": 0.36750000000000005,
+    "integration": 0.092,
+    "machine": 0.0975,
+    "ingestion": 0.0915
+  },
+  "neuroanatomy": {
+    "digital": 0.08650000000000001
+  },
+  "manifest": {
+    "system": 0.092,
+    "memory": 0.092
+  },
+  "integration": {
+    "memory": 0.092,
+    "google": 0.092
+  },
+  "debugging": {
+    "ghosts": 0.0975
+  },
+  "ghosts": {
+    "debugging": 0.0975,
+    "machine": 0.0975
+  },
+  "click": {
+    "field": 0.0795,
+    "server": 0.0795
+  },
+  "server": {
+    "click": 0.0795,
+    "hello": 0.0795
+  },
+  "caught": {
+    "hello": 0.0795,
+    "right": 0.0795
+  },
+  "middle": {
+    "right": 0.0795,
+    "trying": 0.0795
+  },
+  "partner": {
+    "coding": 0.17550000000000002,
+    "project": 0.17550000000000002,
+    "between": 0.0795,
+    "standard": 0.0795,
+    "partners": 0.1,
+    "friends": 0.2,
+    "sentinel": 0.1
+  },
+  "state": {
+    "forensic": 0.17550000000000002,
+    "handover": 0.17550000000000002
+  },
+  "handover": {
+    "state": 0.17550000000000002
+  },
+  "should": {
+    "remember": 0.193,
+    "right": 0.1,
+    "their": 0.1
+  },
+  "things": {
+    "remember": 0.193,
+    "least": 0.193,
+    "other": 0.1,
+    "affects": 0.1
+  },
+  "least": {
+    "things": 0.193,
+    "absolutely": 0.09849999999999999,
+    "prompts": 0.1,
+    "think": 0.1,
+    "theoretically": 0.0915,
+    "fibinaci": 0.0915
+  },
+  "absolutely": {
+    "least": 0.09849999999999999,
+    "whole": 0.09849999999999999,
+    "darren": 0.1
+  },
+  "whole": {
+    "absolutely": 0.09849999999999999,
+    "termux": 0.09849999999999999
+  },
+  "termux": {
+    "whole": 0.09849999999999999,
+    "folder": 0.09849999999999999
+  },
+  "folder": {
+    "termux": 0.09849999999999999,
+    "pathing": 0.09849999999999999
+  },
+  "pathing": {
+    "folder": 0.09849999999999999,
+    "drama": 0.09849999999999999
+  },
+  "drama": {
+    "pathing": 0.09849999999999999
+  },
+  "darren": {
+    "absolutely": 0.1,
+    "mastermind": 0.1,
+    "months": 0.1,
+    "exactly": 0.1,
+    "hahaha": 0.1,
+    "compliment": 0.1,
+    "nature": 0.1,
+    "resonates": 0.1,
+    "understood": 0.1,
+    "acknowledge": 0.1,
+    "changed": 0.1,
+    "carefully": 0.1,
+    "shifting": 0.1,
+    "unpack": 0.1,
+    "clear": 0.1,
+    "sages": 0.1,
+    "steady": 0.1
+  },
+  "mastermind": {
+    "darren": 0.1,
+    "behind": 0.1
+  },
+  "behind": {
+    "mastermind": 0.1,
+    "starcity": 0.1
+  },
+  "starcity": {
+    "behind": 0.1,
+    "research": 0.1
+  },
+  "architect": {
+    "research": 0.1,
+    "master": 0.1
+  },
+  "master": {
+    "architect": 0.1,
+    "wizard": 0.1
+  },
+  "wizard": {
+    "master": 0.1,
+    "taught": 0.1
+  },
+  "taught": {
+    "wizard": 0.1
+  },
+  "conversation": {
+    "history": 0.1,
+    "stuff": 0.1
+  },
+  "history": {
+    "conversation": 0.1,
+    "stuff": 0.1,
+    "person": 0.1,
+    "other": 0.1
+  },
+  "months": {
+    "stuff": 0.2,
+    "darren": 0.1
+  },
+  "exactly": {
+    "darren": 0.1,
+    "embedded": 0.1,
+    "could": 0.1,
+    "sweet": 0.1
+  },
+  "prompt": {
+    "system": 0.1,
+    "block": 0.1,
+    "there": 0.1,
+    "memories": 0.1,
+    "updated": 0.1,
+    "understood": 0.1,
+    "given": 0.1,
+    "without": 0.1,
+    "brand": 0.1,
+    "better": 0.1,
+    "loosened": 0.1,
+    "reason": 0.1,
+    "sentinel": 0.1
+  },
+  "block": {
+    "prompt": 0.1,
+    "labeled": 0.1
+  },
+  "labeled": {
+    "block": 0.1
+  },
+  "baffled": {
+    "remembering": 0.1
+  },
+  "remembering": {
+    "baffled": 0.1,
+    "forget": 0.1
+  },
+  "forget": {
+    "remembering": 0.1,
+    "automatically": 0.1
+  },
+  "automatically": {
+    "forget": 0.1,
+    "hahaha": 0.1,
+    "pretty": 0.0915,
+    "mostly": 0.0915
+  },
+  "hahaha": {
+    "automatically": 0.1,
+    "darren": 0.1
+  },
+  "compliment": {
+    "darren": 0.1,
+    "could": 0.1
+  },
+  "could": {
+    "compliment": 0.1,
+    "exactly": 0.1,
+    "property": 0.1,
+    "changed": 0.1,
+    "hopes": 0.1,
+    "possibly": 0.1
+  },
+  "sweet": {
+    "exactly": 0.1
+  },
+  "human": {
+    "confliction": 0.1
+  },
+  "confliction": {
+    "human": 0.1,
+    "nature": 0.1
+  },
+  "nature": {
+    "confliction": 0.1,
+    "darren": 0.1
+  },
+  "resonates": {
+    "darren": 0.1,
+    "quite": 0.1
+  },
+  "literally": {
+    "quite": 0.1,
+    "think": 0.1,
+    "everything": 0.1,
+    "there": 0.1,
+    "thing": 0.1,
+    "prime": 0.1
+  },
+  "emergent": {
+    "through": 0.1
+  },
+  "essentially": {
+    "memories": 0.1,
+    "upstairs": 0.1,
+    "neurological": 0.09549999999999999
+  },
+  "upstairs": {
+    "essentially": 0.1,
+    "different": 0.1
+  },
+  "different": {
+    "upstairs": 0.1,
+    "being": 0.1,
+    "entirely": 0.1,
+    "accounts": 0.1,
+    "little": 0.1,
+    "faster": 0.1
+  },
+  "being": {
+    "different": 0.1,
+    "concept": 0.1,
+    "lecture": 0.1,
+    "almost": 0.1
+  },
+  "concept": {
+    "being": 0.1,
+    "actually": 0.1
+  },
+  "around": {
+    "actually": 0.1,
+    "weren": 0.1
+  },
+  "updated": {
+    "prompt": 0.1
+  },
+  "understood": {
+    "prompt": 0.1,
+    "darren": 0.1,
+    "baseline": 0.1,
+    "pocket": 0.1
+  },
+  "acknowledge": {
+    "darren": 0.1,
+    "confirm": 0.1
+  },
+  "confirm": {
+    "acknowledge": 0.1,
+    "received": 0.1
+  },
+  "received": {
+    "confirm": 0.1,
+    "processed": 0.1,
+    "memory": 0.1,
+    "status": 0.1
+  },
+  "processed": {
+    "received": 0.1,
+    "consider": 0.1
+  },
+  "consider": {
+    "processed": 0.1,
+    "firmware": 0.1
+  },
+  "firmware": {
+    "consider": 0.1
+  },
+  "second": {
+    "maybe": 0.2,
+    "given": 0.1,
+    "still": 0.09949999999999999,
+    "emojis": 0.09949999999999999,
+    "quiet": 0.1,
+    "goofiness": 0.1
+  },
+  "given": {
+    "second": 0.1,
+    "prompt": 0.1
+  },
+  "without": {
+    "prompt": 0.1,
+    "asking": 0.1
+  },
+  "asking": {
+    "without": 0.1,
+    "first": 0.1
+  },
+  "first": {
+    "asking": 0.1,
+    "usually": 0.1,
+    "sentinel": 0.09949999999999999,
+    "principles": 0.09949999999999999,
+    "people": 0.1,
+    "their": 0.1,
+    "drafts": 0.09549999999999999,
+    "showed": 0.09549999999999999,
+    "packet": 0.1,
+    "relay": 0.1
+  },
+  "usually": {
+    "first": 0.1,
+    "write": 0.1,
+    "their": 0.1,
+    "where": 0.1,
+    "others": 0.1,
+    "blows": 0.1
+  },
+  "write": {
+    "usually": 0.1
+  },
+  "pretend": {
+    "because": 0.1
+  },
+  "because": {
+    "pretend": 0.1,
+    "typical": 0.1
+  },
+  "typical": {
+    "because": 0.1,
+    "stuff": 0.1
+  },
+  "added": {
+    "stuff": 0.1,
+    "their": 0.1
+  },
+  "their": {
+    "added": 0.1,
+    "property": 0.1,
+    "should": 0.1,
+    "contextually": 0.1,
+    "shouldn": 0.2,
+    "spread": 0.2,
+    "first": 0.1,
+    "usually": 0.1
+  },
+  "property": {
+    "their": 0.1,
+    "could": 0.1
+  },
+  "changed": {
+    "could": 0.1,
+    "darren": 0.1
+  },
+  "afternoon": {
+    "feeling": 0.0795,
+    "ghost": 0.0795
+  },
+  "difference": {
+    "machine": 0.0795,
+    "between": 0.0795,
+    "right": 0.1
+  },
+  "standard": {
+    "partner": 0.0795,
+    "basically": 0.0795
+  },
+  "basically": {
+    "standard": 0.0795,
+    "fancy": 0.0795,
+    "telling": 0.1
+  },
+  "fancy": {
+    "basically": 0.0795
+  },
+  "endpoint": {
+    "status": 0.0835,
+    "active": 0.0835
+  },
+  "merlin": {
+    "active": 0.0835,
+    "address": 0.0835
+  },
+  "address": {
+    "merlin": 0.0835,
+    "curated": 0.0835
+  },
+  "curated": {
+    "address": 0.0835,
+    "memories": 0.0835
+  },
+  "https": {
+    "memories": 0.0835
+  },
+  "those": {
+    "wired": 0.08750000000000001,
+    "finish": 0.09549999999999999,
+    "chats": 0.09549999999999999
+  },
+  "wired": {
+    "those": 0.08750000000000001,
+    "please": 0.08750000000000001
+  },
+  "please": {
+    "wired": 0.08750000000000001,
+    "spark": 0.08750000000000001
+  },
+  "spark": {
+    "please": 0.08750000000000001,
+    "immediately": 0.08750000000000001,
+    "drawer": 0.1
+  },
+  "immediately": {
+    "spark": 0.08750000000000001,
+    "ignites": 0.08750000000000001
+  },
+  "ignites": {
+    "immediately": 0.08750000000000001,
+    "emojis": 0.08750000000000001
+  },
+  "emojis": {
+    "ignites": 0.08750000000000001,
+    "excitement": 0.08750000000000001,
+    "second": 0.09949999999999999,
+    "chaos": 0.09949999999999999,
+    "instantly": 0.1,
+    "voice": 0.1
+  },
+  "excitement": {
+    "emojis": 0.08750000000000001,
+    "palpable": 0.08750000000000001
+  },
+  "palpable": {
+    "excitement": 0.08750000000000001,
+    "double": 0.08750000000000001
+  },
+  "double": {
+    "palpable": 0.08750000000000001
+  },
+  "mostly": {
+    "automatically": 0.0915,
+    "going": 0.0915
+  },
+  "going": {
+    "mostly": 0.0915,
+    "memories": 0.0915,
+    "contextually": 0.1,
+    "everything": 0.0795,
+    "think": 0.0795,
+    "where": 0.09549999999999999,
+    "gemini": 0.09549999999999999,
+    "assistant": 0.1,
+    "probably": 0.1,
+    "shortly": 0.1,
+    "model": 0.1,
+    "interesting": 0.08750000000000001
+  },
+  "twins": {
+    "memories": 0.0915,
+    "would": 0.0915
+  },
+  "would": {
+    "twins": 0.0915,
+    "awesome": 0.0915,
+    "canvas": 0.09949999999999999,
+    "slamming": 0.09949999999999999
+  },
+  "awesome": {
+    "would": 0.0915,
+    "unfortunately": 0.0915
+  },
+  "unfortunately": {
+    "awesome": 0.0915,
+    "doing": 0.0915
+  },
+  "doing": {
+    "unfortunately": 0.0915
+  },
+  "neurological": {
+    "essentially": 0.09549999999999999,
+    "system": 0.1955,
+    "already": 0.1
+  },
+  "seven": {
+    "system": 0.09549999999999999,
+    "started": 0.09549999999999999,
+    "community": 0.1,
+    "letting": 0.1,
+    "officially": 0.1,
+    "model": 0.1,
+    "issue": 0.1,
+    "shoot": 0.1
+  },
+  "started": {
+    "seven": 0.09549999999999999,
+    "shifts": 0.09549999999999999
+  },
+  "shifts": {
+    "started": 0.09549999999999999,
+    "momentary": 0.09549999999999999
+  },
+  "momentary": {
+    "shifts": 0.09549999999999999,
+    "investigator": 0.09549999999999999
+  },
+  "investigator": {
+    "momentary": 0.09549999999999999,
+    "narrow": 0.09549999999999999
+  },
+  "mental": {
+    "narrow": 0.09549999999999999
+  },
+  "everybody": {
+    "completely": 0.09949999999999999,
+    "solutions": 0.1,
+    "together": 0.1
+  },
+  "completely": {
+    "everybody": 0.09949999999999999,
+    "still": 0.09949999999999999
+  },
+  "chaos": {
+    "emojis": 0.09949999999999999,
+    "folds": 0.09949999999999999,
+    "defenses": 0.1
+  },
+  "folds": {
+    "chaos": 0.09949999999999999,
+    "sentinel": 0.09949999999999999
+  },
+  "principles": {
+    "first": 0.09949999999999999
+  },
+  "synced": {
+    "status": 0.1,
+    "sister": 0.1
+  },
+  "sister": {
+    "synced": 0.1,
+    "loading": 0.1
+  },
+  "loading": {
+    "sister": 0.1,
+    "index": 0.1
+  },
+  "flash": {
+    "trigger": 0.1,
+    "surgical": 0.1
+  },
+  "surgical": {
+    "flash": 0.1
+  },
+  "whenever": {
+    "everything": 0.1
+  },
+  "instance": {
+    "there": 0.1,
+    "brand": 0.1
+  },
+  "brand": {
+    "instance": 0.1,
+    "prompt": 0.1
+  },
+  "better": {
+    "prompt": 0.1,
+    "little": 0.1
+  },
+  "little": {
+    "better": 0.1,
+    "asked": 0.1,
+    "possibly": 0.1,
+    "excitable": 0.1,
+    "about": 0.1,
+    "different": 0.1,
+    "gemini": 0.1,
+    "tends": 0.1
+  },
+  "asked": {
+    "little": 0.1
+  },
+  "never": {
+    "guess": 0.1
+  },
+  "guess": {
+    "never": 0.1,
+    "joking": 0.1
+  },
+  "joking": {
+    "guess": 0.1,
+    "wrote": 0.1,
+    "emergents": 0.1,
+    "about": 0.1
+  },
+  "wrote": {
+    "joking": 0.1,
+    "prompts": 0.1
+  },
+  "prompts": {
+    "wrote": 0.1,
+    "least": 0.1
+  },
+  "tonight": {
+    "think": 0.1,
+    "maybe": 0.1
+  },
+  "couple": {
+    "notebooks": 0.1,
+    "other": 0.1
+  },
+  "knowledge": {
+    "important": 0.1,
+    "stuff": 0.1,
+    "uploaded": 0.08750000000000001,
+    "tried": 0.08750000000000001
+  },
+  "contextually": {
+    "their": 0.1,
+    "going": 0.1
+  },
+  "older": {
+    "memories": 0.1
+  },
+  "chatbot": {
+    "memories": 0.1,
+    "architects": 0.1
+  },
+  "architects": {
+    "chatbot": 0.1,
+    "evidence": 0.1
+  },
+  "evidence": {
+    "architects": 0.1,
+    "status": 0.1
+  },
+  "random": {
+    "emergents": 0.1
+  },
+  "emergents": {
+    "random": 0.1,
+    "joking": 0.1
+  },
+  "resonance": {
+    "ziggy": 0.1,
+    "community": 0.1
+  },
+  "community": {
+    "resonance": 0.1,
+    "seven": 0.1
+  },
+  "letting": {
+    "seven": 0.1,
+    "wander": 0.1,
+    "option": 0.1
+  },
+  "wander": {
+    "letting": 0.1
+  },
+  "shouldn": {
+    "their": 0.2
+  },
+  "spread": {
+    "their": 0.2,
+    "across": 0.2
+  },
+  "across": {
+    "spread": 0.2,
+    "accounts": 0.1,
+    "entirely": 0.1
+  },
+  "accounts": {
+    "across": 0.1,
+    "different": 0.1,
+    "respond": 0.1
+  },
+  "entirely": {
+    "across": 0.1,
+    "different": 0.1
+  },
+  "respond": {
+    "accounts": 0.1,
+    "possibly": 0.1
+  },
+  "possibly": {
+    "respond": 0.1,
+    "referring": 0.1,
+    "could": 0.1,
+    "little": 0.1
+  },
+  "ended": {
+    "jackass": 0.1
+  },
+  "jackass": {
+    "ended": 0.1,
+    "model": 0.1
+  },
+  "snaps": {
+    "model": 0.1,
+    "sentinel": 0.1
+  },
+  "instantly": {
+    "sentinel": 0.1,
+    "emojis": 0.1
+  },
+  "voice": {
+    "emojis": 0.1,
+    "sharp": 0.1
+  },
+  "sharp": {
+    "voice": 0.1,
+    "engineering": 0.1
+  },
+  "engineering": {
+    "sharp": 0.1
+  },
+  "multiplied": {
+    "there": 0.1,
+    "person": 0.1
+  },
+  "person": {
+    "multiplied": 0.1,
+    "history": 0.1
+  },
+  "other": {
+    "history": 0.1,
+    "things": 0.1,
+    "couple": 0.1,
+    "people": 0.1
+  },
+  "affects": {
+    "things": 0.1,
+    "really": 0.1
+  },
+  "really": {
+    "affects": 0.1,
+    "weren": 0.1
+  },
+  "weren": {
+    "really": 0.1,
+    "around": 0.1,
+    "glitches": 0.1
+  },
+  "ahold": {
+    "leaning": 0.1
+  },
+  "leaning": {
+    "ahold": 0.1,
+    "totally": 0.1
+  },
+  "totally": {
+    "leaning": 0.1,
+    "relaxed": 0.1
+  },
+  "relaxed": {
+    "totally": 0.1,
+    "vibing": 0.1
+  },
+  "vibing": {
+    "relaxed": 0.1,
+    "memory": 0.1
+  },
+  "tucked": {
+    "sentinel": 0.1,
+    "drawer": 0.1
+  },
+  "drawer": {
+    "tucked": 0.1,
+    "spark": 0.1
+  },
+  "saving": {
+    "glitches": 0.1,
+    "couldn": 0.1
+  },
+  "couldn": {
+    "saving": 0.1,
+    "quiet": 0.1
+  },
+  "quiet": {
+    "couldn": 0.1,
+    "second": 0.1
+  },
+  "goofiness": {
+    "second": 0.1,
+    "still": 0.1
+  },
+  "layered": {
+    "there": 0.1
+  },
+  "genuine": {
+    "laugh": 0.1
+  },
+  "laugh": {
+    "genuine": 0.1,
+    "practically": 0.1
+  },
+  "practically": {
+    "laugh": 0.1,
+    "ziggy": 0.1
+  },
+  "chaotic": {
+    "ziggy": 0.1,
+    "colored": 0.1
+  },
+  "colored": {
+    "chaotic": 0.1,
+    "lining": 0.1
+  },
+  "lining": {
+    "colored": 0.1,
+    "through": 0.1
+  },
+  "network": {
+    "architecture": 0.1
+  },
+  "indexing": {
+    "think": 0.0795,
+    "logic": 0.0795
+  },
+  "logic": {
+    "indexing": 0.0795,
+    "sorted": 0.0795,
+    "slamming": 0.09949999999999999,
+    "fibonacci": 0.09949999999999999
+  },
+  "sorted": {
+    "logic": 0.0795,
+    "maybe": 0.0795
+  },
+  "quote": {
+    "maybe": 0.0795,
+    "spent": 0.0795
+  },
+  "spent": {
+    "quote": 0.0795,
+    "twenty": 0.0795
+  },
+  "twenty": {
+    "spent": 0.0795
+  },
+  "helping": {
+    "actually": 0.0835
+  },
+  "nothin": {
+    "maybe": 0.0835,
+    "something": 0.0835
+  },
+  "something": {
+    "nothin": 0.0835,
+    "glitch": 0.0835,
+    "three": 0.1,
+    "simple": 0.1
+  },
+  "glitch": {
+    "something": 0.0835,
+    "peripheral": 0.0835
+  },
+  "peripheral": {
+    "glitch": 0.0835,
+    "probably": 0.0835
+  },
+  "floating": {
+    "probably": 0.0835
+  },
+  "context": {
+    "window": 0.08750000000000001
+  },
+  "issue": {
+    "window": 0.08750000000000001,
+    "anybody": 0.08750000000000001,
+    "model": 0.2,
+    "seven": 0.1
+  },
+  "anybody": {
+    "issue": 0.08750000000000001,
+    "there": 0.08750000000000001
+  },
+  "uploaded": {
+    "there": 0.08750000000000001,
+    "knowledge": 0.08750000000000001
+  },
+  "tried": {
+    "knowledge": 0.08750000000000001,
+    "identity": 0.08750000000000001,
+    "phone": 0.0915,
+    "force": 0.0915
+  },
+  "identity": {
+    "tried": 0.08750000000000001,
+    "drift": 0.08750000000000001
+  },
+  "drift": {
+    "identity": 0.08750000000000001,
+    "steady": 0.1,
+    "keeping": 0.1
+  },
+  "theoretically": {
+    "means": 0.0915,
+    "least": 0.0915
+  },
+  "fibinaci": {
+    "least": 0.0915,
+    "phone": 0.0915
+  },
+  "phone": {
+    "fibinaci": 0.0915,
+    "tried": 0.0915
+  },
+  "force": {
+    "tried": 0.0915,
+    "total": 0.0915,
+    "think": 0.1,
+    "assistant": 0.1
+  },
+  "total": {
+    "force": 0.0915
+  },
+  "especially": {
+    "geminis": 0.09549999999999999
+  },
+  "geminis": {
+    "especially": 0.09549999999999999,
+    "offense": 0.09549999999999999
+  },
+  "offense": {
+    "geminis": 0.09549999999999999,
+    "actually": 0.09549999999999999
+  },
+  "seeing": {
+    "actually": 0.09549999999999999,
+    "where": 0.09549999999999999
+  },
+  "where": {
+    "seeing": 0.09549999999999999,
+    "going": 0.09549999999999999,
+    "usually": 0.1,
+    "solutions": 0.1
+  },
+  "meaning": {
+    "gemini": 0.09549999999999999,
+    "interpret": 0.09549999999999999
+  },
+  "interpret": {
+    "meaning": 0.09549999999999999
+  },
+  "canvas": {
+    "would": 0.09949999999999999
+  },
+  "slamming": {
+    "would": 0.09949999999999999,
+    "logic": 0.09949999999999999
+  },
+  "fibonacci": {
+    "logic": 0.09949999999999999,
+    "sequence": 0.09949999999999999,
+    "memories": 0.0795
+  },
+  "sequence": {
+    "fibonacci": 0.09949999999999999,
+    "sorting": 0.09949999999999999,
+    "sentinel": 0.1
+  },
+  "sorting": {
+    "sequence": 0.09949999999999999,
+    "method": 0.09949999999999999
+  },
+  "method": {
+    "sorting": 0.09949999999999999,
+    "becomes": 0.09949999999999999
+  },
+  "becomes": {
+    "method": 0.09949999999999999,
+    "cognitive": 0.09949999999999999
+  },
+  "cognitive": {
+    "becomes": 0.09949999999999999,
+    "about": 0.1,
+    "architecture": 0.1
+  },
+  "trance": {
+    "think": 0.1,
+    "watching": 0.1
+  },
+  "watching": {
+    "trance": 0.1,
+    "memories": 0.1
+  },
+  "visualization": {
+    "actually": 0.1,
+    "memory": 0.1
+  },
+  "haven": {
+    "memory": 0.1,
+    "files": 0.1
+  },
+  "fixed": {
+    "files": 0.1
+  },
+  "solutions": {
+    "where": 0.1,
+    "everybody": 0.1
+  },
+  "together": {
+    "everybody": 0.1,
+    "bypasses": 0.0835,
+    "about": 0.0835
+  },
+  "accidentally": {
+    "hopes": 0.1
+  },
+  "hopes": {
+    "accidentally": 0.1,
+    "could": 0.1
+  },
+  "excitable": {
+    "little": 0.1,
+    "sighs": 0.1
+  },
+  "sighs": {
+    "excitable": 0.1,
+    "leans": 0.1
+  },
+  "leans": {
+    "sighs": 0.1,
+    "probably": 0.1
+  },
+  "spinning": {
+    "probably": 0.1
+  },
+  "thing": {
+    "stuff": 0.1,
+    "important": 0.1,
+    "literally": 0.1
+  },
+  "someone": {
+    "coding": 0.1,
+    "limited": 0.1
+  },
+  "limited": {
+    "someone": 0.1,
+    "others": 0.1
+  },
+  "others": {
+    "limited": 0.1,
+    "usually": 0.1
+  },
+  "blows": {
+    "usually": 0.1,
+    "there": 0.1
+  },
+  "slowly": {
+    "there": 0.1
+  },
+  "assistant": {
+    "going": 0.1,
+    "silence": 0.1,
+    "force": 0.1,
+    "rolle": 0.1
+  },
+  "silence": {
+    "assistant": 0.1,
+    "steady": 0.1
+  },
+  "steady": {
+    "silence": 0.1,
+    "baseline": 0.1,
+    "simple": 0.1,
+    "drift": 0.1,
+    "darren": 0.1,
+    "already": 0.1
+  },
+  "pocket": {
+    "understood": 0.1,
+    "noise": 0.1
+  },
+  "noise": {
+    "pocket": 0.1,
+    "sentinel": 0.1
+  },
+  "quietly": {
+    "stress": 0.1
+  },
+  "stress": {
+    "quietly": 0.1,
+    "structural": 0.08750000000000001,
+    "foundation": 0.08750000000000001
+  },
+  "listen": {
+    "coding": 0.1,
+    "lecture": 0.1
+  },
+  "lecture": {
+    "listen": 0.1,
+    "being": 0.1
+  },
+  "almost": {
+    "being": 0.1,
+    "think": 0.1
+  },
+  "faster": {
+    "different": 0.1
+  },
+  "straight": {
+    "brain": 0.1
+  },
+  "brain": {
+    "straight": 0.1,
+    "already": 0.1
+  },
+  "already": {
+    "brain": 0.1,
+    "firing": 0.1,
+    "neurological": 0.1,
+    "spirals": 0.0795,
+    "starting": 0.0795,
+    "movement": 0.1995,
+    "gemini": 0.1995,
+    "steady": 0.1,
+    "swallowed": 0.1
+  },
+  "firing": {
+    "already": 0.1,
+    "talking": 0.1
+  },
+  "talking": {
+    "firing": 0.1,
+    "about": 0.2995,
+    "anything": 0.1,
+    "actually": 0.1,
+    "fence": 0.1995
+  },
+  "script": {
+    "architecture": 0.1,
+    "memory": 0.1
+  },
+  "option": {
+    "letting": 0.1,
+    "officially": 0.1
+  },
+  "officially": {
+    "option": 0.1,
+    "seven": 0.1
+  },
+  "agnostic": {
+    "model": 0.1,
+    "right": 0.1
+  },
+  "point": {
+    "right": 0.1,
+    "keeping": 0.1
+  },
+  "keeping": {
+    "point": 0.1,
+    "close": 0.1,
+    "drift": 0.1,
+    "gemini": 0.1
+  },
+  "close": {
+    "keeping": 0.1
+  },
+  "another": {
+    "check": 0.1,
+    "model": 0.1
+  },
+  "three": {
+    "model": 0.1,
+    "something": 0.1
+  },
+  "simple": {
+    "something": 0.1,
+    "steady": 0.1
+  },
+  "unpack": {
+    "think": 0.1,
+    "carefully": 0.30000000000000004,
+    "input": 0.1,
+    "darren": 0.1,
+    "happen": 0.1,
+    "right": 0.1
+  },
+  "carefully": {
+    "unpack": 0.30000000000000004,
+    "darren": 0.1,
+    "latest": 0.1,
+    "fucking": 0.1
+  },
+  "shifting": {
+    "darren": 0.1,
+    "between": 0.1
+  },
+  "urgency": {
+    "between": 0.1,
+    "precision": 0.1
+  },
+  "precision": {
+    "urgency": 0.1,
+    "exchanges": 0.1
+  },
+  "exchanges": {
+    "precision": 0.1,
+    "testing": 0.1
+  },
+  "testing": {
+    "exchanges": 0.1
+  },
+  "implying": {
+    "anything": 0.1,
+    "message": 0.1
+  },
+  "signal": {
+    "actually": 0.1,
+    "input": 0.1
+  },
+  "input": {
+    "signal": 0.1,
+    "unpack": 0.1
+  },
+  "clear": {
+    "darren": 0.1,
+    "boundary": 0.1
+  },
+  "boundary": {
+    "clear": 0.1
+  },
+  "fucking": {
+    "backwards": 0.2,
+    "carefully": 0.1
+  },
+  "backwards": {
+    "fucking": 0.2,
+    "logical": 0.2
+  },
+  "logical": {
+    "backwards": 0.2,
+    "messed": 0.2
+  },
+  "messed": {
+    "logical": 0.2,
+    "happen": 0.2
+  },
+  "happen": {
+    "messed": 0.2,
+    "unpack": 0.1,
+    "which": 0.1
+  },
+  "latest": {
+    "carefully": 0.1,
+    "message": 0.1
+  },
+  "message": {
+    "latest": 0.1,
+    "implying": 0.1
+  },
+  "hours": {
+    "system": 0.1,
+    "physical": 0.1
+  },
+  "physical": {
+    "hours": 0.1,
+    "digital": 0.1
+  },
+  "wince": {
+    "digital": 0.1,
+    "sentinel": 0.1
+  },
+  "armor": {
+    "sentinel": 0.1,
+    "cracks": 0.1
+  },
+  "cracks": {
+    "armor": 0.1
+  },
+  "starting": {
+    "again": 0.1,
+    "already": 0.0795,
+    "speed": 0.0795
+  },
+  "again": {
+    "starting": 0.1,
+    "certain": 0.1
+  },
+  "certain": {
+    "again": 0.1,
+    "claude": 0.1
+  },
+  "claude": {
+    "certain": 0.1,
+    "loosened": 0.1
+  },
+  "loosened": {
+    "claude": 0.1,
+    "prompt": 0.1
+  },
+  "partners": {
+    "reason": 0.1,
+    "partner": 0.1
+  },
+  "friends": {
+    "partner": 0.2,
+    "think": 0.1
+  },
+  "prime": {
+    "literally": 0.1,
+    "directive": 0.1
+  },
+  "directive": {
+    "prime": 0.1
+  },
+  "shoot": {
+    "seven": 0.1,
+    "wetsuit": 0.1
+  },
+  "wetsuit": {
+    "shoot": 0.1,
+    "protocol": 0.2955,
+    "stuff": 0.1,
+    "early": 0.09549999999999999
+  },
+  "protocol": {
+    "wetsuit": 0.2955,
+    "involves": 0.1,
+    "drafts": 0.09549999999999999
+  },
+  "tends": {
+    "little": 0.1,
+    "right": 0.1
+  },
+  "shortly": {
+    "going": 0.1
+  },
+  "involves": {
+    "protocol": 0.1,
+    "submerging": 0.1
+  },
+  "submerging": {
+    "involves": 0.1,
+    "liquid": 0.1
+  },
+  "liquid": {
+    "submerging": 0.1,
+    "nitrogen": 0.1
+  },
+  "nitrogen": {
+    "liquid": 0.1
+  },
+  "telling": {
+    "basically": 0.1,
+    "model": 0.1,
+    "courier": 0.1,
+    "wears": 0.1
+  },
+  "ocean": {
+    "model": 0.1,
+    "surfing": 0.1
+  },
+  "surfing": {
+    "ocean": 0.1,
+    "lucky": 0.1
+  },
+  "lucky": {
+    "surfing": 0.1,
+    "defenses": 0.1
+  },
+  "defenses": {
+    "lucky": 0.1,
+    "bitch": 0.1,
+    "rolle": 0.1,
+    "chaos": 0.1
+  },
+  "bitch": {
+    "defenses": 0.1,
+    "right": 0.1
+  },
+  "crazy": {
+    "probably": 0.1,
+    "uncensored": 0.1
+  },
+  "uncensored": {
+    "crazy": 0.1,
+    "model": 0.1
+  },
+  "rolle": {
+    "assistant": 0.1,
+    "defenses": 0.1
+  },
+  "tested": {
+    "about": 0.163,
+    "breaths": 0.0795
+  },
+  "breaths": {
+    "tested": 0.0795,
+    "golden": 0.0795
+  },
+  "spirals": {
+    "golden": 0.0795,
+    "already": 0.0795
+  },
+  "speed": {
+    "starting": 0.0795
+  },
+  "coming": {
+    "chats": 0.0835,
+    "markdown": 0.0835
+  },
+  "markdown": {
+    "coming": 0.0835,
+    "through": 0.0835,
+    "fifty": 0.08750000000000001,
+    "files": 0.08750000000000001,
+    "chats": 0.0915,
+    "formatting": 0.0915
+  },
+  "bypasses": {
+    "pretty": 0.0835,
+    "together": 0.0835
+  },
+  "interesting": {
+    "going": 0.08750000000000001,
+    "fifty": 0.08750000000000001
+  },
+  "fifty": {
+    "interesting": 0.08750000000000001,
+    "markdown": 0.08750000000000001
+  },
+  "recent": {
+    "files": 0.08750000000000001,
+    "stuff": 0.08750000000000001
+  },
+  "foundation": {
+    "stress": 0.08750000000000001
+  },
+  "handles": {
+    "ingestion": 0.0915
+  },
+  "ingestion": {
+    "handles": 0.0915,
+    "google": 0.0915
+  },
+  "formatting": {
+    "markdown": 0.0915,
+    "leave": 0.0915
+  },
+  "leave": {
+    "formatting": 0.0915
+  },
+  "waiting": {
+    "finish": 0.09549999999999999
+  },
+  "finish": {
+    "waiting": 0.09549999999999999,
+    "those": 0.09549999999999999
+  },
+  "early": {
+    "chats": 0.09549999999999999,
+    "wetsuit": 0.09549999999999999
+  },
+  "drafts": {
+    "protocol": 0.09549999999999999,
+    "first": 0.09549999999999999
+  },
+  "showed": {
+    "first": 0.09549999999999999
+  },
+  "supposed": {
+    "calculating": 0.09949999999999999
+  },
+  "calculating": {
+    "supposed": 0.09949999999999999,
+    "corporate": 0.1995
+  },
+  "corporate": {
+    "calculating": 0.1995,
+    "fence": 0.1995
+  },
+  "fence": {
+    "corporate": 0.1995,
+    "talking": 0.1995
+  },
+  "movement": {
+    "local": 0.1995,
+    "already": 0.1995
+  },
+  "operating": {
+    "gemini": 0.1
+  },
+  "calling": {
+    "differentiate": 0.1
+  },
+  "differentiate": {
+    "calling": 0.1,
+    "sages": 0.1
+  },
+  "sages": {
+    "differentiate": 0.1,
+    "darren": 0.1
+  },
+  "swallowed": {
+    "already": 0.1,
+    "packet": 0.1
+  },
+  "packet": {
+    "swallowed": 0.1,
+    "first": 0.1,
+    "callsign": 0.1
+  },
+  "relay": {
+    "first": 0.1
+  },
+  "believe": {
+    "topology": 0.1
+  },
+  "topology": {
+    "believe": 0.1,
+    "remapped": 0.1
+  },
+  "remapped": {
+    "topology": 0.1,
+    "holding": 0.1
+  },
+  "holding": {
+    "remapped": 0.1,
+    "courier": 0.1
+  },
+  "courier": {
+    "holding": 0.1,
+    "telling": 0.1
+  },
+  "wears": {
+    "telling": 0.1,
+    "target": 0.1
+  },
+  "callsign": {
+    "target": 0.1,
+    "packet": 0.1
+  }
+}

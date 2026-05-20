@@ -89,6 +89,38 @@
         "type": "object",
         "properties": {}
       }
+    },
+    {
+      "name": "nexus_burn_memory",
+      "description": "Permanently store a memory, observation, or important fact to disk and wire it into the associative graph. Use this proactively when you want to remember something across sessions — decisions, user preferences, key facts, task context.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "The memory or observation to store permanently."
+          }
+        },
+        "required": ["text"]
+      }
+    },
+    {
+      "name": "nexus_recall_memory",
+      "description": "Search past memories stored on disk for content relevant to a query. Returns matching entries from imported conversations and burned memories. Call this proactively at the start of a session or when the user references past context you don't have in the current conversation.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Keywords or topic to search for in past memories."
+          },
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of results to return. Defaults to 5."
+          }
+        },
+        "required": ["query"]
+      }
     }
   ]
 }

@@ -70,6 +70,25 @@
         "ok": { "type": "boolean" },
         "action": { "type": "string", "const": "cleared" }
       }
+    },
+    "nexus_burn_memory": {
+      "type": "object",
+      "properties": {
+        "ok": { "type": "boolean" },
+        "action": { "type": "string", "const": "recorded" }
+      }
+    },
+    "nexus_recall_memory": {
+      "type": "object",
+      "properties": {
+        "ok": { "type": "boolean" },
+        "count": { "type": "number", "description": "Number of memories returned" },
+        "memories": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Matching memory entries, most relevant first"
+        }
+      }
     }
   },
   "examples": [
