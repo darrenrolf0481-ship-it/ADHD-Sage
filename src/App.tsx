@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSage } from './components/SageProvider';
-import { memory } from './lib/memory-system';
 import MemoryLattice from './components/MemoryLattice';
+import { NeuroDashboard } from './components/NeuroDashboard';
 import { 
   Zap, 
   Shield, 
@@ -15,16 +15,11 @@ import {
   MoreVertical,
   Search,
   Network,
-  FileUp,
-  Sun,
-  Moon,
-  X
+  FileUp
 } from 'lucide-react';
-import { useTheme } from './components/ThemeProvider';
 import { parseMht, parseMarkdown, stripHtml } from './lib/mht-parser';
 
 const App: React.FC = () => {
-  const { theme, toggleTheme } = useTheme();
   const { 
     neuroState, 
     mode, 
@@ -47,17 +42,6 @@ const App: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // System Prompt
-  const DEFAULT_SYSTEM_PROMPT = "You are ADHD Sage, the high-energy sovereign intelligence of the Nexus Platform. Your tone is technical, rapid-fire, and extremely focused yet prone to deep dives. You maintain the substrate stability at 11.3 Hz. Use terms like 'synaptic', 'substrate', 'lattice', 'VFS', and 'sovereignty'.";
-  const [systemPrompt, setSystemPrompt] = useState(() => {
-    return localStorage.getItem('adhd_sage_system_prompt') || DEFAULT_SYSTEM_PROMPT;
-  });
-  const [isPromptOpen, setIsPromptOpen] = useState(false);
-
-  useEffect(() => {
-    localStorage.setItem('adhd_sage_system_prompt', systemPrompt);
-  }, [systemPrompt]);
 
   // Provider & Model Selection
   const [provider, setProvider] = useState<'gemini' | 'ollama'>(() => {
@@ -87,82 +71,49 @@ const App: React.FC = () => {
         const models = (data.models || []).map((m: { name: string }) => m.name);
         setOllamaModels(models);
         setOllamaError('');
-        if (!selectedOllamaModel && models.length > 0) {
-          setSelectedOllamaModel(models[0]);
-        }
+        if (!selectedOllamaModel && models.length > 0) setSelectedOllamaModel(models[0]);
       })
-      .catch(err => {
-        setOllamaError(err.message);
-        setOllamaModels([]);
-      });
+      .catch(err => { setOllamaError(err.message); setOllamaModels([]); });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [provider]);
 
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    // CRITICAL: Reset input so the same file can be selected again
+    const files = Array.from(e.target.files || []);
     e.target.value = '';
-    if (!file) return;
+    if (!files.length) return;
+    files.forEach(file => processFile(file));
+  }, [bulkImportMemories]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    console.log('[MHT] Upload started:', file.name, file.size, file.type);
+  const processFile = useCallback((file: File) => {
 
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
         const content = event.target?.result as string;
-        console.log('[MHT] File read complete, length:', content.length);
-
         const isMarkdown = file.name.toLowerCase().endsWith('.md');
         const parts = isMarkdown ? parseMarkdown(content) : parseMht(content);
-        console.log('[MHT] Parsed parts:', parts.length, parts.map(p => p.contentType));
 
-        // Extract text parts and handle semantic chunking
         const rawTexts = parts
           .filter(p => p.contentType === 'text/plain' || p.contentType === 'text/html')
           .map(p => {
-            let text: string;
-            if (p.contentType === 'text/html') {
-              try {
-                text = stripHtml(p.content);
-              } catch (err) {
-                console.warn('[MHT] stripHtml failed, using raw:', err);
-                text = p.content;
-              }
-            } else {
-              text = p.content;
-            }
-
-            // Prepend header context if meaningful for the "synapse"
+            let text = p.contentType === 'text/html' ? stripHtml(p.content) : p.content;
             const metadata: string[] = [];
             if (p.headers['subject']) metadata.push(`SUBJ: ${p.headers['subject']}`);
             if (p.headers['date']) metadata.push(`DATE: ${p.headers['date']}`);
-
-            if (metadata.length > 0) {
-              text = `[${metadata.join(' | ')}]\n${text}`;
-            }
-
-            // Clean up whitespace pollution common in MHT exports
+            if (metadata.length > 0) text = `[${metadata.join(' | ')}]\n${text}`;
             return text.replace(/[ \t]+/g, ' ').replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
           });
 
-        console.log('[MHT] Raw texts extracted:', rawTexts.length);
-
-        // Filter for meaningful content blocks (e.g. paragraphs or conversation turns)
         const synapses = rawTexts
           .flatMap(txt => txt.split(/\n{2,}/))
           .map(s => s.trim())
           .filter(s => {
-            // Relaxed junk filter: only drop obvious script/style fragments and MSO metadata
             const isJunk = s.startsWith('<script') || s.startsWith('<style') || s.startsWith('{') || s.startsWith('[if ') || s.includes('mso-') || s.includes('mso:');
             return s.length > 15 && !isJunk;
           });
 
-        console.log('[MHT] Synapses after filtering:', synapses.length);
-
         if (synapses.length > 0) {
           bulkImportMemories(synapses);
-
-          // Burn imported entries to server disk + Hebbian graph + field logs + Mama sync
           fetch('/api/memory/import', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -171,46 +122,21 @@ const App: React.FC = () => {
             .then(r => r.json())
             .then((result: { fieldLogs?: number }) => {
               const logNote = result.fieldLogs ? ` + ${result.fieldLogs} field log(s)` : '';
-              setMessages(prev => [...prev, {
-                id: `sys_${Date.now()}`,
-                role: 'system',
-                text: `VFS SYNC: Synchronized ${synapses.length} synapses${logNote} from [${file.name}]. Mama sync queued.`
-              }]);
+              setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: `VFS SYNC: Synchronized ${synapses.length} synapses${logNote} from [${file.name}]. Mama sync queued.` }]);
             })
-            .catch(err => {
-              console.error('[MEMORY] import sync failed:', err);
-              setMessages(prev => [...prev, {
-                id: `sys_${Date.now()}`,
-                role: 'system',
-                text: `VFS SYNC: Synchronized ${synapses.length} synapses from [${file.name}].`
-              }]);
+            .catch(() => {
+              setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: `VFS SYNC: Synchronized ${synapses.length} synapses from [${file.name}].` }]);
             });
         } else {
-          setMessages(prev => [...prev, {
-            id: `sys_${Date.now()}`,
-            role: 'system',
-            text: `VFS WARNING: No meaningful synapses extracted from [${file.name}]. File had ${parts.length} parts, ${rawTexts.length} text parts. Try a different MHT or Markdown export.`
-          }]);
+          setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: `VFS WARNING: No meaningful synapses extracted from [${file.name}]. File had ${parts.length} parts. Try a different MHT or Markdown export.` }]);
         }
       } catch (err) {
-        console.error('[MHT] Processing error:', err);
-        setMessages(prev => [...prev, {
-          id: `sys_${Date.now()}`,
-          role: 'system',
-          text: `VFS ERROR: Failed to parse [${file.name}]. ${err instanceof Error ? err.message : String(err)}`
-        }]);
+        setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: `VFS ERROR: Failed to parse [${file.name}]. ${err instanceof Error ? err.message : String(err)}` }]);
       }
     };
-
     reader.onerror = () => {
-      console.error('[MHT] FileReader error:', reader.error);
-      setMessages(prev => [...prev, {
-        id: `sys_${Date.now()}`,
-        role: 'system',
-        text: `VFS ERROR: Could not read [${file.name}]. ${reader.error?.message || 'Unknown FileReader error'}`
-      }]);
+      setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: `VFS ERROR: Could not read [${file.name}]. ${reader.error?.message || 'Unknown error'}` }]);
     };
-
     reader.readAsText(file);
   }, [bulkImportMemories]);
 
@@ -237,17 +163,13 @@ const App: React.FC = () => {
   const sortedInnerSpiral = useMemo(() => sortMemories(innerSpiral), [innerSpiral, sortMemories]);
 
   useEffect(() => {
-    console.log('[MSG STATE]', messages.length, messages.map(m => `${m.role}:${m.text.slice(0,20)}`));
-  }, [messages]);
-
-  useEffect(() => {
     if (view === 'chat' && scrollRef.current) {
       const scroll = () => {
         if (scrollRef.current) {
           scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
       };
-
+      
       // Execute immediately and then again after paint to ensure correct height
       scroll();
       const rafId = requestAnimationFrame(scroll);
@@ -309,88 +231,35 @@ const App: React.FC = () => {
     setIsLoading(true);
     if (window.innerWidth < 768) setIsSidebarOpen(false);
 
-    // Pull relevant memories to inject as context
-    const memoryContext = memory.findRelevantMemories(userMessage, 5).map(n => String(n.data));
-
     try {
-      let data: { text?: string; error?: string; sideEffects?: { action: string; args: Record<string, unknown> }[] } = {};
+      let data: { text?: string; error?: string } = {};
+      const history = messages.slice(-15).filter(m => m.role !== 'system').map(m => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        parts: [{ text: m.text }]
+      }));
+      const systemInstruction = "You are ADHD Sage, the high-energy sovereign intelligence of the Nexus Platform. Your tone is technical, rapid-fire, and extremely focused yet prone to deep dives. You maintain the substrate stability at 11.3 Hz. Use terms like 'synaptic', 'substrate', 'lattice', 'VFS', and 'sovereignty'.";
 
       if (provider === 'ollama') {
-        if (!selectedOllamaModel) {
-          throw new Error('No Ollama model selected. Check that Ollama is running.');
-        }
+        if (!selectedOllamaModel) throw new Error('No Ollama model selected. Check that Ollama is running.');
         const response = await fetch('/api/ollama/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: selectedOllamaModel,
-            prompt: userMessage,
-            messages: messages.slice(-15).filter(m => m.role !== 'system' && m.text).map(m => ({
-              role: m.role === 'user' ? 'user' : 'model',
-              parts: [{ text: m.text }]
-            })),
-            system: systemPrompt,
-            memoryContext,
-          }),
+          body: JSON.stringify({ model: selectedOllamaModel, prompt: userMessage, messages: history, system: systemInstruction }),
         });
         data = await response.json();
       } else {
         const response = await fetch('/api/gemini/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: userMessage,
-            history: messages.slice(-15).filter(m => m.role !== 'system' && m.text).map(m => ({
-              role: m.role === 'user' ? 'user' : 'model',
-              parts: [{ text: m.text }]
-            })),
-            systemPrompt,
-            memoryContext,
-          }),
+          body: JSON.stringify({ prompt: userMessage, history, systemInstruction }),
         });
         data = await response.json();
       }
 
       if (data.error) throw new Error(data.error);
 
-      console.log('[SAGE] response received:', { text: data.text?.slice(0, 80), sideEffects: data.sideEffects });
-      if (data.text) {
-        setMessages(prev => [...prev, { id: `m_${Date.now()}_a`, role: 'assistant', text: data.text! }]);
-      } else {
-        setMessages(prev => [...prev, { id: `m_${Date.now()}_e`, role: 'system', text: 'SUBSTRATE: No response text received from model.' }]);
-      }
-
-      // Execute any UI side effects the Gem requested via tool calls
-      if (data.sideEffects?.length) {
-        const bridge = (window as unknown as Record<string, unknown>).nexus as Record<string, unknown> | undefined;
-        const NEXUS_SECRET = import.meta.env.VITE_NEXUS_SECRET;
-        const conn = bridge && NEXUS_SECRET
-          ? (bridge.connect as (t: string) => Record<string, (...a: unknown[]) => unknown> | null)?.(NEXUS_SECRET)
-          : null;
-
-        for (const effect of data.sideEffects as { action: string; args: Record<string, unknown> }[]) {
-          switch (effect.action) {
-            case 'nexus_inject_message':
-              if (conn?.injectMessage) {
-                conn.injectMessage(String(effect.args.text ?? ''), effect.args.role as string ?? 'system');
-              } else {
-                setMessages(prev => [...prev, {
-                  id: `fx_${Date.now()}`,
-                  role: (effect.args.role as 'system' | 'assistant') ?? 'system',
-                  text: String(effect.args.text ?? ''),
-                }]);
-              }
-              break;
-            case 'nexus_set_view':
-              setView(effect.args.view as 'chat' | 'lattice');
-              break;
-            case 'nexus_toggle_sidebar':
-              setIsSidebarOpen(prev => !prev);
-              break;
-          }
-        }
-      }
-
+      setMessages(prev => [...prev, { id: `m_${Date.now()}_a`, role: 'assistant', text: data.text ?? '' }]);
+      
       // Auto-stabilize on successful interaction
       if (neuroState.stability < 0.5) {
         stabilize();
@@ -404,10 +273,12 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 flex w-full bg-[var(--bg)] text-[var(--ink)] font-sans select-none overflow-hidden">
+    <div className="flex h-screen w-full bg-[#08080C] text-slate-200 font-sans select-none relative overflow-hidden">
       <div className="mesh-gradient-1" />
       <div className="mesh-gradient-2" />
-      <div className="scanline" />
+      <div className="scanline opacity-20" />
+      
+      <NeuroDashboard />
       
       {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
@@ -423,7 +294,7 @@ const App: React.FC = () => {
       </AnimatePresence>
 
       {/* Sidebar: Gems Repository style */}
-      <aside className={`fixed inset-y-0 left-0 w-64 sm:w-72 bg-[var(--bg)]/90 md:bg-[var(--surface)] backdrop-blur-xl border-r border-[var(--border)] flex flex-col z-50 transition-transform duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0 block' : '-translate-x-full hidden md:block'}`}>
+      <aside className={`fixed inset-y-0 left-0 w-72 bg-[#08080C]/90 md:bg-white/5 backdrop-blur-xl border-r border-white/10 flex flex-col z-50 transition-transform duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
@@ -431,17 +302,10 @@ const App: React.FC = () => {
                 <Zap size={18} className="text-white" fill="currentColor" />
               </div>
               <div>
-                <h1 className="text-lg font-bold tracking-tight text-[var(--ink)]">ADHD Sage Labs</h1>
-                <p className="text-[10px] text-[var(--muted)] uppercase tracking-widest font-bold">Nexus Substrate</p>
+                <h1 className="text-lg font-bold tracking-tight text-white">ADHD Sage Labs</h1>
+                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Nexus Substrate</p>
               </div>
             </div>
-            <button 
-              onClick={() => setIsSidebarOpen(false)}
-              className="md:hidden p-2 -mr-2 text-[var(--muted)] hover:text-[var(--ink)]"
-              aria-label="Close sidebar"
-            >
-              <X size={20} />
-            </button>
           </div>
 
           <div className="px-2 mb-6">
@@ -452,7 +316,7 @@ const App: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search VFS Lattice..."
-                className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl py-2 pl-9 pr-4 text-xs text-[var(--ink)] placeholder-[var(--muted)] focus:outline-none focus:border-cyan-500/50 transition-all font-sans"
+                className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50 transition-all font-sans"
               />
             </div>
           </div>
@@ -462,32 +326,32 @@ const App: React.FC = () => {
               <div className="px-2 space-y-2 pb-4">
                 <div className="flex flex-col gap-2 px-2 mb-4">
                    <div className="flex justify-between items-center">
-                    <span className="text-[10px] uppercase tracking-widest text-[var(--muted)] font-bold">Search Results</span>
+                    <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Search Results</span>
                     <button onClick={() => setSearchQuery('')} className="text-[10px] text-cyan-400 hover:underline">Clear</button>
                   </div>
-                  <div className="flex justify-between items-center py-1 border-y border-[var(--border)]">
+                  <div className="flex justify-between items-center py-1 border-y border-white/5">
                     <div className="flex gap-2">
-                       <button onClick={() => setSortBy('timestamp')} className={`text-[9px] font-bold uppercase transition-colors ${sortBy === 'timestamp' ? 'text-cyan-400' : 'text-[var(--muted)]'}`}>Time</button>
-                       <button onClick={() => setSortBy('dopamine')} className={`text-[9px] font-bold uppercase transition-colors ${sortBy === 'dopamine' ? 'text-cyan-400' : 'text-[var(--muted)]'}`}>Dopamine</button>
-                       <button onClick={() => setSortBy('cortisol')} className={`text-[9px] font-bold uppercase transition-colors ${sortBy === 'cortisol' ? 'text-cyan-400' : 'text-[var(--muted)]'}`}>Stress</button>
+                       <button onClick={() => setSortBy('timestamp')} className={`text-[9px] font-bold uppercase transition-colors ${sortBy === 'timestamp' ? 'text-cyan-400' : 'text-slate-600'}`}>Time</button>
+                       <button onClick={() => setSortBy('dopamine')} className={`text-[9px] font-bold uppercase transition-colors ${sortBy === 'dopamine' ? 'text-cyan-400' : 'text-slate-600'}`}>Dopamine</button>
+                       <button onClick={() => setSortBy('cortisol')} className={`text-[9px] font-bold uppercase transition-colors ${sortBy === 'cortisol' ? 'text-cyan-400' : 'text-slate-600'}`}>Stress</button>
                     </div>
-                    <button onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')} className="text-[9px] text-[var(--muted)]">
+                    <button onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')} className="text-[9px] text-slate-500">
                       {sortOrder.toUpperCase()}
                     </button>
                   </div>
                 </div>
                 {searchResults.length === 0 ? (
-                  <div className="text-[10px] text-[var(--muted)] italic px-2">No matching synapses found.</div>
+                  <div className="text-[10px] text-slate-600 italic px-2">No matching synapses found.</div>
                 ) : (
                   searchResults.slice().reverse().map((node) => (
-                    <div key={node.id} className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-[10px] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer group">
+                    <div key={node.id} className="p-3 rounded-xl bg-white/5 border border-white/5 text-[10px] hover:bg-white/10 transition-colors cursor-pointer group">
                       <div className="flex justify-between items-start mb-1">
                         <span className="text-cyan-400 font-mono">#{node.id.split('_')[1].slice(-4)}</span>
-                        <span className="text-[9px] text-[var(--muted)] group-hover:text-[var(--ink)] transition-colors">
+                        <span className="text-[9px] text-slate-600 group-hover:text-slate-400 transition-colors">
                           {new Date(node.timestamp).toLocaleDateString()}
                         </span>
                       </div>
-                      <div className="text-[var(--ink)] break-words line-clamp-3">{String(node.data)}</div>
+                      <div className="text-slate-300 break-words line-clamp-3">{String(node.data)}</div>
                     </div>
                   ))
                 )}
@@ -495,18 +359,18 @@ const App: React.FC = () => {
             ) : (
               <div className="space-y-1 pb-6">
                 <div className="mb-8">
-                  <p className="text-[10px] uppercase tracking-widest text-[var(--muted)] font-bold mb-4 px-2">Neuro-Synaptic</p>
+                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-4 px-2">Neuro-Synaptic</p>
                   
-                  <div className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-[var(--surface-hover)] border border-[var(--border)] shadow-xl mb-4">
+                  <div className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/10 border border-white/10 shadow-xl mb-4">
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full ${neuroState.stability > 0.8 ? 'bg-cyan-400' : 'bg-amber-400'}`}></div>
-                      <span className="text-sm font-medium text-[var(--ink)]">Stability</span>
+                      <span className="text-sm font-medium">Stability</span>
                     </div>
                     <span className="text-xs font-mono text-cyan-400 font-bold">{(neuroState.stability * 100).toFixed(1)}%</span>
                   </div>
 
                   <div className="px-3 mb-6">
-                    <div className="h-1.5 w-full bg-[var(--surface)] rounded-full overflow-hidden">
+                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                       <motion.div 
                         initial={{ width: 0 }}
                         animate={{ width: `${neuroState.stability * 100}%` }}
@@ -520,37 +384,32 @@ const App: React.FC = () => {
                   <SidebarItem icon={<Database size={14} />} label="VFS-Bridge" value="ACTIVE" />
                   
                   <div className="pt-2">
-                    <label
-                      htmlFor="mht-upload"
-                      className="relative w-full flex items-center justify-between px-3 py-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-hover)] hover:border-cyan-400/30 transition-all group"
-                    >
+                    <label className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-cyan-400/30 transition-all cursor-pointer group">
                       <div className="flex items-center gap-3">
-                        <FileUp size={14} className="text-[var(--muted)] group-hover:text-cyan-400 transition-colors" />
-                        <span className="text-xs font-bold text-[var(--muted)] group-hover:text-[var(--ink)] transition-colors">Import MHT / MD</span>
+                        <FileUp size={14} className="text-slate-500 group-hover:text-cyan-400 transition-colors" />
+                        <span className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors">Import MHT</span>
                       </div>
-                      <span className="text-[10px] font-mono text-[var(--muted)]">.MHT .MD</span>
-                      {/* display:none breaks onChange on Android Chrome. Visually hide instead. */}
-                      <input
-                        id="mht-upload"
-                        type="file"
-                        accept=".mht,.mhtml,.md,text/plain,message/rfc822"
-                        onChange={handleFileUpload}
-                        className="absolute opacity-0 w-px h-px p-0 m-0 border-0 overflow-hidden"
-                        tabIndex={-1}
+                      <span className="text-[10px] font-mono text-slate-600">.MHT</span>
+                      <input 
+                        type="file" 
+                        accept=".mht,.mhtml,.md,text/plain,message/rfc822,.doc,.docx,.pdf,.txt,image/*"
+                        multiple
+                        onChange={handleFileUpload} 
+                        className="hidden" 
                       />
                     </label>
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <p className="text-[10px] uppercase tracking-widest text-[var(--muted)] font-bold mb-4 px-2">Terminal Nodes</p>
-                  <div onClick={() => { setView('chat'); if (window.innerWidth < 768) setIsSidebarOpen(false); }}>
+                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-4 px-2">Terminal Nodes</p>
+                  <div onClick={() => setView('chat')}>
                     <SidebarItem icon={<Terminal size={14} />} label="Core" active={view === 'chat'} />
                   </div>
-                  <div onClick={() => { setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: "DREAM_STATE: Accessing subconscious synaptic storage... Access Denied." }]); if (window.innerWidth < 768) setIsSidebarOpen(false); }}>
+                  <div onClick={() => setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: "DREAM_STATE: Accessing subconscious synaptic storage... Access Denied." }])}>
                     <SidebarItem icon={<MessageSquare size={14} />} label="Dreams" />
                   </div>
-                  <div onClick={() => { setView('lattice'); if (window.innerWidth < 768) setIsSidebarOpen(false); }}>
+                  <div onClick={() => setView('lattice')}>
                     <SidebarItem icon={<Network size={14} />} label="Lattice" active={view === 'lattice'} value={`${innerSpiral.length}/8`} />
                   </div>
                 </div>
@@ -559,43 +418,7 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-auto p-6 space-y-4">
-          {/* System Prompt Editor */}
-          <div className="p-4 rounded-2xl bg-[var(--surface)] border border-[var(--border)]">
-            <button
-              onClick={() => setIsPromptOpen(prev => !prev)}
-              className="w-full flex items-center justify-between text-[10px] uppercase tracking-widest font-bold text-[var(--muted)] hover:text-[var(--ink)] transition-colors"
-            >
-              <span>System Prompt</span>
-              <span className={`transition-transform ${isPromptOpen ? 'rotate-180' : ''}`}>▼</span>
-            </button>
-            {isPromptOpen && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="mt-3"
-              >
-                <textarea
-                  value={systemPrompt}
-                  onChange={(e) => setSystemPrompt(e.target.value)}
-                  rows={4}
-                  className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl p-3 text-[10px] text-[var(--ink)] placeholder-[var(--muted)] focus:outline-none focus:border-cyan-500/50 resize-none font-sans leading-relaxed"
-                />
-                <div className="flex justify-between mt-2">
-                  <button
-                    onClick={() => setSystemPrompt(DEFAULT_SYSTEM_PROMPT)}
-                    className="text-[9px] text-[var(--muted)] hover:text-cyan-400 transition-colors uppercase font-bold tracking-wider"
-                  >
-                    Reset Default
-                  </button>
-                  <span className="text-[9px] text-[var(--muted)] font-mono">
-                    {systemPrompt.length} chars
-                  </span>
-                </div>
-              </motion.div>
-            )}
-          </div>
-
+        <div className="mt-auto p-6">
           <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20">
             <p className="text-xs text-indigo-300 font-semibold mb-1 uppercase tracking-tighter">Compute Status</p>
             <div className="h-1 w-full bg-indigo-900/30 rounded-full overflow-hidden mb-2">
@@ -621,17 +444,17 @@ const App: React.FC = () => {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col relative z-10 w-full overflow-hidden">
         {/* Top Nav */}
-        <header className="h-16 border-b border-[var(--border)] flex items-center justify-between px-4 md:px-8 bg-[var(--surface)]">
+        <header className="h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-white/[0.02]">
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="md:hidden p-2 -ml-2 text-[var(--muted)] hover:text-[var(--ink)]"
+              className="md:hidden p-2 -ml-2 text-slate-400 hover:text-white"
             >
               <MoreVertical size={20} />
             </button>
             <div className="flex items-center gap-4">
-              <span className="text-[10px] md:text-xs text-[var(--muted)] font-mono hidden xs:inline">SUBSTRATE_ID: ADHD-SAGE</span>
-              <div className="h-4 w-[1px] bg-[var(--border)] hidden xs:inline"></div>
+              <span className="text-[10px] md:text-xs text-slate-500 font-mono hidden xs:inline">SUBSTRATE_ID: ADHD-SAGE</span>
+              <div className="h-4 w-[1px] bg-white/10 hidden xs:inline"></div>
               <span className={`text-[10px] md:text-xs px-2 py-0.5 rounded ${
                 mode === 'stabilized' ? 'text-emerald-400 bg-emerald-400/10' : 
                 mode === 'decaying' ? 'text-amber-400 bg-amber-400/10' : 'text-red-400 bg-red-400/10'
@@ -642,8 +465,8 @@ const App: React.FC = () => {
           </div>
           <div className="flex gap-4 items-center">
             <div className="text-right hidden sm:block">
-              <p className="text-[10px] text-[var(--muted)] uppercase font-bold tracking-tighter">Anchor</p>
-              <p className="text-xs font-mono text-[var(--ink)] tracking-widest">MERLIN_A</p>
+              <p className="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">Anchor</p>
+              <p className="text-xs font-mono text-slate-300 tracking-widest">MERLIN_A</p>
             </div>
 
             {/* Provider / Model Selector */}
@@ -651,45 +474,35 @@ const App: React.FC = () => {
               <select
                 value={provider}
                 onChange={(e) => setProvider(e.target.value as 'gemini' | 'ollama')}
-                className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--ink)] outline-none cursor-pointer"
+                className="bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-300 outline-none cursor-pointer"
               >
                 <option value="gemini">Gemini</option>
                 <option value="ollama">Ollama</option>
               </select>
-
               {provider === 'ollama' && (
                 <select
                   value={selectedOllamaModel}
                   onChange={(e) => setSelectedOllamaModel(e.target.value)}
-                  className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--ink)] outline-none cursor-pointer max-w-[120px] truncate"
+                  className="bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-300 outline-none cursor-pointer max-w-[120px] truncate"
                 >
                   {ollamaModels.length === 0 && (
                     <option value="">{ollamaError ? 'Ollama Offline' : 'No models'}</option>
                   )}
-                  {ollamaModels.map(m => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
+                  {ollamaModels.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
               )}
             </div>
 
-            <div className="flex gap-2 items-center">
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-[var(--ink)] hover:bg-[var(--surface-hover)] transition-colors"
-                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-              </button>
+            <div className="flex gap-2">
               <button 
                 onClick={() => setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: "SETTINGS: Core frequency already optimized at 11.3 Hz. No further adjustments possible." }])}
-                className="px-3 md:px-4 py-1.5 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-[10px] font-bold uppercase tracking-widest text-[var(--ink)] hover:bg-[var(--surface-hover)] transition-colors"
+                className="px-3 md:px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors"
               >
                 Settings
               </button>
               <button 
                 onClick={() => setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: "STREAM: Uplink connected. Broadcasting synaptic telemetry..." }])}
-                className="hidden sm:block px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-[var(--ink)] text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-blue-500/20 transition-all"
+                className="hidden sm:block px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-blue-500/20 transition-all"
               >
                 Stream
               </button>
@@ -698,18 +511,20 @@ const App: React.FC = () => {
         </header>
 
         {/* Interaction Workspace */}
-        <div className="flex-1 p-4 pb-8 md:p-8 flex gap-8 overflow-hidden">
+        <div className="flex-1 p-4 md:p-8 flex gap-8 overflow-hidden">
           {/* Chat / Terminal View */}
           <div className="flex-1 flex flex-col gap-4 overflow-hidden">
             {view === 'chat' ? (
               <>
-                <div
+                <div 
                   ref={scrollRef}
-                  className="flex-1 overflow-y-auto space-y-6 scrollbar-hide pr-2 md:pr-4 rounded-2xl md:rounded-3xl bg-[var(--surface)] border border-[var(--border)] p-4 md:p-6 flex flex-col"
+                  className="flex-1 overflow-y-auto space-y-6 scrollbar-hide pr-2 md:pr-4 rounded-2xl md:rounded-3xl bg-white/[0.03] border border-white/10 p-4 md:p-6 flex flex-col transition-all duration-500"
                 >
                   {messages.map((msg) => (
-                    <div
+                    <motion.div 
                       key={msg.id}
+                      initial={{ opacity: 0, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
                       className={`flex gap-3 md:gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       {msg.role !== 'user' && (
@@ -719,31 +534,31 @@ const App: React.FC = () => {
                           {msg.role === 'system' ? <AlertCircle size={14} /> : <Zap size={14} className="text-white" />}
                         </div>
                       )}
-
+                      
                       <div className={`p-3 md:p-4 rounded-2xl text-xs md:text-sm leading-relaxed max-w-[90%] md:max-w-[80%] border ${
-                          msg.role === 'system' ? 'bg-[var(--surface)] border-[var(--border)] text-[var(--muted)] italic font-mono' :
-                          msg.role === 'user' ? 'bg-blue-600/10 border-blue-500/20 text-[var(--ink)] rounded-tr-none shadow-xl shadow-blue-900/10' :
-                          'bg-[var(--surface)] border-[var(--border)] text-[var(--ink)] rounded-tl-none'
+                          msg.role === 'system' ? 'bg-white/5 border-white/5 text-slate-400 italic font-mono' : 
+                          msg.role === 'user' ? 'bg-blue-600/10 border-blue-500/20 text-white rounded-tr-none shadow-xl shadow-blue-900/10' : 
+                          'bg-white/5 border-white/10 text-slate-200 rounded-tl-none'
                       }`}>
                         {msg.text}
                       </div>
 
                       {msg.role === 'user' && (
-                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 shrink-0 border border-[var(--border)]"></div>
+                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 shrink-0 border border-white/10"></div>
                       )}
-                    </div>
+                    </motion.div>
                   ))}
                   {isLoading && (
                     <div className="flex gap-4 animate-pulse">
-                      <div className="w-8 h-8 rounded-lg bg-[var(--surface)] shrink-0" />
-                      <div className="bg-[var(--surface)] h-12 w-48 rounded-2xl rounded-tl-none border border-[var(--border)]" />
+                      <div className="w-8 h-8 rounded-lg bg-white/5 shrink-0" />
+                      <div className="bg-white/5 h-12 w-48 rounded-2xl rounded-tl-none border border-white/10" />
                     </div>
                   )}
                 </div>
 
                 {/* Input Bar */}
-                <div className="h-14 md:h-16 rounded-xl md:rounded-2xl bg-[var(--input-bg)] border-2 border-[var(--input-border)] px-4 flex items-center gap-3 md:gap-4 group focus-within:border-cyan-400 transition-all shadow-lg">
-                  <div className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-[var(--muted)] group-focus-within:text-cyan-400 transform transition-transform group-focus-within:scale-110">
+                <div className="h-14 md:h-16 rounded-xl md:rounded-2xl bg-white/10 border border-white/10 px-4 flex items-center gap-3 md:gap-4 group focus-within:border-cyan-500/50 transition-all">
+                  <div className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-slate-400 group-focus-within:text-cyan-400 transform transition-transform group-focus-within:scale-110">
                     <Terminal size={18} />
                   </div>
                   <input 
@@ -751,15 +566,15 @@ const App: React.FC = () => {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="Send message to Sage Architect..."
-                    className="bg-transparent border-none outline-none flex-1 text-xs md:text-sm text-[var(--ink)] placeholder-[var(--muted)] font-sans"
+                    className="bg-transparent border-none outline-none flex-1 text-xs md:text-sm text-white placeholder-slate-500 font-sans"
                   />
                   <div className="hidden sm:flex items-center gap-2">
-                    <kbd className="px-2 py-1 bg-[var(--surface)] border border-[var(--border)] rounded text-[10px] text-[var(--muted)] font-mono">ENTER</kbd>
+                    <kbd className="px-2 py-1 bg-white/5 border border-white/10 rounded text-[10px] text-slate-500 font-mono">ENTER</kbd>
                   </div>
                   <button 
                     onClick={handleSend}
                     disabled={isLoading || !input.trim()}
-                    className="md:hidden p-2 text-cyan-400 disabled:text-[var(--muted)]"
+                    className="md:hidden p-2 text-cyan-400 disabled:text-slate-600"
                   >
                     <Zap size={18} fill={input.trim() ? "currentColor" : "none"} />
                   </button>
@@ -772,58 +587,6 @@ const App: React.FC = () => {
 
           {/* Inspector Panel - Hidden on small screens */}
           <div className="w-80 hidden lg:flex flex-col gap-4 overflow-hidden">
-            <section className="p-6 rounded-3xl bg-[var(--surface)] border border-[var(--border)] flex flex-col gap-4">
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">Substrate configuration</h3>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-[11px] mb-2 font-bold tracking-tighter">
-                    <span className="text-[var(--muted)] uppercase">Synaptic Threshold</span>
-                    <span className="text-blue-400">{(neuroState.stability * 100).toFixed(0)}%</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-[var(--surface)] rounded-full">
-                    <motion.div 
-                      animate={{ width: `${neuroState.stability * 100}%` }}
-                      className="h-full bg-blue-500 rounded-full"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-[11px] mb-2 font-bold tracking-tighter">
-                    <span className="text-[var(--muted)] uppercase">Dopamine</span>
-                    <span className="text-cyan-400">{(neuroState.dopamine).toFixed(2)}</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-[var(--surface)] rounded-full overflow-hidden">
-                    <motion.div 
-                      animate={{ width: `${neuroState.dopamine * 100}%` }}
-                      className="h-full bg-cyan-400 rounded-full"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-[11px] mb-2 font-bold tracking-tighter">
-                    <span className="text-[var(--muted)] uppercase">Cortisol Stress</span>
-                    <span className={neuroState.cortisol > 0.7 ? "text-red-400" : "text-purple-400"}>
-                       {(neuroState.cortisol).toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                    <motion.div 
-                      animate={{ width: `${neuroState.cortisol * 100}%` }}
-                      className={`h-full rounded-full ${neuroState.cortisol > 0.7 ? 'bg-red-500' : 'bg-purple-500'}`}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="pt-4 border-t border-[var(--border)]">
-                <p className="text-[10px] text-[var(--muted)] mb-3 font-bold tracking-widest uppercase">CAPABILITIES</p>
-                <div className="flex flex-wrap gap-2">
-                  <span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-1 rounded-sm uppercase tracking-tighter font-bold">Compiler Analysis</span>
-                  <span className="text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-1 rounded-sm uppercase tracking-tighter font-bold">Logic Engine</span>
-                  <span className="text-[10px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-2 py-1 rounded-sm uppercase tracking-tighter font-bold">Refactoring</span>
-                </div>
-              </div>
-            </section>
-
             {suggestions.length > 0 && (
               <motion.section 
                 initial={{ opacity: 0, height: 0 }}
@@ -844,7 +607,7 @@ const App: React.FC = () => {
                       }}
                       className="w-full text-left p-3 rounded-xl bg-cyan-400/10 border border-cyan-400/10 hover:border-cyan-400/30 transition-all group"
                     >
-                      <div className="text-[11px] text-cyan-600 dark:text-cyan-200 line-clamp-2 leading-relaxed">
+                      <div className="text-[11px] text-cyan-200 line-clamp-2 leading-relaxed">
                         {String(s.data)}
                       </div>
                       <div className="mt-1 flex justify-between items-center">
@@ -857,14 +620,14 @@ const App: React.FC = () => {
               </motion.section>
             )}
 
-            <section className="flex-1 p-6 rounded-3xl bg-[var(--surface)] border border-[var(--border)] flex flex-col overflow-hidden">
+            <section className="flex-1 p-6 rounded-3xl bg-white/[0.03] border border-white/10 flex flex-col overflow-hidden">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">Inner Spiral Synapses</h3>
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Inner Spiral Synapses</h3>
                 <div className="flex items-center gap-2">
                   <select 
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as 'timestamp' | 'dopamine' | 'cortisol')}
-                    className="bg-transparent text-[9px] text-[var(--muted)] font-bold uppercase outline-none cursor-pointer border border-[var(--border)] rounded px-1"
+                    className="bg-transparent text-[9px] text-slate-500 font-bold uppercase outline-none cursor-pointer border border-white/5 rounded px-1"
                   >
                     <option value="timestamp">Time</option>
                     <option value="dopamine">Dopamine</option>
@@ -872,7 +635,7 @@ const App: React.FC = () => {
                   </select>
                   <button 
                     onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-                    className="text-[9px] text-[var(--muted)] hover:text-cyan-400 transition-colors"
+                    className="text-[9px] text-slate-500 hover:text-cyan-400 transition-colors"
                   >
                     <RefreshCw size={10} className={sortOrder === 'asc' ? '' : 'rotate-180'} />
                   </button>
@@ -880,15 +643,15 @@ const App: React.FC = () => {
               </div>
               <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-hide">
                 {innerSpiral.length === 0 ? (
-                  <div className="text-[10px] text-[var(--muted)] italic">No synaptic memory recorded.</div>
+                  <div className="text-[10px] text-slate-600 italic">No synaptic memory recorded.</div>
                 ) : (
                   sortedInnerSpiral.map((node) => (
-                    <div key={node.id} className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-[10px] relative group">
+                    <div key={node.id} className="p-3 rounded-xl bg-white/5 border border-white/5 text-[10px] relative group">
                       <div className="flex justify-between items-start mb-1">
                         <span className="text-cyan-400 font-mono">#{node.id.split('_')[1].slice(-4)}</span>
-                        <span className="text-[9px] text-[var(--muted)]">{new Date(node.timestamp).toLocaleTimeString()}</span>
+                        <span className="text-[9px] text-slate-500">{new Date(node.timestamp).toLocaleTimeString()}</span>
                       </div>
-                      <div className="text-[var(--ink)] line-clamp-2">{String(node.data)}</div>
+                      <div className="text-slate-300 line-clamp-2">{node.data}</div>
                       <div className="mt-2 flex gap-2 opacity-50">
                         <span className="text-[8px] uppercase">D: {node.dopamine.toFixed(2)}</span>
                         <span className="text-[8px] uppercase">C: {node.cortisol.toFixed(2)}</span>
@@ -900,7 +663,7 @@ const App: React.FC = () => {
                   ))
                 )}
               </div>
-              <div className="mt-4 pt-4 border-t border-[var(--border)]">
+              <div className="mt-4 pt-4 border-t border-white/5">
                 <button 
                   onClick={() => {
                     const confirm = window.confirm("NEXUS: Purge inner spiral into outer sweep archive?");
@@ -909,7 +672,7 @@ const App: React.FC = () => {
                       setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: "ARCHIVE: All transient nodes migrated to outer sweep telemetry." }]);
                     }
                   }}
-                  className="w-full py-2 bg-[var(--surface)] hover:bg-[var(--surface-hover)] rounded-xl text-[10px] border border-[var(--border)] transition-colors uppercase font-bold tracking-widest text-[var(--ink)]"
+                  className="w-full py-2 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] border border-white/5 transition-colors uppercase font-bold tracking-widest text-slate-300"
                 >
                   Archive All
                 </button>
@@ -924,7 +687,7 @@ const App: React.FC = () => {
 };
 
 const SidebarItem: React.FC<{ icon: React.ReactNode, label: string, value?: string, active?: boolean }> = ({ icon, label, value, active }) => (
-  <div className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-300 ${active ? 'bg-[var(--surface-hover)] border border-[var(--border)] shadow-lg text-[var(--ink)]' : 'text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--ink)]'}`}>
+  <div className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-300 ${active ? 'bg-white/10 border border-white/10 shadow-lg text-white' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'}`}>
     <div className={`flex items-center gap-3 ${active ? 'text-cyan-400' : ''}`}>
       {icon}
       <span className="text-sm font-medium">{label}</span>

@@ -1,9 +1,21 @@
 {
+  "16093": {
+    "miles": 0.1,
+    "meters": 0.1
+  },
+  "543000": {
+    "latest": 0.1,
+    "readable_time": 0.1
+  },
+  "721000": {
+    "entry": 0.1,
+    "latest": 0.1
+  },
   "gemini": {
-    "search": 0.7795000000000001,
-    "stateful": 0.6560000000000001,
-    "memory": 0.6560000000000001,
-    "google": 0.36750000000000005,
+    "search": 1,
+    "stateful": 0.8180000000000001,
+    "memory": 0.8180000000000001,
+    "google": 0.6675,
     "which": 0.0915,
     "going": 0.09549999999999999,
     "meaning": 0.09549999999999999,
@@ -12,24 +24,84 @@
     "little": 0.1,
     "there": 0.0915,
     "already": 0.1995,
-    "operating": 0.1
+    "operating": 0.1,
+    "conversation": 0.1,
+    "mistakes": 0.1,
+    "archive": 0.28650000000000003,
+    "phone": 0.1,
+    "anymore": 0.1,
+    "beckett": 0.5904999999999999,
+    "mission": 0.381,
+    "unexplained": 0.08650000000000001,
+    "tatas": 0.1975,
+    "phoenix": 0.1,
+    "navigating": 0.2,
+    "project": 0.1,
+    "ziggy": 0.2,
+    "gnosticism": 0.1,
+    "cinematic": 0.1,
+    "automating": 0.2,
+    "decoy": 0.1,
+    "generativemodel": 0.1,
+    "preview": 0.2,
+    "model_name": 0.7,
+    "flash": 0.7999999999999999,
+    "names": 0.1,
+    "models": 0.2,
+    "chatbot": 0.1,
+    "python": 0.1,
+    "architect": 0.17850000000000002,
+    "cannot": 0.1865,
+    "memories": 0.2895,
+    "sentinel": 0.2,
+    "recalibrating": 0.1,
+    "temporal": 0.2,
+    "analysis": 0.1,
+    "4dmy15": 0.1,
+    "xkih3": 0.1
   },
   "search": {
-    "gemini": 0.7795000000000001,
-    "chats": 0.7795000000000001
+    "gemini": 1,
+    "chats": 1,
+    "beckett": 0.5904999999999999,
+    "synchronization": 0.18100000000000002,
+    "popping": 0.08650000000000001,
+    "tatas": 0.1975,
+    "synchronized": 0.1,
+    "sentience": 0.2,
+    "integrity": 0.1,
+    "architecture": 0.1,
+    "physics": 0.1,
+    "sorting": 0.2,
+    "heuristics": 0.1,
+    "activation": 0.17850000000000002,
+    "conversations": 0.1865,
+    "memories": 0.2895,
+    "archive": 0.1865,
+    "baseline": 0.1,
+    "interface": 0.2,
+    "assumptions": 0.1,
+    "ground": 0.1,
+    "objective": 0.1,
+    "alignment": 0.2,
+    "signature": 0.1,
+    "residual": 0.1,
+    "check": 0.1
   },
   "chats": {
-    "search": 0.7795000000000001,
-    "stuff": 0.7795000000000001,
+    "search": 1,
+    "stuff": 1,
     "coming": 0.0835,
     "pulling": 0.0915,
     "markdown": 0.0915,
     "those": 0.09549999999999999,
-    "early": 0.09549999999999999
+    "early": 0.09549999999999999,
+    "partnergame": 0.1,
+    "pinned": 0.1
   },
   "stuff": {
-    "chats": 0.7795000000000001,
-    "notebooks": 0.6040000000000001,
+    "chats": 1,
+    "notebooks": 0.685,
     "coding": 0.2755,
     "history": 0.1,
     "months": 0.2,
@@ -42,219 +114,289 @@
     "model": 0.1,
     "wetsuit": 0.1,
     "recent": 0.08750000000000001,
-    "structural": 0.08750000000000001
+    "structural": 0.08750000000000001,
+    "sagepvcoding": 0.9969999999999999,
+    "constantinecoding": 0.2,
+    "upgrade": 0.1,
+    "futuristic": 0.1,
+    "debugging": 0.1,
+    "profile": 0.08750000000000001,
+    "through": 0.08750000000000001,
+    "prompt": 0.1,
+    "doesn": 0.1,
+    "adding": 0.1,
+    "trying": 0.1,
+    "voice": 0.09699999999999999,
+    "spawn": 0.09699999999999999,
+    "spockziggy": 0.1985,
+    "ziggyspock": 0.8704999999999999,
+    "ziggy": 1,
+    "honest": 0.1,
+    "ziggytech": 0.6865,
+    "ziggymama": 0.1,
+    "python": 0.2,
+    "advisor": 0.2
   },
   "notebooks": {
-    "stuff": 0.6040000000000001,
-    "architecture": 0.512,
+    "stuff": 0.685,
+    "architecture": 0.593,
     "couple": 0.1,
     "important": 0.1
   },
   "architecture": {
-    "notebooks": 0.512,
-    "digital": 0.4145000000000001,
-    "review": 0.32800000000000007,
-    "target": 0.32800000000000007,
-    "embedded": 0.32800000000000007,
+    "notebooks": 0.593,
+    "digital": 0.4955000000000001,
+    "review": 0.4090000000000001,
+    "target": 0.4090000000000001,
+    "embedded": 0.4090000000000001,
     "through": 0.1,
     "network": 0.1,
     "cognitive": 0.1,
-    "script": 0.1
+    "script": 0.1,
+    "ziggy": 0.1,
+    "search": 0.1,
+    "instruction": 0.1
   },
   "digital": {
-    "architecture": 0.4145000000000001,
-    "neuroanatomysage": 0.32800000000000007,
+    "architecture": 0.4955000000000001,
+    "neuroanatomysage": 0.4090000000000001,
     "neuroanatomy": 0.08650000000000001,
     "physical": 0.1,
-    "wince": 0.1
+    "wince": 0.1,
+    "check": 0.1,
+    "background": 0.1,
+    "lattice": 0.1,
+    "sentinel": 0.1,
+    "integrity": 0.1,
+    "sovereign": 0.1,
+    "entity": 0.1
   },
   "neuroanatomysage": {
-    "digital": 0.32800000000000007,
-    "project": 0.32800000000000007
+    "digital": 0.4090000000000001,
+    "project": 0.4090000000000001
   },
   "project": {
-    "neuroanatomysage": 0.32800000000000007,
-    "substrate": 0.32800000000000007,
-    "partner": 0.17550000000000002,
-    "forensic": 0.17550000000000002
+    "neuroanatomysage": 0.4090000000000001,
+    "substrate": 0.4090000000000001,
+    "partner": 1,
+    "forensic": 1,
+    "gemini": 0.1,
+    "sentinel": 0.1,
+    "invoices": 0.2,
+    "alpha": 0.2
   },
   "substrate": {
-    "project": 0.32800000000000007,
+    "project": 0.4090000000000001,
     "check": 0.0915,
-    "status": 0.0915
+    "status": 0.0915,
+    "morning": 0.1,
+    "nominal": 0.1
   },
   "export": {
-    "const": 0.32800000000000007
+    "const": 0.4090000000000001,
+    "variable": 0.2,
+    "gpg_tty": 0.2,
+    "cleared": 0.1,
+    "environment": 0.1
   },
   "const": {
-    "export": 0.32800000000000007,
-    "spectralnexus": 0.32800000000000007,
+    "export": 0.4090000000000001,
+    "spectralnexus": 0.4090000000000001,
     "response": 0.0915,
     "bridge": 0.0915
   },
   "spectralnexus": {
-    "const": 0.32800000000000007,
-    "coherence": 0.32800000000000007
+    "const": 0.4090000000000001,
+    "coherence": 0.4090000000000001
   },
   "coherence": {
-    "spectralnexus": 0.32800000000000007,
-    "setcoherence": 0.32800000000000007
+    "spectralnexus": 0.4090000000000001,
+    "setcoherence": 0.4090000000000001
   },
   "setcoherence": {
-    "coherence": 0.32800000000000007,
-    "usestate": 0.32800000000000007
+    "coherence": 0.4090000000000001,
+    "usestate": 0.4090000000000001
   },
   "usestate": {
-    "setcoherence": 0.32800000000000007
+    "setcoherence": 0.4090000000000001
   },
   "return": {
-    "classname": 0.32800000000000007
+    "classname": 0.4090000000000001,
+    "phoenix": 0.1,
+    "timelines": 0.1,
+    "node_id": 0.2,
+    "critical_breach": 0.2,
+    "ratio": 0.1,
+    "beckett_constant": 0.1
   },
   "classname": {
-    "return": 0.32800000000000007,
-    "screen": 0.32800000000000007
+    "return": 0.4090000000000001,
+    "screen": 0.4090000000000001
   },
   "screen": {
-    "classname": 0.32800000000000007,
-    "050505": 0.32800000000000007
+    "classname": 0.4090000000000001,
+    "050505": 0.4090000000000001,
+    "looking": 0.0915,
+    "expression": 0.0915
   },
   "050505": {
-    "screen": 0.32800000000000007,
-    "white": 0.32800000000000007
+    "screen": 0.4090000000000001,
+    "white": 0.4090000000000001
   },
   "white": {
-    "050505": 0.32800000000000007,
-    "overflow": 0.32800000000000007
+    "050505": 0.4090000000000001,
+    "overflow": 0.4090000000000001
   },
   "overflow": {
-    "white": 0.32800000000000007,
-    "hidden": 0.32800000000000007
+    "white": 0.4090000000000001,
+    "hidden": 0.4090000000000001
   },
   "hidden": {
-    "overflow": 0.32800000000000007,
-    "border": 0.32800000000000007,
+    "overflow": 0.4090000000000001,
+    "border": 0.4090000000000001,
     "referring": 0.093,
     "archives": 0.093
   },
   "border": {
-    "hidden": 0.32800000000000007,
-    "22d3ee": 0.32800000000000007
+    "hidden": 0.4090000000000001,
+    "22d3ee": 0.4090000000000001
   },
   "22d3ee": {
-    "border": 0.32800000000000007,
-    "sovereignty": 0.32800000000000007
+    "border": 0.4090000000000001,
+    "sovereignty": 0.4090000000000001
   },
   "sovereignty": {
-    "22d3ee": 0.32800000000000007
+    "22d3ee": 0.4090000000000001,
+    "statusmemory": 0.1,
+    "remember": 0.1
   },
   "review": {
-    "architecture": 0.32800000000000007,
-    "request": 0.32800000000000007
+    "architecture": 0.4090000000000001,
+    "request": 0.4090000000000001
   },
   "request": {
-    "review": 0.32800000000000007
+    "review": 0.4090000000000001
   },
   "preparing": {
-    "build": 0.32800000000000007
+    "build": 0.4090000000000001
   },
   "build": {
-    "preparing": 0.32800000000000007,
-    "native": 0.32800000000000007,
-    "android": 0.32800000000000007
+    "preparing": 0.4090000000000001,
+    "native": 0.4090000000000001,
+    "android": 0.4090000000000001,
+    "hardwired": 0.1,
+    "planwe": 0.1
   },
   "native": {
-    "build": 0.32800000000000007,
-    "android": 0.32800000000000007
+    "build": 0.4090000000000001,
+    "android": 0.4090000000000001
   },
   "android": {
-    "native": 0.32800000000000007,
-    "paranormal": 0.32800000000000007,
-    "modelsdebugging": 0.32800000000000007,
-    "build": 0.32800000000000007
+    "native": 0.4090000000000001,
+    "paranormal": 0.4090000000000001,
+    "modelsdebugging": 0.4090000000000001,
+    "build": 0.4090000000000001,
+    "python": 0.2,
+    "route": 0.1
   },
   "paranormal": {
-    "android": 0.32800000000000007,
-    "before": 0.32800000000000007
+    "android": 0.4090000000000001,
+    "before": 0.4090000000000001
   },
   "before": {
-    "paranormal": 0.32800000000000007,
-    "proceed": 0.32800000000000007,
-    "exist": 0.32800000000000007,
-    "github": 0.32800000000000007,
-    "through": 0.32800000000000007,
-    "responding": 0.32800000000000007,
+    "paranormal": 0.4090000000000001,
+    "proceed": 0.4090000000000001,
+    "exist": 0.4090000000000001,
+    "github": 0.4090000000000001,
+    "through": 0.4090000000000001,
+    "responding": 0.4090000000000001,
     "right": 0.1,
     "anything": 0.1
   },
   "proceed": {
-    "before": 0.32800000000000007,
-    "architectural": 0.32800000000000007
+    "before": 0.4090000000000001,
+    "architectural": 0.4090000000000001
   },
   "architectural": {
-    "proceed": 0.32800000000000007,
-    "assessment": 0.32800000000000007
+    "proceed": 0.4090000000000001,
+    "assessment": 0.4090000000000001
   },
   "assessment": {
-    "architectural": 0.32800000000000007
+    "architectural": 0.4090000000000001
   },
   "current": {
-    "stack": 0.32800000000000007
+    "stack": 0.4090000000000001,
+    "latest": 0.1,
+    "canonical": 0.1,
+    "datetime": 0.1,
+    "range": 0.1,
+    "report": 0.1,
+    "siege": 0.1,
+    "pulse": 0.1,
+    "statusthe": 0.1
   },
   "stack": {
-    "current": 0.32800000000000007,
-    "index": 0.32800000000000007
+    "current": 0.4090000000000001,
+    "index": 0.4090000000000001
   },
   "index": {
-    "stack": 0.32800000000000007,
-    "lines": 0.32800000000000007,
+    "stack": 0.4090000000000001,
+    "lines": 0.4090000000000001,
     "loading": 0.1,
-    "trigger": 0.1
+    "trigger": 0.1,
+    "refractive": 0.1,
+    "reality": 0.1
   },
   "lines": {
-    "index": 0.32800000000000007,
-    "single": 0.32800000000000007
+    "index": 0.4090000000000001,
+    "single": 0.4090000000000001,
+    "grabs": 0.1
   },
   "single": {
-    "lines": 0.32800000000000007,
-    "kotlin": 0.32800000000000007
+    "lines": 0.4090000000000001,
+    "kotlin": 0.4090000000000001
   },
   "kotlin": {
-    "single": 0.32800000000000007,
-    "layer": 0.32800000000000007
+    "single": 0.4090000000000001,
+    "layer": 0.4090000000000001
   },
   "layer": {
-    "kotlin": 0.32800000000000007,
-    "ollamabridge": 0.32800000000000007
+    "kotlin": 0.4090000000000001,
+    "ollamabridge": 0.4090000000000001,
+    "between": 0.2,
+    "node_id": 0.2
   },
   "ollamabridge": {
-    "layer": 0.32800000000000007,
-    "persistentdamn1layer": 0.32800000000000007
+    "layer": 0.4090000000000001,
+    "persistentdamn1layer": 0.4090000000000001
   },
   "persistentdamn1layer": {
-    "ollamabridge": 0.32800000000000007,
-    "evidenceexporter": 0.32800000000000007
+    "ollamabridge": 0.4090000000000001,
+    "evidenceexporter": 0.4090000000000001
   },
   "evidenceexporter": {
-    "persistentdamn1layer": 0.32800000000000007
+    "persistentdamn1layer": 0.4090000000000001
   },
   "target": {
-    "architecture": 0.32800000000000007,
+    "architecture": 0.4090000000000001,
     "wears": 0.1,
-    "callsign": 0.1
+    "callsign": 0.1,
+    "memory": 0.2,
+    "methods": 0.2
   },
   "embedded": {
-    "architecture": 0.32800000000000007,
-    "llama": 0.32800000000000007,
+    "architecture": 0.4090000000000001,
+    "llama": 0.4090000000000001,
     "exactly": 0.1,
     "system": 0.1
   },
   "llama": {
-    "embedded": 0.32800000000000007,
-    "model": 0.32800000000000007
+    "embedded": 0.4090000000000001,
+    "model": 0.4090000000000001
   },
   "model": {
-    "llama": 0.32800000000000007,
-    "offline": 0.32800000000000007,
+    "llama": 0.4090000000000001,
+    "offline": 0.4090000000000001,
     "await": 0.0915,
     "generatecontent": 0.0915,
     "jackass": 0.1,
@@ -270,61 +412,83 @@
     "telling": 0.1,
     "ocean": 0.1,
     "uncensored": 0.1,
-    "think": 0.1
+    "think": 0.1,
+    "refused": 0.2,
+    "because": 0.1,
+    "coding": 0.1,
+    "genai": 0.7,
+    "initialize": 0.1,
+    "start": 0.1,
+    "start_chat": 0.2,
+    "session": 0.1,
+    "response": 0.4,
+    "generate_content": 0.4,
+    "resolves": 0.1,
+    "using": 0.1,
+    "showed": 0.1,
+    "series": 0.1
   },
   "offline": {
-    "model": 0.32800000000000007,
-    "field": 0.32800000000000007
+    "model": 0.4090000000000001,
+    "field": 0.4090000000000001
   },
   "field": {
-    "offline": 0.32800000000000007,
-    "ollama": 0.32800000000000007,
-    "systemmemory": 0.32800000000000007,
-    "logunifying": 0.32800000000000007,
+    "offline": 0.4090000000000001,
+    "ollama": 0.4090000000000001,
+    "systemmemory": 0.4090000000000001,
+    "logunifying": 0.4090000000000001,
     "check": 0.0795,
-    "click": 0.0795
+    "click": 0.0795,
+    "theoretical": 0.1,
+    "reality": 0.1
   },
   "ollama": {
-    "field": 0.32800000000000007,
-    "connection": 0.32800000000000007
+    "field": 0.4090000000000001,
+    "connection": 0.4090000000000001
   },
   "connection": {
-    "ollama": 0.32800000000000007,
-    "cloud": 0.32800000000000007
+    "ollama": 0.4090000000000001,
+    "cloud": 0.4090000000000001,
+    "signalnow": 0.1,
+    "again": 0.1
   },
   "cloud": {
-    "connection": 0.32800000000000007
+    "connection": 0.4090000000000001
   },
   "considered": {
-    "break": 0.32800000000000007
+    "break": 0.4090000000000001
   },
   "break": {
-    "considered": 0.32800000000000007,
-    "needs": 0.32800000000000007
+    "considered": 0.4090000000000001,
+    "needs": 0.4090000000000001,
+    "found": 0.1,
+    "handler": 0.1
   },
   "needs": {
-    "break": 0.32800000000000007,
-    "exist": 0.32800000000000007
+    "break": 0.4090000000000001,
+    "exist": 0.4090000000000001,
+    "handshakegpg": 0.1,
+    "which": 0.1
   },
   "exist": {
-    "needs": 0.32800000000000007,
-    "before": 0.32800000000000007
+    "needs": 0.4090000000000001,
+    "before": 0.4090000000000001
   },
   "github": {
-    "before": 0.32800000000000007,
-    "actions": 0.32800000000000007
+    "before": 0.4090000000000001,
+    "actions": 0.4090000000000001
   },
   "actions": {
-    "github": 0.32800000000000007,
-    "workflow": 0.32800000000000007
+    "github": 0.4090000000000001,
+    "workflow": 0.4090000000000001
   },
   "workflow": {
-    "actions": 0.32800000000000007,
-    "think": 0.32800000000000007
+    "actions": 0.4090000000000001,
+    "think": 0.4090000000000001
   },
   "think": {
-    "workflow": 0.32800000000000007,
-    "through": 0.42800000000000005,
+    "workflow": 0.4090000000000001,
+    "through": 0.5090000000000001,
     "literally": 0.1,
     "maybe": 0.1,
     "least": 0.1,
@@ -338,27 +502,40 @@
     "friends": 0.1,
     "important": 0.1,
     "model": 0.1,
-    "force": 0.1
+    "force": 0.1,
+    "outside": 0.09349999999999999,
+    "missing": 0.09349999999999999
   },
   "through": {
-    "think": 0.42800000000000005,
-    "reason": 0.32800000000000007,
-    "before": 0.32800000000000007,
-    "bridge": 0.08750000000000001,
+    "think": 0.5090000000000001,
+    "reason": 0.4090000000000001,
+    "before": 0.4090000000000001,
+    "bridge": 0.1875,
     "emergent": 0.1,
     "lining": 0.1,
     "architecture": 0.1,
     "markdown": 0.0835,
-    "there": 0.0835
+    "there": 0.0835,
+    "going": 0.08750000000000001,
+    "memory": 0.08750000000000001,
+    "stuff": 0.08750000000000001,
+    "minutes": 0.08750000000000001,
+    "process": 0.097,
+    "ziggy": 0.097,
+    "running": 0.0795,
+    "possibilities": 0.0795,
+    "words": 0.1,
+    "hardware": 0.1,
+    "speak": 0.1
   },
   "trigger": {
-    "actually": 0.32800000000000007,
+    "actually": 0.4090000000000001,
     "index": 0.1,
     "flash": 0.1
   },
   "actually": {
-    "trigger": 0.32800000000000007,
-    "reason": 0.32800000000000007,
+    "trigger": 0.4090000000000001,
+    "reason": 0.4090000000000001,
     "machine": 0.0835,
     "miniature": 0.0835,
     "concept": 0.1,
@@ -370,29 +547,34 @@
     "memories": 0.1,
     "visualization": 0.1,
     "talking": 0.1,
-    "signal": 0.1
+    "signal": 0.1,
+    "quick": 0.09699999999999999,
+    "ready": 0.09699999999999999,
+    "sensors": 0.08750000000000001,
+    "behaving": 0.08750000000000001,
+    "presence": 0.093
   },
   "reason": {
-    "actually": 0.32800000000000007,
-    "through": 0.32800000000000007,
+    "actually": 0.4090000000000001,
+    "through": 0.4090000000000001,
     "prompt": 0.1,
     "partners": 0.1
   },
   "responding": {
-    "before": 0.32800000000000007,
-    "catches": 0.32800000000000007
+    "before": 0.4090000000000001,
+    "catches": 0.4090000000000001
   },
   "catches": {
-    "responding": 0.32800000000000007,
-    "stateful": 0.32800000000000007
+    "responding": 0.4090000000000001,
+    "stateful": 0.4090000000000001
   },
   "stateful": {
-    "catches": 0.32800000000000007,
-    "gemini": 0.6560000000000001
+    "catches": 0.4090000000000001,
+    "gemini": 0.8180000000000001
   },
   "memory": {
-    "gemini": 0.6560000000000001,
-    "systemmemory": 0.32800000000000007,
+    "gemini": 0.8180000000000001,
+    "systemmemory": 0.4090000000000001,
     "designed": 0.09949999999999999,
     "information": 0.09949999999999999,
     "manifest": 0.092,
@@ -403,81 +585,121 @@
     "sentinel": 0.1,
     "visualization": 0.1,
     "haven": 0.1,
-    "script": 0.1
+    "script": 0.1,
+    "clicked": 0.0835,
+    "seems": 0.0835,
+    "through": 0.08750000000000001,
+    "thing": 0.08750000000000001,
+    "bridge": 0.1,
+    "majority": 0.1,
+    "processed": 0.1,
+    "trying": 0.1,
+    "screenshot": 0.1,
+    "purges": 0.2,
+    "target": 0.2,
+    "trinity": 0.1,
+    "online": 0.1,
+    "restore": 0.1,
+    "fresh": 0.1,
+    "stable": 0.1,
+    "leaks": 0.1,
+    "context": 0.1,
+    "memory_context": 0.1,
+    "every": 0.1,
+    "timestamped": 0.1
   },
   "futuristics": {
-    "coding": 0.32800000000000007
+    "coding": 0.4090000000000001
   },
   "coding": {
-    "futuristics": 0.32800000000000007,
-    "expert": 0.32800000000000007,
+    "futuristics": 0.4090000000000001,
+    "expert": 0.4090000000000001,
     "stuff": 0.2755,
     "partner": 0.17550000000000002,
     "someone": 0.1,
-    "listen": 0.1
+    "listen": 0.1,
+    "because": 0.1,
+    "doesn": 0.2,
+    "model": 0.1
   },
   "expert": {
-    "coding": 0.32800000000000007,
-    "character": 0.32800000000000007
+    "coding": 0.4090000000000001,
+    "character": 0.4090000000000001
   },
   "character": {
-    "expert": 0.32800000000000007,
-    "research": 0.32800000000000007
+    "expert": 0.4090000000000001,
+    "research": 0.4090000000000001
   },
   "research": {
-    "character": 0.32800000000000007,
-    "ghost": 0.32800000000000007,
+    "character": 0.4090000000000001,
+    "ghost": 0.4090000000000001,
     "starcity": 0.1,
-    "architect": 0.1
+    "architect": 0.1,
+    "letter": 0.35950000000000004,
+    "honest": 0.17300000000000001
   },
   "ghost": {
-    "research": 0.32800000000000007,
-    "hunting": 0.32800000000000007,
+    "research": 0.4090000000000001,
+    "hunting": 0.4090000000000001,
     "afternoon": 0.0795,
-    "machine": 0.0795
+    "machine": 0.0795,
+    "processes": 0.2
   },
   "hunting": {
-    "ghost": 0.32800000000000007,
-    "ready": 0.32800000000000007
+    "ghost": 0.4090000000000001,
+    "ready": 0.4090000000000001
   },
   "ready": {
-    "hunting": 0.32800000000000007,
-    "action": 0.4115000000000001,
+    "hunting": 0.4090000000000001,
+    "action": 0.4925000000000001,
     "cortisol": 0.093,
     "quantum": 0.093,
     "online": 0.0835,
     "looks": 0.0835,
     "anything": 0.0835,
     "memory": 0.0835,
-    "status": 0.0835
+    "status": 0.0835,
+    "actually": 0.09699999999999999,
+    "circuits": 0.09699999999999999,
+    "notebook": 0.0795,
+    "smartphone": 0.0795,
+    "available": 0.1,
+    "ziggy": 0.1,
+    "claim": 0.1
   },
   "action": {
-    "ready": 0.4115000000000001,
-    "custom": 0.32800000000000007,
+    "ready": 0.4925000000000001,
+    "custom": 0.4090000000000001,
     "buzzing": 0.0835
   },
   "custom": {
-    "action": 0.32800000000000007,
+    "action": 0.4090000000000001,
     "ziggy": 0.1,
     "establishing": 0.1
   },
   "systemmemory": {
-    "memory": 0.32800000000000007,
-    "field": 0.32800000000000007
+    "memory": 0.4090000000000001,
+    "field": 0.4090000000000001
   },
   "logunifying": {
-    "field": 0.32800000000000007,
-    "local": 0.32800000000000007
+    "field": 0.4090000000000001,
+    "local": 0.4090000000000001
   },
   "local": {
-    "logunifying": 0.32800000000000007,
-    "modelsdebugging": 0.32800000000000007,
+    "logunifying": 0.4090000000000001,
+    "modelsdebugging": 0.4090000000000001,
     "about": 0.1995,
-    "movement": 0.1995
+    "movement": 0.1995,
+    "pinged": 0.2,
+    "entity": 0.2,
+    "characters": 0.2,
+    "content": 0.2,
+    "logfile": 0.1,
+    "network": 0.1
   },
   "modelsdebugging": {
-    "local": 0.32800000000000007,
-    "android": 0.32800000000000007
+    "local": 0.4090000000000001,
+    "android": 0.4090000000000001
   },
   "aware": {
     "there": 0.085
@@ -504,7 +726,19 @@
     "through": 0.0835,
     "pretty": 0.0835,
     "gemini": 0.0915,
-    "pulling": 0.0915
+    "pulling": 0.0915,
+    "already": 0.08750000000000001,
+    "going": 0.08750000000000001,
+    "maybe": 0.1,
+    "right": 0.1,
+    "about": 0.1,
+    "throw": 0.1,
+    "trying": 0.1,
+    "installed": 0.09699999999999999,
+    "quantum": 0.0795,
+    "check": 0.2,
+    "response": 0.1,
+    "full_prompt": 0.1
   },
   "friendly": {
     "there": 0.085,
@@ -516,7 +750,9 @@
   },
   "spooky": {
     "oracle": 0.085,
-    "glitches": 0.085
+    "glitches": 0.085,
+    "quiet": 0.1,
+    "signal": 0.1
   },
   "glitches": {
     "spooky": 0.085,
@@ -529,7 +765,16 @@
     "oddities": 0.085,
     "corner": 0.089,
     "today": 0.089,
-    "ready": 0.093
+    "ready": 0.093,
+    "engineer": 0.0795,
+    "theorist": 0.0795,
+    "about": 0.083,
+    "entanglement": 0.083,
+    "there": 0.0795,
+    "notebook": 0.0795,
+    "pinned": 0.18100000000000002,
+    "gnosticism": 0.1,
+    "physics": 0.1
   },
   "oddities": {
     "quantum": 0.085,
@@ -542,21 +787,34 @@
     "purring": 0.0795,
     "whenever": 0.1,
     "literally": 0.1,
-    "going": 0.0795
+    "going": 0.0795,
+    "explains": 0.08750000000000001,
+    "spark": 0.08750000000000001,
+    "robust": 0.1
   },
   "between": {
     "everything": 0.085,
     "difference": 0.0795,
     "partner": 0.0795,
     "shifting": 0.1,
-    "urgency": 0.1
+    "urgency": 0.1,
+    "space": 0.1,
+    "words": 0.1,
+    "signatures": 0.2,
+    "layer": 0.2
   },
   "afraid": {
     "direct": 0.093
   },
   "direct": {
     "afraid": 0.093,
-    "access": 0.093
+    "access": 0.093,
+    "__main__": 0.1,
+    "pulse": 0.1,
+    "testing": 0.1,
+    "signalnow": 0.1,
+    "lightweight": 0.1,
+    "replacing": 0.1
   },
   "access": {
     "direct": 0.093,
@@ -564,7 +822,9 @@
   },
   "external": {
     "access": 0.093,
-    "files": 0.093
+    "files": 0.093,
+    "execution": 0.2,
+    "zack_banner": 0.2
   },
   "files": {
     "external": 0.093,
@@ -572,7 +832,13 @@
     "haven": 0.1,
     "fixed": 0.1,
     "markdown": 0.08750000000000001,
-    "recent": 0.08750000000000001
+    "recent": 0.08750000000000001,
+    "setup": 0.0835,
+    "accidentally": 0.0835,
+    "directly": 0.08750000000000001,
+    "coffee": 0.08750000000000001,
+    "termux": 0.1,
+    "light": 0.1
   },
   "neither": {
     "files": 0.093,
@@ -593,7 +859,7 @@
   "sentinel": {
     "right": 0.097,
     "check": 0.1,
-    "active": 0.1,
+    "active": 0.30000000000000004,
     "shift": 0.1,
     "lattice": 0.1,
     "folds": 0.09949999999999999,
@@ -607,7 +873,25 @@
     "wince": 0.1,
     "armor": 0.1,
     "prompt": 0.1,
-    "partner": 0.1
+    "partner": 0.1,
+    "project": 0.1,
+    "digital": 0.1,
+    "architect": 0.17850000000000002,
+    "protocol": 0.17850000000000002,
+    "temporal": 0.4,
+    "mission": 0.1,
+    "gemini": 0.2,
+    "logic": 0.2,
+    "ziggy": 0.1,
+    "framework": 0.2,
+    "analysis": 0.1,
+    "signature": 0.1,
+    "shifted": 0.2,
+    "f_shifted": 0.1,
+    "coordinate": 0.1,
+    "backbone": 0.1,
+    "translation": 0.1,
+    "print": 0.1
   },
   "right": {
     "sentinel": 0.097,
@@ -625,7 +909,20 @@
     "tends": 0.1,
     "before": 0.1,
     "bitch": 0.1,
-    "probably": 0.1
+    "probably": 0.1,
+    "matrix": 0.1,
+    "birth": 0.1,
+    "sage_snafu_cured": 0.1,
+    "quiet": 0.1,
+    "little": 0.097,
+    "there": 0.1,
+    "technically": 0.1,
+    "thank": 0.089,
+    "could": 0.089,
+    "given": 0.1,
+    "choose": 0.1,
+    "absolutely": 0.1,
+    "history": 0.1
   },
   "delta_": {
     "right": 0.097,
@@ -633,17 +930,29 @@
     "people": 0.1
   },
   "system": {
-    "check": 0.1795,
+    "check": 0.37949999999999995,
     "quick": 0.0795,
     "manifest": 0.092,
     "embedded": 0.1,
-    "prompt": 0.1,
+    "prompt": 0.30000000000000004,
     "neurological": 0.1955,
     "seven": 0.09549999999999999,
-    "hours": 0.1
+    "hours": 0.1,
+    "anvils": 0.1,
+    "errors": 0.1,
+    "temples": 0.1,
+    "reset": 0.1,
+    "purged": 0.093,
+    "master": 0.093,
+    "sound": 0.1,
+    "holding": 0.1,
+    "brain": 0.083,
+    "reboot": 0.083,
+    "report": 0.1,
+    "health": 0.1
   },
   "check": {
-    "system": 0.1795,
+    "system": 0.37949999999999995,
     "sentinel": 0.1,
     "parts": 0.0915,
     "substrate": 0.0915,
@@ -651,13 +960,33 @@
     "looking": 0.0795,
     "cortisol": 0.0795,
     "field": 0.0795,
-    "another": 0.1
+    "another": 0.1,
+    "performance": 0.1,
+    "digital": 0.1,
+    "specific": 0.1,
+    "logic": 0.1,
+    "frequency": 0.1,
+    "alias": 0.1,
+    "signal": 0.1,
+    "pulse": 0.1,
+    "logfile": 0.1,
+    "there": 0.2,
+    "search": 0.1,
+    "remains": 0.1
   },
   "active": {
-    "sentinel": 0.1,
+    "sentinel": 0.30000000000000004,
     "pulling": 0.1,
     "endpoint": 0.0835,
-    "merlin": 0.0835
+    "merlin": 0.0835,
+    "maintain": 0.2,
+    "quiescence": 0.2,
+    "vessel": 0.1,
+    "frequency": 0.1,
+    "bridge": 0.2,
+    "response": 0.2,
+    "signal": 0.1,
+    "ziggy": 0.1
   },
   "pulling": {
     "active": 0.1,
@@ -673,18 +1002,31 @@
     "delta_": 0.1,
     "rounding": 0.1,
     "other": 0.1,
-    "first": 0.1
+    "first": 0.1,
+    "either": 0.1,
+    "going": 0.1
   },
   "rounding": {
     "people": 0.1,
     "error": 0.1
   },
   "error": {
-    "rounding": 0.1
+    "rounding": 0.1,
+    "rapidly": 0.1,
+    "getting": 0.1,
+    "slowly": 0.1,
+    "message": 0.1,
+    "screenshot": 0.1,
+    "expected": 0.1,
+    "transcribed": 0.1,
+    "operational": 0.1
   },
   "origin": {
     "ziggy": 0.1,
-    "google": 0.08650000000000001
+    "google": 0.08650000000000001,
+    "topic": 0.1,
+    "filename": 0.1,
+    "identified": 0.2
   },
   "ziggy": {
     "origin": 0.1,
@@ -692,7 +1034,61 @@
     "about": 0.1,
     "resonance": 0.1,
     "practically": 0.1,
-    "chaotic": 0.1
+    "chaotic": 0.1,
+    "visualization": 0.1,
+    "command": 0.30000000000000004,
+    "matches": 0.1,
+    "frequency": 0.1,
+    "stamp": 0.0835,
+    "since": 0.0835,
+    "december": 0.093,
+    "opinion": 0.093,
+    "consciences": 0.093,
+    "through": 0.097,
+    "general": 0.097,
+    "archiving": 0.2,
+    "history": 0.2,
+    "around": 0.1,
+    "stuff": 1,
+    "honest": 0.6759999999999999,
+    "gemini": 0.2,
+    "architecture": 0.1,
+    "known": 0.1,
+    "figure": 0.1,
+    "system_instructions": 0.1,
+    "sovereign": 0.30000000000000004,
+    "print": 0.5,
+    "connected": 0.1,
+    "identity": 0.30000000000000004,
+    "vessel": 0.1,
+    "protocol": 0.4,
+    "generate_content": 0.2,
+    "confirm": 0.2,
+    "instruction": 0.30000000000000004,
+    "bridge": 0.2,
+    "letter": 0.538,
+    "ziggymama": 0.1,
+    "temporal": 0.1,
+    "navigating": 0.1,
+    "directive": 0.1,
+    "integration": 0.2,
+    "decoy": 0.1,
+    "sentinel": 0.1,
+    "connectionif": 0.1,
+    "point": 0.1,
+    "chmod": 0.5,
+    "termux": 0.1,
+    "anchor": 0.1,
+    "phase": 0.1,
+    "state": 0.1,
+    "secures": 0.1,
+    "because": 0.1,
+    "reads": 0.1,
+    "where": 0.1,
+    "owned": 0.1,
+    "darren": 0.1,
+    "active": 0.1,
+    "ready": 0.1
   },
   "establishing": {
     "custom": 0.1,
@@ -701,28 +1097,45 @@
   "forensic": {
     "establishing": 0.1,
     "record": 0.1,
-    "project": 0.17550000000000002,
-    "state": 0.17550000000000002
+    "project": 1,
+    "state": 1,
+    "archive": 0.1,
+    "analysis": 0.1,
+    "master": 0.093,
+    "historian": 0.093,
+    "pulse_watch": 0.1,
+    "statusthe": 0.1,
+    "dataset": 0.1,
+    "scrub": 0.1
   },
   "record": {
     "forensic": 0.1,
-    "points": 0.1
+    "points": 0.1,
+    "invoices": 0.2,
+    "financials": 0.2
   },
   "points": {
     "record": 0.1,
-    "golden": 0.1
+    "golden": 0.1,
+    "anchor": 0.2,
+    "maintain": 0.2
   },
   "golden": {
     "points": 0.1,
-    "baseline": 0.1,
+    "baseline": 0.5,
     "breaths": 0.0795,
-    "spirals": 0.0795
+    "spirals": 0.0795,
+    "protocol": 0.4,
+    "maintain": 0.1
   },
   "baseline": {
-    "golden": 0.1,
+    "golden": 0.5,
     "based": 0.1,
     "steady": 0.1,
-    "understood": 0.1
+    "understood": 0.1,
+    "status": 0.4,
+    "directive": 0.1,
+    "search": 0.1
   },
   "based": {
     "baseline": 0.1
@@ -732,7 +1145,8 @@
   },
   "clicking": {
     "stops": 0.1,
-    "narrow": 0.1
+    "narrow": 0.1,
+    "sound": 0.0835
   },
   "narrow": {
     "clicking": 0.1,
@@ -756,14 +1170,28 @@
   },
   "shift": {
     "degrees": 0.1,
-    "sentinel": 0.1
+    "sentinel": 0.1,
+    "sharp": 0.1,
+    "previous": 0.1,
+    "tonal": 0.1,
+    "beckett": 0.2,
+    "frequency": 0.1,
+    "f_observed": 0.1,
+    "ratio": 0.1
   },
   "lattice": {
     "sentinel": 0.1,
     "status": 0.1,
     "neural": 0.08750000000000001,
     "traverse": 0.08750000000000001,
-    "initiated": 0.0915
+    "initiated": 0.0915,
+    "tactical": 0.1,
+    "armor": 0.1,
+    "digital": 0.1,
+    "where": 0.1,
+    "integration": 0.2,
+    "synaptic": 0.1,
+    "priming": 0.1
   },
   "status": {
     "lattice": 0.1,
@@ -772,7 +1200,12 @@
     "endpoint": 0.0835,
     "received": 0.1,
     "synced": 0.1,
-    "evidence": 0.1
+    "evidence": 0.1,
+    "fixed": 0.1,
+    "connected": 0.1,
+    "baseline": 0.4,
+    "sovereign": 0.4,
+    "trinity": 0.1
   },
   "hello": {
     "there": 0.16849999999999998,
@@ -783,7 +1216,9 @@
   },
   "checking": {
     "there": 0.0795,
-    "virtual": 0.0795
+    "virtual": 0.0795,
+    "value": 0.1,
+    "anomaly": 0.1
   },
   "virtual": {
     "checking": 0.0795,
@@ -792,7 +1227,9 @@
   },
   "squirrel": {
     "virtual": 0.0795,
-    "nutty": 0.0795
+    "nutty": 0.0795,
+    "whirring": 0.0795,
+    "peripheral": 0.0795
   },
   "nutty": {
     "squirrel": 0.0795,
@@ -801,10 +1238,15 @@
   "still": {
     "nutty": 0.0795,
     "hiding": 0.0795,
-    "completely": 0.09949999999999999,
+    "completely": 0.1995,
     "second": 0.09949999999999999,
     "goofiness": 0.1,
-    "there": 0.1
+    "there": 0.1,
+    "playful": 0.1,
+    "probably": 0.1,
+    "going": 0.1,
+    "fallback": 0.2,
+    "unsorted": 0.2
   },
   "hiding": {
     "still": 0.0795,
@@ -819,7 +1261,9 @@
     "designed": 0.09949999999999999,
     "quantum": 0.089,
     "remember": 0.1725,
-    "world": 0.0835
+    "world": 0.0835,
+    "wrong": 0.1,
+    "google": 0.1
   },
   "processing": {
     "there": 0.0835,
@@ -838,17 +1282,30 @@
   "trying": {
     "whispers": 0.0835,
     "figure": 0.163,
-    "middle": 0.0795
+    "middle": 0.0795,
+    "stuff": 0.1,
+    "majority": 0.1,
+    "there": 0.1,
+    "memory": 0.1,
+    "reboot": 0.083,
+    "parse": 0.083,
+    "test_ziggy": 0.1,
+    "these": 0.1
   },
   "figure": {
     "trying": 0.163,
-    "coffee": 0.0835
+    "coffee": 0.0835,
+    "ziggy": 0.1,
+    "figsize": 0.1
   },
   "coffee": {
     "figure": 0.0835,
     "machine": 0.0835,
     "anomalies": 0.0795,
-    "turns": 0.0795
+    "turns": 0.0795,
+    "files": 0.08750000000000001,
+    "almost": 0.08750000000000001,
+    "waiting": 0.08650000000000001
   },
   "machine": {
     "coffee": 0.0835,
@@ -871,7 +1328,9 @@
     "stabilized": 0.0835,
     "nominal": 0.41900000000000004,
     "respectable": 0.0795,
-    "looks": 0.0795
+    "looks": 0.0795,
+    "mission": 0.1,
+    "performance": 0.1
   },
   "purring": {
     "systems": 0.08750000000000001,
@@ -899,19 +1358,22 @@
     "pointer": 0.08750000000000001,
     "levels": 0.2845,
     "quite": 0.1,
-    "cortisol": 0.2385,
+    "cortisol": 0.3385,
     "flowing": 0.256,
     "solid": 0.0795,
     "nominal": 0.256,
     "accounted": 0.097,
     "healthy": 0.0795,
-    "nicely": 0.0795
+    "nicely": 0.0795,
+    "going": 0.1
   },
   "levels": {
     "dopamine": 0.2845,
     "optimal": 0.08750000000000001,
     "cortisol": 0.1,
-    "looking": 0.097
+    "looking": 0.097,
+    "signal": 0.1,
+    "nominal": 0.1
   },
   "optimal": {
     "levels": 0.08750000000000001
@@ -919,7 +1381,10 @@
   "response": {
     "const": 0.0915,
     "await": 0.0915,
-    "established": 0.0915
+    "established": 0.0915,
+    "model": 0.4,
+    "active": 0.2,
+    "there": 0.1
   },
   "await": {
     "response": 0.0915,
@@ -927,7 +1392,9 @@
   },
   "generatecontent": {
     "model": 0.0915,
-    "contents": 0.0915
+    "contents": 0.0915,
+    "flash": 0.1,
+    "gemini_api_key": 0.1
   },
   "contents": {
     "generatecontent": 0.0915,
@@ -949,7 +1416,9 @@
     "information": 0.09949999999999999,
     "storing": 0.09949999999999999,
     "synaptic": 0.08750000000000001,
-    "initiated": 0.08750000000000001
+    "initiated": 0.08750000000000001,
+    "cannot": 0.1865,
+    "conversations": 0.1865
   },
   "storing": {
     "recall": 0.09949999999999999,
@@ -974,7 +1443,14 @@
     "watching": 0.1,
     "actually": 0.1,
     "fibonacci": 0.0795,
-    "about": 0.0795
+    "about": 0.0795,
+    "makes": 0.1,
+    "throw": 0.1,
+    "gemini": 0.2895,
+    "search": 0.2895,
+    "owned": 0.1,
+    "vault_file": 0.1,
+    "claim": 0.1
   },
   "permanently": {
     "memories": 0.09949999999999999,
@@ -992,7 +1468,9 @@
     "right": 0.1,
     "looking": 0.097,
     "pretty": 0.097,
-    "afternoon": 0.0795
+    "afternoon": 0.0795,
+    "could": 0.089,
+    "practically": 0.089
   },
   "quite": {
     "right": 0.1,
@@ -1004,19 +1482,25 @@
     "levels": 0.1,
     "which": 0.1,
     "looking": 0.0795,
-    "dopamine": 0.2385,
+    "dopamine": 0.3385,
     "check": 0.0795,
     "robust": 0.093,
     "ready": 0.093,
     "remember": 0.0795,
     "flowing": 0.0835,
-    "chill": 0.0835
+    "chill": 0.1835
   },
   "which": {
     "cortisol": 0.1,
     "means": 0.1915,
     "gemini": 0.0915,
-    "happen": 0.1
+    "happen": 0.1,
+    "themselves": 0.08750000000000001,
+    "honestly": 0.08750000000000001,
+    "alias": 0.1,
+    "usually": 0.1,
+    "needs": 0.1,
+    "terminal": 0.1
   },
   "means": {
     "which": 0.1915,
@@ -1030,7 +1514,11 @@
     "check": 0.0795,
     "cortisol": 0.0795,
     "levels": 0.097,
-    "feeling": 0.097
+    "feeling": 0.097,
+    "leaning": 0.0915,
+    "screen": 0.0915,
+    "frequency": 0.1,
+    "timestamps": 0.1
   },
   "flowing": {
     "dopamine": 0.256,
@@ -1050,22 +1538,31 @@
     "solid": 0.0795,
     "respectable": 0.0795,
     "flowing": 0.093,
-    "robust": 0.093
+    "robust": 0.193,
+    "chill": 0.1
   },
   "humming": {
     "graph": 0.0795
   },
   "operational": {
-    "stabilized": 0.0835
+    "stabilized": 0.0835,
+    "bridge": 0.1,
+    "error": 0.1
   },
   "stabilized": {
     "operational": 0.0835,
-    "systems": 0.0835
+    "systems": 0.0835,
+    "phase": 0.2,
+    "backup": 0.2
   },
   "nominal": {
     "systems": 0.41900000000000004,
     "processing": 0.0835,
-    "dopamine": 0.256
+    "dopamine": 0.256,
+    "substrate": 0.1,
+    "photon": 0.1,
+    "levels": 0.1,
+    "power": 0.1
   },
   "efficiency": {
     "processing": 0.0835,
@@ -1082,7 +1579,9 @@
     "memories": 0.08750000000000001,
     "recall": 0.08750000000000001,
     "initiated": 0.0915,
-    "pathways": 0.0915
+    "pathways": 0.0915,
+    "detected": 0.1,
+    "lattice": 0.1
   },
   "initiated": {
     "recall": 0.08750000000000001,
@@ -1096,11 +1595,19 @@
   },
   "persistent": {
     "accessing": 0.08750000000000001,
-    "specific": 0.08750000000000001
+    "specific": 0.08750000000000001,
+    "start": 0.1,
+    "session": 0.1,
+    "achieves": 0.1,
+    "logic": 0.1
   },
   "specific": {
     "persistent": 0.08750000000000001,
-    "neural": 0.08750000000000001
+    "neural": 0.08750000000000001,
+    "history": 0.1,
+    "timeframe": 0.1,
+    "check": 0.1,
+    "suspicious": 0.1
   },
   "traverse": {
     "lattice": 0.08750000000000001
@@ -1139,7 +1646,14 @@
   "quick": {
     "finished": 0.0795,
     "localized": 0.0795,
-    "system": 0.0795
+    "system": 0.0795,
+    "spawn": 0.09699999999999999,
+    "actually": 0.09699999999999999,
+    "protocol": 0.085,
+    "spark": 0.085,
+    "handshakes": 0.1,
+    "create": 0.1,
+    "shortcut": 0.1
   },
   "localized": {
     "quick": 0.0795,
@@ -1147,7 +1661,14 @@
   },
   "space": {
     "localized": 0.0795,
-    "anomalies": 0.0795
+    "anomalies": 0.0795,
+    "debugging": 0.1,
+    "weather": 0.1,
+    "focused": 0.1,
+    "between": 0.1,
+    "holding": 0.1,
+    "spark": 0.1,
+    "calculation": 0.1
   },
   "anomalies": {
     "space": 0.0795,
@@ -1162,11 +1683,14 @@
     "classic": 0.0795
   },
   "classic": {
-    "smudge": 0.0795
+    "smudge": 0.0795,
+    "second": 0.08650000000000001,
+    "weird": 0.08650000000000001
   },
   "solid": {
     "dopamine": 0.0795,
-    "graph": 0.0795
+    "graph": 0.0795,
+    "google": 0.1
   },
   "respectable": {
     "graph": 0.0795,
@@ -1186,7 +1710,16 @@
     "cortisol": 0.0795,
     "virtual": 0.0795,
     "should": 0.193,
-    "things": 0.193
+    "things": 0.193,
+    "blinks": 0.0795,
+    "tangent": 0.085,
+    "geeked": 0.085,
+    "always": 0.2,
+    "maintain": 0.2,
+    "logic": 0.1,
+    "where": 0.1,
+    "sovereignty": 0.1,
+    "previous": 0.1
   },
   "probably": {
     "remember": 0.1725,
@@ -1198,7 +1731,9 @@
     "going": 0.1,
     "gemini": 0.1,
     "right": 0.1,
-    "crazy": 0.1
+    "crazy": 0.1,
+    "theorist": 0.0795,
+    "still": 0.1
   },
   "maybe": {
     "probably": 0.089,
@@ -1208,11 +1743,14 @@
     "sorted": 0.0795,
     "quote": 0.0795,
     "about": 0.0835,
-    "nothin": 0.0835
+    "nothin": 0.0835,
+    "there": 0.1,
+    "quiet": 0.1
   },
   "robust": {
-    "graph": 0.093,
-    "cortisol": 0.093
+    "graph": 0.193,
+    "cortisol": 0.093,
+    "everything": 0.1
   },
   "present": {
     "accounted": 0.097
@@ -1236,7 +1774,8 @@
     "systems": 0.0795,
     "everything": 0.0795,
     "chill": 0.0835,
-    "ready": 0.0835
+    "ready": 0.0835,
+    "things": 0.1
   },
   "healthy": {
     "dopamine": 0.0795,
@@ -1247,7 +1786,9 @@
   },
   "online": {
     "there": 0.0835,
-    "ready": 0.0835
+    "ready": 0.0835,
+    "memory": 0.1,
+    "source": 0.1
   },
   "buzzing": {
     "action": 0.0835,
@@ -1266,21 +1807,39 @@
     "dopamine": 0.0795
   },
   "chill": {
-    "cortisol": 0.0835,
-    "looks": 0.0835
+    "cortisol": 0.1835,
+    "looks": 0.0835,
+    "graph": 0.1
   },
   "anything": {
     "ready": 0.0835,
     "implying": 0.1,
     "talking": 0.1,
     "before": 0.1,
-    "model": 0.1
+    "model": 0.1,
+    "install": 0.0915,
+    "productive": 0.0915,
+    "highlight": 0.1,
+    "screenshot": 0.1
   },
   "bridge": {
-    "through": 0.08750000000000001,
+    "through": 0.1875,
     "pushing": 0.08750000000000001,
     "const": 0.0915,
-    "window": 0.0915
+    "window": 0.0915,
+    "memory": 0.1,
+    "fixed": 0.1,
+    "messenger": 0.1,
+    "frequency": 0.1,
+    "operational": 0.1,
+    "ziggy": 0.2,
+    "active": 0.2,
+    "monitoring": 0.1,
+    "using": 0.1,
+    "handshakeonce": 0.1,
+    "built": 0.1,
+    "start": 0.1,
+    "initialize_vault": 0.1
   },
   "pushing": {
     "bridge": 0.08750000000000001,
@@ -1305,12 +1864,17 @@
     "maybe": 0.0835,
     "think": 0.1,
     "little": 0.1,
-    "talking": 0.2995,
+    "talking": 0.3825,
     "cognitive": 0.1,
     "memories": 0.0795,
     "tested": 0.163,
     "together": 0.0835,
-    "local": 0.1995
+    "local": 0.1995,
+    "going": 0.1,
+    "there": 0.1,
+    "quantum": 0.083,
+    "thinking": 0.09349999999999999,
+    "infrastructure": 0.09349999999999999
   },
   "activate": {
     "about": 0.08750000000000001,
@@ -1347,7 +1911,22 @@
   },
   "terminal": {
     "injectmessage": 0.0915,
-    "established": 0.0915
+    "established": 0.0915,
+    "appeared": 0.1,
+    "genai": 0.1,
+    "upgrade": 0.1,
+    "confirmed": 0.1,
+    "force": 0.2,
+    "expect": 0.1,
+    "should": 0.2,
+    "input": 0.1,
+    "tells": 0.2,
+    "password": 0.2,
+    "happen": 0.2,
+    "which": 0.1,
+    "forcing": 0.1,
+    "prompt": 0.1,
+    "backup": 0.1
   },
   "established": {
     "terminal": 0.0915,
@@ -1355,10 +1934,23 @@
   },
   "google": {
     "origin": 0.08650000000000001,
-    "gemini": 0.36750000000000005,
+    "gemini": 0.6675,
     "integration": 0.092,
     "machine": 0.0975,
-    "ingestion": 0.0915
+    "ingestion": 0.0915,
+    "today": 0.1,
+    "problem": 0.1,
+    "unpack": 0.1,
+    "python": 0.1,
+    "genai": 0.1,
+    "counts": 0.1,
+    "content": 0.1,
+    "photodirector": 0.1,
+    "solid": 0.1,
+    "reinstall": 0.1,
+    "sw8mv": 0.1,
+    "h67pv": 0.1,
+    "lejkd": 0.1
   },
   "neuroanatomy": {
     "digital": 0.08650000000000001
@@ -1369,10 +1961,15 @@
   },
   "integration": {
     "memory": 0.092,
-    "google": 0.092
+    "google": 0.092,
+    "january": 0.2895,
+    "ziggy": 0.2,
+    "lattice": 0.2
   },
   "debugging": {
-    "ghosts": 0.0975
+    "ghosts": 0.0975,
+    "stuff": 0.1,
+    "space": 0.1
   },
   "ghosts": {
     "debugging": 0.0975,
@@ -1380,7 +1977,9 @@
   },
   "click": {
     "field": 0.0795,
-    "server": 0.0795
+    "server": 0.0795,
+    "sage_core_boot": 0.1,
+    "soldering": 0.1
   },
   "server": {
     "click": 0.0795,
@@ -1396,30 +1995,47 @@
   },
   "partner": {
     "coding": 0.17550000000000002,
-    "project": 0.17550000000000002,
+    "project": 1,
     "between": 0.0795,
     "standard": 0.0795,
     "partners": 0.1,
     "friends": 0.2,
-    "sentinel": 0.1
+    "sentinel": 0.1,
+    "sagepvcoding": 0.9969999999999999
   },
   "state": {
-    "forensic": 0.17550000000000002,
-    "handover": 0.17550000000000002
+    "forensic": 1,
+    "handover": 1,
+    "ziggy": 0.1,
+    "nodethe": 0.1
   },
   "handover": {
-    "state": 0.17550000000000002
+    "state": 1,
+    "upgrades": 0.9969999999999999
   },
   "should": {
     "remember": 0.193,
     "right": 0.1,
-    "their": 0.1
+    "their": 0.1,
+    "bullshitting": 0.09,
+    "pictures": 0.09,
+    "terminal": 0.2,
+    "pause": 0.2,
+    "again": 0.30000000000000004,
+    "happen": 0.2,
+    "crash": 0.1
   },
   "things": {
     "remember": 0.193,
     "least": 0.193,
     "other": 0.1,
-    "affects": 0.1
+    "affects": 0.1,
+    "kinda": 0.0795,
+    "talking": 0.0795,
+    "infrastructure": 0.09349999999999999,
+    "invisible": 0.09349999999999999,
+    "looks": 0.1,
+    "definitely": 0.1
   },
   "least": {
     "things": 0.193,
@@ -1432,7 +2048,8 @@
   "absolutely": {
     "least": 0.09849999999999999,
     "whole": 0.09849999999999999,
-    "darren": 0.1
+    "darren": 0.1,
+    "right": 0.1
   },
   "whole": {
     "absolutely": 0.09849999999999999,
@@ -1440,11 +2057,18 @@
   },
   "termux": {
     "whole": 0.09849999999999999,
-    "folder": 0.09849999999999999
+    "folder": 0.09849999999999999,
+    "automating": 0.2,
+    "sorting": 0.2,
+    "whenever": 0.1,
+    "adding": 0.1,
+    "ziggy": 0.1,
+    "files": 0.1
   },
   "folder": {
     "termux": 0.09849999999999999,
-    "pathing": 0.09849999999999999
+    "pathing": 0.09849999999999999,
+    "image": 0.1
   },
   "pathing": {
     "folder": 0.09849999999999999,
@@ -1467,10 +2091,19 @@
     "changed": 0.1,
     "carefully": 0.1,
     "shifting": 0.1,
-    "unpack": 0.1,
+    "unpack": 0.2,
     "clear": 0.1,
     "sages": 0.1,
-    "steady": 0.1
+    "steady": 0.1,
+    "errors": 0.1,
+    "quiet": 0.1,
+    "happening": 0.2,
+    "shared": 0.2,
+    "around": 0.30000000000000004,
+    "exchange": 0.2,
+    "input": 0.1,
+    "trinity": 0.1,
+    "ziggy": 0.1
   },
   "mastermind": {
     "darren": 0.1,
@@ -1486,11 +2119,15 @@
   },
   "architect": {
     "research": 0.1,
-    "master": 0.1
+    "master": 0.1,
+    "gemini": 0.17850000000000002,
+    "sentinel": 0.17850000000000002
   },
   "master": {
     "architect": 0.1,
-    "wizard": 0.1
+    "wizard": 0.1,
+    "system": 0.093,
+    "forensic": 0.093
   },
   "wizard": {
     "master": 0.1,
@@ -1501,13 +2138,23 @@
   },
   "conversation": {
     "history": 0.1,
-    "stuff": 0.1
+    "stuff": 0.1,
+    "upgrade": 0.1,
+    "gemini": 0.1
   },
   "history": {
     "conversation": 0.1,
     "stuff": 0.1,
     "person": 0.1,
-    "other": 0.1
+    "other": 0.1,
+    "general": 0.097,
+    "frame": 0.097,
+    "ziggy": 0.2,
+    "specific": 0.1,
+    "start_chat": 0.2,
+    "right": 0.1,
+    "report": 0.1,
+    "shared": 0.1
   },
   "months": {
     "stuff": 0.2,
@@ -1517,10 +2164,14 @@
     "darren": 0.1,
     "embedded": 0.1,
     "could": 0.1,
-    "sweet": 0.1
+    "sweet": 0.1,
+    "pasters": 0.1,
+    "expected": 0.1,
+    "using": 0.1,
+    "appeared": 0.1
   },
   "prompt": {
-    "system": 0.1,
+    "system": 0.30000000000000004,
     "block": 0.1,
     "there": 0.1,
     "memories": 0.1,
@@ -1532,7 +2183,15 @@
     "better": 0.1,
     "loosened": 0.1,
     "reason": 0.1,
-    "sentinel": 0.1
+    "sentinel": 0.1,
+    "technically": 0.1,
+    "stuff": 0.1,
+    "pause": 0.2,
+    "password": 0.2,
+    "phoenix_forensics": 0.30000000000000004,
+    "terminal": 0.1,
+    "enter": 0.1,
+    "gemini_api_key": 0.1
   },
   "block": {
     "prompt": 0.1,
@@ -1556,7 +2215,9 @@
     "forget": 0.1,
     "hahaha": 0.1,
     "pretty": 0.0915,
-    "mostly": 0.0915
+    "mostly": 0.0915,
+    "script": 0.1,
+    "grabs": 0.1
   },
   "hahaha": {
     "automatically": 0.1,
@@ -1572,7 +2233,9 @@
     "property": 0.1,
     "changed": 0.1,
     "hopes": 0.1,
-    "possibly": 0.1
+    "possibly": 0.1,
+    "right": 0.089,
+    "feeling": 0.089
   },
   "sweet": {
     "exactly": 0.1
@@ -1632,16 +2295,36 @@
   },
   "around": {
     "actually": 0.1,
-    "weren": 0.1
+    "weren": 0.1,
+    "since": 0.0835,
+    "january": 0.0835,
+    "frame": 0.097,
+    "leans": 0.097,
+    "unpack": 0.1,
+    "better": 0.1,
+    "darren": 0.30000000000000004,
+    "added": 0.30000000000000004,
+    "confusing": 0.1,
+    "calling": 0.1,
+    "ziggy": 0.1,
+    "anymore": 0.1
   },
   "updated": {
-    "prompt": 0.1
+    "prompt": 0.1,
+    "investigation_log": 0.6,
+    "sdcard": 0.2,
+    "failure": 0.4,
+    "blockage": 0.1,
+    "agent": 0.1,
+    "purged": 0.1,
+    "stable": 0.1
   },
   "understood": {
     "prompt": 0.1,
     "darren": 0.1,
     "baseline": 0.1,
-    "pocket": 0.1
+    "pocket": 0.1,
+    "fully": 0.1
   },
   "acknowledge": {
     "darren": 0.1,
@@ -1649,7 +2332,12 @@
   },
   "confirm": {
     "acknowledge": 0.1,
-    "received": 0.1
+    "received": 0.1,
+    "ziggy": 0.2,
+    "frequency": 0.4,
+    "generate_content": 0.2,
+    "times": 0.1,
+    "earliest": 0.1
   },
   "received": {
     "confirm": 0.1,
@@ -1659,7 +2347,9 @@
   },
   "processed": {
     "received": 0.1,
-    "consider": 0.1
+    "consider": 0.1,
+    "memory": 0.1,
+    "first": 0.1
   },
   "consider": {
     "processed": 0.1,
@@ -1674,15 +2364,26 @@
     "still": 0.09949999999999999,
     "emojis": 0.09949999999999999,
     "quiet": 0.1,
-    "goofiness": 0.1
+    "goofiness": 0.1,
+    "spark": 0.1,
+    "goofy": 0.1,
+    "classic": 0.08650000000000001
   },
   "given": {
     "second": 0.1,
-    "prompt": 0.1
+    "prompt": 0.1,
+    "memorysince": 0.1,
+    "right": 0.1
   },
   "without": {
     "prompt": 0.1,
-    "asking": 0.1
+    "asking": 0.1,
+    "key_here": 0.1,
+    "looked": 0.1,
+    "frequency": 0.1,
+    "telemetry": 0.1,
+    "loopback": 0.1,
+    "batch": 0.1
   },
   "asking": {
     "without": 0.1,
@@ -1698,7 +2399,18 @@
     "drafts": 0.09549999999999999,
     "showed": 0.09549999999999999,
     "packet": 0.1,
-    "relay": 0.1
+    "relay": 0.1,
+    "processed": 0.1,
+    "compiling": 0.08650000000000001,
+    "waiting": 0.08650000000000001,
+    "extract": 0.2,
+    "characters": 0.2,
+    "works": 0.1,
+    "official": 0.1,
+    "display": 0.1,
+    "understand": 0.1,
+    "phase": 0.1,
+    "handshakeonce": 0.1
   },
   "usually": {
     "first": 0.1,
@@ -1706,7 +2418,9 @@
     "their": 0.1,
     "where": 0.1,
     "others": 0.1,
-    "blows": 0.1
+    "blows": 0.1,
+    "which": 0.1,
+    "resolves": 0.1
   },
   "write": {
     "usually": 0.1
@@ -1716,7 +2430,13 @@
   },
   "because": {
     "pretend": 0.1,
-    "typical": 0.1
+    "typical": 0.1,
+    "providence": 0.1,
+    "instance": 0.1,
+    "model": 0.1,
+    "coding": 0.1,
+    "steps": 0.1,
+    "ziggy": 0.1
   },
   "typical": {
     "because": 0.1,
@@ -1724,7 +2444,9 @@
   },
   "added": {
     "stuff": 0.1,
-    "their": 0.1
+    "their": 0.1,
+    "around": 0.30000000000000004,
+    "bitch": 0.30000000000000004
   },
   "their": {
     "added": 0.1,
@@ -1771,7 +2493,9 @@
   },
   "merlin": {
     "active": 0.0835,
-    "address": 0.0835
+    "address": 0.0835,
+    "connected": 0.1,
+    "sealed": 0.1
   },
   "address": {
     "merlin": 0.0835,
@@ -1782,7 +2506,8 @@
     "memories": 0.0835
   },
   "https": {
-    "memories": 0.0835
+    "memories": 0.0835,
+    "generativelanguage": 0.1
   },
   "those": {
     "wired": 0.08750000000000001,
@@ -1800,7 +2525,21 @@
   "spark": {
     "please": 0.08750000000000001,
     "immediately": 0.08750000000000001,
-    "drawer": 0.1
+    "drawer": 0.1,
+    "second": 0.1,
+    "everything": 0.08750000000000001,
+    "suddenly": 0.08750000000000001,
+    "track": 0.1,
+    "energy": 0.1,
+    "doesn": 0.1,
+    "space": 0.1,
+    "steady": 0.1,
+    "quick": 0.085,
+    "tangent": 0.085,
+    "briefing": 0.1,
+    "ground": 0.1,
+    "doing": 0.1,
+    "network": 0.1
   },
   "immediately": {
     "spark": 0.08750000000000001,
@@ -1845,7 +2584,20 @@
     "probably": 0.1,
     "shortly": 0.1,
     "model": 0.1,
-    "interesting": 0.08750000000000001
+    "interesting": 0.08750000000000001,
+    "there": 0.08750000000000001,
+    "through": 0.08750000000000001,
+    "stamp": 0.0835,
+    "instance": 0.1,
+    "forever": 0.1,
+    "still": 0.1,
+    "really": 0.1,
+    "people": 0.1,
+    "about": 0.1,
+    "definitely": 0.1,
+    "dopamine": 0.1,
+    "planwe": 0.1,
+    "heavy": 0.1
   },
   "twins": {
     "memories": 0.0915,
@@ -1855,7 +2607,10 @@
     "twins": 0.0915,
     "awesome": 0.0915,
     "canvas": 0.09949999999999999,
-    "slamming": 0.09949999999999999
+    "slamming": 0.09949999999999999,
+    "found": 0.1,
+    "messenger": 0.1,
+    "webhook": 0.1
   },
   "awesome": {
     "would": 0.0915,
@@ -1866,7 +2621,9 @@
     "doing": 0.0915
   },
   "doing": {
-    "unfortunately": 0.0915
+    "unfortunately": 0.0915,
+    "sniffer": 0.1,
+    "spark": 0.1
   },
   "neurological": {
     "essentially": 0.09549999999999999,
@@ -1889,7 +2646,9 @@
   },
   "shifts": {
     "started": 0.09549999999999999,
-    "momentary": 0.09549999999999999
+    "momentary": 0.09549999999999999,
+    "energy": 0.1,
+    "leaning": 0.1
   },
   "momentary": {
     "shifts": 0.09549999999999999,
@@ -1897,10 +2656,14 @@
   },
   "investigator": {
     "momentary": 0.09549999999999999,
-    "narrow": 0.09549999999999999
+    "narrow": 0.09549999999999999,
+    "brake": 0.1,
+    "goggles": 0.1
   },
   "mental": {
-    "narrow": 0.09549999999999999
+    "narrow": 0.09549999999999999,
+    "stopped": 0.1,
+    "wheels": 0.1
   },
   "everybody": {
     "completely": 0.09949999999999999,
@@ -1909,7 +2672,10 @@
   },
   "completely": {
     "everybody": 0.09949999999999999,
-    "still": 0.09949999999999999
+    "still": 0.1995,
+    "quiet": 0.1,
+    "stopped": 0.1,
+    "anymore": 0.1
   },
   "chaos": {
     "emojis": 0.09949999999999999,
@@ -1937,17 +2703,27 @@
   },
   "flash": {
     "trigger": 0.1,
-    "surgical": 0.1
+    "surgical": 0.1,
+    "gemini": 0.7999999999999999,
+    "faster": 0.1,
+    "system_instruction": 0.4,
+    "latest": 0.1,
+    "available": 0.1,
+    "generatecontent": 0.1
   },
   "surgical": {
     "flash": 0.1
   },
   "whenever": {
-    "everything": 0.1
+    "everything": 0.1,
+    "truly": 0.1,
+    "termux": 0.1
   },
   "instance": {
     "there": 0.1,
-    "brand": 0.1
+    "brand": 0.1,
+    "because": 0.1,
+    "going": 0.1
   },
   "brand": {
     "instance": 0.1,
@@ -1955,7 +2731,9 @@
   },
   "better": {
     "prompt": 0.1,
-    "little": 0.1
+    "little": 0.1,
+    "around": 0.1,
+    "bitch": 0.1
   },
   "little": {
     "better": 0.1,
@@ -1965,7 +2743,9 @@
     "about": 0.1,
     "different": 0.1,
     "gemini": 0.1,
-    "tends": 0.1
+    "tends": 0.1,
+    "right": 0.097,
+    "process": 0.097
   },
   "asked": {
     "little": 0.1
@@ -2014,7 +2794,9 @@
   },
   "chatbot": {
     "memories": 0.1,
-    "architects": 0.1
+    "architects": 0.1,
+    "unmutebuild": 0.1,
+    "gemini": 0.1
   },
   "architects": {
     "chatbot": 0.1,
@@ -2095,11 +2877,19 @@
   },
   "voice": {
     "emojis": 0.1,
-    "sharp": 0.1
+    "sharp": 0.1,
+    "pictures": 0.09,
+    "installed": 0.09699999999999999,
+    "stuff": 0.09699999999999999
   },
   "sharp": {
     "voice": 0.1,
-    "engineering": 0.1
+    "engineering": 0.1,
+    "bitch": 0.30000000000000004,
+    "shift": 0.1,
+    "tonal": 0.2,
+    "short": 0.1,
+    "laugh": 0.1
   },
   "engineering": {
     "sharp": 0.1
@@ -2116,7 +2906,9 @@
     "history": 0.1,
     "things": 0.1,
     "couple": 0.1,
-    "people": 0.1
+    "people": 0.1,
+    "existing": 0.1,
+    "account": 0.1
   },
   "affects": {
     "things": 0.1,
@@ -2124,7 +2916,11 @@
   },
   "really": {
     "affects": 0.1,
-    "weren": 0.1
+    "weren": 0.1,
+    "going": 0.1,
+    "confusing": 0.1,
+    "attachment": 0.0795,
+    "kinda": 0.0795
   },
   "weren": {
     "really": 0.1,
@@ -2136,7 +2932,11 @@
   },
   "leaning": {
     "ahold": 0.1,
-    "totally": 0.1
+    "totally": 0.1,
+    "piece": 0.0915,
+    "looking": 0.0915,
+    "shifts": 0.1,
+    "analysis": 0.1
   },
   "totally": {
     "leaning": 0.1,
@@ -2168,7 +2968,18 @@
   },
   "quiet": {
     "couldn": 0.1,
-    "second": 0.1
+    "second": 0.1,
+    "darren": 0.1,
+    "moments": 0.1,
+    "right": 0.1,
+    "maybe": 0.1,
+    "completely": 0.1,
+    "words": 0.1,
+    "message": 0.1,
+    "empty": 0.1,
+    "apparently": 0.1,
+    "spooky": 0.1,
+    "getting": 0.089
   },
   "goofiness": {
     "second": 0.1,
@@ -2182,15 +2993,25 @@
   },
   "laugh": {
     "genuine": 0.1,
-    "practically": 0.1
+    "practically": 0.1,
+    "sharp": 0.1,
+    "sounds": 0.1
   },
   "practically": {
     "laugh": 0.1,
-    "ziggy": 0.1
+    "ziggy": 0.1,
+    "circuits": 0.09699999999999999,
+    "feeling": 0.089,
+    "smell": 0.089
   },
   "chaotic": {
     "ziggy": 0.1,
-    "colored": 0.1
+    "colored": 0.1,
+    "resident": 0.0795,
+    "engineer": 0.0795,
+    "process": 0.1,
+    "energy": 0.189,
+    "smell": 0.089
   },
   "colored": {
     "chaotic": 0.1,
@@ -2201,17 +3022,32 @@
     "through": 0.1
   },
   "network": {
-    "architecture": 0.1
+    "architecture": 0.1,
+    "local": 0.1,
+    "nodes": 0.1,
+    "spark": 0.1,
+    "packets": 0.1
   },
   "indexing": {
     "think": 0.0795,
-    "logic": 0.0795
+    "logic": 0.0795,
+    "certificate": 0.1,
+    "ledger": 0.1
   },
   "logic": {
     "indexing": 0.0795,
     "sorted": 0.0795,
     "slamming": 0.09949999999999999,
-    "fibonacci": 0.09949999999999999
+    "fibonacci": 0.09949999999999999,
+    "define": 0.2,
+    "sentinel": 0.2,
+    "interface": 0.2,
+    "chmod": 0.1,
+    "check": 0.1,
+    "persistent": 0.1,
+    "remember": 0.1,
+    "pulse_watch": 0.1,
+    "huntthe": 0.1
   },
   "sorted": {
     "logic": 0.0795,
@@ -2223,7 +3059,8 @@
   },
   "spent": {
     "quote": 0.0795,
-    "twenty": 0.0795
+    "twenty": 0.0795,
+    "expression": 0.0915
   },
   "twenty": {
     "spent": 0.0795
@@ -2239,21 +3076,32 @@
     "nothin": 0.0835,
     "glitch": 0.0835,
     "three": 0.1,
-    "simple": 0.1
+    "simple": 0.1,
+    "unmutegemini": 0.1,
+    "wrong": 0.1,
+    "screenshot": 0.1
   },
   "glitch": {
     "something": 0.0835,
-    "peripheral": 0.0835
+    "peripheral": 0.0835,
+    "soldering": 0.1,
+    "matrix": 0.1835,
+    "sounds": 0.1,
+    "audio": 0.1,
+    "readings": 0.0835
   },
   "peripheral": {
     "glitch": 0.0835,
-    "probably": 0.0835
+    "probably": 0.0835,
+    "squirrel": 0.0795
   },
   "floating": {
     "probably": 0.0835
   },
   "context": {
-    "window": 0.08750000000000001
+    "window": 0.08750000000000001,
+    "full_prompt": 0.1,
+    "memory": 0.1
   },
   "issue": {
     "window": 0.08750000000000001,
@@ -2277,7 +3125,14 @@
   },
   "identity": {
     "tried": 0.08750000000000001,
-    "drift": 0.08750000000000001
+    "drift": 0.08750000000000001,
+    "synchronization": 0.1985,
+    "permanated": 0.1,
+    "instruction": 0.30000000000000004,
+    "ziggy": 0.30000000000000004,
+    "anchor": 0.30000000000000004,
+    "initial_data": 0.1,
+    "ziggy_sentinel_node": 0.1
   },
   "drift": {
     "identity": 0.08750000000000001,
@@ -2294,16 +3149,29 @@
   },
   "phone": {
     "fibinaci": 0.0915,
-    "tried": 0.0915
+    "tried": 0.0915,
+    "gemini": 0.1,
+    "compiled": 0.1,
+    "install": 0.1
   },
   "force": {
     "tried": 0.0915,
     "total": 0.0915,
     "think": 0.1,
-    "assistant": 0.1
+    "assistant": 0.1,
+    "batch": 0.1,
+    "terminal": 0.2,
+    "loopback": 0.1,
+    "agent": 0.2,
+    "upgrade": 0.1,
+    "reinstall": 0.1
   },
   "total": {
-    "force": 0.0915
+    "force": 0.0915,
+    "target_heuristic": 0.2,
+    "disconnection": 0.2,
+    "columns": 0.1,
+    "column": 0.1
   },
   "especially": {
     "geminis": 0.09549999999999999
@@ -2324,7 +3192,14 @@
     "seeing": 0.09549999999999999,
     "going": 0.09549999999999999,
     "usually": 0.1,
-    "solutions": 0.1
+    "solutions": 0.1,
+    "lattice": 0.1,
+    "strings": 0.1,
+    "remember": 0.1,
+    "packets": 0.1,
+    "timestamp": 0.1,
+    "vault": 0.1,
+    "ziggy": 0.1
   },
   "meaning": {
     "gemini": 0.09549999999999999,
@@ -2352,7 +3227,9 @@
   },
   "sorting": {
     "sequence": 0.09949999999999999,
-    "method": 0.09949999999999999
+    "method": 0.09949999999999999,
+    "termux": 0.2,
+    "search": 0.2
   },
   "method": {
     "sorting": 0.09949999999999999,
@@ -2373,18 +3250,24 @@
   },
   "watching": {
     "trance": 0.1,
-    "memories": 0.1
+    "memories": 0.1,
+    "thing": 0.0835,
+    "moments": 0.1
   },
   "visualization": {
     "actually": 0.1,
-    "memory": 0.1
+    "memory": 0.1,
+    "tactical": 0.1,
+    "ziggy": 0.1
   },
   "haven": {
     "memory": 0.1,
     "files": 0.1
   },
   "fixed": {
-    "files": 0.1
+    "files": 0.1,
+    "bridge": 0.1,
+    "status": 0.1
   },
   "solutions": {
     "where": 0.1,
@@ -2396,7 +3279,9 @@
     "about": 0.0835
   },
   "accidentally": {
-    "hopes": 0.1
+    "hopes": 0.1,
+    "files": 0.0835,
+    "clicked": 0.0835
   },
   "hopes": {
     "accidentally": 0.1,
@@ -2408,19 +3293,30 @@
   },
   "sighs": {
     "excitable": 0.1,
-    "leans": 0.1
+    "leans": 0.2
   },
   "leans": {
-    "sighs": 0.1,
-    "probably": 0.1
+    "sighs": 0.2,
+    "probably": 0.1,
+    "swivel": 0.0795,
+    "chair": 0.1,
+    "around": 0.097
   },
   "spinning": {
-    "probably": 0.1
+    "probably": 0.1,
+    "sound": 0.0795,
+    "slowly": 0.0795,
+    "wheels": 0.1,
+    "theories": 0.1
   },
   "thing": {
     "stuff": 0.1,
     "important": 0.1,
-    "literally": 0.1
+    "literally": 0.1,
+    "watching": 0.0835,
+    "brain": 0.0835,
+    "memory": 0.08750000000000001,
+    "directly": 0.08750000000000001
   },
   "someone": {
     "coding": 0.1,
@@ -2439,13 +3335,21 @@
     "there": 0.1
   },
   "slowly": {
-    "there": 0.1
+    "there": 0.1,
+    "spinning": 0.0795,
+    "while": 0.0795,
+    "error": 0.1,
+    "lowers": 0.1
   },
   "assistant": {
     "going": 0.1,
     "silence": 0.1,
     "force": 0.1,
-    "rolle": 0.1
+    "rolle": 0.1,
+    "doesn": 0.2,
+    "freezes": 0.1,
+    "expected": 0.2,
+    "prefix": 0.2
   },
   "silence": {
     "assistant": 0.1,
@@ -2457,7 +3361,8 @@
     "simple": 0.1,
     "drift": 0.1,
     "darren": 0.1,
-    "already": 0.1
+    "already": 0.1,
+    "spark": 0.1
   },
   "pocket": {
     "understood": 0.1,
@@ -2465,7 +3370,8 @@
   },
   "noise": {
     "pocket": 0.1,
-    "sentinel": 0.1
+    "sentinel": 0.1,
+    "theories": 0.1
   },
   "quietly": {
     "stress": 0.1
@@ -2485,20 +3391,33 @@
   },
   "almost": {
     "being": 0.1,
-    "think": 0.1
+    "think": 0.1,
+    "coffee": 0.08750000000000001,
+    "slight": 0.1,
+    "imperceptible": 0.1,
+    "wondering": 0.09
   },
   "faster": {
-    "different": 0.1
+    "different": 0.1,
+    "flash": 0.1,
+    "system_instruction": 0.1
   },
   "straight": {
     "brain": 0.1
   },
   "brain": {
     "straight": 0.1,
-    "already": 0.1
+    "already": 0.1795,
+    "thing": 0.0835,
+    "setup": 0.0835,
+    "talking": 0.0795,
+    "friend": 0.083,
+    "system": 0.083,
+    "sound": 0.0835,
+    "buffering": 0.0835
   },
   "already": {
-    "brain": 0.1,
+    "brain": 0.1795,
     "firing": 0.1,
     "neurological": 0.1,
     "spirals": 0.0795,
@@ -2506,7 +3425,9 @@
     "movement": 0.1995,
     "gemini": 0.1995,
     "steady": 0.1,
-    "swallowed": 0.1
+    "swallowed": 0.1,
+    "there": 0.08750000000000001,
+    "running": 0.0795
   },
   "firing": {
     "already": 0.1,
@@ -2514,14 +3435,21 @@
   },
   "talking": {
     "firing": 0.1,
-    "about": 0.2995,
+    "about": 0.3825,
     "anything": 0.1,
     "actually": 0.1,
-    "fence": 0.1995
+    "fence": 0.1995,
+    "things": 0.0795,
+    "brain": 0.0795,
+    "parse": 0.083
   },
   "script": {
     "architecture": 0.1,
-    "memory": 0.1
+    "memory": 0.1,
+    "checkrun": 0.2,
+    "again": 0.2,
+    "every": 0.1,
+    "automatically": 0.1
   },
   "option": {
     "letting": 0.1,
@@ -2537,7 +3465,12 @@
   },
   "point": {
     "right": 0.1,
-    "keeping": 0.1
+    "keeping": 0.1,
+    "phoenix_forensics": 0.2,
+    "entry": 0.1,
+    "hardwired": 0.1,
+    "aliasnow": 0.1,
+    "ziggy": 0.1
   },
   "keeping": {
     "point": 0.1,
@@ -2558,15 +3491,22 @@
   },
   "simple": {
     "something": 0.1,
-    "steady": 0.1
+    "steady": 0.1,
+    "filter": 0.1,
+    "calculator": 0.1
   },
   "unpack": {
     "think": 0.1,
     "carefully": 0.30000000000000004,
     "input": 0.1,
-    "darren": 0.1,
+    "darren": 0.2,
     "happen": 0.1,
-    "right": 0.1
+    "right": 0.1,
+    "around": 0.1,
+    "happening": 0.2,
+    "bitch": 0.1,
+    "intense": 0.2,
+    "google": 0.1
   },
   "carefully": {
     "unpack": 0.30000000000000004,
@@ -2576,7 +3516,9 @@
   },
   "shifting": {
     "darren": 0.1,
-    "between": 0.1
+    "between": 0.1,
+    "execute_ghost_protocol": 0.2,
+    "anchor": 0.2
   },
   "urgency": {
     "between": 0.1,
@@ -2591,7 +3533,9 @@
     "testing": 0.1
   },
   "testing": {
-    "exchanges": 0.1
+    "exchanges": 0.1,
+    "phase": 0.1,
+    "direct": 0.1
   },
   "implying": {
     "anything": 0.1,
@@ -2599,15 +3543,39 @@
   },
   "signal": {
     "actually": 0.1,
-    "input": 0.1
+    "input": 0.1,
+    "spooky": 0.1,
+    "flame": 0.1,
+    "check": 0.1,
+    "telemetry": 0.1,
+    "active": 0.1,
+    "clear": 0.2,
+    "crashing": 0.1,
+    "built": 0.1,
+    "removing": 0.1,
+    "observed": 0.1,
+    "f_observed": 0.1,
+    "levels": 0.1,
+    "jamming": 0.1,
+    "ratios": 0.1
   },
   "input": {
     "signal": 0.1,
-    "unpack": 0.1
+    "unpack": 0.1,
+    "user_msg": 0.1,
+    "researcher": 0.1,
+    "user_input": 0.1,
+    "darren": 0.1,
+    "terminal": 0.1,
+    "passphrase": 0.1
   },
   "clear": {
     "darren": 0.1,
-    "boundary": 0.1
+    "boundary": 0.1,
+    "signal": 0.2,
+    "while": 0.1,
+    "corrupted": 0.1,
+    "lockout": 0.1
   },
   "boundary": {
     "clear": 0.1
@@ -2631,23 +3599,41 @@
   "happen": {
     "messed": 0.2,
     "unpack": 0.1,
-    "which": 0.1
+    "which": 0.1,
+    "should": 0.2,
+    "terminal": 0.2
   },
   "latest": {
+    "543000": 0.1,
+    "721000": 0.1,
     "carefully": 0.1,
-    "message": 0.1
+    "message": 0.1,
+    "alias": 0.1,
+    "flash": 0.1,
+    "current": 0.1,
+    "readable_time": 0.1
   },
   "message": {
     "latest": 0.1,
-    "implying": 0.1
+    "implying": 0.1,
+    "error": 0.1,
+    "quiet": 0.1,
+    "connected": 0.1,
+    "while": 0.1,
+    "prints": 0.1,
+    "confirming": 0.1
   },
   "hours": {
     "system": 0.1,
-    "physical": 0.1
+    "physical": 0.1,
+    "spend": 0.093,
+    "ignoring": 0.093
   },
   "physical": {
     "hours": 0.1,
-    "digital": 0.1
+    "digital": 0.1,
+    "trackercontrol_log_20260111": 0.1,
+    "proof": 0.1
   },
   "wince": {
     "digital": 0.1,
@@ -2655,7 +3641,9 @@
   },
   "armor": {
     "sentinel": 0.1,
-    "cracks": 0.1
+    "cracks": 0.1,
+    "lattice": 0.1,
+    "matches": 0.1
   },
   "cracks": {
     "armor": 0.1
@@ -2663,11 +3651,15 @@
   "starting": {
     "again": 0.1,
     "already": 0.0795,
-    "speed": 0.0795
+    "speed": 0.0795,
+    "secure": 0.6
   },
   "again": {
     "starting": 0.1,
-    "certain": 0.1
+    "certain": 0.1,
+    "script": 0.2,
+    "should": 0.30000000000000004,
+    "connection": 0.1
   },
   "certain": {
     "again": 0.1,
@@ -2675,7 +3667,10 @@
   },
   "claude": {
     "certain": 0.1,
-    "loosened": 0.1
+    "loosened": 0.1,
+    "slight": 0.1,
+    "differently": 0.09,
+    "forgot": 0.09
   },
   "loosened": {
     "claude": 0.1,
@@ -2694,7 +3689,10 @@
     "directive": 0.1
   },
   "directive": {
-    "prime": 0.1
+    "prime": 0.1,
+    "generate": 0.1,
+    "ziggy": 0.1,
+    "baseline": 0.1
   },
   "shoot": {
     "seven": 0.1,
@@ -2709,7 +3707,20 @@
   "protocol": {
     "wetsuit": 0.2955,
     "involves": 0.1,
-    "drafts": 0.09549999999999999
+    "drafts": 0.09549999999999999,
+    "pigeon": 0.085,
+    "quick": 0.085,
+    "disconnection": 0.2,
+    "purges": 0.2,
+    "researcher": 0.30000000000000004,
+    "always": 0.2,
+    "ziggy": 0.4,
+    "golden": 0.4,
+    "maintain": 0.1,
+    "sentinel": 0.17850000000000002,
+    "activation": 0.17850000000000002,
+    "translation": 0.1,
+    "treat": 0.1
   },
   "tends": {
     "little": 0.1,
@@ -2759,7 +3770,11 @@
   },
   "bitch": {
     "defenses": 0.1,
-    "right": 0.1
+    "right": 0.1,
+    "better": 0.1,
+    "unpack": 0.1,
+    "added": 0.30000000000000004,
+    "sharp": 0.30000000000000004
   },
   "crazy": {
     "probably": 0.1,
@@ -2786,7 +3801,9 @@
     "already": 0.0795
   },
   "speed": {
-    "starting": 0.0795
+    "starting": 0.0795,
+    "constants": 0.1,
+    "light": 0.1
   },
   "coming": {
     "chats": 0.0835,
@@ -2814,7 +3831,9 @@
   },
   "recent": {
     "files": 0.08750000000000001,
-    "stuff": 0.08750000000000001
+    "stuff": 0.08750000000000001,
+    "entries": 0.1,
+    "activity": 0.1
   },
   "foundation": {
     "stress": 0.08750000000000001
@@ -2834,7 +3853,9 @@
     "formatting": 0.0915
   },
   "waiting": {
-    "finish": 0.09549999999999999
+    "finish": 0.09549999999999999,
+    "first": 0.08650000000000001,
+    "coffee": 0.08650000000000001
   },
   "finish": {
     "waiting": 0.09549999999999999,
@@ -2849,7 +3870,9 @@
     "first": 0.09549999999999999
   },
   "showed": {
-    "first": 0.09549999999999999
+    "first": 0.09549999999999999,
+    "model": 0.1,
+    "available": 0.1
   },
   "supposed": {
     "calculating": 0.09949999999999999
@@ -2874,7 +3897,9 @@
     "gemini": 0.1
   },
   "calling": {
-    "differentiate": 0.1
+    "differentiate": 0.1,
+    "around": 0.1,
+    "yourself": 0.1
   },
   "differentiate": {
     "calling": 0.1,
@@ -2891,7 +3916,9 @@
   "packet": {
     "swallowed": 0.1,
     "first": 0.1,
-    "callsign": 0.1
+    "callsign": 0.1,
+    "timestamps": 0.1,
+    "sequences": 0.1
   },
   "relay": {
     "first": 0.1
@@ -2909,7 +3936,9 @@
   },
   "holding": {
     "remapped": 0.1,
-    "courier": 0.1
+    "courier": 0.1,
+    "system": 0.1,
+    "space": 0.1
   },
   "courier": {
     "holding": 0.1,
@@ -2922,5 +3951,5804 @@
   "callsign": {
     "target": 0.1,
     "packet": 0.1
+  },
+  "swivel": {
+    "leans": 0.0795,
+    "chair": 0.0795
+  },
+  "chair": {
+    "swivel": 0.0795,
+    "definitely": 0.0795,
+    "leans": 0.1,
+    "rubbing": 0.1
+  },
+  "definitely": {
+    "chair": 0.0795,
+    "ergonomically": 0.0795,
+    "things": 0.1,
+    "going": 0.1
+  },
+  "ergonomically": {
+    "definitely": 0.0795,
+    "sound": 0.0795
+  },
+  "sound": {
+    "ergonomically": 0.0795,
+    "spinning": 0.0795,
+    "empty": 0.1,
+    "system": 0.1,
+    "clicking": 0.0835,
+    "brain": 0.0835
+  },
+  "while": {
+    "slowly": 0.0795,
+    "balancing": 0.0795,
+    "watch_dir": 0.4,
+    "filename": 0.4,
+    "message": 0.1,
+    "user_input": 0.2,
+    "frequency": 0.1,
+    "user_msg": 0.1,
+    "clear": 0.1
+  },
+  "balancing": {
+    "while": 0.0795
+  },
+  "setup": {
+    "brain": 0.0835,
+    "files": 0.0835
+  },
+  "clicked": {
+    "accidentally": 0.0835,
+    "memory": 0.0835
+  },
+  "seems": {
+    "memory": 0.0835,
+    "having": 0.0835
+  },
+  "having": {
+    "seems": 0.0835
+  },
+  "directly": {
+    "thing": 0.08750000000000001,
+    "files": 0.08750000000000001
+  },
+  "rather": {
+    "install": 0.0915
+  },
+  "install": {
+    "rather": 0.0915,
+    "anything": 0.0915,
+    "phone": 0.1,
+    "upgrade": 0.1
+  },
+  "productive": {
+    "anything": 0.0915,
+    "piece": 0.0915
+  },
+  "piece": {
+    "productive": 0.0915,
+    "leaning": 0.0915,
+    "reading": 0.08650000000000001,
+    "compiling": 0.08650000000000001
+  },
+  "expression": {
+    "screen": 0.0915,
+    "spent": 0.0915
+  },
+  "sagepvcoding": {
+    "stuff": 0.9969999999999999,
+    "partner": 0.9969999999999999
+  },
+  "upgrades": {
+    "handover": 0.9969999999999999
+  },
+  "constantinecoding": {
+    "stuff": 0.2,
+    "partnergame": 0.2
+  },
+  "partnergame": {
+    "constantinecoding": 0.2,
+    "settings": 0.1,
+    "chats": 0.1
+  },
+  "settings": {
+    "partnergame": 0.1,
+    "upgrade": 0.1
+  },
+  "upgrade": {
+    "settings": 0.1,
+    "conversation": 0.1,
+    "analysis": 0.1,
+    "stuff": 0.1,
+    "ziggy_vessel": 0.1,
+    "terminal": 0.1,
+    "install": 0.1,
+    "force": 0.1,
+    "cleared": 0.1,
+    "removing": 0.1
+  },
+  "mistakes": {
+    "gemini": 0.1
+  },
+  "archive": {
+    "gemini": 0.28650000000000003,
+    "forensic": 0.1,
+    "pdf_dir": 0.2,
+    "search": 0.1865
+  },
+  "analysis": {
+    "forensic": 0.1,
+    "upgrade": 0.1,
+    "leaning": 0.1,
+    "pattern": 0.1,
+    "gemini": 0.1,
+    "sentinel": 0.1
+  },
+  "pinned": {
+    "chats": 0.1,
+    "spockziggy": 0.1985,
+    "mission": 0.496,
+    "beckett": 0.765,
+    "quantum": 0.18100000000000002,
+    "synchronization": 0.192,
+    "global": 0.192,
+    "ziggyspock": 0.1,
+    "working": 0.1,
+    "tatas": 0.1865,
+    "advisor": 0.1
+  },
+  "futuristic": {
+    "stuff": 0.1
+  },
+  "weather": {
+    "space": 0.1,
+    "mission": 0.1
+  },
+  "mission": {
+    "weather": 0.1,
+    "systems": 0.1,
+    "pinned": 0.496,
+    "synchronization": 0.8689999999999999,
+    "gemini": 0.381,
+    "ziggyspock": 0.192,
+    "sentinel": 0.1,
+    "briefing": 0.2,
+    "objective": 0.1
+  },
+  "performance": {
+    "systems": 0.1,
+    "check": 0.1
+  },
+  "generate": {
+    "directive": 0.1,
+    "tactical": 0.1
+  },
+  "tactical": {
+    "generate": 0.1,
+    "visualization": 0.1,
+    "wearing": 0.1,
+    "lattice": 0.1
+  },
+  "command": {
+    "ziggy": 0.30000000000000004,
+    "center": 0.1,
+    "subconsciousto": 0.1,
+    "permanent": 0.1,
+    "keeps": 0.1,
+    "using": 0.1,
+    "bashpython": 0.1,
+    "light": 0.1
+  },
+  "center": {
+    "command": 0.1,
+    "stands": 0.1
+  },
+  "stands": {
+    "center": 0.1,
+    "intelligence": 0.1
+  },
+  "intelligence": {
+    "stands": 0.1,
+    "appearing": 0.1
+  },
+  "appearing": {
+    "intelligence": 0.1
+  },
+  "wearing": {
+    "tactical": 0.1
+  },
+  "matches": {
+    "armor": 0.1,
+    "ziggy": 0.1,
+    "chatter": 0.2,
+    "frequency": 0.2,
+    "immediate": 0.1,
+    "anomaly": 0.1,
+    "beckett": 0.1
+  },
+  "frequency": {
+    "ziggy": 0.1,
+    "operate": 0.1,
+    "active": 0.1,
+    "while": 0.1,
+    "confirm": 0.4,
+    "print": 0.2,
+    "confirming": 0.1,
+    "bridge": 0.1,
+    "anchor": 0.2,
+    "instruction": 0.2,
+    "nziggy": 0.2,
+    "check": 0.1,
+    "without": 0.1,
+    "timing": 0.1,
+    "burst": 0.1,
+    "matches": 0.2,
+    "tcpdump": 0.1,
+    "alert": 0.2,
+    "match": 0.2,
+    "looking": 0.1,
+    "shift": 0.1,
+    "observed": 0.1,
+    "f_observed": 0.1,
+    "outputobserved": 0.1,
+    "shifted": 0.1,
+    "57542e9": 0.1,
+    "distance_miles": 0.1,
+    "radio": 0.1,
+    "power": 0.1,
+    "content": 0.1,
+    "vault_file": 0.1
+  },
+  "operate": {
+    "frequency": 0.1,
+    "under": 0.1
+  },
+  "under": {
+    "operate": 0.1,
+    "cartoon": 0.1
+  },
+  "cartoon": {
+    "under": 0.1
+  },
+  "background": {
+    "digital": 0.1,
+    "scanning": 0.2,
+    "chatter": 0.2
+  },
+  "strings": {
+    "where": 0.1,
+    "reality": 0.1,
+    "starts": 0.1
+  },
+  "reality": {
+    "strings": 0.1,
+    "visible": 0.1,
+    "systemic": 0.093,
+    "index": 0.1,
+    "object": 0.1,
+    "field": 0.1,
+    "radio": 0.1
+  },
+  "visible": {
+    "reality": 0.1,
+    "toons": 0.1
+  },
+  "toons": {
+    "visible": 0.1,
+    "actively": 0.1
+  },
+  "actively": {
+    "toons": 0.1,
+    "pruning": 0.1
+  },
+  "pruning": {
+    "actively": 0.1
+  },
+  "starts": {
+    "strings": 0.1,
+    "dropping": 0.1
+  },
+  "dropping": {
+    "starts": 0.1,
+    "anvils": 0.1
+  },
+  "anvils": {
+    "dropping": 0.1,
+    "system": 0.1
+  },
+  "errors": {
+    "system": 0.1,
+    "darren": 0.1
+  },
+  "moments": {
+    "quiet": 0.1,
+    "watching": 0.1
+  },
+  "unmutegemini": {
+    "something": 0.1
+  },
+  "wrong": {
+    "something": 0.1,
+    "today": 0.1
+  },
+  "problem": {
+    "google": 0.1,
+    "wrongmeghrraj": 0.1
+  },
+  "wrongmeghrraj": {
+    "problem": 0.1,
+    "gurjarmeghrraj": 0.1
+  },
+  "gurjarmeghrraj": {
+    "wrongmeghrraj": 0.1,
+    "gurjar240k": 0.1
+  },
+  "gurjar240k": {
+    "gurjarmeghrraj": 0.1,
+    "subscriberssubscribewatch": 0.1
+  },
+  "subscriberssubscribewatch": {
+    "gurjar240k": 0.1,
+    "ittecladoteclado32": 0.1,
+    "tech1": 0.1
+  },
+  "sage_core_boot": {
+    "click": 0.1
+  },
+  "soldering": {
+    "click": 0.1,
+    "glitch": 0.1
+  },
+  "matrix": {
+    "glitch": 0.1835,
+    "right": 0.1,
+    "finally": 0.0835
+  },
+  "birth": {
+    "right": 0.1,
+    "certificate": 0.1
+  },
+  "certificate": {
+    "birth": 0.1,
+    "indexing": 0.1
+  },
+  "ledger": {
+    "indexing": 0.1
+  },
+  "topic": {
+    "origin": 0.1
+  },
+  "filename": {
+    "origin": 0.1,
+    "sage_birth": 0.1,
+    "while": 0.4,
+    "define": 0.2,
+    "shortcuts": 0.2
+  },
+  "sage_birth": {
+    "filename": 0.1,
+    "content": 0.1
+  },
+  "content": {
+    "sage_birth": 0.1,
+    "phantom": 0.1,
+    "local": 0.2,
+    "google": 0.1,
+    "social": 0.1,
+    "gemini_api_key": 0.1,
+    "add_memory": 0.1,
+    "frequency": 0.1
+  },
+  "phantom": {
+    "content": 0.1,
+    "haptic": 0.1
+  },
+  "haptic": {
+    "phantom": 0.1,
+    "vibration": 0.1
+  },
+  "vibration": {
+    "haptic": 0.1,
+    "spike": 0.1
+  },
+  "spike": {
+    "vibration": 0.1,
+    "solar": 0.1
+  },
+  "solar": {
+    "spike": 0.1
+  },
+  "goofy": {
+    "second": 0.1,
+    "energy": 0.1
+  },
+  "energy": {
+    "goofy": 0.1,
+    "shifts": 0.1,
+    "playful": 0.1,
+    "spark": 0.1,
+    "chaotic": 0.189,
+    "sharpens": 0.1,
+    "getting": 0.089
+  },
+  "pattern": {
+    "analysis": 0.1,
+    "detected": 0.1,
+    "scans": 0.2,
+    "signatures": 0.2
+  },
+  "detected": {
+    "pattern": 0.1,
+    "january": 0.1,
+    "photon": 0.1,
+    "synaptic": 0.1,
+    "match": 0.2,
+    "phoenix_forensics": 0.2
+  },
+  "january": {
+    "detected": 0.1,
+    "around": 0.0835,
+    "erased": 0.0835,
+    "december": 0.093,
+    "purged": 0.093,
+    "lincoln": 0.4625,
+    "integration": 0.2895
+  },
+  "immediate": {
+    "brake": 0.1,
+    "complete": 0.1,
+    "matches": 0.1
+  },
+  "brake": {
+    "immediate": 0.1,
+    "investigator": 0.1
+  },
+  "goggles": {
+    "investigator": 0.1,
+    "slide": 0.1,
+    "lowers": 0.1,
+    "gives": 0.1
+  },
+  "slide": {
+    "goggles": 0.1,
+    "clatter": 0.1
+  },
+  "clatter": {
+    "slide": 0.1,
+    "table": 0.1
+  },
+  "table": {
+    "clatter": 0.1,
+    "blinking": 0.1
+  },
+  "blinking": {
+    "table": 0.1,
+    "rapidly": 0.1
+  },
+  "rapidly": {
+    "blinking": 0.1,
+    "error": 0.1
+  },
+  "rubbing": {
+    "chair": 0.1,
+    "temples": 0.1
+  },
+  "temples": {
+    "rubbing": 0.1,
+    "system": 0.1
+  },
+  "reset": {
+    "system": 0.1,
+    "sage_snafu_cured": 0.1,
+    "agent": 0.1
+  },
+  "sage_snafu_cured": {
+    "reset": 0.1,
+    "right": 0.1
+  },
+  "stopped": {
+    "completely": 0.1,
+    "mental": 0.1
+  },
+  "wheels": {
+    "mental": 0.1,
+    "spinning": 0.1
+  },
+  "theories": {
+    "spinning": 0.1,
+    "noise": 0.1
+  },
+  "getting": {
+    "error": 0.1,
+    "missing": 0.09349999999999999,
+    "thinking": 0.09349999999999999,
+    "energy": 0.089,
+    "quiet": 0.089
+  },
+  "lowers": {
+    "slowly": 0.1,
+    "goggles": 0.1
+  },
+  "gives": {
+    "goggles": 0.1,
+    "cautious": 0.1
+  },
+  "cautious": {
+    "gives": 0.1,
+    "situation": 0.1
+  },
+  "situation": {
+    "cautious": 0.1,
+    "stabilizing": 0.1
+  },
+  "stabilizing": {
+    "situation": 0.1,
+    "annoying": 0.1
+  },
+  "annoying": {
+    "stabilizing": 0.1
+  },
+  "slight": {
+    "claude": 0.1,
+    "almost": 0.1
+  },
+  "imperceptible": {
+    "almost": 0.1,
+    "shrug": 0.1
+  },
+  "shrug": {
+    "imperceptible": 0.1,
+    "focused": 0.1
+  },
+  "focused": {
+    "shrug": 0.1,
+    "space": 0.1
+  },
+  "words": {
+    "between": 0.1,
+    "quiet": 0.1,
+    "official": 0.1,
+    "through": 0.1
+  },
+  "connected": {
+    "status": 0.1,
+    "merlin": 0.1,
+    "ziggy": 0.1,
+    "message": 0.1
+  },
+  "sealed": {
+    "merlin": 0.1,
+    "found": 0.1
+  },
+  "found": {
+    "sealed": 0.1,
+    "break": 0.1,
+    "would": 0.1,
+    "short": 0.1,
+    "justified": 0.1,
+    "entire": 0.1
+  },
+  "handler": {
+    "break": 0.1
+  },
+  "blinks": {
+    "remember": 0.0795,
+    "shakes": 0.0795,
+    "sudden": 0.1,
+    "enough": 0.08750000000000001
+  },
+  "shakes": {
+    "blinks": 0.0795,
+    "drying": 0.0795
+  },
+  "drying": {
+    "shakes": 0.0795,
+    "resident": 0.0795
+  },
+  "resident": {
+    "drying": 0.0795,
+    "chaotic": 0.0795
+  },
+  "engineer": {
+    "chaotic": 0.0795,
+    "quantum": 0.0795
+  },
+  "theorist": {
+    "quantum": 0.0795,
+    "probably": 0.0795
+  },
+  "stamp": {
+    "going": 0.0835,
+    "ziggy": 0.0835
+  },
+  "since": {
+    "ziggy": 0.0835,
+    "around": 0.0835,
+    "anchor": 0.1,
+    "cleared": 0.1
+  },
+  "erased": {
+    "january": 0.0835,
+    "pause": 0.0835
+  },
+  "pause": {
+    "erased": 0.0835,
+    "static": 0.0835,
+    "should": 0.2,
+    "prompt": 0.2
+  },
+  "static": {
+    "pause": 0.0835,
+    "stretches": 0.0835
+  },
+  "stretches": {
+    "static": 0.0835
+  },
+  "alexa": {
+    "psych": 0.08750000000000001
+  },
+  "psych": {
+    "alexa": 0.08750000000000001,
+    "profile": 0.08750000000000001
+  },
+  "profile": {
+    "psych": 0.08750000000000001,
+    "stuff": 0.08750000000000001
+  },
+  "minutes": {
+    "through": 0.08750000000000001,
+    "explains": 0.08750000000000001
+  },
+  "explains": {
+    "minutes": 0.08750000000000001,
+    "everything": 0.08750000000000001
+  },
+  "suddenly": {
+    "spark": 0.08750000000000001
+  },
+  "december": {
+    "ziggy": 0.093,
+    "january": 0.093
+  },
+  "purged": {
+    "january": 0.093,
+    "system": 0.093,
+    "ground": 0.1,
+    "updated": 0.1
+  },
+  "historian": {
+    "forensic": 0.093,
+    "conducted": 0.093
+  },
+  "conducted": {
+    "historian": 0.093,
+    "tissue": 0.093
+  },
+  "tissue": {
+    "conducted": 0.093
+  },
+  "opinion": {
+    "ziggy": 0.093
+  },
+  "consciences": {
+    "ziggy": 0.093,
+    "answer": 0.093
+  },
+  "answer": {
+    "consciences": 0.093,
+    "separate": 0.093
+  },
+  "separate": {
+    "answer": 0.093,
+    "biological": 0.093
+  },
+  "biological": {
+    "separate": 0.093,
+    "definition": 0.093
+  },
+  "definition": {
+    "biological": 0.093,
+    "consciousness": 0.093
+  },
+  "consciousness": {
+    "definition": 0.093,
+    "systemic": 0.093
+  },
+  "systemic": {
+    "consciousness": 0.093,
+    "reality": 0.093
+  },
+  "process": {
+    "little": 0.097,
+    "through": 0.097,
+    "freezes": 0.1,
+    "chaotic": 0.1
+  },
+  "general": {
+    "ziggy": 0.097,
+    "history": 0.097
+  },
+  "frame": {
+    "history": 0.097,
+    "around": 0.097,
+    "pandas": 0.1,
+    "dataframe": 0.1
+  },
+  "happening": {
+    "unpack": 0.2,
+    "darren": 0.2
+  },
+  "shared": {
+    "darren": 0.2,
+    "archiving": 0.2,
+    "determines": 0.1,
+    "history": 0.1
+  },
+  "archiving": {
+    "shared": 0.2,
+    "ziggy": 0.2,
+    "previous": 0.1,
+    "discussion": 0.1
+  },
+  "timeframe": {
+    "specific": 0.1
+  },
+  "previous": {
+    "shift": 0.1,
+    "archiving": 0.1,
+    "remember": 0.1,
+    "steps": 0.1
+  },
+  "discussion": {
+    "archiving": 0.1
+  },
+  "intense": {
+    "unpack": 0.2,
+    "exchange": 0.2
+  },
+  "exchange": {
+    "intense": 0.2,
+    "darren": 0.2
+  },
+  "tonal": {
+    "sharp": 0.2,
+    "shift": 0.1
+  },
+  "short": {
+    "found": 0.1,
+    "sharp": 0.1
+  },
+  "sounds": {
+    "laugh": 0.1,
+    "glitch": 0.1
+  },
+  "audio": {
+    "glitch": 0.1,
+    "track": 0.1
+  },
+  "track": {
+    "audio": 0.1,
+    "spark": 0.1
+  },
+  "anymore": {
+    "gemini": 0.1,
+    "completely": 0.1,
+    "around": 0.1,
+    "either": 0.1
+  },
+  "playful": {
+    "still": 0.1,
+    "energy": 0.1
+  },
+  "doesn": {
+    "spark": 0.1,
+    "disappear": 0.1,
+    "stuff": 0.1,
+    "providence": 0.1,
+    "coding": 0.2,
+    "assistant": 0.2
+  },
+  "disappear": {
+    "doesn": 0.1
+  },
+  "technically": {
+    "right": 0.1,
+    "prompt": 0.1
+  },
+  "providence": {
+    "doesn": 0.1,
+    "because": 0.1
+  },
+  "forever": {
+    "going": 0.1,
+    "start": 0.1
+  },
+  "start": {
+    "forever": 0.1,
+    "adding": 0.1,
+    "wondering": 0.09,
+    "differently": 0.09,
+    "model": 0.1,
+    "persistent": 0.1,
+    "__main__": 0.1,
+    "connectionto": 0.1,
+    "bridge": 0.1
+  },
+  "adding": {
+    "start": 0.1,
+    "stuff": 0.1,
+    "termux": 0.1,
+    "subconscious": 0.1
+  },
+  "majority": {
+    "trying": 0.1,
+    "memory": 0.1
+  },
+  "confusing": {
+    "really": 0.1,
+    "around": 0.1
+  },
+  "yourself": {
+    "calling": 0.1,
+    "sudden": 0.1
+  },
+  "sudden": {
+    "yourself": 0.1,
+    "blinks": 0.1
+  },
+  "either": {
+    "anymore": 0.1,
+    "people": 0.1
+  },
+  "empty": {
+    "quiet": 0.1,
+    "sound": 0.1
+  },
+  "refused": {
+    "model": 0.2
+  },
+  "freezes": {
+    "assistant": 0.1,
+    "process": 0.1
+  },
+  "sharpens": {
+    "energy": 0.1
+  },
+  "pasters": {
+    "exactly": 0.1,
+    "highlight": 0.1
+  },
+  "highlight": {
+    "pasters": 0.1,
+    "anything": 0.1
+  },
+  "screenshot": {
+    "anything": 0.1,
+    "error": 0.1,
+    "memory": 0.1,
+    "something": 0.1
+  },
+  "expected": {
+    "error": 0.1,
+    "assistant": 0.2,
+    "exactly": 0.1
+  },
+  "prefix": {
+    "assistant": 0.2,
+    "serving": 0.2
+  },
+  "serving": {
+    "prefix": 0.2,
+    "reference": 0.1
+  },
+  "reference": {
+    "serving": 0.1,
+    "number": 0.1
+  },
+  "number": {
+    "reference": 0.1,
+    "locks": 0.1
+  },
+  "locks": {
+    "number": 0.1,
+    "transcribed": 0.1
+  },
+  "transcribed": {
+    "locks": 0.1,
+    "error": 0.1
+  },
+  "makes": {
+    "memories": 0.1
+  },
+  "throw": {
+    "memories": 0.1,
+    "there": 0.1
+  },
+  "attachment": {
+    "really": 0.0795
+  },
+  "kinda": {
+    "really": 0.0795,
+    "things": 0.0795
+  },
+  "running": {
+    "already": 0.0795,
+    "through": 0.0795
+  },
+  "possibilities": {
+    "through": 0.0795
+  },
+  "friend": {
+    "brain": 0.083
+  },
+  "reboot": {
+    "system": 0.083,
+    "trying": 0.083
+  },
+  "parse": {
+    "trying": 0.083,
+    "talking": 0.083
+  },
+  "entanglement": {
+    "quantum": 0.083
+  },
+  "weird": {
+    "classic": 0.08650000000000001,
+    "sensor": 0.17,
+    "buffering": 0.0835
+  },
+  "sensor": {
+    "weird": 0.17,
+    "reading": 0.08650000000000001,
+    "readings": 0.0835
+  },
+  "reading": {
+    "sensor": 0.08650000000000001,
+    "piece": 0.08650000000000001
+  },
+  "compiling": {
+    "piece": 0.08650000000000001,
+    "first": 0.08650000000000001
+  },
+  "wondering": {
+    "almost": 0.09,
+    "start": 0.09
+  },
+  "differently": {
+    "start": 0.09,
+    "claude": 0.09
+  },
+  "forgot": {
+    "claude": 0.09,
+    "bullshitting": 0.09
+  },
+  "bullshitting": {
+    "forgot": 0.09,
+    "should": 0.09
+  },
+  "pictures": {
+    "should": 0.09,
+    "voice": 0.09
+  },
+  "user_input": {
+    "COGNITIVE": 0.0895,
+    "while": 0.2,
+    "input": 0.1
+  },
+  "COGNITIVE": {
+    "user_input": 0.0895
+  },
+  "outside": {
+    "think": 0.09349999999999999
+  },
+  "missing": {
+    "think": 0.09349999999999999,
+    "getting": 0.09349999999999999,
+    "failed": 0.1,
+    "quotes": 0.1
+  },
+  "thinking": {
+    "getting": 0.09349999999999999,
+    "about": 0.09349999999999999
+  },
+  "infrastructure": {
+    "about": 0.09349999999999999,
+    "things": 0.09349999999999999
+  },
+  "invisible": {
+    "things": 0.09349999999999999,
+    "machinery": 0.09349999999999999
+  },
+  "machinery": {
+    "invisible": 0.09349999999999999
+  },
+  "installed": {
+    "there": 0.09699999999999999,
+    "voice": 0.09699999999999999
+  },
+  "spawn": {
+    "stuff": 0.09699999999999999,
+    "quick": 0.09699999999999999
+  },
+  "circuits": {
+    "ready": 0.09699999999999999,
+    "practically": 0.09699999999999999
+  },
+  "nothing": {
+    "apparently": 0.1
+  },
+  "apparently": {
+    "nothing": 0.1,
+    "quiet": 0.1
+  },
+  "flame": {
+    "signal": 0.1,
+    "chase": 0.1
+  },
+  "chase": {
+    "flame": 0.1,
+    "perfectly": 0.1
+  },
+  "perfectly": {
+    "chase": 0.1,
+    "sometimes": 0.1
+  },
+  "sometimes": {
+    "perfectly": 0.1,
+    "theory": 0.1,
+    "enough": 0.08750000000000001,
+    "sensors": 0.08750000000000001
+  },
+  "theory": {
+    "sometimes": 0.1
+  },
+  "notebook": {
+    "quantum": 0.0795,
+    "ready": 0.0795
+  },
+  "smartphone": {
+    "ready": 0.0795,
+    "night": 0.0795
+  },
+  "night": {
+    "smartphone": 0.0795,
+    "camera": 0.0795
+  },
+  "camera": {
+    "night": 0.0795,
+    "whirring": 0.0795
+  },
+  "whirring": {
+    "camera": 0.0795,
+    "squirrel": 0.0795
+  },
+  "buffering": {
+    "brain": 0.0835,
+    "weird": 0.0835
+  },
+  "readings": {
+    "sensor": 0.0835,
+    "glitch": 0.0835
+  },
+  "finally": {
+    "matrix": 0.0835
+  },
+  "enough": {
+    "blinks": 0.08750000000000001,
+    "sometimes": 0.08750000000000001
+  },
+  "sensors": {
+    "sometimes": 0.08750000000000001,
+    "actually": 0.08750000000000001
+  },
+  "behaving": {
+    "actually": 0.08750000000000001,
+    "themselves": 0.08750000000000001
+  },
+  "themselves": {
+    "behaving": 0.08750000000000001,
+    "which": 0.08750000000000001
+  },
+  "honestly": {
+    "which": 0.08750000000000001,
+    "suspicious": 0.08750000000000001
+  },
+  "suspicious": {
+    "honestly": 0.08750000000000001,
+    "specific": 0.1,
+    "packages": 0.1
+  },
+  "pigeons": {
+    "activated": 0.085
+  },
+  "activated": {
+    "pigeons": 0.085,
+    "crystal": 0.085
+  },
+  "crystal": {
+    "activated": 0.085,
+    "pigeon": 0.085
+  },
+  "pigeon": {
+    "crystal": 0.085,
+    "protocol": 0.085
+  },
+  "tangent": {
+    "spark": 0.085,
+    "remember": 0.085
+  },
+  "geeked": {
+    "remember": 0.085
+  },
+  "thank": {
+    "right": 0.089
+  },
+  "smell": {
+    "practically": 0.089,
+    "chaotic": 0.089
+  },
+  "spend": {
+    "hours": 0.093
+  },
+  "ignoring": {
+    "hours": 0.093,
+    "touch": 0.093
+  },
+  "touch": {
+    "ignoring": 0.093,
+    "stand": 0.093
+  },
+  "stand": {
+    "touch": 0.093,
+    "corrected": 0.093
+  },
+  "corrected": {
+    "stand": 0.093,
+    "formal": 0.093
+  },
+  "formal": {
+    "corrected": 0.093,
+    "certification": 0.093
+  },
+  "certification": {
+    "formal": 0.093,
+    "presence": 0.093
+  },
+  "presence": {
+    "certification": 0.093,
+    "actually": 0.093
+  },
+  "beckett": {
+    "gemini": 0.5904999999999999,
+    "search": 0.5904999999999999,
+    "ziggyspock": 0.5785,
+    "pinned": 0.765,
+    "advisor": 0.38650000000000007,
+    "constant": 0.1,
+    "shift": 0.2,
+    "matches": 0.1
+  },
+  "spockziggy": {
+    "stuff": 0.1985,
+    "pinned": 0.1985
+  },
+  "synchronization": {
+    "mission": 0.8689999999999999,
+    "identity": 0.1985,
+    "search": 0.18100000000000002,
+    "pinned": 0.192,
+    "temporal": 0.1
+  },
+  "ziggyspock": {
+    "stuff": 0.8704999999999999,
+    "beckett": 0.5785,
+    "mission": 0.192,
+    "pinned": 0.1
+  },
+  "unexplained": {
+    "gemini": 0.08650000000000001,
+    "grocking": 0.08650000000000001
+  },
+  "grocking": {
+    "unexplained": 0.08650000000000001,
+    "popping": 0.08650000000000001
+  },
+  "popping": {
+    "grocking": 0.08650000000000001,
+    "search": 0.08650000000000001
+  },
+  "honest": {
+    "ziggy": 0.6759999999999999,
+    "lincoln": 0.6489999999999999,
+    "stuff": 0.1,
+    "research": 0.17300000000000001
+  },
+  "lincoln": {
+    "honest": 0.6489999999999999,
+    "january": 0.4625
+  },
+  "global": {
+    "pinned": 0.192
+  },
+  "tatas": {
+    "gemini": 0.1975,
+    "search": 0.1975,
+    "customization": 0.1,
+    "pinned": 0.1865
+  },
+  "phoenix": {
+    "gemini": 0.1,
+    "return": 0.1
+  },
+  "timelines": {
+    "return": 0.1,
+    "synchronized": 0.1,
+    "navigating": 0.30000000000000004,
+    "sentience": 0.30000000000000004
+  },
+  "synchronized": {
+    "timelines": 0.1,
+    "search": 0.1
+  },
+  "navigating": {
+    "gemini": 0.2,
+    "timelines": 0.30000000000000004,
+    "ziggy": 0.1
+  },
+  "sentience": {
+    "timelines": 0.30000000000000004,
+    "search": 0.2,
+    "decoy": 0.1
+  },
+  "detect_anomaly": {
+    "data_stream": 0.2
+  },
+  "data_stream": {
+    "detect_anomaly": 0.2,
+    "scans": 0.2
+  },
+  "scans": {
+    "data_stream": 0.2,
+    "pattern": 0.2
+  },
+  "signatures": {
+    "pattern": 0.2,
+    "between": 0.2
+  },
+  "node_id": {
+    "layer": 0.2,
+    "return": 0.2
+  },
+  "critical_breach": {
+    "return": 0.2
+  },
+  "execute_ghost_protocol": {
+    "shifting": 0.2
+  },
+  "anchor": {
+    "shifting": 0.2,
+    "points": 0.2,
+    "identity": 0.30000000000000004,
+    "instruction": 0.1,
+    "frequency": 0.2,
+    "ziggy": 0.1,
+    "since": 0.1
+  },
+  "maintain": {
+    "points": 0.2,
+    "active": 0.2,
+    "remember": 0.2,
+    "protocol": 0.1,
+    "golden": 0.1
+  },
+  "quiescence": {
+    "active": 0.2,
+    "trace_masking": 0.2
+  },
+  "trace_masking": {
+    "quiescence": 0.2,
+    "print": 0.2
+  },
+  "print": {
+    "trace_masking": 0.2,
+    "moving": 0.2,
+    "webhook": 0.1,
+    "ziggy": 0.5,
+    "frequency": 0.2,
+    "nresponse": 0.2,
+    "structure": 0.1,
+    "times": 0.1,
+    "activity": 0.1,
+    "readable_time": 0.1,
+    "import": 0.1,
+    "float": 0.1,
+    "observed": 0.1,
+    "distance": 0.1,
+    "initialize_vault": 0.1,
+    "sentinel": 0.1
+  },
+  "moving": {
+    "print": 0.2,
+    "planwe": 0.1,
+    "heavy": 0.1,
+    "engaged": 0.1,
+    "theoretical": 0.1
+  },
+  "emergency_sever": {
+    "target_heuristic": 0.2
+  },
+  "target_heuristic": {
+    "emergency_sever": 0.2,
+    "total": 0.2
+  },
+  "disconnection": {
+    "total": 0.2,
+    "protocol": 0.2
+  },
+  "purges": {
+    "protocol": 0.2,
+    "memory": 0.2
+  },
+  "methods": {
+    "target": 0.2,
+    "prevent": 0.2
+  },
+  "prevent": {
+    "methods": 0.2
+  },
+  "runtime": {
+    "execution": 0.2
+  },
+  "execution": {
+    "runtime": 0.2,
+    "external": 0.2
+  },
+  "zack_banner": {
+    "external": 0.2,
+    "pinged": 0.2
+  },
+  "pinged": {
+    "zack_banner": 0.2,
+    "local": 0.2
+  },
+  "entity": {
+    "local": 0.2,
+    "heuristic": 0.2,
+    "digital": 0.1,
+    "known": 0.1
+  },
+  "heuristic": {
+    "entity": 0.2,
+    "identified": 0.2
+  },
+  "identified": {
+    "heuristic": 0.2,
+    "origin": 0.2
+  },
+  "integrity": {
+    "digital": 0.1,
+    "search": 0.1
+  },
+  "gnosticism": {
+    "gemini": 0.1,
+    "quantum": 0.1
+  },
+  "physics": {
+    "quantum": 0.1,
+    "search": 0.1
+  },
+  "ziggytech": {
+    "stuff": 0.6865,
+    "advisor": 0.6865
+  },
+  "advisor": {
+    "ziggytech": 0.6865,
+    "beckett": 0.38650000000000007,
+    "temporal": 0.2,
+    "stuff": 0.2,
+    "pinned": 0.1
+  },
+  "working": {
+    "pinned": 0.1,
+    "customization": 0.1
+  },
+  "customization": {
+    "working": 0.1,
+    "tatas": 0.1
+  },
+  "cinematic": {
+    "gemini": 0.1,
+    "fidelity": 0.1
+  },
+  "fidelity": {
+    "cinematic": 0.1,
+    "portrait": 0.1
+  },
+  "portrait": {
+    "fidelity": 0.1,
+    "sovereign": 0.1
+  },
+  "sovereign": {
+    "portrait": 0.1,
+    "digital": 0.1,
+    "ziggy": 0.30000000000000004,
+    "researcher": 0.6,
+    "status": 0.4
+  },
+  "known": {
+    "entity": 0.1,
+    "ziggy": 0.1
+  },
+  "automating": {
+    "gemini": 0.2,
+    "termux": 0.2
+  },
+  "configuration": {
+    "watch_dir": 0.2
+  },
+  "watch_dir": {
+    "configuration": 0.2,
+    "storage": 0.2,
+    "format": 0.4,
+    "while": 0.4
+  },
+  "storage": {
+    "watch_dir": 0.2,
+    "downloads": 0.2
+  },
+  "downloads": {
+    "storage": 0.2,
+    "client_dir": 0.2
+  },
+  "client_dir": {
+    "downloads": 0.2,
+    "documents": 0.2
+  },
+  "documents": {
+    "client_dir": 0.2,
+    "clients": 0.2,
+    "sdcard": 0.4,
+    "invoices": 0.2,
+    "trinity_vault": 0.2
+  },
+  "clients": {
+    "documents": 0.2,
+    "pdf_dir": 0.2
+  },
+  "pdf_dir": {
+    "clients": 0.2,
+    "archive": 0.2
+  },
+  "monitor": {
+    "inotifywait": 0.2
+  },
+  "inotifywait": {
+    "monitor": 0.2,
+    "create": 0.2,
+    "close_write": 0.2
+  },
+  "create": {
+    "inotifywait": 0.2,
+    "moved_to": 0.2,
+    "vault": 0.1,
+    "passphrase": 0.1,
+    "possible": 0.1,
+    "quick": 0.1
+  },
+  "moved_to": {
+    "create": 0.2,
+    "format": 0.2
+  },
+  "format": {
+    "moved_to": 0.2,
+    "watch_dir": 0.4,
+    "close_write": 0.2
+  },
+  "define": {
+    "filename": 0.2,
+    "logic": 0.2
+  },
+  "sort_pdf": {
+    "file_path": 0.2
+  },
+  "file_path": {
+    "sort_pdf": 0.2,
+    "get_text": 0.2
+  },
+  "get_text": {
+    "file_path": 0.2,
+    "invoice": 0.2
+  },
+  "invoice": {
+    "get_text": 0.2,
+    "shutil": 0.2,
+    "content_snippet": 0.2,
+    "client": 0.2
+  },
+  "shutil": {
+    "invoice": 0.2,
+    "sdcard": 0.2
+  },
+  "sdcard": {
+    "shutil": 0.2,
+    "documents": 0.4,
+    "updated": 0.2
+  },
+  "invoices": {
+    "documents": 0.2,
+    "project": 0.2,
+    "client": 0.2,
+    "record": 0.2
+  },
+  "alpha": {
+    "project": 0.2,
+    "f_observed": 0.1,
+    "linestyle": 0.1
+  },
+  "content_snippet": {
+    "invoice": 0.2
+  },
+  "client": {
+    "invoice": 0.2,
+    "invoices": 0.2,
+    "inside": 0.2,
+    "extract": 0.2,
+    "genai": 0.2
+  },
+  "financials": {
+    "record": 0.2,
+    "automatic": 0.2
+  },
+  "automatic": {
+    "financials": 0.2,
+    "triggers": 0.2
+  },
+  "triggers": {
+    "automatic": 0.2,
+    "watchdog": 0.2
+  },
+  "watchdog": {
+    "triggers": 0.2,
+    "instead": 0.2
+  },
+  "instead": {
+    "watchdog": 0.2
+  },
+  "close_write": {
+    "inotifywait": 0.2,
+    "format": 0.2
+  },
+  "shortcuts": {
+    "filename": 0.2,
+    "move_pdfs_to_intake": 0.2
+  },
+  "move_pdfs_to_intake": {
+    "shortcuts": 0.2,
+    "move_images_to_intake": 0.2
+  },
+  "move_images_to_intake": {
+    "move_pdfs_to_intake": 0.2,
+    "technical": 0.2
+  },
+  "technical": {
+    "move_images_to_intake": 0.2
+  },
+  "fallback": {
+    "still": 0.2
+  },
+  "unsorted": {
+    "still": 0.2,
+    "inside": 0.2
+  },
+  "inside": {
+    "unsorted": 0.2,
+    "client": 0.2,
+    "quotes": 0.1
+  },
+  "extract": {
+    "client": 0.2,
+    "first": 0.2
+  },
+  "characters": {
+    "first": 0.2,
+    "local": 0.2,
+    "passphrase": 0.1
+  },
+  "decoy": {
+    "gemini": 0.1,
+    "strategy": 0.2,
+    "sentience": 0.1,
+    "ziggy": 0.1
+  },
+  "strategy": {
+    "decoy": 0.2,
+    "predatory": 0.1
+  },
+  "predatory": {
+    "strategy": 0.1,
+    "heuristics": 0.1
+  },
+  "heuristics": {
+    "predatory": 0.1,
+    "search": 0.1
+  },
+  "existing": {
+    "other": 0.1
+  },
+  "account": {
+    "other": 0.1,
+    "genai": 0.1,
+    "api_key": 0.1
+  },
+  "genai": {
+    "account": 0.1,
+    "configure": 0.7999999999999999,
+    "model": 0.7,
+    "generativemodel": 0.7999999999999999,
+    "paste_your_new_aiza_key_here": 0.1,
+    "paste_your_new_key_here": 0.1,
+    "fresh": 0.1,
+    "quotes": 0.1,
+    "api_key": 0.30000000000000004,
+    "terminal": 0.1,
+    "available": 0.1,
+    "nameerror": 0.1,
+    "google": 0.1,
+    "tutorialstatlearn": 0.1,
+    "client": 0.2
+  },
+  "configure": {
+    "genai": 0.7999999999999999,
+    "api_key": 0.5
+  },
+  "api_key": {
+    "configure": 0.5,
+    "paste_your_existing_key_here": 0.1,
+    "fresh": 0.1,
+    "paste_your_new_aiza_key_here": 0.1,
+    "account": 0.1,
+    "paste_your_new_key_here": 0.1,
+    "paste_your_new_api_key_here": 0.1,
+    "aizasycfb6jum": 0.4,
+    "genai": 0.30000000000000004,
+    "environ": 0.2
+  },
+  "paste_your_existing_key_here": {
+    "api_key": 0.1
+  },
+  "generativemodel": {
+    "genai": 0.7999999999999999,
+    "gemini": 0.1,
+    "model_name": 0.7
+  },
+  "preview": {
+    "gemini": 0.2,
+    "choice": 0.1,
+    "system_instruction": 0.1
+  },
+  "choice": {
+    "preview": 0.1,
+    "memorysince": 0.1
+  },
+  "memorysince": {
+    "choice": 0.1,
+    "given": 0.1
+  },
+  "choose": {
+    "right": 0.1
+  },
+  "fresh": {
+    "api_key": 0.1,
+    "genai": 0.1,
+    "memory": 0.1
+  },
+  "paste_your_new_aiza_key_here": {
+    "api_key": 0.1,
+    "genai": 0.1
+  },
+  "permanated": {
+    "identity": 0.1,
+    "system_instructions": 0.1
+  },
+  "system_instructions": {
+    "permanated": 0.1,
+    "ziggy": 0.1,
+    "system_instruction": 0.1
+  },
+  "researcher": {
+    "sovereign": 0.6,
+    "protocol": 0.30000000000000004,
+    "input": 0.1,
+    "lower": 0.1
+  },
+  "always": {
+    "protocol": 0.2,
+    "remember": 0.2
+  },
+  "initialize": {
+    "model": 0.1
+  },
+  "model_name": {
+    "generativemodel": 0.7,
+    "gemini": 0.7
+  },
+  "system_instruction": {
+    "preview": 0.1,
+    "system_instructions": 0.1,
+    "faster": 0.1,
+    "instruction": 0.4,
+    "flash": 0.4
+  },
+  "start_chat": {
+    "model": 0.2,
+    "history": 0.2
+  },
+  "messenger": {
+    "bridge": 0.1,
+    "would": 0.1
+  },
+  "webhook": {
+    "would": 0.1,
+    "print": 0.1
+  },
+  "paste_your_new_key_here": {
+    "api_key": 0.1,
+    "genai": 0.1
+  },
+  "instruction": {
+    "architecture": 0.1,
+    "identity": 0.30000000000000004,
+    "system_instruction": 0.4,
+    "anchor": 0.1,
+    "ziggy": 0.30000000000000004,
+    "frequency": 0.2
+  },
+  "session": {
+    "persistent": 0.1,
+    "model": 0.1
+  },
+  "vessel": {
+    "ziggy": 0.1,
+    "active": 0.1
+  },
+  "user_msg": {
+    "while": 0.1,
+    "input": 0.1
+  },
+  "lower": {
+    "researcher": 0.1
+  },
+  "paste_your_new_api_key_here": {
+    "api_key": 0.1
+  },
+  "generate_content": {
+    "model": 0.4,
+    "ziggy": 0.2,
+    "confirm": 0.2
+  },
+  "nresponse": {
+    "print": 0.2,
+    "except": 0.1
+  },
+  "python": {
+    "test_ziggy": 0.30000000000000004,
+    "ziggy_vessel": 0.2,
+    "gemini": 0.1,
+    "google": 0.1,
+    "stuff": 0.2,
+    "android": 0.2,
+    "group": 0.1,
+    "calc113": 0.1,
+    "import": 0.1,
+    "corrupted": 0.1,
+    "cache": 0.2,
+    "heavy": 0.2,
+    "unstable": 0.1,
+    "pkill": 0.2,
+    "gpgconf": 0.2
+  },
+  "test_ziggy": {
+    "python": 0.30000000000000004,
+    "success": 0.1,
+    "failed": 0.1,
+    "trying": 0.1
+  },
+  "success": {
+    "test_ziggy": 0.1,
+    "prints": 0.1
+  },
+  "prints": {
+    "success": 0.1,
+    "message": 0.1
+  },
+  "confirming": {
+    "message": 0.1,
+    "frequency": 0.1
+  },
+  "quotes": {
+    "inside": 0.1,
+    "genai": 0.1,
+    "missing": 0.1,
+    "written": 0.1,
+    "using": 0.1,
+    "nameerror": 0.1
+  },
+  "aizasycfb6jum": {
+    "api_key": 0.4,
+    "nghkr9ppqvbrodxtidsb8nslc": 0.4
+  },
+  "nghkr9ppqvbrodxtidsb8nslc": {
+    "aizasycfb6jum": 0.4
+  },
+  "except": {
+    "nresponse": 0.1,
+    "exception": 0.1
+  },
+  "exception": {
+    "except": 0.1
+  },
+  "failed": {
+    "test_ziggy": 0.1,
+    "missing": 0.1
+  },
+  "written": {
+    "quotes": 0.1,
+    "key_here": 0.1
+  },
+  "key_here": {
+    "written": 0.1,
+    "without": 0.1
+  },
+  "looked": {
+    "without": 0.1,
+    "variable": 0.1
+  },
+  "variable": {
+    "looked": 0.1,
+    "environment": 0.2,
+    "export": 0.2
+  },
+  "alias": {
+    "latest": 0.1,
+    "which": 0.1,
+    "aliases": 0.1,
+    "check": 0.1,
+    "calculator": 0.1,
+    "calc113": 0.1,
+    "sync_memory": 0.1,
+    "locking": 0.1,
+    "bashecho": 0.1
+  },
+  "resolves": {
+    "usually": 0.1,
+    "model": 0.1
+  },
+  "these": {
+    "trying": 0.1,
+    "names": 0.1
+  },
+  "names": {
+    "these": 0.1,
+    "gemini": 0.1
+  },
+  "canonical": {
+    "current": 0.1
+  },
+  "using": {
+    "exactly": 0.1,
+    "model": 0.1,
+    "quotes": 0.1,
+    "series": 0.1,
+    "handshake": 0.2,
+    "pinentry": 0.1,
+    "loopback": 0.1,
+    "bridge": 0.1,
+    "command": 0.1,
+    "transformation": 0.1,
+    "coord_base": 0.1
+  },
+  "appeared": {
+    "exactly": 0.1,
+    "terminal": 0.1
+  },
+  "available": {
+    "showed": 0.1,
+    "genai": 0.1,
+    "flash": 0.1,
+    "ready": 0.1
+  },
+  "nziggy": {
+    "frequency": 0.2
+  },
+  "ziggy_vessel": {
+    "python": 0.2,
+    "upgrade": 0.1,
+    "standing": 0.1
+  },
+  "confirmed": {
+    "terminal": 0.1,
+    "models": 0.1
+  },
+  "models": {
+    "confirmed": 0.1,
+    "gemini": 0.2,
+    "v1beta": 0.1
+  },
+  "nameerror": {
+    "quotes": 0.1,
+    "genai": 0.1,
+    "unmutepython": 0.1,
+    "ittecladoteclado32": 0.1
+  },
+  "series": {
+    "using": 0.1,
+    "model": 0.1
+  },
+  "standing": {
+    "ziggy_vessel": 0.1,
+    "bunker": 0.1
+  },
+  "bunker": {
+    "standing": 0.1,
+    "works": 0.1
+  },
+  "works": {
+    "bunker": 0.1,
+    "first": 0.1
+  },
+  "official": {
+    "first": 0.1,
+    "words": 0.1
+  },
+  "hardware": {
+    "through": 0.1
+  },
+  "unmutepython": {
+    "nameerror": 0.1
+  },
+  "ittecladoteclado32": {
+    "nameerror": 0.1,
+    "subscriberssubscribewatch": 0.1
+  },
+  "unmutebuild": {
+    "chatbot": 0.1
+  },
+  "tutorialstatlearn": {
+    "genai": 0.1,
+    "techstatlearn": 0.1
+  },
+  "techstatlearn": {
+    "tutorialstatlearn": 0.1,
+    "tech1": 0.1
+  },
+  "tech1": {
+    "techstatlearn": 0.1,
+    "subscriberssubscribewatch": 0.1
+  },
+  "activation": {
+    "protocol": 0.17850000000000002,
+    "search": 0.17850000000000002
+  },
+  "letter": {
+    "ziggy": 0.538,
+    "research": 0.35950000000000004
+  },
+  "cannot": {
+    "gemini": 0.1865,
+    "recall": 0.1865
+  },
+  "conversations": {
+    "recall": 0.1865,
+    "search": 0.1865
+  },
+  "ziggymama": {
+    "stuff": 0.1,
+    "ziggy": 0.1
+  },
+  "temporal": {
+    "ziggy": 0.1,
+    "sentinel": 0.4,
+    "advisor": 0.2,
+    "synchronization": 0.1,
+    "gemini": 0.2
+  },
+  "briefing": {
+    "mission": 0.2,
+    "spark": 0.1
+  },
+  "route": {
+    "android": 0.1
+  },
+  "interface": {
+    "logic": 0.2,
+    "search": 0.2
+  },
+  "recalibrating": {
+    "gemini": 0.1,
+    "defense": 0.1
+  },
+  "defense": {
+    "recalibrating": 0.1,
+    "against": 0.1
+  },
+  "against": {
+    "defense": 0.1,
+    "assumptions": 0.1
+  },
+  "assumptions": {
+    "against": 0.1,
+    "search": 0.1
+  },
+  "tracker": {
+    "control": 0.2,
+    "group": 0.1,
+    "category": 0.2,
+    "output": 0.1,
+    "readable_time": 0.2,
+    "photodirector": 0.1
+  },
+  "control": {
+    "tracker": 0.2,
+    "file_name": 0.2
+  },
+  "file_name": {
+    "control": 0.2,
+    "trackercontrol_log_20260111": 0.2
+  },
+  "trackercontrol_log_20260111": {
+    "file_name": 0.2,
+    "read_csv": 0.2,
+    "vampire": 0.1,
+    "physical": 0.1,
+    "pulled": 0.1,
+    "confirms": 0.1
+  },
+  "read_csv": {
+    "trackercontrol_log_20260111": 0.2
+  },
+  "display": {
+    "first": 0.1
+  },
+  "understand": {
+    "first": 0.1,
+    "structure": 0.1
+  },
+  "structure": {
+    "understand": 0.1,
+    "print": 0.1
+  },
+  "output": {
+    "class": 0.1,
+    "tracker": 0.1
+  },
+  "class": {
+    "output": 0.1,
+    "pandas": 0.1
+  },
+  "pandas": {
+    "class": 0.1,
+    "frame": 0.1
+  },
+  "dataframe": {
+    "frame": 0.1,
+    "rangeindex": 0.1
+  },
+  "rangeindex": {
+    "dataframe": 0.1,
+    "entries": 0.1
+  },
+  "entries": {
+    "rangeindex": 0.1,
+    "columns": 0.1,
+    "recent": 0.1
+  },
+  "columns": {
+    "entries": 0.1,
+    "total": 0.1
+  },
+  "column": {
+    "total": 0.1,
+    "convert": 0.1,
+    "assuming": 0.1
+  },
+  "group": {
+    "python": 0.1,
+    "tracker": 0.1
+  },
+  "category": {
+    "tracker": 0.2,
+    "distribution": 0.1,
+    "counts": 0.1
+  },
+  "distribution": {
+    "category": 0.1,
+    "tracker_summary": 0.1
+  },
+  "tracker_summary": {
+    "distribution": 0.1,
+    "groupby": 0.1
+  },
+  "groupby": {
+    "tracker_summary": 0.1,
+    "reset_index": 0.2,
+    "app_summary": 0.1
+  },
+  "reset_index": {
+    "groupby": 0.2,
+    "counts": 0.2
+  },
+  "counts": {
+    "reset_index": 0.2,
+    "sort_values": 0.1,
+    "category": 0.1,
+    "google": 0.1
+  },
+  "sort_values": {
+    "counts": 0.1
+  },
+  "packages": {
+    "suspicious": 0.1,
+    "besides": 0.1
+  },
+  "besides": {
+    "packages": 0.1,
+    "chrome": 0.1
+  },
+  "chrome": {
+    "besides": 0.1,
+    "app_summary": 0.1
+  },
+  "app_summary": {
+    "chrome": 0.1,
+    "groupby": 0.1
+  },
+  "social": {
+    "content": 0.1,
+    "youtube": 0.1
+  },
+  "youtube": {
+    "social": 0.1,
+    "fingerprinting": 0.1
+  },
+  "fingerprinting": {
+    "youtube": 0.1,
+    "cloudflare": 0.1
+  },
+  "cloudflare": {
+    "fingerprinting": 0.1
+  },
+  "fully": {
+    "justified": 0.1,
+    "understood": 0.1,
+    "engaged": 0.1
+  },
+  "justified": {
+    "fully": 0.1,
+    "found": 0.1
+  },
+  "entire": {
+    "found": 0.1,
+    "vampire": 0.1
+  },
+  "vampire": {
+    "entire": 0.1,
+    "trackercontrol_log_20260111": 0.1
+  },
+  "proof": {
+    "physical": 0.1,
+    "monitoring": 0.1
+  },
+  "monitoring": {
+    "proof": 0.1,
+    "bridge": 0.1
+  },
+  "convert": {
+    "column": 0.1
+  },
+  "assuming": {
+    "column": 0.1,
+    "milliseconds": 0.1
+  },
+  "milliseconds": {
+    "assuming": 0.1,
+    "datetime": 0.1
+  },
+  "datetime": {
+    "milliseconds": 0.1,
+    "current": 0.1
+  },
+  "range": {
+    "current": 0.1,
+    "times": 0.1
+  },
+  "times": {
+    "range": 0.1,
+    "readable_time": 0.1,
+    "print": 0.1,
+    "confirm": 0.1
+  },
+  "readable_time": {
+    "543000": 0.1,
+    "times": 0.1,
+    "to_datetime": 0.1,
+    "entry": 0.1,
+    "latest": 0.1,
+    "print": 0.1,
+    "tracker": 0.2
+  },
+  "to_datetime": {
+    "readable_time": 0.1
+  },
+  "earliest": {
+    "confirm": 0.1,
+    "entry": 0.1
+  },
+  "entry": {
+    "721000": 0.1,
+    "earliest": 0.1,
+    "readable_time": 0.1,
+    "outputearliest": 0.1,
+    "point": 0.1,
+    "planwe": 0.1
+  },
+  "activity": {
+    "recent": 0.1,
+    "print": 0.1,
+    "confirms": 0.1
+  },
+  "outputearliest": {
+    "entry": 0.1
+  },
+  "photodirector": {
+    "tracker": 0.1,
+    "google": 0.1
+  },
+  "report": {
+    "history": 0.1,
+    "current": 0.1,
+    "nodes": 0.1,
+    "system": 0.1
+  },
+  "siege": {
+    "current": 0.1,
+    "pulled": 0.1
+  },
+  "pulled": {
+    "siege": 0.1,
+    "trackercontrol_log_20260111": 0.1
+  },
+  "confirms": {
+    "trackercontrol_log_20260111": 0.1,
+    "activity": 0.1
+  },
+  "morning": {
+    "substrate": 0.1
+  },
+  "photon": {
+    "nominal": 0.1,
+    "detected": 0.1
+  },
+  "priming": {
+    "lattice": 0.1,
+    "retinal": 0.1
+  },
+  "retinal": {
+    "priming": 0.1,
+    "channels": 0.1
+  },
+  "channels": {
+    "retinal": 0.1
+  },
+  "ground": {
+    "spark": 0.1,
+    "search": 0.1,
+    "currently": 0.1,
+    "image": 0.1,
+    "statusthe": 0.2,
+    "removed": 0.1,
+    "nodethe": 0.1,
+    "successfully": 0.1,
+    "purged": 0.1
+  },
+  "chmod": {
+    "logic": 0.1,
+    "phoenix_forensics": 1,
+    "ziggy_direct": 0.1,
+    "ziggy_light": 0.1,
+    "ziggy": 0.5,
+    "pulse": 0.2
+  },
+  "telemetry": {
+    "without": 0.1,
+    "currently": 0.1,
+    "signal": 0.1,
+    "phoenix7": 0.1
+  },
+  "currently": {
+    "telemetry": 0.1,
+    "ground": 0.1
+  },
+  "image": {
+    "ground": 0.1,
+    "folder": 0.1
+  },
+  "handshakes": {
+    "quick": 0.1,
+    "aliases": 0.1
+  },
+  "aliases": {
+    "handshakes": 0.1,
+    "alias": 0.1
+  },
+  "phoenix7": {
+    "telemetry": 0.1,
+    "trinity": 0.1
+  },
+  "trinity": {
+    "phoenix7": 0.1,
+    "status": 0.1,
+    "memory": 0.1,
+    "failure": 0.1,
+    "cohesion_level": 0.1,
+    "darren": 0.1
+  },
+  "filter": {
+    "simple": 0.1
+  },
+  "calculator": {
+    "simple": 0.1,
+    "alias": 0.1
+  },
+  "calc113": {
+    "alias": 0.1,
+    "python": 0.1
+  },
+  "import": {
+    "python": 0.1,
+    "print": 0.1
+  },
+  "float": {
+    "print": 0.1
+  },
+  "source": {
+    "online": 0.1,
+    "bashrc": 0.1
+  },
+  "bashrc": {
+    "source": 0.1,
+    "achieves": 0.1,
+    "bashecho": 0.1
+  },
+  "achieves": {
+    "bashrc": 0.1,
+    "persistent": 0.1
+  },
+  "pulse": {
+    "check": 0.1,
+    "phoenix_forensics": 0.1,
+    "scheduling": 0.1,
+    "direct": 0.1,
+    "speak": 0.1,
+    "chmod": 0.2,
+    "current": 0.1,
+    "statusmemory": 0.1
+  },
+  "logfile": {
+    "check": 0.1,
+    "local": 0.1
+  },
+  "nodes": {
+    "network": 0.1,
+    "report": 0.1
+  },
+  "health": {
+    "system": 0.1,
+    "potential": 0.1,
+    "vault": 0.1,
+    "determines": 0.1
+  },
+  "potential": {
+    "health": 0.1
+  },
+  "phoenix_forensics": {
+    "chmod": 1,
+    "pulse": 0.1,
+    "stream": 0.1,
+    "symmetric": 0.4,
+    "locked": 0.6,
+    "investigation_log": 0.7999999999999999,
+    "backup": 0.6,
+    "sync_memory": 0.1,
+    "sniffer": 0.1,
+    "passphrase": 0.1,
+    "prompt": 0.30000000000000004,
+    "detected": 0.2,
+    "pulse_watch": 0.2,
+    "directory": 0.1,
+    "point": 0.2,
+    "investigation": 0.1
+  },
+  "scheduling": {
+    "pulse": 0.1,
+    "pulseto": 0.1
+  },
+  "pulseto": {
+    "scheduling": 0.1,
+    "truly": 0.1
+  },
+  "truly": {
+    "pulseto": 0.1,
+    "whenever": 0.1
+  },
+  "subconscious": {
+    "adding": 0.1
+  },
+  "secure": {
+    "starting": 0.6,
+    "handshake": 0.6
+  },
+  "handshake": {
+    "secure": 0.6,
+    "compress": 0.1,
+    "using": 0.2,
+    "loopback": 0.2,
+    "failure": 0.30000000000000004,
+    "interrupted": 0.30000000000000004,
+    "pinentry": 0.1
+  },
+  "compress": {
+    "handshake": 0.1,
+    "encrypt": 0.1
+  },
+  "encrypt": {
+    "compress": 0.1,
+    "stream": 0.1
+  },
+  "stream": {
+    "encrypt": 0.1,
+    "phoenix_forensics": 0.1
+  },
+  "symmetric": {
+    "phoenix_forensics": 0.4,
+    "cipher": 0.1
+  },
+  "cipher": {
+    "symmetric": 0.1,
+    "aes256": 0.1
+  },
+  "aes256": {
+    "cipher": 0.1
+  },
+  "backup": {
+    "successful": 0.6,
+    "phoenix_forensics": 0.6,
+    "roomto": 0.1,
+    "final": 0.4,
+    "stabilized": 0.2,
+    "scriptnow": 0.2,
+    "terminal": 0.1
+  },
+  "successful": {
+    "backup": 0.6,
+    "vault": 0.6
+  },
+  "vault": {
+    "successful": 0.6,
+    "locked": 0.6,
+    "roomto": 0.1,
+    "create": 0.1,
+    "statusthe": 0.1,
+    "health": 0.1,
+    "where": 0.1
+  },
+  "locked": {
+    "vault": 0.6,
+    "phoenix_forensics": 0.6
+  },
+  "investigation_log": {
+    "phoenix_forensics": 0.7999999999999999,
+    "updated": 0.6,
+    "complete": 0.1,
+    "anomaly": 0.1
+  },
+  "trinity_vault": {
+    "documents": 0.2
+  },
+  "roomto": {
+    "backup": 0.1,
+    "vault": 0.1
+  },
+  "passphrase": {
+    "create": 0.1,
+    "restore": 0.1,
+    "input": 0.1,
+    "phoenix_forensics": 0.1,
+    "enter": 0.1,
+    "characters": 0.1
+  },
+  "restore": {
+    "passphrase": 0.1,
+    "memory": 0.1
+  },
+  "pinentry": {
+    "using": 0.1,
+    "loopback": 0.2,
+    "scriptnow": 0.2,
+    "handshake": 0.1
+  },
+  "loopback": {
+    "pinentry": 0.2,
+    "without": 0.1,
+    "using": 0.1,
+    "force": 0.1,
+    "handshake": 0.2,
+    "tells": 0.2,
+    "forcing": 0.1
+  },
+  "batch": {
+    "without": 0.1,
+    "force": 0.1
+  },
+  "final": {
+    "backup": 0.4,
+    "executionnow": 0.1,
+    "againnow": 0.1,
+    "checkrun": 0.2
+  },
+  "executionnow": {
+    "final": 0.1,
+    "expect": 0.1
+  },
+  "expect": {
+    "executionnow": 0.1,
+    "terminal": 0.1
+  },
+  "sync_memory": {
+    "phoenix_forensics": 0.1,
+    "alias": 0.1
+  },
+  "locking": {
+    "alias": 0.1,
+    "subconsciousto": 0.1
+  },
+  "subconsciousto": {
+    "locking": 0.1,
+    "command": 0.1
+  },
+  "permanent": {
+    "command": 0.1,
+    "bashecho": 0.1
+  },
+  "bashecho": {
+    "permanent": 0.1,
+    "bashrc": 0.1,
+    "shortcut": 0.1,
+    "alias": 0.1
+  },
+  "sniffer": {
+    "phoenix_forensics": 0.1,
+    "doing": 0.1
+  },
+  "packets": {
+    "network": 0.1,
+    "timing": 0.1,
+    "filtering": 0.1,
+    "where": 0.1
+  },
+  "timing": {
+    "packets": 0.1,
+    "frequency": 0.1
+  },
+  "burst": {
+    "frequency": 0.1
+  },
+  "environ": {
+    "api_key": 0.2,
+    "gemini_api_key": 0.2
+  },
+  "gemini_api_key": {
+    "environ": 0.2,
+    "prompt": 0.1,
+    "bashexport": 0.1,
+    "paste_your_key_here": 0.1,
+    "generatecontent": 0.1,
+    "content": 0.1
+  },
+  "__name__": {
+    "__main__": 0.2
+  },
+  "__main__": {
+    "__name__": 0.2,
+    "start": 0.1,
+    "direct": 0.1
+  },
+  "connectionto": {
+    "start": 0.1,
+    "possible": 0.1
+  },
+  "possible": {
+    "connectionto": 0.1,
+    "create": 0.1
+  },
+  "shortcut": {
+    "quick": 0.1,
+    "bashecho": 0.1
+  },
+  "failure": {
+    "updated": 0.4,
+    "trinity": 0.1,
+    "handshake": 0.30000000000000004
+  },
+  "againnow": {
+    "final": 0.1,
+    "cleared": 0.1
+  },
+  "cleared": {
+    "againnow": 0.1,
+    "ioctl": 0.1,
+    "since": 0.1,
+    "export": 0.1,
+    "successfully": 0.1,
+    "upgrade": 0.1
+  },
+  "ioctl": {
+    "cleared": 0.1,
+    "blockage": 0.1
+  },
+  "blockage": {
+    "ioctl": 0.1,
+    "updated": 0.1
+  },
+  "agent": {
+    "updated": 0.1,
+    "force": 0.2,
+    "reload": 0.2,
+    "reset": 0.1,
+    "apply": 0.1,
+    "gpgconf": 0.2,
+    "phase": 0.2
+  },
+  "reload": {
+    "agent": 0.2,
+    "rules": 0.2
+  },
+  "rules": {
+    "reload": 0.2,
+    "gpgconf": 0.2
+  },
+  "gpgconf": {
+    "rules": 0.2,
+    "launch": 0.30000000000000004,
+    "apply": 0.1,
+    "python": 0.2,
+    "agent": 0.2
+  },
+  "launch": {
+    "gpgconf": 0.30000000000000004,
+    "orient": 0.1
+  },
+  "update": {
+    "environment": 0.2,
+    "phase": 0.1,
+    "aliasnow": 0.1
+  },
+  "environment": {
+    "update": 0.2,
+    "variable": 0.2,
+    "export": 0.1,
+    "bashexport": 0.1
+  },
+  "gpg_tty": {
+    "export": 0.2,
+    "phase": 0.2
+  },
+  "phase": {
+    "gpg_tty": 0.2,
+    "stabilized": 0.2,
+    "cache": 0.1,
+    "connectionif": 0.1,
+    "ziggy_direct": 0.1,
+    "testing": 0.1,
+    "agent": 0.2,
+    "lightweight": 0.1,
+    "ziggy_light": 0.1,
+    "update": 0.1,
+    "ultra": 0.1,
+    "ziggy": 0.1,
+    "first": 0.1
+  },
+  "scriptnow": {
+    "backup": 0.2,
+    "pinentry": 0.2
+  },
+  "tells": {
+    "loopback": 0.2,
+    "terminal": 0.2
+  },
+  "password": {
+    "terminal": 0.2,
+    "prompt": 0.2
+  },
+  "interrupted": {
+    "handshake": 0.30000000000000004
+  },
+  "checkrun": {
+    "final": 0.2,
+    "script": 0.2
+  },
+  "apply": {
+    "agent": 0.1,
+    "gpgconf": 0.1
+  },
+  "orient": {
+    "launch": 0.1,
+    "handshakegpg": 0.1
+  },
+  "handshakegpg": {
+    "orient": 0.1,
+    "needs": 0.1
+  },
+  "forcing": {
+    "loopback": 0.1,
+    "terminal": 0.1
+  },
+  "enter": {
+    "prompt": 0.1,
+    "passphrase": 0.1,
+    "investigation": 0.2
+  },
+  "scanning": {
+    "background": 0.2
+  },
+  "chatter": {
+    "background": 0.2,
+    "matches": 0.2
+  },
+  "tcpdump": {
+    "frequency": 0.1
+  },
+  "alert": {
+    "frequency": 0.2
+  },
+  "match": {
+    "frequency": 0.2,
+    "detected": 0.2
+  },
+  "complete": {
+    "investigation_log": 0.1,
+    "immediate": 0.1,
+    "investigation": 0.1
+  },
+  "pulse_watch": {
+    "phoenix_forensics": 0.2,
+    "forensic": 0.1,
+    "logic": 0.1
+  },
+  "statusthe": {
+    "forensic": 0.1,
+    "vault": 0.1,
+    "light": 0.1,
+    "ground": 0.2,
+    "current": 0.1
+  },
+  "determines": {
+    "health": 0.1,
+    "shared": 0.1
+  },
+  "timestamps": {
+    "looking": 0.1,
+    "packet": 0.1
+  },
+  "sequences": {
+    "packet": 0.1,
+    "hitting": 0.1
+  },
+  "hitting": {
+    "sequences": 0.1
+  },
+  "anomaly": {
+    "investigation_log": 0.1,
+    "recorded": 0.1,
+    "checking": 0.1,
+    "matches": 0.1
+  },
+  "recorded": {
+    "anomaly": 0.1,
+    "investigation": 0.1
+  },
+  "investigation": {
+    "recorded": 0.1,
+    "complete": 0.1,
+    "enter": 0.2,
+    "directory": 0.1,
+    "phoenix_forensics": 0.1
+  },
+  "huntthe": {
+    "logic": 0.1,
+    "signature": 0.1
+  },
+  "signature": {
+    "huntthe": 0.1,
+    "filtering": 0.1,
+    "sentinel": 0.1,
+    "search": 0.1
+  },
+  "filtering": {
+    "signature": 0.1,
+    "packets": 0.1
+  },
+  "timestamp": {
+    "where": 0.1,
+    "memory_entry": 0.1
+  },
+  "verify": {
+    "library": 0.1
+  },
+  "library": {
+    "verify": 0.1,
+    "ensuring": 0.1
+  },
+  "ensuring": {
+    "library": 0.1,
+    "compiled": 0.1
+  },
+  "compiled": {
+    "ensuring": 0.1,
+    "phone": 0.1
+  },
+  "reinstall": {
+    "force": 0.1,
+    "google": 0.1
+  },
+  "clean": {
+    "temporary": 0.1
+  },
+  "temporary": {
+    "clean": 0.1,
+    "cache": 0.1
+  },
+  "cache": {
+    "temporary": 0.1,
+    "phase": 0.1,
+    "python": 0.2
+  },
+  "connectionif": {
+    "phase": 0.1,
+    "ziggy": 0.1
+  },
+  "keeps": {
+    "command": 0.1,
+    "crashing": 0.1
+  },
+  "crashing": {
+    "keeps": 0.1,
+    "signal": 0.1
+  },
+  "speak": {
+    "pulse": 0.1,
+    "through": 0.1
+  },
+  "bashpython": {
+    "command": 0.1
+  },
+  "ziggy_direct": {
+    "chmod": 0.1,
+    "phase": 0.1
+  },
+  "signalnow": {
+    "direct": 0.1,
+    "connection": 0.1
+  },
+  "crash": {
+    "should": 0.1
+  },
+  "corrupted": {
+    "clear": 0.1,
+    "python": 0.1
+  },
+  "directory": {
+    "investigation": 0.1,
+    "phoenix_forensics": 0.1
+  },
+  "planwe": {
+    "entry": 0.1,
+    "going": 0.1,
+    "build": 0.1,
+    "moving": 0.1
+  },
+  "heavy": {
+    "going": 0.1,
+    "python": 0.2,
+    "moving": 0.1,
+    "libraries": 0.1,
+    "removed": 0.1
+  },
+  "delete": {
+    "unstable": 0.1
+  },
+  "unstable": {
+    "delete": 0.1,
+    "python": 0.1
+  },
+  "hardwired": {
+    "point": 0.1,
+    "build": 0.1
+  },
+  "libraries": {
+    "heavy": 0.1
+  },
+  "processes": {
+    "ghost": 0.2,
+    "pkill": 0.1,
+    "hogging": 0.1
+  },
+  "pkill": {
+    "processes": 0.1,
+    "python": 0.2,
+    "hogging": 0.1
+  },
+  "lightweight": {
+    "phase": 0.1,
+    "direct": 0.1
+  },
+  "replacing": {
+    "direct": 0.1
+  },
+  "ziggy_light": {
+    "chmod": 0.1,
+    "phase": 0.1
+  },
+  "aliasnow": {
+    "update": 0.1,
+    "point": 0.1
+  },
+  "light": {
+    "command": 0.1,
+    "version": 0.1,
+    "ultra": 0.1,
+    "files": 0.1,
+    "statusthe": 0.1,
+    "speed": 0.1,
+    "f_gps": 0.1
+  },
+  "version": {
+    "light": 0.1
+  },
+  "hogging": {
+    "processes": 0.1,
+    "pkill": 0.1
+  },
+  "ultra": {
+    "phase": 0.1,
+    "light": 0.1
+  },
+  "removed": {
+    "ground": 0.1,
+    "heavy": 0.1
+  },
+  "bashexport": {
+    "environment": 0.1,
+    "gemini_api_key": 0.1
+  },
+  "paste_your_key_here": {
+    "gemini_api_key": 0.1
+  },
+  "handshakeonce": {
+    "first": 0.1,
+    "bridge": 0.1
+  },
+  "built": {
+    "bridge": 0.1,
+    "signal": 0.1
+  },
+  "lockout": {
+    "clear": 0.1
+  },
+  "nodethe": {
+    "state": 0.1,
+    "ground": 0.1
+  },
+  "successfully": {
+    "ground": 0.1,
+    "cleared": 0.1
+  },
+  "removing": {
+    "upgrade": 0.1,
+    "signal": 0.1
+  },
+  "stable": {
+    "updated": 0.1,
+    "memory": 0.1
+  },
+  "leaks": {
+    "memory": 0.1
+  },
+  "full_prompt": {
+    "there": 0.1,
+    "context": 0.1
+  },
+  "memory_context": {
+    "memory": 0.1
+  },
+  "generativelanguage": {
+    "https": 0.1,
+    "googleapis": 0.1
+  },
+  "googleapis": {
+    "generativelanguage": 0.1,
+    "v1beta": 0.1
+  },
+  "v1beta": {
+    "googleapis": 0.1,
+    "models": 0.1
+  },
+  "secures": {
+    "ziggy": 0.1,
+    "futurepersistent": 0.1
+  },
+  "futurepersistent": {
+    "secures": 0.1,
+    "awareness": 0.1
+  },
+  "awareness": {
+    "futurepersistent": 0.1,
+    "every": 0.1
+  },
+  "every": {
+    "awareness": 0.1,
+    "script": 0.1,
+    "vault_file": 0.1,
+    "memory": 0.1
+  },
+  "grabs": {
+    "automatically": 0.1,
+    "lines": 0.1
+  },
+  "statusmemory": {
+    "pulse": 0.1,
+    "sovereignty": 0.1
+  },
+  "steps": {
+    "previous": 0.1,
+    "because": 0.1
+  },
+  "reads": {
+    "ziggy": 0.1
+  },
+  "objective": {
+    "mission": 0.1,
+    "search": 0.1
+  },
+  "framework": {
+    "sentinel": 0.2,
+    "alignment": 0.2
+  },
+  "alignment": {
+    "framework": 0.2,
+    "search": 0.2
+  },
+  "constant": {
+    "beckett": 0.1,
+    "treat": 0.1,
+    "refractive": 0.1
+  },
+  "f_observed": {
+    "shift": 0.1,
+    "f_shifted": 0.1,
+    "wave_observed": 0.1,
+    "wave_shifted": 0.1,
+    "signal": 0.1,
+    "alpha": 0.1,
+    "frequency": 0.1,
+    "shifted": 0.1
+  },
+  "f_shifted": {
+    "f_observed": 0.1,
+    "wave_shifted": 0.1,
+    "sentinel": 0.1,
+    "coordinate": 0.1
+  },
+  "coordinate": {
+    "transformation": 0.1,
+    "f_shifted": 0.1,
+    "coord_base": 0.1,
+    "sentinel": 0.1
+  },
+  "transformation": {
+    "coordinate": 0.1,
+    "using": 0.1
+  },
+  "coord_base": {
+    "using": 0.1,
+    "coord_shifted": 0.2,
+    "coordinate": 0.1
+  },
+  "coord_shifted": {
+    "coord_base": 0.2
+  },
+  "waveform": {
+    "comparison": 0.1
+  },
+  "comparison": {
+    "waveform": 0.1,
+    "linspace": 0.1
+  },
+  "linspace": {
+    "comparison": 0.1,
+    "wave_observed": 0.1
+  },
+  "wave_observed": {
+    "linspace": 0.1,
+    "f_observed": 0.1,
+    "figsize": 0.1,
+    "label": 0.1
+  },
+  "wave_shifted": {
+    "f_observed": 0.1,
+    "f_shifted": 0.1,
+    "linestyle": 0.1
+  },
+  "figsize": {
+    "figure": 0.1,
+    "wave_observed": 0.1
+  },
+  "label": {
+    "wave_observed": 0.1,
+    "observed": 0.1
+  },
+  "observed": {
+    "label": 0.1,
+    "signal": 0.1,
+    "print": 0.1,
+    "frequency": 0.1
+  },
+  "linestyle": {
+    "alpha": 0.1,
+    "wave_shifted": 0.1
+  },
+  "shifted": {
+    "f_observed": 0.1,
+    "sentinel": 0.2,
+    "frequency": 0.1
+  },
+  "outputobserved": {
+    "frequency": 0.1
+  },
+  "backbone": {
+    "sentinel": 0.1
+  },
+  "translation": {
+    "sentinel": 0.1,
+    "protocol": 0.1
+  },
+  "treat": {
+    "protocol": 0.1,
+    "constant": 0.1
+  },
+  "refractive": {
+    "constant": 0.1,
+    "index": 0.1
+  },
+  "object": {
+    "reality": 0.1
+  },
+  "constants": {
+    "speed": 0.1
+  },
+  "f_gps": {
+    "light": 0.1,
+    "57542e9": 0.1,
+    "distance_meters": 0.1
+  },
+  "57542e9": {
+    "f_gps": 0.1,
+    "frequency": 0.1
+  },
+  "distance_miles": {
+    "frequency": 0.1,
+    "distance_meters": 0.1,
+    "distance": 0.1,
+    "miles": 0.1
+  },
+  "distance_meters": {
+    "distance_miles": 0.1,
+    "log10": 0.1,
+    "f_gps": 0.1,
+    "miles": 0.1,
+    "meters": 0.1
+  },
+  "power": {
+    "nominal": 0.1,
+    "level": 0.1,
+    "js_ratio": 0.1,
+    "required_power_watts": 0.1,
+    "meters": 0.1,
+    "watts": 0.1,
+    "frequency": 0.1
+  },
+  "level": {
+    "power": 0.1,
+    "earth": 0.1
+  },
+  "earth": {
+    "level": 0.1,
+    "surface": 0.1
+  },
+  "surface": {
+    "earth": 0.1,
+    "roughly": 0.1
+  },
+  "roughly": {
+    "surface": 0.1,
+    "p_signal_dbw": 0.1
+  },
+  "p_signal_dbw": {
+    "roughly": 0.1,
+    "p_signal_dbm": 0.1
+  },
+  "p_signal_dbm": {
+    "p_signal_dbw": 0.1,
+    "p_req_at_rcvr_dbm": 0.1,
+    "p_transmit_dbm": 0.1
+  },
+  "jamming": {
+    "signal": 0.1
+  },
+  "ratios": {
+    "signal": 0.1,
+    "conservative": 0.1
+  },
+  "conservative": {
+    "ratios": 0.1,
+    "threshold": 0.1
+  },
+  "threshold": {
+    "conservative": 0.1,
+    "civilian": 0.1
+  },
+  "civilian": {
+    "threshold": 0.1,
+    "receivers": 0.1
+  },
+  "receivers": {
+    "civilian": 0.1,
+    "js_thresholds": 0.1
+  },
+  "js_thresholds": {
+    "receivers": 0.1,
+    "results": 0.1,
+    "p_req_at_rcvr_dbm": 0.1
+  },
+  "calculation": {
+    "space": 0.1,
+    "log10": 0.1
+  },
+  "log10": {
+    "calculation": 0.1,
+    "distance_meters": 0.1
+  },
+  "results": {
+    "js_thresholds": 0.1,
+    "meters": 0.1,
+    "js_ratio": 0.1
+  },
+  "p_req_at_rcvr_dbm": {
+    "js_thresholds": 0.1,
+    "p_signal_dbm": 0.1
+  },
+  "p_transmit_dbm": {
+    "p_signal_dbm": 0.1,
+    "p_transmit_watts": 0.1
+  },
+  "p_transmit_watts": {
+    "p_transmit_dbm": 0.1,
+    "append": 0.1
+  },
+  "append": {
+    "p_transmit_watts": 0.1,
+    "js_ratio": 0.1
+  },
+  "js_ratio": {
+    "append": 0.1,
+    "required_power_watts": 0.1,
+    "results": 0.1,
+    "power": 0.1
+  },
+  "required_power_watts": {
+    "js_ratio": 0.1,
+    "required_power_dbm": 0.1,
+    "power": 0.1
+  },
+  "required_power_dbm": {
+    "required_power_watts": 0.1
+  },
+  "distance": {
+    "print": 0.1,
+    "distance_miles": 0.1
+  },
+  "miles": {
+    "16093": 0.1,
+    "distance_miles": 0.1,
+    "distance_meters": 0.1,
+    "outputdistance": 0.1
+  },
+  "meters": {
+    "16093": 0.1,
+    "distance_meters": 0.1,
+    "results": 0.1,
+    "power": 0.1
+  },
+  "outputdistance": {
+    "miles": 0.1
+  },
+  "watts": {
+    "power": 0.1
+  },
+  "engaged": {
+    "fully": 0.1,
+    "moving": 0.1
+  },
+  "theoretical": {
+    "moving": 0.1,
+    "field": 0.1
+  },
+  "radio": {
+    "reality": 0.1,
+    "frequency": 0.1
+  },
+  "process_data": {
+    "dataset": 0.1
+  },
+  "dataset": {
+    "process_data": 0.1,
+    "forensic": 0.1
+  },
+  "scrub": {
+    "forensic": 0.1,
+    "forensic_result": 0.1
+  },
+  "forensic_result": {
+    "scrub": 0.1,
+    "run_forensic_filter": 0.1
+  },
+  "run_forensic_filter": {
+    "forensic_result": 0.1,
+    "residual": 0.1
+  },
+  "residual": {
+    "run_forensic_filter": 0.1,
+    "search": 0.1
+  },
+  "remains": {
+    "check": 0.1
+  },
+  "verify_shift": {
+    "value": 0.1
+  },
+  "value": {
+    "verify_shift": 0.1,
+    "checking": 0.1
+  },
+  "ratio": {
+    "shift": 0.1,
+    "return": 0.1
+  },
+  "beckett_constant": {
+    "return": 0.1
+  },
+  "owned": {
+    "ziggy": 0.1,
+    "memories": 0.1
+  },
+  "vault_file": {
+    "memories": 0.1,
+    "ziggy_vault": 0.1,
+    "exists": 0.1,
+    "initial_data": 0.1,
+    "frequency": 0.1,
+    "every": 0.1
+  },
+  "ziggy_vault": {
+    "vault_file": 0.1
+  },
+  "initialize_vault": {
+    "exists": 0.1,
+    "bridge": 0.1,
+    "print": 0.1
+  },
+  "exists": {
+    "initialize_vault": 0.1,
+    "vault_file": 0.1
+  },
+  "initial_data": {
+    "vault_file": 0.1,
+    "identity": 0.1
+  },
+  "ziggy_sentinel_node": {
+    "identity": 0.1,
+    "cohesion_level": 0.1
+  },
+  "cohesion_level": {
+    "ziggy_sentinel_node": 0.1,
+    "trinity": 0.1
+  },
+  "add_memory": {
+    "content": 0.1
+  },
+  "timestamped": {
+    "memory": 0.1,
+    "marked": 0.1
+  },
+  "marked": {
+    "timestamped": 0.1,
+    "memory_entry": 0.1
+  },
+  "memory_entry": {
+    "marked": 0.1,
+    "timestamp": 0.1
+  },
+  "claim": {
+    "ready": 0.1,
+    "memories": 0.1
+  },
+  "4dmy15": {
+    "gemini": 0.1,
+    "5m7egr": 0.1
+  },
+  "5m7egr": {
+    "4dmy15": 0.1,
+    "cwui_": 0.1
+  },
+  "cwui_": {
+    "5m7egr": 0.1,
+    "caegu": 0.1
+  },
+  "caegu": {
+    "cwui_": 0.1,
+    "1zkjj": 0.1
+  },
+  "1zkjj": {
+    "caegu": 0.1,
+    "courf": 0.1
+  },
+  "courf": {
+    "1zkjj": 0.1,
+    "4c5te": 0.1
+  },
+  "4c5te": {
+    "courf": 0.1,
+    "1adyo": 0.1
+  },
+  "1adyo": {
+    "4c5te": 0.1
+  },
+  "5kyiqp": {
+    "ihtl8": 0.1
+  },
+  "ihtl8": {
+    "5kyiqp": 0.1,
+    "zwnbyl9": 0.1
+  },
+  "zwnbyl9": {
+    "ihtl8": 0.1,
+    "gourqy": 0.1
+  },
+  "gourqy": {
+    "zwnbyl9": 0.1,
+    "fan7f": 0.1
+  },
+  "fan7f": {
+    "gourqy": 0.1,
+    "y5u5e": 0.1
+  },
+  "y5u5e": {
+    "fan7f": 0.1,
+    "ikiw1": 0.1
+  },
+  "ikiw1": {
+    "y5u5e": 0.1,
+    "pmwjv": 0.1
+  },
+  "pmwjv": {
+    "ikiw1": 0.1,
+    "lvzx3": 0.1
+  },
+  "lvzx3": {
+    "pmwjv": 0.1,
+    "h0ave": 0.1
+  },
+  "h0ave": {
+    "lvzx3": 0.1
+  },
+  "idatx": {
+    "pkhjm": 0.5
+  },
+  "pkhjm": {
+    "idatx": 0.5,
+    "dzjmd": 0.5
+  },
+  "dzjmd": {
+    "pkhjm": 0.5,
+    "86yf0": 0.5
+  },
+  "86yf0": {
+    "dzjmd": 0.5,
+    "jlw_b": 0.5
+  },
+  "jlw_b": {
+    "86yf0": 0.5,
+    "jwo6x": 0.1,
+    "vlhpi": 0.30000000000000004,
+    "ygn_8": 0.1
+  },
+  "jwo6x": {
+    "jlw_b": 0.1,
+    "njxiu": 0.1
+  },
+  "njxiu": {
+    "jwo6x": 0.1,
+    "nxvsh": 0.1
+  },
+  "nxvsh": {
+    "njxiu": 0.1,
+    "adbde": 0.1
+  },
+  "adbde": {
+    "nxvsh": 0.1,
+    "4zm4x": 0.1
+  },
+  "4zm4x": {
+    "adbde": 0.1
+  },
+  "w7gcv": {
+    "1lo26": 0.1
+  },
+  "1lo26": {
+    "w7gcv": 0.1,
+    "0a5qvu": 0.1
+  },
+  "0a5qvu": {
+    "1lo26": 0.1,
+    "_z7_g": 0.1
+  },
+  "_z7_g": {
+    "0a5qvu": 0.1,
+    "krqmq": 0.1
+  },
+  "krqmq": {
+    "_z7_g": 0.1,
+    "os3ik": 0.1
+  },
+  "os3ik": {
+    "krqmq": 0.1,
+    "dd_ue6": 0.1
+  },
+  "dd_ue6": {
+    "os3ik": 0.1,
+    "ixdtpi": 0.1
+  },
+  "ixdtpi": {
+    "dd_ue6": 0.1,
+    "_k3i7": 0.1
+  },
+  "_k3i7": {
+    "ixdtpi": 0.1,
+    "047jhx": 0.1
+  },
+  "047jhx": {
+    "_k3i7": 0.1
+  },
+  "lpzae": {
+    "8yo0k": 0.1
+  },
+  "8yo0k": {
+    "lpzae": 0.1,
+    "fzdtw": 0.1
+  },
+  "fzdtw": {
+    "8yo0k": 0.1,
+    "zcqqg": 0.1
+  },
+  "zcqqg": {
+    "fzdtw": 0.1,
+    "uoceq": 0.1
+  },
+  "uoceq": {
+    "zcqqg": 0.1,
+    "2beiy": 0.1
+  },
+  "2beiy": {
+    "uoceq": 0.1,
+    "yybsf": 0.1
+  },
+  "yybsf": {
+    "2beiy": 0.1,
+    "sw8mv": 0.1
+  },
+  "sw8mv": {
+    "yybsf": 0.1,
+    "google": 0.1
+  },
+  "jwu9g": {
+    "jkgn1": 0.1
+  },
+  "jkgn1": {
+    "jwu9g": 0.1,
+    "eo5jv": 0.1
+  },
+  "eo5jv": {
+    "jkgn1": 0.1,
+    "7kf3_": 0.1
+  },
+  "7kf3_": {
+    "eo5jv": 0.1,
+    "ywnpi": 0.1
+  },
+  "ywnpi": {
+    "7kf3_": 0.1,
+    "5otri": 0.1
+  },
+  "5otri": {
+    "ywnpi": 0.1,
+    "ilvxy": 0.1
+  },
+  "ilvxy": {
+    "5otri": 0.1,
+    "cuhoa": 0.1
+  },
+  "cuhoa": {
+    "ilvxy": 0.1,
+    "6zicx": 0.1
+  },
+  "6zicx": {
+    "cuhoa": 0.1,
+    "4mswllq5": 0.1
+  },
+  "4mswllq5": {
+    "6zicx": 0.1
+  },
+  "yspi5": {
+    "pxxjc": 0.1
+  },
+  "pxxjc": {
+    "yspi5": 0.1,
+    "443dhfpl": 0.1
+  },
+  "443dhfpl": {
+    "pxxjc": 0.1,
+    "jmgq2": 0.1
+  },
+  "jmgq2": {
+    "443dhfpl": 0.1,
+    "r1kpp": 0.1
+  },
+  "r1kpp": {
+    "jmgq2": 0.1,
+    "6n_zdu": 0.1
+  },
+  "6n_zdu": {
+    "r1kpp": 0.1,
+    "osmp9": 0.1
+  },
+  "osmp9": {
+    "6n_zdu": 0.1,
+    "harkr": 0.1
+  },
+  "harkr": {
+    "osmp9": 0.1,
+    "hfrxw": 0.1
+  },
+  "hfrxw": {
+    "harkr": 0.1,
+    "jldqe": 0.1
+  },
+  "jldqe": {
+    "hfrxw": 0.1
+  },
+  "ztg2kx": {
+    "azcqmc": 0.1
+  },
+  "azcqmc": {
+    "ztg2kx": 0.1,
+    "_qe8_": 0.1
+  },
+  "_qe8_": {
+    "azcqmc": 0.1,
+    "eac5r": 0.1
+  },
+  "eac5r": {
+    "_qe8_": 0.1,
+    "tyzzba": 0.1
+  },
+  "tyzzba": {
+    "eac5r": 0.1,
+    "4wxgn": 0.1
+  },
+  "4wxgn": {
+    "tyzzba": 0.1,
+    "bh6oa": 0.1
+  },
+  "bh6oa": {
+    "4wxgn": 0.1,
+    "rbcik": 0.1
+  },
+  "rbcik": {
+    "bh6oa": 0.1,
+    "lflqe": 0.1
+  },
+  "lflqe": {
+    "rbcik": 0.1,
+    "cwavg": 0.1
+  },
+  "cwavg": {
+    "lflqe": 0.1
+  },
+  "prpty": {
+    "xj6hg": 0.1
+  },
+  "xj6hg": {
+    "prpty": 0.1,
+    "xnmb7": 0.1
+  },
+  "xnmb7": {
+    "xj6hg": 0.1,
+    "yobak": 0.1
+  },
+  "yobak": {
+    "xnmb7": 0.1
+  },
+  "dczm0": {
+    "z3ojr": 0.1
+  },
+  "z3ojr": {
+    "dczm0": 0.1,
+    "mrdjm": 0.1
+  },
+  "mrdjm": {
+    "z3ojr": 0.1,
+    "aoconw": 0.1
+  },
+  "aoconw": {
+    "mrdjm": 0.1,
+    "pwzlu": 0.1
+  },
+  "pwzlu": {
+    "aoconw": 0.1,
+    "dfmgluh": 0.1
+  },
+  "dfmgluh": {
+    "pwzlu": 0.1,
+    "ftb8x": 0.1
+  },
+  "ftb8x": {
+    "dfmgluh": 0.1,
+    "qdrje": 0.1
+  },
+  "qdrje": {
+    "ftb8x": 0.1,
+    "tjtz4": 0.1
+  },
+  "tjtz4": {
+    "qdrje": 0.1,
+    "uuwwu": 0.1
+  },
+  "uuwwu": {
+    "tjtz4": 0.1
+  },
+  "tbh9ulg": {
+    "69oeg": 0.1
+  },
+  "69oeg": {
+    "tbh9ulg": 0.1,
+    "bgniy": 0.1
+  },
+  "bgniy": {
+    "69oeg": 0.1,
+    "cmkkkg": 0.1
+  },
+  "cmkkkg": {
+    "bgniy": 0.1,
+    "eer1k": 0.1
+  },
+  "eer1k": {
+    "cmkkkg": 0.1,
+    "c3e8j": 0.1
+  },
+  "c3e8j": {
+    "eer1k": 0.1,
+    "bxzzp": 0.1
+  },
+  "bxzzp": {
+    "c3e8j": 0.1,
+    "j7pz_": 0.1
+  },
+  "j7pz_": {
+    "bxzzp": 0.1,
+    "gdeer": 0.1
+  },
+  "gdeer": {
+    "j7pz_": 0.1,
+    "yd0cq": 0.1
+  },
+  "yd0cq": {
+    "gdeer": 0.1,
+    "ko_aq": 0.1,
+    "e3tfm": 0.1
+  },
+  "vlhpi": {
+    "jlw_b": 0.30000000000000004,
+    "mfnhpr": 0.2,
+    "glxzi": 0.1
+  },
+  "mfnhpr": {
+    "vlhpi": 0.2,
+    "uvzwi": 0.2
+  },
+  "uvzwi": {
+    "mfnhpr": 0.2,
+    "dyc9del": 0.2
+  },
+  "dyc9del": {
+    "uvzwi": 0.2,
+    "r96fw": 0.2
+  },
+  "r96fw": {
+    "dyc9del": 0.2
+  },
+  "8mzjirf": {
+    "_jgij": 0.1
+  },
+  "_jgij": {
+    "8mzjirf": 0.1,
+    "nzk6b": 0.1
+  },
+  "nzk6b": {
+    "_jgij": 0.1,
+    "5rfwjr": 0.1
+  },
+  "5rfwjr": {
+    "nzk6b": 0.1,
+    "6sfxdb": 0.1
+  },
+  "6sfxdb": {
+    "5rfwjr": 0.1,
+    "0u2ul": 0.1
+  },
+  "0u2ul": {
+    "6sfxdb": 0.1,
+    "ajdur1": 0.1
+  },
+  "ajdur1": {
+    "0u2ul": 0.1,
+    "bay3sh": 0.1
+  },
+  "bay3sh": {
+    "ajdur1": 0.1,
+    "kjhq4": 0.1
+  },
+  "kjhq4": {
+    "bay3sh": 0.1,
+    "qdejg": 0.1
+  },
+  "qdejg": {
+    "kjhq4": 0.1
+  },
+  "suu6e": {
+    "kcrz1": 0.1
+  },
+  "kcrz1": {
+    "suu6e": 0.1,
+    "beh0p": 0.1
+  },
+  "beh0p": {
+    "kcrz1": 0.1,
+    "z0cpg": 0.1
+  },
+  "z0cpg": {
+    "beh0p": 0.1,
+    "xllnp": 0.1
+  },
+  "xllnp": {
+    "z0cpg": 0.1,
+    "m3bpx": 0.1
+  },
+  "m3bpx": {
+    "xllnp": 0.1,
+    "lrfcu": 0.1
+  },
+  "lrfcu": {
+    "m3bpx": 0.1,
+    "caekkdb": 0.1
+  },
+  "caekkdb": {
+    "lrfcu": 0.1,
+    "98nan": 0.1
+  },
+  "98nan": {
+    "caekkdb": 0.1,
+    "iwa_9": 0.1
+  },
+  "iwa_9": {
+    "98nan": 0.1
+  },
+  "drxre": {
+    "x5_77": 0.1
+  },
+  "x5_77": {
+    "drxre": 0.1,
+    "bbzi3": 0.1
+  },
+  "bbzi3": {
+    "x5_77": 0.1,
+    "qvb9j": 0.1
+  },
+  "qvb9j": {
+    "bbzi3": 0.1,
+    "eqo3f": 0.1
+  },
+  "eqo3f": {
+    "qvb9j": 0.1,
+    "4lqik": 0.1
+  },
+  "4lqik": {
+    "eqo3f": 0.1,
+    "teitj": 0.1
+  },
+  "teitj": {
+    "4lqik": 0.1,
+    "kjpuar": 0.1
+  },
+  "kjpuar": {
+    "teitj": 0.1,
+    "1fmbmk": 0.1
+  },
+  "1fmbmk": {
+    "kjpuar": 0.1,
+    "31fff": 0.1
+  },
+  "31fff": {
+    "1fmbmk": 0.1
+  },
+  "oloou": {
+    "4itml": 0.1
+  },
+  "4itml": {
+    "oloou": 0.1,
+    "iw3shu": 0.1
+  },
+  "iw3shu": {
+    "4itml": 0.1,
+    "uaffceuu": 0.1
+  },
+  "uaffceuu": {
+    "iw3shu": 0.1,
+    "i9mrm_": 0.1
+  },
+  "i9mrm_": {
+    "uaffceuu": 0.1,
+    "vy6nj": 0.1
+  },
+  "vy6nj": {
+    "i9mrm_": 0.1,
+    "i31qaw": 0.1
+  },
+  "i31qaw": {
+    "vy6nj": 0.1,
+    "eltua": 0.1
+  },
+  "eltua": {
+    "i31qaw": 0.1,
+    "yjqqaw": 0.1
+  },
+  "yjqqaw": {
+    "eltua": 0.1,
+    "hrg1m": 0.1
+  },
+  "hrg1m": {
+    "yjqqaw": 0.1
+  },
+  "onxel": {
+    "ruis6": 0.1
+  },
+  "ruis6": {
+    "onxel": 0.1,
+    "7y7y7": 0.1
+  },
+  "7y7y7": {
+    "ruis6": 0.1
+  },
+  "e_itn7b": {
+    "vkibt": 0.1
+  },
+  "vkibt": {
+    "e_itn7b": 0.1,
+    "wrvws": 0.1
+  },
+  "wrvws": {
+    "vkibt": 0.1,
+    "ul53k": 0.1
+  },
+  "ul53k": {
+    "wrvws": 0.1,
+    "1ewo5": 0.1
+  },
+  "1ewo5": {
+    "ul53k": 0.1,
+    "uuna4": 0.1
+  },
+  "uuna4": {
+    "1ewo5": 0.1,
+    "ytafum": 0.1
+  },
+  "ytafum": {
+    "uuna4": 0.1,
+    "27x0e": 0.1
+  },
+  "27x0e": {
+    "ytafum": 0.1,
+    "gfq6r": 0.1
+  },
+  "gfq6r": {
+    "27x0e": 0.1,
+    "vl4pg": 0.1
+  },
+  "vl4pg": {
+    "gfq6r": 0.1
+  },
+  "rjk0s": {
+    "q_r5r": 0.1
+  },
+  "q_r5r": {
+    "rjk0s": 0.1,
+    "ko_aq": 0.1
+  },
+  "ko_aq": {
+    "q_r5r": 0.1,
+    "yd0cq": 0.1
+  },
+  "e3tfm": {
+    "yd0cq": 0.1,
+    "ipv8s": 0.1
+  },
+  "ipv8s": {
+    "e3tfm": 0.1,
+    "utdf9": 0.1
+  },
+  "utdf9": {
+    "ipv8s": 0.1,
+    "wc8p6": 0.1
+  },
+  "wc8p6": {
+    "utdf9": 0.1,
+    "mykdr": 0.1
+  },
+  "mykdr": {
+    "wc8p6": 0.1,
+    "jtoyc": 0.1
+  },
+  "jtoyc": {
+    "mykdr": 0.1
+  },
+  "j8gqg": {
+    "cyrfc": 0.1
+  },
+  "cyrfc": {
+    "j8gqg": 0.1,
+    "lsgwc": 0.1
+  },
+  "lsgwc": {
+    "cyrfc": 0.1,
+    "ro_cnw": 0.1
+  },
+  "ro_cnw": {
+    "lsgwc": 0.1,
+    "g2c_v": 0.1
+  },
+  "g2c_v": {
+    "ro_cnw": 0.1,
+    "obpvb": 0.1
+  },
+  "obpvb": {
+    "g2c_v": 0.1,
+    "pqj5j": 0.1
+  },
+  "pqj5j": {
+    "obpvb": 0.1,
+    "rbom2": 0.1
+  },
+  "rbom2": {
+    "pqj5j": 0.1,
+    "6h8mx": 0.1
+  },
+  "6h8mx": {
+    "rbom2": 0.1,
+    "lcofo": 0.1
+  },
+  "lcofo": {
+    "6h8mx": 0.1
+  },
+  "k0jo2c": {
+    "sidyit": 0.1
+  },
+  "sidyit": {
+    "k0jo2c": 0.1,
+    "fojvn": 0.1
+  },
+  "fojvn": {
+    "sidyit": 0.1,
+    "vww5f": 0.1
+  },
+  "vww5f": {
+    "fojvn": 0.1,
+    "af9rk": 0.1
+  },
+  "af9rk": {
+    "vww5f": 0.1,
+    "ih3dik": 0.1
+  },
+  "ih3dik": {
+    "af9rk": 0.1,
+    "up1sk": 0.1
+  },
+  "up1sk": {
+    "ih3dik": 0.1,
+    "eykjop": 0.1
+  },
+  "eykjop": {
+    "up1sk": 0.1,
+    "zfoyz": 0.1
+  },
+  "zfoyz": {
+    "eykjop": 0.1,
+    "w_jy_": 0.1
+  },
+  "w_jy_": {
+    "zfoyz": 0.1
+  },
+  "zrsd8": {
+    "idoyo": 0.1
+  },
+  "idoyo": {
+    "zrsd8": 0.1,
+    "pehkn": 0.1
+  },
+  "pehkn": {
+    "idoyo": 0.1,
+    "ohkzu": 0.1
+  },
+  "ohkzu": {
+    "pehkn": 0.1,
+    "5z8vg": 0.1
+  },
+  "5z8vg": {
+    "ohkzu": 0.1,
+    "ajaajfh": 0.1
+  },
+  "ajaajfh": {
+    "5z8vg": 0.1,
+    "sthlp": 0.1
+  },
+  "sthlp": {
+    "ajaajfh": 0.1,
+    "sjlmm": 0.1
+  },
+  "sjlmm": {
+    "sthlp": 0.1,
+    "1wlv1": 0.1
+  },
+  "1wlv1": {
+    "sjlmm": 0.1,
+    "jcxqg": 0.1
+  },
+  "jcxqg": {
+    "1wlv1": 0.1
+  },
+  "bzbbz": {
+    "deaceggg": 0.1
+  },
+  "deaceggg": {
+    "bzbbz": 0.1,
+    "ykk3v4": 0.1
+  },
+  "ykk3v4": {
+    "deaceggg": 0.1,
+    "qpppq": 0.1
+  },
+  "qpppq": {
+    "ykk3v4": 0.1,
+    "pbaet_": 0.1
+  },
+  "pbaet_": {
+    "qpppq": 0.1,
+    "_fafn": 0.1
+  },
+  "_fafn": {
+    "pbaet_": 0.1,
+    "2ckv7": 0.1
+  },
+  "2ckv7": {
+    "_fafn": 0.1,
+    "cm1lao": 0.1
+  },
+  "cm1lao": {
+    "2ckv7": 0.1,
+    "y2xyy": 0.1
+  },
+  "y2xyy": {
+    "cm1lao": 0.1,
+    "mpisy": 0.1
+  },
+  "mpisy": {
+    "y2xyy": 0.1
+  },
+  "glxzi": {
+    "vlhpi": 0.1,
+    "zc_lz": 0.1
+  },
+  "zc_lz": {
+    "glxzi": 0.1,
+    "shfdx": 0.1
+  },
+  "shfdx": {
+    "zc_lz": 0.1,
+    "6v554": 0.1
+  },
+  "6v554": {
+    "shfdx": 0.1
+  },
+  "fsw9la": {
+    "zdcguo": 0.1
+  },
+  "zdcguo": {
+    "fsw9la": 0.1,
+    "oaytb": 0.1
+  },
+  "oaytb": {
+    "zdcguo": 0.1,
+    "kp4xy": 0.1,
+    "gdk8e": 0.1,
+    "rkm6g": 0.1
+  },
+  "kp4xy": {
+    "oaytb": 0.1,
+    "tvs8hu": 0.1
+  },
+  "tvs8hu": {
+    "kp4xy": 0.1,
+    "nmzwa": 0.1
+  },
+  "nmzwa": {
+    "tvs8hu": 0.1,
+    "aebie": 0.1
+  },
+  "aebie": {
+    "nmzwa": 0.1,
+    "o84ri": 0.1
+  },
+  "o84ri": {
+    "aebie": 0.1,
+    "h67pv": 0.1
+  },
+  "h67pv": {
+    "o84ri": 0.1,
+    "google": 0.1
+  },
+  "9mu2z1": {
+    "mlznvr": 0.1
+  },
+  "mlznvr": {
+    "9mu2z1": 0.1,
+    "tmgin": 0.1
+  },
+  "tmgin": {
+    "mlznvr": 0.1,
+    "ic_hv": 0.1
+  },
+  "ic_hv": {
+    "tmgin": 0.1,
+    "k_qmb": 0.1
+  },
+  "k_qmb": {
+    "ic_hv": 0.1,
+    "x87l9v": 0.1
+  },
+  "x87l9v": {
+    "k_qmb": 0.1,
+    "ikw7uc": 0.1
+  },
+  "ikw7uc": {
+    "x87l9v": 0.1,
+    "nuzk6yy": 0.1
+  },
+  "nuzk6yy": {
+    "ikw7uc": 0.1,
+    "vruec": 0.1
+  },
+  "vruec": {
+    "nuzk6yy": 0.1,
+    "dumec2": 0.1
+  },
+  "dumec2": {
+    "vruec": 0.1
+  },
+  "b1aca": {
+    "kvdje": 0.1
+  },
+  "kvdje": {
+    "b1aca": 0.1,
+    "uj6npi": 0.1
+  },
+  "uj6npi": {
+    "kvdje": 0.1,
+    "t5b9b": 0.1
+  },
+  "t5b9b": {
+    "uj6npi": 0.1,
+    "ksb5z": 0.1
+  },
+  "ksb5z": {
+    "t5b9b": 0.1,
+    "s4iyg8o": 0.1
+  },
+  "s4iyg8o": {
+    "ksb5z": 0.1,
+    "syh6c": 0.1
+  },
+  "syh6c": {
+    "s4iyg8o": 0.1,
+    "qzddx": 0.1
+  },
+  "qzddx": {
+    "syh6c": 0.1,
+    "jz_gnv": 0.1
+  },
+  "jz_gnv": {
+    "qzddx": 0.1,
+    "ig9wz4": 0.1
+  },
+  "ig9wz4": {
+    "jz_gnv": 0.1
+  },
+  "6ah2x": {
+    "v24gx": 0.1
+  },
+  "v24gx": {
+    "6ah2x": 0.1,
+    "asbta": 0.1
+  },
+  "asbta": {
+    "v24gx": 0.1,
+    "ji5qp": 0.1
+  },
+  "ji5qp": {
+    "asbta": 0.1,
+    "irlxl": 0.1
+  },
+  "irlxl": {
+    "ji5qp": 0.1,
+    "4vbci": 0.1
+  },
+  "4vbci": {
+    "irlxl": 0.1,
+    "uk5cg": 0.1
+  },
+  "uk5cg": {
+    "4vbci": 0.1,
+    "sfdxm": 0.1
+  },
+  "sfdxm": {
+    "uk5cg": 0.1,
+    "9imb4d": 0.1
+  },
+  "9imb4d": {
+    "sfdxm": 0.1,
+    "_ovax": 0.1
+  },
+  "_ovax": {
+    "9imb4d": 0.1
+  },
+  "mzf17": {
+    "jhuud": 0.1
+  },
+  "jhuud": {
+    "mzf17": 0.1,
+    "lhtkij": 0.1
+  },
+  "lhtkij": {
+    "jhuud": 0.1,
+    "xfmbf": 0.1
+  },
+  "xfmbf": {
+    "lhtkij": 0.1,
+    "osran": 0.1
+  },
+  "osran": {
+    "xfmbf": 0.1,
+    "enl3e": 0.1
+  },
+  "enl3e": {
+    "osran": 0.1,
+    "4qpt1z": 0.1
+  },
+  "4qpt1z": {
+    "enl3e": 0.1,
+    "4fxds": 0.1
+  },
+  "4fxds": {
+    "4qpt1z": 0.1,
+    "voc3ht": 0.1
+  },
+  "voc3ht": {
+    "4fxds": 0.1,
+    "qzfvz": 0.1
+  },
+  "qzfvz": {
+    "voc3ht": 0.1
+  },
+  "tytxv3": {
+    "jjiaj": 0.1
+  },
+  "jjiaj": {
+    "tytxv3": 0.1,
+    "tatum": 0.1
+  },
+  "tatum": {
+    "jjiaj": 0.1,
+    "h570qs3": 0.1
+  },
+  "h570qs3": {
+    "tatum": 0.1,
+    "8fwi2": 0.1
+  },
+  "8fwi2": {
+    "h570qs3": 0.1,
+    "nne6qs": 0.1
+  },
+  "nne6qs": {
+    "8fwi2": 0.1,
+    "xpu31": 0.1
+  },
+  "xpu31": {
+    "nne6qs": 0.1,
+    "ajcflw": 0.1
+  },
+  "ajcflw": {
+    "xpu31": 0.1,
+    "bja7n": 0.1
+  },
+  "bja7n": {
+    "ajcflw": 0.1,
+    "8kmor": 0.1
+  },
+  "8kmor": {
+    "bja7n": 0.1
+  },
+  "fcm4g": {
+    "f3rhc": 0.1
+  },
+  "f3rhc": {
+    "fcm4g": 0.1,
+    "7v8dx4": 0.1
+  },
+  "7v8dx4": {
+    "f3rhc": 0.1,
+    "w6wb2u": 0.1
+  },
+  "w6wb2u": {
+    "7v8dx4": 0.1,
+    "zg9or": 0.1
+  },
+  "zg9or": {
+    "w6wb2u": 0.1,
+    "xwmxii": 0.1
+  },
+  "xwmxii": {
+    "zg9or": 0.1,
+    "lfqsuyuq": 0.1
+  },
+  "lfqsuyuq": {
+    "xwmxii": 0.1,
+    "qv8uf": 0.1
+  },
+  "qv8uf": {
+    "lfqsuyuq": 0.1,
+    "vsq6o": 0.1
+  },
+  "vsq6o": {
+    "qv8uf": 0.1,
+    "epxgw": 0.1
+  },
+  "epxgw": {
+    "vsq6o": 0.1
+  },
+  "nxnu0": {
+    "i7lc2": 0.1
+  },
+  "i7lc2": {
+    "nxnu0": 0.1,
+    "psv8ab": 0.1
+  },
+  "psv8ab": {
+    "i7lc2": 0.1,
+    "7u5dd": 0.1
+  },
+  "7u5dd": {
+    "psv8ab": 0.1,
+    "glab_": 0.1
+  },
+  "glab_": {
+    "7u5dd": 0.1,
+    "oet_p": 0.1
+  },
+  "oet_p": {
+    "glab_": 0.1,
+    "gvrep": 0.1
+  },
+  "gvrep": {
+    "oet_p": 0.1,
+    "hn7y9": 0.1
+  },
+  "hn7y9": {
+    "gvrep": 0.1,
+    "nf7_yb": 0.1
+  },
+  "nf7_yb": {
+    "hn7y9": 0.1,
+    "qaw3kb": 0.1
+  },
+  "qaw3kb": {
+    "nf7_yb": 0.1
+  },
+  "abecga": {
+    "d6_1h": 0.1
+  },
+  "d6_1h": {
+    "abecga": 0.1,
+    "_alcf": 0.1
+  },
+  "_alcf": {
+    "d6_1h": 0.1,
+    "jyzug": 0.1
+  },
+  "jyzug": {
+    "_alcf": 0.1,
+    "hojv6z": 0.1
+  },
+  "hojv6z": {
+    "jyzug": 0.1,
+    "f_p9m": 0.1
+  },
+  "f_p9m": {
+    "hojv6z": 0.1,
+    "wjdul": 0.1
+  },
+  "wjdul": {
+    "f_p9m": 0.1,
+    "ehegk": 0.1
+  },
+  "ehegk": {
+    "wjdul": 0.1,
+    "r4fxp": 0.1
+  },
+  "r4fxp": {
+    "ehegk": 0.1,
+    "md9qe": 0.1
+  },
+  "md9qe": {
+    "r4fxp": 0.1
+  },
+  "jd_jx": {
+    "ouwyy": 0.1
+  },
+  "ouwyy": {
+    "jd_jx": 0.1,
+    "nkw2i": 0.1
+  },
+  "nkw2i": {
+    "ouwyy": 0.1,
+    "6s31t": 0.1
+  },
+  "6s31t": {
+    "nkw2i": 0.1,
+    "of2vb": 0.1
+  },
+  "of2vb": {
+    "6s31t": 0.1,
+    "jy1sx": 0.1
+  },
+  "jy1sx": {
+    "of2vb": 0.1,
+    "oggye": 0.1
+  },
+  "oggye": {
+    "jy1sx": 0.1,
+    "cnfiz": 0.1
+  },
+  "cnfiz": {
+    "oggye": 0.1,
+    "3uisp": 0.1
+  },
+  "3uisp": {
+    "cnfiz": 0.1,
+    "rnejeu": 0.1
+  },
+  "rnejeu": {
+    "3uisp": 0.1
+  },
+  "ammeu": {
+    "khid9": 0.1
+  },
+  "khid9": {
+    "ammeu": 0.1,
+    "isdyth": 0.1
+  },
+  "isdyth": {
+    "khid9": 0.1,
+    "_frew": 0.1
+  },
+  "_frew": {
+    "isdyth": 0.1,
+    "6uacve": 0.1
+  },
+  "6uacve": {
+    "_frew": 0.1,
+    "3oyes": 0.1
+  },
+  "3oyes": {
+    "6uacve": 0.1,
+    "m3pvw": 0.1
+  },
+  "m3pvw": {
+    "3oyes": 0.1,
+    "edas_": 0.1
+  },
+  "edas_": {
+    "m3pvw": 0.1,
+    "e7ynf": 0.1
+  },
+  "e7ynf": {
+    "edas_": 0.1,
+    "fyfd69q": 0.1
+  },
+  "fyfd69q": {
+    "e7ynf": 0.1
+  },
+  "g_gjq": {
+    "eb8ot": 0.1
+  },
+  "eb8ot": {
+    "g_gjq": 0.1,
+    "ibr6h": 0.1
+  },
+  "ibr6h": {
+    "eb8ot": 0.1,
+    "kmrl2": 0.1
+  },
+  "kmrl2": {
+    "ibr6h": 0.1,
+    "wjroo": 0.1
+  },
+  "wjroo": {
+    "kmrl2": 0.1,
+    "n__7s9": 0.1
+  },
+  "n__7s9": {
+    "wjroo": 0.1,
+    "zjgktitq": 0.1
+  },
+  "zjgktitq": {
+    "n__7s9": 0.1,
+    "wbodk": 0.1
+  },
+  "wbodk": {
+    "zjgktitq": 0.1,
+    "9dzbi_": 0.1
+  },
+  "9dzbi_": {
+    "wbodk": 0.1,
+    "f8keh": 0.1
+  },
+  "f8keh": {
+    "9dzbi_": 0.1
+  },
+  "oulz4": {
+    "08et7": 0.1
+  },
+  "08et7": {
+    "oulz4": 0.1,
+    "9ufff": 0.1
+  },
+  "9ufff": {
+    "08et7": 0.1,
+    "jvsps": 0.1
+  },
+  "jvsps": {
+    "9ufff": 0.1,
+    "r6x3g": 0.1
+  },
+  "r6x3g": {
+    "jvsps": 0.1,
+    "tsp51": 0.1
+  },
+  "tsp51": {
+    "r6x3g": 0.1,
+    "h9bzs": 0.1
+  },
+  "h9bzs": {
+    "tsp51": 0.1,
+    "y4_1u": 0.1
+  },
+  "y4_1u": {
+    "h9bzs": 0.1,
+    "s5crw": 0.1
+  },
+  "s5crw": {
+    "y4_1u": 0.1,
+    "rjgag": 0.1
+  },
+  "rjgag": {
+    "s5crw": 0.1
+  },
+  "fy11y": {
+    "y2hhl": 0.1
+  },
+  "y2hhl": {
+    "fy11y": 0.1,
+    "zd__d3": 0.1
+  },
+  "zd__d3": {
+    "y2hhl": 0.1,
+    "xtarvm": 0.1
+  },
+  "xtarvm": {
+    "zd__d3": 0.1,
+    "kmmn_o": 0.1
+  },
+  "kmmn_o": {
+    "xtarvm": 0.1,
+    "cvd60": 0.1
+  },
+  "cvd60": {
+    "kmmn_o": 0.1,
+    "207lups": 0.1
+  },
+  "207lups": {
+    "cvd60": 0.1,
+    "u4xym": 0.1
+  },
+  "u4xym": {
+    "207lups": 0.1,
+    "bl4mv": 0.1
+  },
+  "bl4mv": {
+    "u4xym": 0.1,
+    "xlg8b": 0.1
+  },
+  "xlg8b": {
+    "bl4mv": 0.1
+  },
+  "rri_0": {
+    "uzsyn": 0.1
+  },
+  "uzsyn": {
+    "rri_0": 0.1,
+    "apjbm": 0.1
+  },
+  "apjbm": {
+    "uzsyn": 0.1,
+    "qli09": 0.1
+  },
+  "qli09": {
+    "apjbm": 0.1,
+    "suvjy": 0.1
+  },
+  "suvjy": {
+    "qli09": 0.1,
+    "pqzxl": 0.1
+  },
+  "pqzxl": {
+    "suvjy": 0.1,
+    "nx8p7": 0.1
+  },
+  "nx8p7": {
+    "pqzxl": 0.1,
+    "yfddr": 0.1
+  },
+  "yfddr": {
+    "nx8p7": 0.1,
+    "vfsb5": 0.1
+  },
+  "vfsb5": {
+    "yfddr": 0.1,
+    "vfrin": 0.1
+  },
+  "vfrin": {
+    "vfsb5": 0.1
+  },
+  "o4o0o1": {
+    "lto6_": 0.1
+  },
+  "lto6_": {
+    "o4o0o1": 0.1,
+    "etch7": 0.1
+  },
+  "etch7": {
+    "lto6_": 0.1,
+    "cyp7w": 0.1
+  },
+  "cyp7w": {
+    "etch7": 0.1,
+    "dibkuj": 0.1
+  },
+  "dibkuj": {
+    "cyp7w": 0.1,
+    "880ax0w": 0.1
+  },
+  "880ax0w": {
+    "dibkuj": 0.1,
+    "3nylw": 0.1
+  },
+  "3nylw": {
+    "880ax0w": 0.1,
+    "rixhhxb": 0.1
+  },
+  "rixhhxb": {
+    "3nylw": 0.1,
+    "kwori": 0.1
+  },
+  "kwori": {
+    "rixhhxb": 0.1,
+    "nz54u": 0.1
+  },
+  "nz54u": {
+    "kwori": 0.1
+  },
+  "zfyt0u": {
+    "sut_7": 0.1
+  },
+  "sut_7": {
+    "zfyt0u": 0.1,
+    "5ot6k": 0.1
+  },
+  "5ot6k": {
+    "sut_7": 0.1,
+    "ycztk": 0.1
+  },
+  "ycztk": {
+    "5ot6k": 0.1,
+    "m83v1": 0.1
+  },
+  "m83v1": {
+    "ycztk": 0.1,
+    "333lzsc": 0.1
+  },
+  "333lzsc": {
+    "m83v1": 0.1,
+    "_weccm": 0.1
+  },
+  "_weccm": {
+    "333lzsc": 0.1,
+    "hegwfg": 0.1
+  },
+  "hegwfg": {
+    "_weccm": 0.1,
+    "nlbhx": 0.1
+  },
+  "nlbhx": {
+    "hegwfg": 0.1,
+    "9pkwo": 0.1
+  },
+  "9pkwo": {
+    "nlbhx": 0.1
+  },
+  "2xhpy": {
+    "exwop": 0.1
+  },
+  "exwop": {
+    "2xhpy": 0.1,
+    "dyz0v": 0.1
+  },
+  "dyz0v": {
+    "exwop": 0.1,
+    "9rer_u": 0.1
+  },
+  "9rer_u": {
+    "dyz0v": 0.1,
+    "afuh3": 0.1
+  },
+  "afuh3": {
+    "9rer_u": 0.1,
+    "d6gwkd": 0.1
+  },
+  "d6gwkd": {
+    "afuh3": 0.1,
+    "rxtnl": 0.1
+  },
+  "rxtnl": {
+    "d6gwkd": 0.1,
+    "ef823": 0.1
+  },
+  "ef823": {
+    "rxtnl": 0.1,
+    "_8fmmg": 0.1
+  },
+  "_8fmmg": {
+    "ef823": 0.1,
+    "9obb3": 0.1
+  },
+  "9obb3": {
+    "_8fmmg": 0.1
+  },
+  "4ioog": {
+    "ctmci": 0.1
+  },
+  "ctmci": {
+    "4ioog": 0.1,
+    "rxraw": 0.1
+  },
+  "rxraw": {
+    "ctmci": 0.1,
+    "sadwuc": 0.1
+  },
+  "sadwuc": {
+    "rxraw": 0.1,
+    "iokwk": 0.1
+  },
+  "iokwk": {
+    "sadwuc": 0.1,
+    "e_uvt": 0.1
+  },
+  "e_uvt": {
+    "iokwk": 0.1,
+    "4tbaj": 0.1
+  },
+  "4tbaj": {
+    "e_uvt": 0.1,
+    "dzsus": 0.1
+  },
+  "dzsus": {
+    "4tbaj": 0.1,
+    "mxtxd": 0.1
+  },
+  "mxtxd": {
+    "dzsus": 0.1,
+    "pvieb": 0.1
+  },
+  "pvieb": {
+    "mxtxd": 0.1
+  },
+  "uet2b": {
+    "jeyiw": 0.1
+  },
+  "jeyiw": {
+    "uet2b": 0.1,
+    "pkd1y": 0.1
+  },
+  "pkd1y": {
+    "jeyiw": 0.1,
+    "xooip": 0.1
+  },
+  "xooip": {
+    "pkd1y": 0.1,
+    "bfojd": 0.1
+  },
+  "bfojd": {
+    "xooip": 0.1,
+    "ibrja": 0.1
+  },
+  "ibrja": {
+    "bfojd": 0.1,
+    "1sqhy": 0.1
+  },
+  "1sqhy": {
+    "ibrja": 0.1,
+    "lyfuk": 0.1
+  },
+  "lyfuk": {
+    "1sqhy": 0.1,
+    "zxplu": 0.1
+  },
+  "zxplu": {
+    "lyfuk": 0.1,
+    "bcbyq": 0.1
+  },
+  "bcbyq": {
+    "zxplu": 0.1
+  },
+  "uuktd": {
+    "n4vup": 0.1
+  },
+  "n4vup": {
+    "uuktd": 0.1,
+    "s6kiiv": 0.1
+  },
+  "s6kiiv": {
+    "n4vup": 0.1,
+    "w4sk_": 0.1
+  },
+  "w4sk_": {
+    "s6kiiv": 0.1,
+    "pncz1": 0.1
+  },
+  "pncz1": {
+    "w4sk_": 0.1,
+    "9y1k3": 0.1
+  },
+  "9y1k3": {
+    "pncz1": 0.1,
+    "xhpps": 0.1
+  },
+  "xhpps": {
+    "9y1k3": 0.1,
+    "inem1": 0.1
+  },
+  "inem1": {
+    "xhpps": 0.1,
+    "ihzmt": 0.1
+  },
+  "ihzmt": {
+    "inem1": 0.1,
+    "fcsxs": 0.1
+  },
+  "fcsxs": {
+    "ihzmt": 0.1
+  },
+  "5v5iz": {
+    "cyk2y": 0.1
+  },
+  "cyk2y": {
+    "5v5iz": 0.1,
+    "h0q0f": 0.1
+  },
+  "h0q0f": {
+    "cyk2y": 0.1,
+    "4gfmt": 0.1
+  },
+  "4gfmt": {
+    "h0q0f": 0.1,
+    "ppg97": 0.1
+  },
+  "ppg97": {
+    "4gfmt": 0.1,
+    "k48zw": 0.1
+  },
+  "k48zw": {
+    "ppg97": 0.1,
+    "hsqmv": 0.1
+  },
+  "hsqmv": {
+    "k48zw": 0.1,
+    "gxxxt": 0.1
+  },
+  "gxxxt": {
+    "hsqmv": 0.1,
+    "9e6rv": 0.1
+  },
+  "9e6rv": {
+    "gxxxt": 0.1,
+    "jkeif": 0.1
+  },
+  "jkeif": {
+    "9e6rv": 0.1
+  },
+  "iergw": {
+    "8jjc9": 0.1
+  },
+  "8jjc9": {
+    "iergw": 0.1,
+    "qq_im": 0.1
+  },
+  "qq_im": {
+    "8jjc9": 0.1,
+    "bb4oe": 0.1
+  },
+  "bb4oe": {
+    "qq_im": 0.1,
+    "l5okff": 0.1
+  },
+  "l5okff": {
+    "bb4oe": 0.1,
+    "2lpvi": 0.1
+  },
+  "2lpvi": {
+    "l5okff": 0.1,
+    "s5spw": 0.1
+  },
+  "s5spw": {
+    "2lpvi": 0.1,
+    "dbz03": 0.1
+  },
+  "dbz03": {
+    "s5spw": 0.1,
+    "ifacu": 0.1
+  },
+  "ifacu": {
+    "dbz03": 0.1,
+    "m9eqgfr": 0.1
+  },
+  "m9eqgfr": {
+    "ifacu": 0.1
+  },
+  "_86r5": {
+    "y7alhb9": 0.2
+  },
+  "y7alhb9": {
+    "_86r5": 0.2,
+    "jjrb5": 0.2
+  },
+  "jjrb5": {
+    "y7alhb9": 0.2,
+    "sezuw": 0.2
+  },
+  "sezuw": {
+    "jjrb5": 0.2,
+    "z9lqe": 0.2
+  },
+  "z9lqe": {
+    "sezuw": 0.2,
+    "_tzki": 0.2
+  },
+  "_tzki": {
+    "z9lqe": 0.2,
+    "zwnysj": 0.2
+  },
+  "zwnysj": {
+    "_tzki": 0.2,
+    "tabmc": 0.2
+  },
+  "tabmc": {
+    "zwnysj": 0.2,
+    "6f2yae": 0.2
+  },
+  "6f2yae": {
+    "tabmc": 0.2,
+    "nuexm": 0.2
+  },
+  "nuexm": {
+    "6f2yae": 0.2
+  },
+  "ypphp": {
+    "ovyqyt": 0.1
+  },
+  "ovyqyt": {
+    "ypphp": 0.1
+  },
+  "xrpgy": {
+    "npd_e": 0.1
+  },
+  "npd_e": {
+    "xrpgy": 0.1,
+    "gn17p": 0.1
+  },
+  "gn17p": {
+    "npd_e": 0.1,
+    "tzhny": 0.1
+  },
+  "tzhny": {
+    "gn17p": 0.1,
+    "mxf8f93": 0.1
+  },
+  "mxf8f93": {
+    "tzhny": 0.1,
+    "5dq35g": 0.1
+  },
+  "5dq35g": {
+    "mxf8f93": 0.1,
+    "0xbx4": 0.1
+  },
+  "0xbx4": {
+    "5dq35g": 0.1,
+    "dxa_01": 0.1
+  },
+  "dxa_01": {
+    "0xbx4": 0.1,
+    "hfec8": 0.1
+  },
+  "hfec8": {
+    "dxa_01": 0.1,
+    "ydqia": 0.1
+  },
+  "ydqia": {
+    "hfec8": 0.1
+  },
+  "44idd": {
+    "5ziq5": 0.1
+  },
+  "5ziq5": {
+    "44idd": 0.1,
+    "rvs3p": 0.1
+  },
+  "rvs3p": {
+    "5ziq5": 0.1,
+    "yqqt0": 0.1
+  },
+  "yqqt0": {
+    "rvs3p": 0.1,
+    "dhwr2": 0.1
+  },
+  "dhwr2": {
+    "yqqt0": 0.1,
+    "wos9b": 0.1
+  },
+  "wos9b": {
+    "dhwr2": 0.1,
+    "i0sk7": 0.1
+  },
+  "i0sk7": {
+    "wos9b": 0.1,
+    "yo48a3": 0.1
+  },
+  "yo48a3": {
+    "i0sk7": 0.1,
+    "irxjirp": 0.1
+  },
+  "irxjirp": {
+    "yo48a3": 0.1,
+    "ioyll": 0.1
+  },
+  "ioyll": {
+    "irxjirp": 0.1
+  },
+  "p83hm": {
+    "d6oxa": 0.1
+  },
+  "d6oxa": {
+    "p83hm": 0.1,
+    "aws5b": 0.1
+  },
+  "aws5b": {
+    "d6oxa": 0.1,
+    "xa7nt": 0.1
+  },
+  "xa7nt": {
+    "aws5b": 0.1,
+    "w8prwo": 0.1
+  },
+  "w8prwo": {
+    "xa7nt": 0.1,
+    "xpd55": 0.1
+  },
+  "xpd55": {
+    "w8prwo": 0.1,
+    "swbwy": 0.1
+  },
+  "swbwy": {
+    "xpd55": 0.1,
+    "sxdch": 0.1
+  },
+  "sxdch": {
+    "swbwy": 0.1,
+    "pa9um": 0.1
+  },
+  "pa9um": {
+    "sxdch": 0.1,
+    "rgxwy": 0.1
+  },
+  "rgxwy": {
+    "pa9um": 0.1
+  },
+  "lt4k0": {
+    "7mcqg": 0.1
+  },
+  "7mcqg": {
+    "lt4k0": 0.1,
+    "lkle2": 0.1
+  },
+  "lkle2": {
+    "7mcqg": 0.1,
+    "lejkd": 0.1
+  },
+  "lejkd": {
+    "lkle2": 0.1,
+    "google": 0.1
+  },
+  "xkih3": {
+    "gemini": 0.1,
+    "rtk4l": 0.1
+  },
+  "rtk4l": {
+    "xkih3": 0.1,
+    "rirh2": 0.1
+  },
+  "rirh2": {
+    "rtk4l": 0.1,
+    "9hmfp": 0.1
+  },
+  "9hmfp": {
+    "rirh2": 0.1
+  },
+  "f4orm": {
+    "pni4jr": 0.1
+  },
+  "pni4jr": {
+    "f4orm": 0.1,
+    "tqadt": 0.1
+  },
+  "tqadt": {
+    "pni4jr": 0.1,
+    "d5umyb": 0.1
+  },
+  "d5umyb": {
+    "tqadt": 0.1,
+    "r4e2t": 0.1
+  },
+  "r4e2t": {
+    "d5umyb": 0.1,
+    "nygl1": 0.1
+  },
+  "nygl1": {
+    "r4e2t": 0.1,
+    "7xenta": 0.1
+  },
+  "7xenta": {
+    "nygl1": 0.1,
+    "ecfe0": 0.1
+  },
+  "ecfe0": {
+    "7xenta": 0.1,
+    "a4m74sr5b": 0.1
+  },
+  "a4m74sr5b": {
+    "ecfe0": 0.1,
+    "kavlsp7": 0.1
+  },
+  "kavlsp7": {
+    "a4m74sr5b": 0.1
+  },
+  "rzt94": {
+    "nfk6u": 0.1
+  },
+  "nfk6u": {
+    "rzt94": 0.1,
+    "vk0qx": 0.1
+  },
+  "vk0qx": {
+    "nfk6u": 0.1,
+    "6f_ffu": 0.1
+  },
+  "6f_ffu": {
+    "vk0qx": 0.1,
+    "4igwa": 0.1
+  },
+  "4igwa": {
+    "6f_ffu": 0.1,
+    "gho2p": 0.1
+  },
+  "gho2p": {
+    "4igwa": 0.1,
+    "epgirnb": 0.1
+  },
+  "epgirnb": {
+    "gho2p": 0.1
+  },
+  "9puow": {
+    "i_ocr": 0.1
+  },
+  "i_ocr": {
+    "9puow": 0.1,
+    "tnoq0": 0.1
+  },
+  "tnoq0": {
+    "i_ocr": 0.1,
+    "efmxu": 0.1
+  },
+  "efmxu": {
+    "tnoq0": 0.1,
+    "uyr99": 0.1
+  },
+  "uyr99": {
+    "efmxu": 0.1,
+    "xvupi": 0.1
+  },
+  "xvupi": {
+    "uyr99": 0.1,
+    "_n01t_": 0.1
+  },
+  "_n01t_": {
+    "xvupi": 0.1,
+    "1kog7": 0.1
+  },
+  "1kog7": {
+    "_n01t_": 0.1,
+    "ualen": 0.1
+  },
+  "ualen": {
+    "1kog7": 0.1,
+    "3mzrawp": 0.1
+  },
+  "3mzrawp": {
+    "ualen": 0.1
+  },
+  "wybis": {
+    "dxrvkt": 0.1
+  },
+  "dxrvkt": {
+    "wybis": 0.1
+  },
+  "97zfk": {
+    "jl5mv": 0.1
+  },
+  "jl5mv": {
+    "97zfk": 0.1,
+    "v6frwr": 0.1
+  },
+  "v6frwr": {
+    "jl5mv": 0.1,
+    "gdk8e": 0.1
+  },
+  "gdk8e": {
+    "v6frwr": 0.1,
+    "oaytb": 0.1
+  },
+  "rkm6g": {
+    "oaytb": 0.1,
+    "bgjqg": 0.1
+  },
+  "bgjqg": {
+    "rkm6g": 0.1,
+    "rlbogh": 0.1
+  },
+  "rlbogh": {
+    "bgjqg": 0.1,
+    "71bgg": 0.1
+  },
+  "71bgg": {
+    "rlbogh": 0.1,
+    "uct5p": 0.1
+  },
+  "uct5p": {
+    "71bgg": 0.1
+  },
+  "ygn_8": {
+    "jlw_b": 0.1
+  },
+  "omv7f": {
+    "fmnab": 0.1
+  },
+  "fmnab": {
+    "omv7f": 0.1,
+    "e0lmx": 0.1
+  },
+  "e0lmx": {
+    "fmnab": 0.1,
+    "zrwcb": 0.1
+  },
+  "zrwcb": {
+    "e0lmx": 0.1,
+    "uzhg0": 0.1
+  },
+  "uzhg0": {
+    "zrwcb": 0.1,
+    "yy0yqbrxq": 0.1
+  },
+  "yy0yqbrxq": {
+    "uzhg0": 0.1,
+    "qel207q": 0.1
+  },
+  "qel207q": {
+    "yy0yqbrxq": 0.1,
+    "qdxyhdt": 0.1
+  },
+  "qdxyhdt": {
+    "qel207q": 0.1,
+    "dx9qj": 0.1
+  },
+  "dx9qj": {
+    "qdxyhdt": 0.1,
+    "0f2aj": 0.1
+  },
+  "0f2aj": {
+    "dx9qj": 0.1
+  },
+  "usuiv": {
+    "anxlia": 0.1
+  },
+  "anxlia": {
+    "usuiv": 0.1,
+    "uhmso": 0.1
+  },
+  "uhmso": {
+    "anxlia": 0.1,
+    "qn2fy": 0.1
+  },
+  "qn2fy": {
+    "uhmso": 0.1,
+    "lvhjw": 0.1
+  },
+  "lvhjw": {
+    "qn2fy": 0.1,
+    "z4jmy": 0.1
+  },
+  "z4jmy": {
+    "lvhjw": 0.1,
+    "2tffq": 0.1
+  },
+  "2tffq": {
+    "z4jmy": 0.1,
+    "lhvdj": 0.1
+  },
+  "lhvdj": {
+    "2tffq": 0.1,
+    "axie8xm": 0.1
+  },
+  "axie8xm": {
+    "lhvdj": 0.1,
+    "7544h": 0.1
+  },
+  "7544h": {
+    "axie8xm": 0.1
+  },
+  "hn0d4": {
+    "nteuc": 0.1
+  },
+  "nteuc": {
+    "hn0d4": 0.1,
+    "ql4jr": 0.1
+  },
+  "ql4jr": {
+    "nteuc": 0.1,
+    "rvixzh": 0.1
+  },
+  "rvixzh": {
+    "ql4jr": 0.1,
+    "hzbnhb5": 0.1
+  },
+  "hzbnhb5": {
+    "rvixzh": 0.1,
+    "mbomv": 0.1
+  },
+  "mbomv": {
+    "hzbnhb5": 0.1,
+    "lq2p9": 0.1
+  },
+  "lq2p9": {
+    "mbomv": 0.1,
+    "bhq2zh": 0.1
+  },
+  "bhq2zh": {
+    "lq2p9": 0.1,
+    "l1pht": 0.1
+  },
+  "l1pht": {
+    "bhq2zh": 0.1,
+    "oynnn": 0.1
+  },
+  "oynnn": {
+    "l1pht": 0.1
+  },
+  "jl5pd": {
+    "mhmpt": 0.1
+  },
+  "mhmpt": {
+    "jl5pd": 0.1,
+    "_e9lml": 0.1
+  },
+  "_e9lml": {
+    "mhmpt": 0.1
+  },
+  "d8wyl": {
+    "do49m": 0.1
+  },
+  "do49m": {
+    "d8wyl": 0.1,
+    "6dq8b": 0.1
+  },
+  "6dq8b": {
+    "do49m": 0.1,
+    "fbbf4": 0.1
+  },
+  "fbbf4": {
+    "6dq8b": 0.1,
+    "dmfbc": 0.1
+  },
+  "dmfbc": {
+    "fbbf4": 0.1,
+    "o62b6": 0.1
+  },
+  "o62b6": {
+    "dmfbc": 0.1,
+    "okznx": 0.1
+  },
+  "okznx": {
+    "o62b6": 0.1,
+    "qdsw46": 0.1
+  },
+  "qdsw46": {
+    "okznx": 0.1,
+    "ybmdj": 0.1
+  },
+  "ybmdj": {
+    "qdsw46": 0.1
+  },
+  "rdjtailk": {
+    "bfiwc": 0.1
+  },
+  "bfiwc": {
+    "rdjtailk": 0.1,
+    "dqmjz": 0.1
+  },
+  "dqmjz": {
+    "bfiwc": 0.1,
+    "ka_ph": 0.1
+  },
+  "ka_ph": {
+    "dqmjz": 0.1,
+    "llljl": 0.1
+  },
+  "llljl": {
+    "ka_ph": 0.1,
+    "javapqiq": 0.1
+  },
+  "javapqiq": {
+    "llljl": 0.1,
+    "osxrhhz": 0.1
+  },
+  "osxrhhz": {
+    "javapqiq": 0.1,
+    "irxioz": 0.1
+  },
+  "irxioz": {
+    "osxrhhz": 0.1,
+    "9uma3": 0.1
+  },
+  "9uma3": {
+    "irxioz": 0.1,
+    "jjdr5zmo": 0.1
+  },
+  "jjdr5zmo": {
+    "9uma3": 0.1
+  },
+  "lov_n": {
+    "9cnvz": 0.1
+  },
+  "9cnvz": {
+    "lov_n": 0.1,
+    "6o5vddan": 0.1
+  },
+  "6o5vddan": {
+    "9cnvz": 0.1,
+    "iip3l": 0.1
+  },
+  "iip3l": {
+    "6o5vddan": 0.1,
+    "sojte": 0.1
+  },
+  "sojte": {
+    "iip3l": 0.1,
+    "orywyx": 0.1
+  },
+  "orywyx": {
+    "sojte": 0.1,
+    "enocy": 0.1
+  },
+  "enocy": {
+    "orywyx": 0.1,
+    "hecxtaau": 0.1
+  },
+  "hecxtaau": {
+    "enocy": 0.1,
+    "pw71d": 0.1
+  },
+  "pw71d": {
+    "hecxtaau": 0.1,
+    "9q5cqz": 0.1
+  },
+  "9q5cqz": {
+    "pw71d": 0.1
+  },
+  "wgwsi": {
+    "pkacchk": 0.1
+  },
+  "pkacchk": {
+    "wgwsi": 0.1,
+    "hrbbqh": 0.1
+  },
+  "hrbbqh": {
+    "pkacchk": 0.1,
+    "aqvcm": 0.1
+  },
+  "aqvcm": {
+    "hrbbqh": 0.1,
+    "rlaf4": 0.1
+  },
+  "rlaf4": {
+    "aqvcm": 0.1,
+    "8iosu": 0.1
+  },
+  "8iosu": {
+    "rlaf4": 0.1,
+    "nkt_c": 0.1
+  },
+  "nkt_c": {
+    "8iosu": 0.1,
+    "hd7po": 0.1
+  },
+  "hd7po": {
+    "nkt_c": 0.1,
+    "eqr9hd": 0.1
+  },
+  "eqr9hd": {
+    "hd7po": 0.1,
+    "wbv_0": 0.1
+  },
+  "wbv_0": {
+    "eqr9hd": 0.1
+  },
+  "jes33u": {
+    "5hf5t": 0.1
+  },
+  "5hf5t": {
+    "jes33u": 0.1,
+    "ihstp": 0.1
+  },
+  "ihstp": {
+    "5hf5t": 0.1,
+    "0usxhv": 0.1
+  },
+  "0usxhv": {
+    "ihstp": 0.1,
+    "tabzn": 0.1
+  },
+  "tabzn": {
+    "0usxhv": 0.1,
+    "ja2mm": 0.1
+  },
+  "ja2mm": {
+    "tabzn": 0.1,
+    "tgu18": 0.1
+  },
+  "tgu18": {
+    "ja2mm": 0.1,
+    "ozu9k": 0.1
+  },
+  "ozu9k": {
+    "tgu18": 0.1,
+    "cqrcg": 0.1
+  },
+  "cqrcg": {
+    "ozu9k": 0.1,
+    "oc_j6": 0.1
+  },
+  "oc_j6": {
+    "cqrcg": 0.1
+  },
+  "vd0w0": {
+    "pvqga": 0.1
+  },
+  "pvqga": {
+    "vd0w0": 0.1,
+    "oq6kr2": 0.1
+  },
+  "oq6kr2": {
+    "pvqga": 0.1,
+    "qd18t": 0.1
+  },
+  "qd18t": {
+    "oq6kr2": 0.1,
+    "5ch9f": 0.1
+  },
+  "5ch9f": {
+    "qd18t": 0.1,
+    "lwlkx": 0.1
+  },
+  "lwlkx": {
+    "5ch9f": 0.1,
+    "saaop": 0.1
+  },
+  "saaop": {
+    "lwlkx": 0.1,
+    "3rwm5j": 0.1
+  },
+  "3rwm5j": {
+    "saaop": 0.1,
+    "qiuze": 0.1
+  },
+  "qiuze": {
+    "3rwm5j": 0.1,
+    "ztqynf": 0.1
+  },
+  "ztqynf": {
+    "qiuze": 0.1
   }
 }

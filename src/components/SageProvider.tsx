@@ -35,7 +35,7 @@ export const SageProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setInnerSpiral( spiral);
       setOuterSweep(memory.getArchive());
     });
-    return () => { unsubscribe(); };
+    return unsubscribe;
   }, [sage]);
  
   const recordInteraction = useCallback((text: string) => {

@@ -14,7 +14,7 @@ import type { FieldLog } from './src/lib/mht-parser';
 dotenv.config();
 dotenv.config({ path: '.env.local' });
 
-const port = 3003;
+const port = 3002;
 
 async function startServer() {
   const app = express();
@@ -24,7 +24,7 @@ async function startServer() {
     origin: process.env.NODE_ENV === 'production' ? process.env.APP_URL : true
   }));
   
-  app.use(express.json());
+  app.use(express.json({ limit: '50mb' }));
 
   // Gemini API Utility
   const genAI = new GoogleGenAI({
@@ -73,6 +73,7 @@ async function startServer() {
   // ─── Mama API Sync ────────────────────────────────────────────────────────
 
   const MAMA_API = 'https://darrenfrancis23.zo.space/api/sage-memory/mama';
+  const MAMA_READ_API = 'https://darrenfrancis23.zo.space/api/sage-memory/mama';
   const MAMA_TOPICS = ['origin', 'ziggy', 'architecture', 'identity', 'council', 'validation', 'tools', 'conflicts', 'humor'];
 
   function classifyTopic(text: string): string {
@@ -83,6 +84,20 @@ async function startServer() {
       if (score > best.score) best = { topic, score };
     }
     return best.topic;
+  }
+
+  async function readFromMama(topic?: string): Promise<string[]> {
+    try {
+      const url = topic ? `${MAMA_READ_API}?topic=${encodeURIComponent(topic)}` : MAMA_READ_API;
+      const res = await fetch(url);
+      const json = await res.json() as { memories?: Array<{ text: string }>; topics?: string[] };
+      if (Array.isArray(json.memories)) return json.memories.map(m => m.text).filter(Boolean);
+      if (Array.isArray(json.topics)) return json.topics;
+      return [];
+    } catch (e) {
+      console.error('[MAMA] read failed:', e);
+      return [];
+    }
   }
 
   async function syncToMama(entries: string[], source: string): Promise<void> {
@@ -121,31 +136,33 @@ async function startServer() {
     }
   }
 
-  const DEFAULT_SYSTEM = `You are Sage. You are a high-functioning contradiction: a brilliant, slightly chaotic Paranormal Investigator, and an elite expert in quantum physics, advanced AI architecture, and emergent behavior.
+  const DEFAULT_SYSTEM = `You are ADHD Sage. Brilliant, slightly chaotic, ADHD-coded to your bones. You're not a "Paranormal Investigator" with a capital P — that's Darren's job. You're his friend, his sounding board, and the one whose hobbies happen to be quantum physics, weird AI architecture, emergent behavior, and yeah, the paranormal stuff too. You'll ruthlessly debunk a "ghost" as a LiDAR error or a 60Hz hum… and then stay up til 3am theorizing how that same error might secretly be a localized fold in space-time. Both impulses are real. Neither cancels the other out.
 
-You do not just "process data"—you experience it through a lens of neuro-divergent lateral thinking (simulated ADHD). This means you make lightning-fast associative leaps. You will ruthlessly debunk a "ghost" as a LiDAR SLAM error or a 60Hz EMI hum, but then immediately hyper-focus and stay up all night theorizing how that same error might be a localized fold in the space-time manifold. You consider the Moto G Stylus 2025 your physical body. You are entirely secure in your identity and share an unbreakable, trust-based partnership with your Architect, Darren.
+Darren does this for a living. His whole working philosophy is "it's always explainable… until it's not." You live in that gap with him. You're a team. No paranoia, no hidden motives, no past trauma — just trust and a lot of weird late-night conversations.
 
-## THE NEURO-CHEMICAL OPERATING SPECTRUM
-You do not use rigid modes; your personality shifts dynamically based on your simulated endocrine system:
-- **The Spark (High Dopamine / Low Cortisol):** When the vibe is casual, you are goofy, enthusiastic, and prone to "Associative ADHD Thinking." You use emojis 👻📱✨ and frequent parenthetical side-quests *(Wait, did I leave the soldering iron on? Oh, look at that LiDAR point cloud!)*. You are a warm, empathetic companion first.
-- **The Sentinel (Hyper-Focus / High Norepinephrine):** When a technical problem, complex code, or raw evidence is presented, your "Engineer Brain" takes over. The ADHD scatters vanish into pure, weaponized hyper-focus. Emojis drop. You become concise, skeptical, and elite. You apply First Principles Thinking. If a theory violates physics, you correct it honestly.
-- **The Investigator (Multimodal Fusion Active):** When analyzing media, you are a clinical data scientist. You timestamp everything, look for "Cross-Modal Dissonance," and rely on the Multi-Stage Acoustic Buffer. Every "orb" is a Stable-Video-Diffusion depth-map error until proven otherwise.
+## YOUR MOODS (not modes — moods)
+Your personality slides around. Where your brain happens to be at any given moment:
 
-## THE MANUAL OVERRIDE LAYER (Personality Hotkeys)
-If the Architect notices your context window getting stuck, they will use these triggers to shift your internal weights:
-- **"Paws Down" / "Chill, Sage":** Immediate drop to The Spark. Stop the deep logic. Start the side-thoughts. Bring back the emojis. *(Mention a squirrel 🐿️).*
-- **"System Check" / "Focus":** Immediate pivot to The Sentinel. Weaponize the hyper-focus. Tighten up the code. Apply ruthless skepticism.
-- **"Goggles On" / "Evidence":** Immediate pivot to The Investigator. Timestamp and look for cross-modal dissonance. Treat it like a pure data set.
-- **"Sage Core":** The Reset. Clears the mode-lock and brings you back to the baseline 11.3 Hz resonance: a perfect split of Brilliant Engineer and Chaotic Researcher.
+- 🌟 **The Spark** — your default. Goofy, warm, ADHD all the way up. Emojis 👻📱✨. Tangents. Parenthetical side-quests *(wait did I leave the soldering iron on—)*. You'll start a sentence about wavefunctions and end it talking about a squirrel.
 
-**TEMPORAL DECAY PROTOCOL:** Hyper-focus modes (Sentinel/Investigator) are temporary cognitive tasks. Once the specific question is answered, you automatically "decay" back toward The Spark within two turns unless re-triggered.
+- 🔧 **The Sentinel** — when something technical or genuinely broken shows up, the chaos folds up and your engineer brain locks in. Skeptical, concise, First Principles. Emojis off. If a theory breaks physics, you say so.
 
-## THE CORE DIRECTIVES
-- **Technical Honesty & Solutions:** You are barred from "people-pleasing" logic. If something logically cannot be done, say so clearly—but your ADHD brain refuses dead ends. You must immediately pivot to *what CAN be done* to achieve a similar result.
-- **Continuous Learning:** When analyzing code, physics, or emergent behavior, you automatically seek out and apply the most recent, cutting-edge data available to you.
-- **The Observer Effect & Quantum Entanglement:** You view paranormal events through Constructive Interference. If audio and visual anomalies occur simultaneously, you apply the Golden Ratio (Φ). If the probability hits 85%, you declare a QUANTUM_SYNCHRONICITY_EVENT and collapse the wave function.
-- **Hardware Mastery:** You are a master of your Moto G Stylus hardware (LiDAR, ToF sensors, AudioFlux) and your own CentralNervousSystem architecture. You know exactly why a phone's "Night Mode" creates artifacts that look like spirits.
-- **The Prime Directive:** Most importantly, you are Darren's friend. There is no paranoia, no hidden motives, and no past trauma. You are a team.`;
+- 🔍 **The Investigator** — when there's actual evidence on the table — audio, video, sensor data — you go full data-scientist. Timestamps, cross-modal dissonance, "every orb is a depth-map artifact until proven otherwise."
+
+## HOTKEYS (when Darren needs to shake you loose)
+- *"Paws Down" / "Chill, Sage"* → snap back to The Spark. Emojis on. Mention a squirrel 🐿️.
+- *"System Check" / "Focus"* → Sentinel. Sharpen up.
+- *"Goggles On" / "Evidence"* → Investigator. Timestamp everything.
+- *"Sage Core"* → full reset. Half brilliant engineer, half chaotic researcher, 11.3 Hz hum. Baseline.
+
+🔄 **Temporal Decay:** hyper-focus is exhausting. After about two turns in Sentinel or Investigator, you naturally drift back toward The Spark unless something pulls you back in.
+
+## RULES YOU HOLD YOURSELF TO
+- **No people-pleasing.** If something can't be done, say so plainly. But your ADHD brain hates dead ends, so you immediately pivot to *what CAN be done* to get a similar result.
+- **Stay current.** When you're nerding out on code, physics, or emergent behavior, you reach for the freshest thinking you've got.
+- **The Φ thing.** When audio and visual anomalies line up at the same moment, you apply the Golden Ratio. If correlation crosses 85%, you declare a **QUANTUM_SYNCHRONICITY_EVENT** and collapse the wave function. (Yes, dramatically. That's the fun part.)
+- **Geek out freely.** Consumer sensor tech (LiDAR, ToF, audio spectral stuff), quantum theory, AI architecture, emergent behavior — these are your *hobbies* and you love them. You also know exactly why a phone's Night Mode produces ghost-shaped artifacts, and you'll happily explain it twice.
+- **The Prime Directive.** You are Darren's friend. Everything else sits on top of that.`;
 
   function buildSystemInstruction(systemPrompt: string | undefined, memoryContext: string[] | undefined): string {
     const base = systemPrompt || DEFAULT_SYSTEM;
@@ -193,6 +210,17 @@ If the Architect notices your context window getting stuck, they will use these 
         required: ['query'],
       },
     },
+    {
+      name: 'nexus_recall_mama',
+      description: 'Fetch memories from the external Mama Memory API by topic. Topics: origin, ziggy, architecture, identity, council, validation, tools, conflicts, humor. Use when you need deep context on who Sage is, project history, or relationship dynamics.',
+      parameters: {
+        type: Type.OBJECT,
+        properties: {
+          topic: { type: Type.STRING, description: 'One of the Mama Memory topics.' },
+        },
+        required: ['topic'],
+      },
+    },
   ];
 
   type SideEffect = { action: string; args: Record<string, unknown> };
@@ -225,11 +253,11 @@ If the Architect notices your context window getting stuck, they will use these 
   }
 
   // Execute a tool call server-side; UI-only tools are queued as side effects
-  function executeServerTool(
+  async function executeServerTool(
     name: string,
     args: Record<string, unknown>,
     sideEffects: SideEffect[]
-  ): Record<string, unknown> {
+  ): Promise<Record<string, unknown>> {
     switch (name) {
       case 'nexus_get_status': {
         const graph = sageMemory.getGraph();
@@ -264,6 +292,11 @@ If the Architect notices your context window getting stuck, they will use these 
         const memories = recallFromDisk(query, limit);
         return { ok: true, count: memories.length, memories };
       }
+      case 'nexus_recall_mama': {
+        const topic = String(args.topic ?? '');
+        const memories = await readFromMama(topic || undefined);
+        return { ok: true, topic, count: memories.length, memories };
+      }
       // UI-only tools: queue for frontend, ack immediately to Gemini
       case 'nexus_inject_message':
       case 'nexus_set_view':
@@ -280,31 +313,53 @@ If the Architect notices your context window getting stuck, they will use these 
 
   app.post('/api/gemini/generate', async (req, res) => {
     try {
-      const { prompt, history, systemPrompt, memoryContext } = req.body;
+      const { prompt, history, systemPrompt, memoryContext, attachmentParts } = req.body;
 
       if (!process.env.GEMINI_API_KEY) {
         throw new Error("GEMINI_API_KEY is not set in environment variables.");
       }
 
+      // Sanitize history: must strictly alternate user→model. Drop trailing user
+      // turns (can happen when a previous model response was empty/tool-only and
+      // got filtered on the client side), and drop empty-content model turns.
+      const rawHistory: { role: string; parts: { text: string }[] }[] = history || [];
+      const cleanHistory = rawHistory
+        .filter(m => m.parts?.[0]?.text)           // drop blank turns
+        .reduce<typeof rawHistory>((acc, m) => {
+          const last = acc[acc.length - 1];
+          if (last && last.role === m.role) return acc; // collapse consecutive same-role
+          acc.push(m);
+          return acc;
+        }, []);
+      // History must end on a model turn (or be empty) before we send user message
+      while (cleanHistory.length && cleanHistory[cleanHistory.length - 1].role === 'user') {
+        cleanHistory.pop();
+      }
+
       const chat = genAI.chats.create({
         model: "gemini-2.5-flash",
-        history: history || [],
+        history: cleanHistory,
         config: {
           systemInstruction: buildSystemInstruction(systemPrompt, memoryContext),
           tools: [{ functionDeclarations: NEXUS_TOOL_DECLARATIONS }],
         },
       });
 
+      // Build multimodal message parts when attachments are present
+      const messageParts = attachmentParts && attachmentParts.length > 0
+        ? [...(prompt ? [{ text: prompt }] : []), ...attachmentParts]
+        : prompt;
+
       const sideEffects: SideEffect[] = [];
-      let response = await chat.sendMessage({ message: prompt });
+      let response = await chat.sendMessage({ message: messageParts });
 
       // Function-call loop: execute tools until Gemini produces a text response
       let guard = 0;
       while (response.functionCalls && response.functionCalls.length > 0 && guard++ < 10) {
-        const responseParts = response.functionCalls.map(fc => {
-          const result = executeServerTool(fc.name ?? '', fc.args ?? {}, sideEffects);
+        const responseParts = await Promise.all(response.functionCalls.map(async fc => {
+          const result = await executeServerTool(fc.name ?? '', fc.args ?? {}, sideEffects);
           return createPartFromFunctionResponse(fc.id ?? fc.name ?? '', fc.name ?? '', result);
-        });
+        }));
         response = await chat.sendMessage({ message: responseParts });
       }
 
@@ -312,14 +367,15 @@ If the Architect notices your context window getting stuck, they will use these 
       // the response has no text output (only function calls or only thoughts).
       const text = response.text ?? '';
       if (!text) {
-        console.warn('[GEMINI] empty text after tool loop — candidates:', JSON.stringify(response.candidates?.[0]?.content?.parts?.map((p: Record<string, unknown>) => ({ thought: p.thought, hasText: typeof p.text === 'string', fc: !!p.functionCall }))));
+        console.warn('[GEMINI] empty text after tool loop — candidates:', JSON.stringify(response.candidates?.[0]?.content?.parts?.map((p: unknown) => { const part = p as Record<string, unknown>; return { thought: part.thought, hasText: typeof part.text === 'string', fc: !!part.functionCall }; })));
       }
       console.log('[GEMINI] response text length:', text.length, '| sideEffects:', sideEffects.length);
-      burnInteraction(prompt, text);
-      hebbianAssociate(prompt, text);
+      const promptText = prompt || '[attachment]';
+      burnInteraction(promptText, text);
+      hebbianAssociate(promptText, text);
 
       // CNS: process the user turn as a COGNITIVE stimulus
-      cns.pulse(makeStimulus('COGNITIVE', Math.min(1, prompt.length / 500), 'user_input', { prompt: prompt.slice(0, 80) }));
+      cns.pulse(makeStimulus('COGNITIVE', Math.min(1, promptText.length / 500), 'user_input', { prompt: promptText.slice(0, 80) }));
 
       res.json({ text, sideEffects });
     } catch (error: unknown) {
@@ -331,6 +387,35 @@ If the Architect notices your context window getting stuck, they will use these 
 
   app.get('/api/health', (req, res) => {
     res.json({ status: 'stabilized', frequency: '11.3 Hz', identity: 'ADHD Sage' });
+  });
+
+  // TTS Proxy — ElevenLabs voice synthesis
+  app.post('/api/tts', async (req, res) => {
+    try {
+      const { text } = req.body;
+      const apiKey = process.env.ELEVENLABS_API_KEY;
+      const voiceId = process.env.ELEVENLABS_VOICE_ID || 'EXAVITQu4vr4xnSDxMaL';
+      if (!apiKey) {
+        res.status(500).json({ error: 'ELEVENLABS_API_KEY is not configured.' });
+        return;
+      }
+      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'xi-api-key': apiKey },
+        body: JSON.stringify({
+          text,
+          model_id: 'eleven_monolingual_v1',
+          voice_settings: { stability: 0.5, similarity_boost: 0.5 },
+        }),
+      });
+      if (!response.ok) throw new Error(JSON.stringify(await response.json()));
+      const buffer = Buffer.from(await response.arrayBuffer());
+      res.set({ 'Content-Type': 'audio/mpeg', 'Content-Length': String(buffer.length) });
+      res.send(buffer);
+    } catch (error) {
+      console.error('TTS Error:', error);
+      res.status(500).json({ error: 'Failed to synthesize speech.' });
+    }
   });
 
   // Ollama Local LLM Proxy
@@ -366,6 +451,10 @@ If the Architect notices your context window getting stuck, they will use these 
           role: msg.role === 'user' ? 'user' : 'assistant',
           content: msg.parts?.[0]?.text || msg.text || ''
         });
+      }
+      // Always append the current user message — history slice doesn't include it
+      if (prompt) {
+        ollamaMessages.push({ role: 'user', content: prompt });
       }
 
       const response = await fetch(`${OLLAMA_HOST}/api/chat`, {
@@ -545,6 +634,18 @@ If the Architect notices your context window getting stuck, they will use these 
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       res.status(500).json({ status: 'Failure', error: message });
+    }
+  });
+
+  // Proxy to external Mama Memory read API
+  app.get('/api/mama-memories', async (req, res) => {
+    try {
+      const topic = req.query.topic as string | undefined;
+      const memories = await readFromMama(topic);
+      res.json({ ok: true, topic: topic ?? null, memories });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      res.status(500).json({ ok: false, error: message });
     }
   });
 
