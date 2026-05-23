@@ -1,0 +1,80 @@
+name: Build SAGE Sentinel APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Install NPM dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build React UI (production)
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      # cap add android initialises the android/ directory from capacitor.config.json
+      # at the repo root; skip if it already exists on a re-run
+      - name: Initialise Capacitor Android
+        run: |
+          if [ ! -d android ]; then
+            npx cap add android
+          else
+            echo "android/ already exists, skipping cap add"
+          fi
+
+      # Sync the freshly built dist/ into the android project
+      - name: Sync web assets
+        run: npx cap sync android
+
+      # Permissions & network security
+      - name: Apply Android permissions and network security config
+        run: |
+          mkdir -p android/app/src/main/res/xml
+          cp app/applet/android-hints/network_security_config.xml \
+             android/app/src/main/res/xml/network_security_config.xml
+
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+
+          # Patch <application> with networkSecurityConfig + cleartext (idempotent)
+          if ! grep -q 'networkSecurityConfig' "$MANIFEST"; then
+            sed -i 's|<application|<application android:networkSecurityConfig="@xml/network_security_config" android:usesCleartextTraffic="true"|g' "$MANIFEST"
+          fi
+
+          # Inject permissions before the <application> block (idempotent)
+          if ! grep -q 'HIGH_SAMPLING_RATE_SENSORS' "$MANIFEST"; then
+            sed -i '/<application/i \
+    <uses-permission android:name="android.permission.INTERNET" />\
+    <uses-permission android:name="android.permission.VIBRATE" />\
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />' "$MANIFEST"
+          fi
+
+      - name: Build debug APK
+        run: |
+          cd android
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ADHDSage-Sentinel-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
