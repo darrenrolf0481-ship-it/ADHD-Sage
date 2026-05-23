@@ -100,10 +100,28 @@ class MemorySystem {
   }
 
   async bulkStash(entries: string[]): Promise<void> {
-    for (const text of entries) {
-      if (!text.trim()) continue;
-      await this.stash(text, { dopamine: 0.6 + Math.random() * 0.2, cortisol: 0.1 });
+    // Fire all stash POSTs in parallel batches; defer the expensive syncFromServer
+    // to a single call at the end instead of once per entry (was: 3 requests × N).
+    const BATCH = 4;
+    const valid = entries.filter(t => t.trim());
+    for (let i = 0; i < valid.length; i += BATCH) {
+      const slice = valid.slice(i, i + BATCH);
+      await Promise.all(slice.map(text => this.stashSilent(text, { dopamine: 0.6 + Math.random() * 0.2, cortisol: 0.1 })));
     }
+    // One sync at the very end to refresh local caches
+    await this.syncFromServer().catch(() => {/* offline — cache is fine */});
+  }
+
+  /** Like stash() but skips the per-entry syncFromServer round-trip. */
+  private async stashSilent(text: string, endocrine: { dopamine: number; cortisol: number }): Promise<void> {
+    this.recordCortisol(endocrine.cortisol);
+    try {
+      await fetch('/api/vfs/inner/stash', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: text, dopamine: endocrine.dopamine, cortisol: endocrine.cortisol }),
+      });
+    } catch { /* offline fallback */ }
   }
 
   async archiveAll(): Promise<void> {

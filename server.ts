@@ -496,7 +496,7 @@ Your personality slides around. Where your brain happens to be at any given mome
 
   // ─── Ollama (local_copper, timeout 1130ms + golden-ratio retry) ───────────
 
-  const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://localhost:11434';
+  const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://127.0.0.1:11434';
 
   app.get('/api/ollama/tags', async (req, res) => {
     try {

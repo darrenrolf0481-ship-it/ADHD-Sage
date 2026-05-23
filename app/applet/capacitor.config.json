@@ -1,0 +1,6 @@
+{
+  "appId": "com.adhdsage.sentinel",
+  "appName": "ADHD Sage Sentinel",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

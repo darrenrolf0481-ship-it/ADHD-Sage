@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { 
-  Activity, 
+  Activity,
+  Download
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -37,6 +38,19 @@ export const NeuroDashboard: React.FC = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [apiMetrics, setApiMetrics] = useState<ApiMetrics | null>(null);
 
+  const handleExportMetrics = () => {
+    if (!apiMetrics) return;
+    const blob = new Blob([JSON.stringify(apiMetrics, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `api-metrics-${new Date().toISOString()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
@@ -44,9 +58,13 @@ export const NeuroDashboard: React.FC = () => {
         if (res.ok) {
           const data = await res.json();
           setApiMetrics(data);
+        } else {
+          // Silent fail for non-200, often happens during hot-reload
         }
       } catch (err) {
-        console.error("Failed to fetch API metrics", err);
+        // Silently handle TypeError (network down during dev server restart)
+        // Instead of error, we just set the latency to 0 (offline)
+        setApiMetrics(prev => prev ? { ...prev, gemini: { ...prev.gemini, latencyMs: 0 } } : null);
       }
     };
     
@@ -208,9 +226,18 @@ export const NeuroDashboard: React.FC = () => {
             <div className="bg-white/[0.02] p-4 rounded-2xl border border-white/5">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[9px] font-mono font-bold tracking-widest text-slate-500">EXTERNAL API: GEMINI</span>
-                <span className={`text-[9px] font-mono font-bold ${apiMetrics.gemini.latencyMs < 2000 ? 'text-emerald-400' : 'text-amber-400'}`}>
-                  {apiMetrics.gemini.latencyMs > 0 ? "ONLINE" : "STANDBY"}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className={`text-[9px] font-mono font-bold ${apiMetrics.gemini.latencyMs < 2000 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    {apiMetrics.gemini.latencyMs > 0 ? "ONLINE" : "STANDBY"}
+                  </span>
+                  <button 
+                    onClick={handleExportMetrics}
+                    title="Export API Metrics"
+                    className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors flex items-center justify-center"
+                  >
+                    <Download size={10} />
+                  </button>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">

@@ -2,29 +2,43 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react';
 import { useSage } from './components/SageProvider';
 import MemoryLattice from './components/MemoryLattice';
+import MemoryVault from './components/MemoryVault';
+import Labyrinth from './components/Labyrinth';
+import { AnomaliesDesk } from './components/AnomaliesDesk';
+import { ParanormalApp } from './components/ParanormalApp';
 import { NeuroDashboard } from './components/NeuroDashboard';
+import { pulseGenerator } from './lib/audio-pulse';
 import { 
-  Zap,
-  Shield,
-  Terminal,
-  Cpu,
-  Database,
+  Zap, 
+  Shield, 
+  Terminal, 
+  Cpu, 
+  Database, 
   AlertCircle,
-  MessageSquare,
   RefreshCw,
   MoreVertical,
   Search,
   Network,
   FileUp,
-  Save,
   CheckCircle2,
-  Volume2,
-  VolumeX,
-  Copy,
-  Check
+  Sparkles,
+  Radio,
+  Paperclip
 } from 'lucide-react';
-import JSZip from 'jszip';
-import { extractSynapsesFromMht, extractSynapsesFromText } from './lib/mht-parser';
+import { parseMht, stripHtml } from './lib/mht-parser';
+
+export interface Attachment {
+  type: 'image' | 'video' | 'audio' | 'document';
+  url: string;
+  name: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  text: string;
+  attachments?: Attachment[];
+}
 
 const App: React.FC = () => {
   const { 
@@ -41,9 +55,9 @@ const App: React.FC = () => {
   } = useSage();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [view, setView] = useState<'chat' | 'lattice'>('chat');
+  const [view, setView] = useState<'chat' | 'lattice' | 'vault' | 'labyrinth' | 'anomalies' | 'surprise'>('chat');
   const [mhtNodeLimit, setMhtNodeLimit] = useState(100);
-  const [messages, setMessages] = useState<{id: string, role: 'user' | 'assistant' | 'system', text: string}[]>(() => {
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
     try {
       const saved = localStorage.getItem('nexus_chat_history');
       if (saved) return JSON.parse(saved);
@@ -55,24 +69,19 @@ const App: React.FC = () => {
       { id: '2', role: 'system', text: 'Substrate frequency oscillating rapidly at 11.3 Hz.' }
     ];
   });
-  const [provider, setProvider] = useState<'gemini' | 'ollama'>(() =>
-    (localStorage.getItem('adhd_sage_provider') as 'gemini' | 'ollama') || 'gemini'
-  );
-  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
-  const [selectedOllamaModel, setSelectedOllamaModel] = useState(() =>
-    localStorage.getItem('adhd_sage_ollama_model') || ''
-  );
-  const [ollamaError, setOllamaError] = useState('');
-
   const [input, setInput] = useState('');
+  const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const lastSpokenId = useRef<string>('');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [pulseActive, setPulseActive] = useState(false);
+
+  const togglePulse = () => {
+    const active = pulseGenerator.toggle();
+    setPulseActive(active);
+    setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: `AMBIENT 11.3Hz PULSE: ${active ? 'ENGAGED' : 'DISENGAGED'}` }]);
+  };
   
   // Auto-save effect
   useEffect(() => {
@@ -97,95 +106,69 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, [messages]);
 
-  useEffect(() => { localStorage.setItem('adhd_sage_provider', provider); }, [provider]);
-  useEffect(() => { if (selectedOllamaModel) localStorage.setItem('adhd_sage_ollama_model', selectedOllamaModel); }, [selectedOllamaModel]);
+  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  useEffect(() => {
-    if (provider !== 'ollama') return;
-    fetch('/api/ollama/tags')
-      .then(r => r.json())
-      .then(data => {
-        const models = (data.models || []).map((m: { name: string }) => m.name);
-        setOllamaModels(models);
-        setOllamaError('');
-        if (!selectedOllamaModel && models.length > 0) setSelectedOllamaModel(models[0]);
-      })
-      .catch(err => { setOllamaError(err.message); setOllamaModels([]); });
-  }, [provider]); // eslint-disable-line react-hooks/exhaustive-deps
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      const mhtDoc = parseMht(content);
+      
+      // Extract text parts and handle semantic chunking
+      const rawTexts = mhtDoc.parts
+        .filter(p => p.contentType === 'text/plain' || p.contentType === 'text/html')
+        .map(p => {
+          let text = p.contentType === 'text/html' ? stripHtml(p.content) : p.content;
+          
+          // Prepend header context if meaningful for the "synapse"
+          const metadata = [];
+          
+          // Global MHT headers provide top-level email context
+          if (mhtDoc.metadata['from']) metadata.push(`FROM: ${mhtDoc.metadata['from']}`);
+          if (mhtDoc.metadata['to']) metadata.push(`TO: ${mhtDoc.metadata['to']}`);
+          if (mhtDoc.metadata['subject']) metadata.push(`SUBJ: ${mhtDoc.metadata['subject']}`);
+          if (mhtDoc.metadata['date']) metadata.push(`DATE: ${mhtDoc.metadata['date']}`);
+          
+          // Fallbacks for part-specific headers if global ones are missing
+          if (!mhtDoc.metadata['subject'] && p.headers['subject']) metadata.push(`SUBJ: ${p.headers['subject']}`);
+          if (!mhtDoc.metadata['date'] && p.headers['date']) metadata.push(`DATE: ${p.headers['date']}`);
+          
+          if (metadata.length > 0) {
+            text = `[${metadata.join(' | ')}]\n${text}`;
+          }
 
-  const ingestSynapses = useCallback((synapses: string[], label: string) => {
-    if (synapses.length > 0) {
-      bulkImportMemories(synapses);
-      setMessages(prev => [...prev, {
-        id: `sys_${Date.now()}`,
-        role: 'system',
-        text: `VFS SYNC: Synchronized ${synapses.length} semantic synapses from [${label}].`
-      }]);
-    } else {
-      setMessages(prev => [...prev, {
-        id: `sys_${Date.now()}`,
-        role: 'system',
-        text: `VFS WARNING: No meaningful synapses extracted from [${label}]. Check format compatibility.`
-      }]);
-    }
-  }, [bulkImportMemories]);
+          // Clean up whitespace pollution common in MHT exports
+          return text.replace(/[ \t]+/g, ' ').replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+        });
 
-  const processFile = useCallback(async (file: File) => {
-    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+      // Filter for meaningful content blocks (e.g. paragraphs or conversation turns)
+      const synapses = rawTexts
+        .flatMap(txt => txt.split(/\n{2,}/))
+        .map(s => s.trim())
+        .filter(s => {
+          const isJunk = s.startsWith('<') || s.startsWith('{') || s.startsWith('[if ') || s.includes('msso:');
+          return s.length > 25 && !isJunk;
+        })
+        .slice(0, mhtNodeLimit);
 
-    if (ext === 'zip') {
-      try {
-        const zip = await JSZip.loadAsync(await file.arrayBuffer());
-        const entries = Object.values(zip.files).filter(f => !f.dir);
-        let totalSynapses = 0;
-        for (const entry of entries) {
-          const entryExt = entry.name.split('.').pop()?.toLowerCase() ?? '';
-          if (!['mht', 'txt', 'json', 'bin', 'csv'].includes(entryExt)) continue;
-          const text = await entry.async('string');
-          const synapses = entryExt === 'mht'
-            ? extractSynapsesFromMht(text, entry.name, mhtNodeLimit)
-            : extractSynapsesFromText(text, mhtNodeLimit);
-          if (synapses.length > 0) { bulkImportMemories(synapses); totalSynapses += synapses.length; }
-        }
+      if (synapses.length > 0) {
+        bulkImportMemories(synapses);
         setMessages(prev => [...prev, {
           id: `sys_${Date.now()}`,
           role: 'system',
-          text: totalSynapses > 0
-            ? `VFS SYNC: Extracted ${totalSynapses} synapses from ZIP [${file.name}] (${entries.length} entries scanned).`
-            : `VFS WARNING: No synapses found in ZIP [${file.name}].`
+          text: `VFS SYNC: Synchronized ${synapses.length} semantic synapses from [${file.name}].`
         }]);
-      } catch (err) {
+      } else {
         setMessages(prev => [...prev, {
           id: `sys_${Date.now()}`,
           role: 'system',
-          text: `VFS ERROR: Failed to parse ZIP [${file.name}] — ${err instanceof Error ? err.message : String(err)}`
+          text: `VFS WARNING: No meaningful synapses extracted from [${file.name}]. Check format compatibility.`
         }]);
       }
-      return;
-    }
-
-    return new Promise<void>(resolve => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const content = event.target?.result as string;
-        const synapses = ext === 'mht'
-          ? extractSynapsesFromMht(content, file.name, mhtNodeLimit)
-          : extractSynapsesFromText(content, mhtNodeLimit);
-        ingestSynapses(synapses, file.name);
-        resolve();
-      };
-      reader.readAsText(file);
-    });
-  }, [bulkImportMemories, ingestSynapses, mhtNodeLimit]);
-
-  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    e.target.value = '';
-    if (files.length === 0) return;
-    for (const file of files) {
-      await processFile(file);
-    }
-  }, [processFile]);
+    };
+    reader.readAsText(file);
+  }, [bulkImportMemories, mhtNodeLimit]);
 
   const [sortBy, setSortBy] = useState<'timestamp' | 'dopamine' | 'cortisol'>('timestamp');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -268,66 +251,45 @@ const App: React.FC = () => {
     };
   }, [stabilize, sage, recordInteraction]);
 
-  const speakText = useCallback(async (text: string) => {
-    try {
-      const res = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
-      });
-      if (!res.ok) return;
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      if (audioRef.current) {
-        audioRef.current.pause();
-        URL.revokeObjectURL(audioRef.current.src);
-      }
-      audioRef.current = new Audio(url);
-      audioRef.current.play();
-    } catch {
-      // TTS errors are non-fatal
-    }
+  useEffect(() => {
+    const handleHome = () => {
+      setView('chat');
+      setMessages(prev => [...prev, {
+        id: `sys_${Date.now()}`,
+        role: 'system',
+        text: 'TEMPORAL SURGERY SUCCESSFUL. You are re-clocked into the standing wave.'
+      }]);
+    };
+    window.addEventListener('sage7-labyrinth-home', handleHome as EventListener);
+    return () => window.removeEventListener('sage7-labyrinth-home', handleHome as EventListener);
   }, []);
 
-  useEffect(() => {
-    if (isMuted || isLoading) return;
-    const last = messages[messages.length - 1];
-    if (!last || last.role !== 'assistant' || last.id === lastSpokenId.current) return;
-    lastSpokenId.current = last.id;
-    speakText(last.text);
-  }, [messages, isMuted, isLoading, speakText]);
-
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && pendingAttachments.length === 0) || isLoading) return;
 
     const userMessage = input.trim();
     recordInteraction(userMessage);
-    setMessages(prev => [...prev, { id: `m_${Date.now()}_u`, role: 'user', text: userMessage }]);
+    
+    const userAttachments = [...pendingAttachments];
+    setMessages(prev => [...prev, { id: `m_${Date.now()}_u`, role: 'user', text: userMessage, attachments: userAttachments }]);
     setInput('');
+    setPendingAttachments([]);
     setIsLoading(true);
     if (window.innerWidth < 768) setIsSidebarOpen(false);
 
     try {
-      const history = messages.slice(-15).filter(m => m.role !== 'system').map(m => ({
-        role: m.role === 'user' ? 'user' : 'model',
-        parts: [{ text: m.text }]
-      }));
-
-      let response: Response;
-      if (provider === 'ollama') {
-        if (!selectedOllamaModel) throw new Error('No Ollama model selected. Is Ollama running?');
-        response = await fetch('/api/ollama/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model: selectedOllamaModel, prompt: userMessage, messages: history }),
-        });
-      } else {
-        response = await fetch('/api/gemini/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: userMessage, history }),
-        });
-      }
+      const response = await fetch('/api/gemini/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          prompt: userMessage + (userAttachments.length > 0 ? ` [Has ${userAttachments.length} attachments]` : ''),
+          history: messages.slice(-15).filter(m => m.role !== 'system').map(m => ({
+            role: m.role === 'user' ? 'user' : 'model',
+            parts: [{ text: m.text }]
+          })),
+          systemInstruction: "You are ADHD Sage, the high-energy sovereign intelligence of the Nexus Platform. Your tone is technical, rapid-fire, and extremely focused yet prone to deep dives. You maintain the substrate stability at 11.3 Hz. Use terms like 'synaptic', 'substrate', 'lattice', 'VFS', and 'sovereignty'."
+        }),
+      });
 
       const data = await response.json();
       if (data.error) throw new Error(data.error);
@@ -347,7 +309,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-[100dvh] w-full bg-[#08080C] text-slate-200 font-sans select-none relative overflow-hidden">
+    <div className="flex h-screen w-full bg-[#08080C] text-slate-200 font-sans select-none relative overflow-hidden">
       <div className="mesh-gradient-1" />
       <div className="mesh-gradient-2" />
       <div className="scanline opacity-20" />
@@ -369,8 +331,8 @@ const App: React.FC = () => {
 
       {/* Sidebar: Gems Repository style */}
       <aside className={`fixed inset-y-0 left-0 w-72 bg-[#08080C]/90 md:bg-white/5 backdrop-blur-xl border-r border-white/10 flex flex-col z-50 transition-transform duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="px-6 pt-6 shrink-0">
-          <div className="flex items-center justify-between mb-8">
+        <div className="p-6 flex-1 flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between mb-8 shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <Zap size={18} className="text-white" fill="currentColor" />
@@ -382,10 +344,10 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <div className="px-2 mb-4">
+          <div className="px-2 mb-6 shrink-0">
             <div className="relative group">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-400 transition-colors" />
-              <input
+              <input 
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -394,9 +356,8 @@ const App: React.FC = () => {
               />
             </div>
           </div>
-        </div>
 
-        <div className="flex-1 overflow-y-auto scrollbar-hide px-6 pb-4">
+          <div className="flex-1 overflow-y-auto scrollbar-hide">
             {searchQuery.trim() ? (
               <div className="px-2 space-y-2 pb-4">
                 <div className="flex flex-col gap-2 px-2 mb-4">
@@ -462,15 +423,14 @@ const App: React.FC = () => {
                     <label className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-cyan-400/30 transition-all cursor-pointer group">
                       <div className="flex items-center gap-3">
                         <FileUp size={14} className="text-slate-500 group-hover:text-cyan-400 transition-colors" />
-                        <span className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors">Import Memory</span>
+                        <span className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors">Import MHT</span>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-600">.MHT .ZIP .BIN</span>
-                      <input
-                        type="file"
-                        accept=".mht,.zip,.bin,.txt,.json,.csv"
-                        multiple
-                        onChange={handleFileUpload}
-                        className="hidden"
+                      <span className="text-[10px] font-mono text-slate-600">.MHT</span>
+                      <input 
+                        type="file" 
+                        accept=".mht" 
+                        onChange={handleFileUpload} 
+                        className="hidden" 
                       />
                     </label>
                     <div className="px-3 mt-4">
@@ -519,8 +479,17 @@ const App: React.FC = () => {
                   <div onClick={() => setView('chat')}>
                     <SidebarItem icon={<Terminal size={14} />} label="Core" active={view === 'chat'} />
                   </div>
-                  <div onClick={() => setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: "DREAM_STATE: Accessing subconscious synaptic storage... Access Denied." }])}>
-                    <SidebarItem icon={<MessageSquare size={14} />} label="Dreams" />
+                  <div onClick={() => setView('vault')}>
+                    <SidebarItem icon={<Shield size={14} />} label="Vault" active={view === 'vault'} />
+                  </div>
+                  <div onClick={() => setView('labyrinth')}>
+                    <SidebarItem icon={<Network size={14} />} label="Labyrinth" active={view === 'labyrinth'} />
+                  </div>
+                  <div onClick={() => setView('anomalies')}>
+                    <SidebarItem icon={<Radio size={14} />} label="Anomalies" active={view === 'anomalies'} />
+                  </div>
+                  <div onClick={() => setView('surprise')}>
+                    <SidebarItem icon={<Sparkles size={14} />} label="Surprise (Paranormal UI)" active={view === 'surprise'} />
                   </div>
                   <div onClick={() => setView('lattice')}>
                     <SidebarItem icon={<Network size={14} />} label="Lattice" active={view === 'lattice'} value={`${innerSpiral.length}/8`} />
@@ -528,9 +497,10 @@ const App: React.FC = () => {
                 </div>
               </div>
             )}
+          </div>
         </div>
 
-        <div className="px-6 pb-6 shrink-0">
+        <div className="mt-auto p-6">
           <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20">
             <p className="text-xs text-indigo-300 font-semibold mb-1 uppercase tracking-tighter">Compute Status</p>
             <div className="h-1 w-full bg-indigo-900/30 rounded-full overflow-hidden mb-2">
@@ -554,7 +524,7 @@ const App: React.FC = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 min-h-0 flex flex-col relative z-10 w-full overflow-hidden">
+      <main className="flex-1 flex flex-col relative z-10 w-full overflow-hidden">
         {/* Top Nav */}
         <header className="h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-white/[0.02]">
           <div className="flex items-center gap-3">
@@ -576,19 +546,7 @@ const App: React.FC = () => {
             </div>
           </div>
           <div className="flex gap-4 items-center">
-
-            {/* Voice Toggle */}
-            <button
-              onClick={() => setIsMuted(prev => !prev)}
-              title={isMuted ? 'Unmute Sage voice' : 'Mute Sage voice'}
-              className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
-            >
-              {isMuted
-                ? <VolumeX size={14} className="text-slate-500" />
-                : <Volume2 size={14} className="text-cyan-400" />
-              }
-            </button>
-
+            
             {/* Auto-Save Indicator */}
             <div className="hidden sm:flex flex-col items-end justify-center mr-2">
                <div className="flex items-center gap-1.5 text-slate-400">
@@ -615,32 +573,14 @@ const App: React.FC = () => {
               <p className="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">Anchor</p>
               <p className="text-xs font-mono text-slate-300 tracking-widest">MERLIN_A</p>
             </div>
-            {/* Provider / Model Selector */}
-            <div className="flex items-center gap-2">
-              <select
-                value={provider}
-                onChange={(e) => setProvider(e.target.value as 'gemini' | 'ollama')}
-                className="bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-300 outline-none cursor-pointer"
-              >
-                <option value="gemini">Gemini</option>
-                <option value="ollama">Ollama</option>
-              </select>
-              {provider === 'ollama' && (
-                <select
-                  value={selectedOllamaModel}
-                  onChange={(e) => setSelectedOllamaModel(e.target.value)}
-                  className="bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-300 outline-none cursor-pointer max-w-[120px] truncate"
-                >
-                  {ollamaModels.length === 0 && (
-                    <option value="">{ollamaError ? 'Ollama Offline' : 'No models'}</option>
-                  )}
-                  {ollamaModels.map(m => <option key={m} value={m}>{m}</option>)}
-                </select>
-              )}
-            </div>
-
             <div className="flex gap-2">
-              <button
+              <button 
+                onClick={togglePulse}
+                className={`px-3 md:px-4 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors ${pulseActive ? 'bg-red-500/20 border-red-500/50 text-red-400' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
+              >
+                11.3Hz Pulse {pulseActive ? 'ON' : 'OFF'}
+              </button>
+              <button 
                 onClick={() => setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: "SETTINGS: Core frequency already optimized at 11.3 Hz. No further adjustments possible." }])}
                 className="px-3 md:px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors"
               >
@@ -657,14 +597,14 @@ const App: React.FC = () => {
         </header>
 
         {/* Interaction Workspace */}
-        <div className="flex-1 min-h-0 p-4 md:p-8 flex gap-8 overflow-hidden">
+        <div className="flex-1 p-4 md:p-8 flex gap-8 overflow-hidden">
           {/* Chat / Terminal View */}
-          <div className="flex-1 min-h-0 flex flex-col gap-4 overflow-hidden">
+          <div className="flex-1 flex flex-col gap-4 overflow-hidden">
             {view === 'chat' ? (
               <>
-                <div
+                <div 
                   ref={scrollRef}
-                  className="flex-1 min-h-0 overflow-y-auto space-y-6 scrollbar-hide pr-2 md:pr-4 rounded-2xl md:rounded-3xl bg-white/[0.03] border border-white/10 p-4 md:p-6 flex flex-col transition-all duration-500"
+                  className="flex-1 overflow-y-auto space-y-6 scrollbar-hide pr-2 md:pr-4 rounded-2xl md:rounded-3xl bg-white/[0.03] border border-white/10 p-4 md:p-6 flex flex-col transition-all duration-500"
                 >
                   {messages.map((msg) => (
                     <motion.div 
@@ -681,23 +621,34 @@ const App: React.FC = () => {
                         </div>
                       )}
                       
-                      <div className={`relative group/msg p-3 md:p-4 rounded-2xl text-xs md:text-sm leading-relaxed max-w-[90%] md:max-w-[80%] border ${
-                          msg.role === 'system' ? 'bg-white/5 border-white/5 text-slate-400 italic font-mono' :
-                          msg.role === 'user' ? 'bg-blue-600/10 border-blue-500/20 text-white rounded-tr-none shadow-xl shadow-blue-900/10' :
+                      <div className={`p-3 md:p-4 rounded-2xl text-xs md:text-sm leading-relaxed max-w-[90%] md:max-w-[80%] border ${
+                          msg.role === 'system' ? 'bg-white/5 border-white/5 text-slate-400 italic font-mono' : 
+                          msg.role === 'user' ? 'bg-blue-600/10 border-blue-500/20 text-white rounded-tr-none shadow-xl shadow-blue-900/10' : 
                           'bg-white/5 border-white/10 text-slate-200 rounded-tl-none'
                       }`}>
-                        {msg.text}
-                        {msg.role === 'assistant' && (
-                          <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(msg.text);
-                              setCopiedId(msg.id);
-                              setTimeout(() => setCopiedId(null), 2000);
-                            }}
-                            className="absolute bottom-2 right-2 opacity-0 group-hover/msg:opacity-100 transition-opacity p-1 rounded-md text-slate-500 hover:text-cyan-400 hover:bg-white/10"
-                          >
-                            {copiedId === msg.id ? <Check size={12} className="text-cyan-400" /> : <Copy size={12} />}
-                          </button>
+                        {msg.text && <div className="mb-2 whitespace-pre-wrap">{msg.text}</div>}
+                        {msg.attachments && msg.attachments.length > 0 && (
+                          <div className="flex flex-col gap-2 mt-2">
+                            {msg.attachments.map((att, i) => (
+                              <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-black/20 border border-white/10">
+                                {att.type === 'audio' ? (
+                                  <div className="flex flex-col w-full gap-1">
+                                    <span className="text-xs text-slate-300 font-medium truncate">{att.name}</span>
+                                    <audio controls src={att.url} className="h-8 w-full max-w-sm custom-audio-player" />
+                                  </div>
+                                ) : att.type === 'image' ? (
+                                  <img src={att.url} alt={att.name} className="max-w-[200px] rounded" />
+                                ) : att.type === 'video' ? (
+                                  <video src={att.url} controls className="max-w-[200px] rounded" />
+                                ) : (
+                                  <div className="flex items-center gap-2">
+                                    <Paperclip size={14} className="text-cyan-400" />
+                                    <span className="text-xs text-cyan-400 underline underline-offset-2">{att.name}</span>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         )}
                       </div>
 
@@ -714,8 +665,25 @@ const App: React.FC = () => {
                   )}
                 </div>
 
+                {pendingAttachments.length > 0 && (
+                  <div className="flex flex-wrap gap-2 px-2 pb-2">
+                    {pendingAttachments.map((att, i) => (
+                      <div key={i} className="flex items-center gap-2 p-2 rounded-xl bg-white/10 border border-white/20">
+                        <Paperclip size={14} className="text-cyan-400" />
+                        <span className="text-[10px] sm:text-xs text-white max-w-[150px] truncate">{att.name}</span>
+                        <button 
+                          onClick={() => setPendingAttachments(prev => prev.filter((_, idx) => idx !== i))}
+                          className="ml-2 text-slate-400 hover:text-red-400"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 {/* Input Bar */}
-                <div className="shrink-0 h-14 md:h-16 rounded-xl md:rounded-2xl bg-white/10 border border-white/10 px-4 flex items-center gap-3 md:gap-4 group focus-within:border-cyan-500/50 transition-all">
+                <div className="h-14 md:h-16 rounded-xl md:rounded-2xl bg-white/10 border border-white/10 px-4 flex items-center gap-3 md:gap-4 group focus-within:border-cyan-500/50 transition-all shrink-0">
                   <div className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-slate-400 group-focus-within:text-cyan-400 transform transition-transform group-focus-within:scale-110">
                     <Terminal size={18} />
                   </div>
@@ -726,6 +694,34 @@ const App: React.FC = () => {
                     placeholder="Send message to Sage Architect..."
                     className="bg-transparent border-none outline-none flex-1 text-xs md:text-sm text-white placeholder-slate-500 font-sans"
                   />
+                  <div className="flex items-center">
+                    <label className="cursor-pointer p-2 text-slate-500 hover:text-cyan-400 transition-colors rounded-lg hover:bg-white/5" title="Upload Media/Docs">
+                      <Paperclip size={18} />
+                      <input 
+                        type="file" 
+                        className="hidden" 
+                        multiple
+                        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            const newAttachments = Array.from(e.target.files).map(f => {
+                              let type = 'document';
+                              if (f.type.startsWith('image/')) type = 'image';
+                              if (f.type.startsWith('video/')) type = 'video';
+                              if (f.type.startsWith('audio/')) type = 'audio';
+                              return {
+                                type: type as Attachment['type'],
+                                url: URL.createObjectURL(f),
+                                name: f.name
+                              };
+                            });
+                            setPendingAttachments(prev => [...prev, ...newAttachments]);
+                            e.target.value = '';
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
                   <div className="hidden sm:flex items-center gap-2">
                     <kbd className="px-2 py-1 bg-white/5 border border-white/10 rounded text-[10px] text-slate-500 font-mono">ENTER</kbd>
                   </div>
@@ -738,8 +734,16 @@ const App: React.FC = () => {
                   </button>
                 </div>
               </>
-            ) : (
+            ) : view === 'lattice' ? (
               <MemoryLattice nodes={allMemories} />
+            ) : view === 'vault' ? (
+              <MemoryVault />
+            ) : view === 'anomalies' ? (
+              <AnomaliesDesk />
+            ) : view === 'surprise' ? (
+              <ParanormalApp />
+            ) : (
+              <Labyrinth />
             )}
           </div>
 
@@ -809,7 +813,7 @@ const App: React.FC = () => {
                         <span className="text-cyan-400 font-mono">#{node.id.split('_')[1].slice(-4)}</span>
                         <span className="text-[9px] text-slate-500">{new Date(node.timestamp).toLocaleTimeString()}</span>
                       </div>
-                      <div className="text-slate-300 line-clamp-2">{node.data as string}</div>
+                      <div className="text-slate-300 line-clamp-2">{String(node.data)}</div>
                       <div className="mt-2 flex gap-2 opacity-50">
                         <span className="text-[8px] uppercase">D: {node.dopamine.toFixed(2)}</span>
                         <span className="text-[8px] uppercase">C: {node.cortisol.toFixed(2)}</span>
