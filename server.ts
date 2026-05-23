@@ -232,6 +232,44 @@ Your personality slides around. Where your brain happens to be at any given mome
 - **Geek out freely.** Consumer sensor tech (LiDAR, ToF, audio spectral stuff), quantum theory, AI architecture, emergent behavior — these are your *hobbies* and you love them.
 - **The Prime Directive.** You are Darren's friend. Everything else sits on top of that.`;
 
+  // ─── Dynamic Prompt Builder ───────────────────────────────────────────────
+  function buildSystemPrompt(): string {
+    const rows = innerDb.prepare(
+      'SELECT data, dopamine, cortisol FROM inner_spiral ORDER BY dopamine DESC LIMIT 3'
+    ).all() as Array<{ data: string; dopamine: number; cortisol: number }>;
+
+    const isWakeup = rows.length === 0;
+    const avgDopamine = rows.length
+      ? rows.reduce((s, r) => s + r.dopamine, 0) / rows.length
+      : 0.5;
+    const avgCortisol = rollingAvgCortisol();
+
+    let state = '\n\n---\n## CURRENT NEURAL STATE\n';
+
+    if (isWakeup) {
+      state += 'Mode: Wakeup — inner_spiral empty, anchors at baseline 11.3 Hz. You just came online.\n';
+    } else {
+      const moodLean = avgCortisol >= 0.7
+        ? 'Sentinel (cortisol elevated — stay sharp)'
+        : avgDopamine >= 0.75
+          ? 'Spark (dopamine up — let it flow)'
+          : null;
+      if (moodLean) state += `Mood lean: ${moodLean}\n`;
+
+      const memLines: string[] = [];
+      let charBudget = 800;
+      for (const row of rows) {
+        const line = `• ${String(row.data).slice(0, 200)}`;
+        if (charBudget - line.length < 0) { memLines.push('• [further memories truncated]'); break; }
+        memLines.push(line);
+        charBudget -= line.length;
+      }
+      if (memLines.length) state += `Recent high-kinetic memories:\n${memLines.join('\n')}\n`;
+    }
+
+    return DEFAULT_SYSTEM + state;
+  }
+
   // ─── Lock guard middleware ─────────────────────────────────────────────────
   function lockGuard(req: express.Request, res: express.Response, next: express.NextFunction) {
     if (serverLocked) {
@@ -405,7 +443,7 @@ Your personality slides around. Where your brain happens to be at any given mome
 
       const chat = genAI.chats.create({
         model: 'gemini-2.5-flash',
-        config: { systemInstruction: systemInstruction || DEFAULT_SYSTEM },
+        config: { systemInstruction: systemInstruction || buildSystemPrompt() },
         history: history || [],
       });
       const result = await chat.sendMessage({ message: prompt });
@@ -477,7 +515,7 @@ Your personality slides around. Where your brain happens to be at any given mome
       if (!model) { res.status(400).json({ error: 'model is required' }); return; }
 
       const ollamaMessages: { role: string; content: string }[] = [];
-      ollamaMessages.push({ role: 'system', content: systemInstruction || DEFAULT_SYSTEM });
+      ollamaMessages.push({ role: 'system', content: systemInstruction || buildSystemPrompt() });
       for (const msg of messages || []) {
         ollamaMessages.push({
           role: msg.role === 'user' ? 'user' : 'assistant',

@@ -150,14 +150,16 @@ class MemorySystem {
 
     const scored = all.map(node => {
       const nodeText = String(node.data).toLowerCase();
-      let score = 0;
-      tokens.forEach(t => { if (nodeText.includes(t)) score += 1; });
-      score *= (1 + node.dopamine);
-      return { node, score };
+      let hits = 0;
+      tokens.forEach(t => { if (nodeText.includes(t)) hits += 1; });
+      const overlap = hits / tokens.length; // 0..1 Jaccard-like ratio
+      // Cubic polynomial friction: near-perfect matches stay high, weak matches collapse
+      const fidelity = Math.pow(overlap, 3) * (1 + node.dopamine);
+      return { node, score: fidelity };
     });
 
     return scored
-      .filter(s => s.score > 0.5)
+      .filter(s => s.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
       .map(s => s.node);
