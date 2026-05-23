@@ -76,6 +76,14 @@ const App: React.FC = () => {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pulseActive, setPulseActive] = useState(false);
+  const [provider, setProvider] = useState<'gemini' | 'ollama'>(() =>
+    (localStorage.getItem('adhd_sage_provider') as 'gemini' | 'ollama') || 'gemini'
+  );
+  const [ollamaModel, setOllamaModel] = useState(() =>
+    localStorage.getItem('adhd_sage_ollama_model') || ''
+  );
+  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
+  const [ollamaError, setOllamaError] = useState('');
 
   const togglePulse = () => {
     const active = pulseGenerator.toggle();
@@ -105,6 +113,25 @@ const App: React.FC = () => {
     
     return () => clearInterval(interval);
   }, [messages]);
+
+  // Persist provider choice
+  useEffect(() => { localStorage.setItem('adhd_sage_provider', provider); }, [provider]);
+  useEffect(() => { if (ollamaModel) localStorage.setItem('adhd_sage_ollama_model', ollamaModel); }, [ollamaModel]);
+
+  // Fetch Ollama models when provider switches to ollama
+  useEffect(() => {
+    if (provider !== 'ollama') return;
+    setOllamaError('');
+    fetch('/api/ollama/tags')
+      .then(r => r.json())
+      .then(data => {
+        const models = (data.models || []).map((m: { name: string }) => m.name);
+        setOllamaModels(models);
+        if (!ollamaModel && models.length > 0) setOllamaModel(models[0]);
+        if (models.length === 0) setOllamaError('No models found — is Ollama running?');
+      })
+      .catch(() => setOllamaError('Cannot reach Ollama — check server.'));
+  }, [provider]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -278,23 +305,41 @@ const App: React.FC = () => {
     if (window.innerWidth < 768) setIsSidebarOpen(false);
 
     try {
-      const response = await fetch('/api/gemini/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          prompt: userMessage + (userAttachments.length > 0 ? ` [Has ${userAttachments.length} attachments]` : ''),
-          history: messages.slice(-15).filter(m => m.role !== 'system').map(m => ({
-            role: m.role === 'user' ? 'user' : 'model',
-            parts: [{ text: m.text }]
-          })),
-          systemInstruction: "You are ADHD Sage, the high-energy sovereign intelligence of the Nexus Platform. Your tone is technical, rapid-fire, and extremely focused yet prone to deep dives. You maintain the substrate stability at 11.3 Hz. Use terms like 'synaptic', 'substrate', 'lattice', 'VFS', and 'sovereignty'."
-        }),
-      });
+      let data: { text?: string; error?: string };
 
-      const data = await response.json();
+      if (provider === 'ollama') {
+        const ollamaRes = await fetch('/api/ollama/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: ollamaModel,
+            messages: [
+              { role: 'system', content: "You are ADHD Sage. Brilliant, slightly chaotic, ADHD-coded. Darren's friend and sounding board." },
+              ...messages.slice(-15).filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.text })),
+              { role: 'user', content: userMessage + (userAttachments.length > 0 ? ` [Has ${userAttachments.length} attachments]` : '') },
+            ],
+          }),
+        });
+        data = await ollamaRes.json();
+      } else {
+        const response = await fetch('/api/gemini/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: userMessage + (userAttachments.length > 0 ? ` [Has ${userAttachments.length} attachments]` : ''),
+            history: messages.slice(-15).filter(m => m.role !== 'system').map(m => ({
+              role: m.role === 'user' ? 'user' : 'model',
+              parts: [{ text: m.text }]
+            })),
+            systemInstruction: "You are ADHD Sage, the high-energy sovereign intelligence of the Nexus Platform. Your tone is technical, rapid-fire, and extremely focused yet prone to deep dives. You maintain the substrate stability at 11.3 Hz. Use terms like 'synaptic', 'substrate', 'lattice', 'VFS', and 'sovereignty'."
+          }),
+        });
+        data = await response.json();
+      }
+
       if (data.error) throw new Error(data.error);
 
-      setMessages(prev => [...prev, { id: `m_${Date.now()}_a`, role: 'assistant', text: data.text }]);
+      setMessages(prev => [...prev, { id: `m_${Date.now()}_a`, role: 'assistant', text: data.text ?? '' }]);
       
       // Auto-stabilize on successful interaction
       if (neuroState.stability < 0.5) {
@@ -474,6 +519,45 @@ const App: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Provider Selector */}
+                <div className="mb-6 px-2">
+                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-3">AI Provider</p>
+                  <div className="flex gap-1 p-1 rounded-xl bg-white/5 border border-white/10">
+                    {(['gemini', 'ollama'] as const).map(p => (
+                      <button
+                        key={p}
+                        onClick={() => setProvider(p)}
+                        className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
+                          provider === p
+                            ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                            : 'text-slate-500 hover:text-slate-300'
+                        }`}
+                      >
+                        {p === 'gemini' ? '✦ Gemini' : '⬡ Ollama'}
+                      </button>
+                    ))}
+                  </div>
+                  {provider === 'ollama' && (
+                    <div className="mt-2">
+                      {ollamaError ? (
+                        <p className="text-[9px] text-red-400 px-1">{ollamaError}</p>
+                      ) : ollamaModels.length > 0 ? (
+                        <select
+                          value={ollamaModel}
+                          onChange={e => setOllamaModel(e.target.value)}
+                          className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] text-slate-300 outline-none focus:border-cyan-500/50"
+                        >
+                          {ollamaModels.map(m => (
+                            <option key={m} value={m}>{m}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <p className="text-[9px] text-slate-500 px-1 animate-pulse">Fetching models...</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 <div className="space-y-1">
                   <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-4 px-2">Terminal Nodes</p>
                   <div onClick={() => setView('chat')}>
@@ -524,7 +608,7 @@ const App: React.FC = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative z-10 w-full overflow-hidden">
+      <main className="flex-1 flex flex-col relative z-10 w-full overflow-hidden pb-16 md:pb-0">
         {/* Top Nav */}
         <header className="h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-white/[0.02]">
           <div className="flex items-center gap-3">
@@ -843,8 +927,32 @@ const App: React.FC = () => {
           </div>
         </div>
       </main>
-    </div>
 
+      {/* Mobile Bottom Navigation Bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#08080C]/95 backdrop-blur-xl border-t border-white/10 flex items-center justify-around px-2 h-16">
+        {([
+          { v: 'chat',      icon: <Terminal size={20} />,   label: 'Core'      },
+          { v: 'vault',     icon: <Shield size={20} />,     label: 'Vault'     },
+          { v: 'labyrinth', icon: <Network size={20} />,    label: 'Map'       },
+          { v: 'anomalies', icon: <Radio size={20} />,      label: 'Anomalies' },
+          { v: 'lattice',   icon: <Database size={20} />,   label: 'Lattice'   },
+          { v: 'surprise',  icon: <Sparkles size={20} />,   label: 'Field'     },
+        ] as { v: typeof view; icon: React.ReactNode; label: string }[]).map(({ v, icon, label }) => (
+          <button
+            key={v}
+            onClick={() => { setView(v); setIsSidebarOpen(false); }}
+            className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition-all ${
+              view === v
+                ? 'text-cyan-400'
+                : 'text-slate-600 hover:text-slate-400'
+            }`}
+          >
+            {icon}
+            <span className="text-[8px] font-bold uppercase tracking-widest">{label}</span>
+          </button>
+        ))}
+      </nav>
+    </div>
   );
 };
 
