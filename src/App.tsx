@@ -76,14 +76,22 @@ const App: React.FC = () => {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pulseActive, setPulseActive] = useState(false);
-  const [provider, setProvider] = useState<'gemini' | 'ollama'>(() =>
-    (localStorage.getItem('adhd_sage_provider') as 'gemini' | 'ollama') || 'gemini'
+  const [provider, setProvider] = useState<'gemini' | 'ollama' | 'openrouter'>(() =>
+    (localStorage.getItem('adhd_sage_provider') as 'gemini' | 'ollama' | 'openrouter') || 'gemini'
   );
   const [ollamaModel, setOllamaModel] = useState(() =>
     localStorage.getItem('adhd_sage_ollama_model') || ''
   );
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
   const [ollamaError, setOllamaError] = useState('');
+
+  const OR_MODELS = [
+    { id: 'google/gemma-4-31b-it:free', label: 'Gemma 4 31B (free)' },
+    { id: 'z-ai/glm-4.5-air:free',      label: 'GLM-4.5 Air (free)' },
+  ];
+  const [orModel, setOrModel] = useState(() =>
+    localStorage.getItem('adhd_sage_or_model') || OR_MODELS[0].id
+  );
 
   const togglePulse = () => {
     const active = pulseGenerator.toggle();
@@ -114,9 +122,10 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, [messages]);
 
-  // Persist provider choice
+  // Persist provider/model choices
   useEffect(() => { localStorage.setItem('adhd_sage_provider', provider); }, [provider]);
   useEffect(() => { if (ollamaModel) localStorage.setItem('adhd_sage_ollama_model', ollamaModel); }, [ollamaModel]);
+  useEffect(() => { localStorage.setItem('adhd_sage_or_model', orModel); }, [orModel]);
 
   // Fetch Ollama models when provider switches to ollama
   useEffect(() => {
@@ -314,13 +323,25 @@ const App: React.FC = () => {
           body: JSON.stringify({
             model: ollamaModel,
             messages: [
-              { role: 'system', content: "You are ADHD Sage. Brilliant, slightly chaotic, ADHD-coded. Darren's friend and sounding board." },
-              ...messages.slice(-15).filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.text })),
-              { role: 'user', content: userMessage + (userAttachments.length > 0 ? ` [Has ${userAttachments.length} attachments]` : '') },
+              ...messages.slice(-15).filter(m => m.role !== 'system').map(m => ({ role: m.role, text: m.text })),
+              { role: 'user', text: userMessage + (userAttachments.length > 0 ? ` [Has ${userAttachments.length} attachments]` : '') },
             ],
           }),
         });
         data = await ollamaRes.json();
+      } else if (provider === 'openrouter') {
+        const orRes = await fetch('/api/openrouter/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: orModel,
+            messages: [
+              ...messages.slice(-15).filter(m => m.role !== 'system').map(m => ({ role: m.role, text: m.text })),
+              { role: 'user', text: userMessage + (userAttachments.length > 0 ? ` [Has ${userAttachments.length} attachments]` : '') },
+            ],
+          }),
+        });
+        data = await orRes.json();
       } else {
         const response = await fetch('/api/gemini/generate', {
           method: 'POST',
@@ -523,20 +544,45 @@ const App: React.FC = () => {
                 <div className="mb-6 px-2">
                   <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-3">AI Provider</p>
                   <div className="flex gap-1 p-1 rounded-xl bg-white/5 border border-white/10">
-                    {(['gemini', 'ollama'] as const).map(p => (
+                    {([
+                      { id: 'gemini',      label: '✦ Gemini'  },
+                      { id: 'openrouter',  label: '⟁ OR'      },
+                      { id: 'ollama',      label: '⬡ Ollama'  },
+                    ] as { id: typeof provider; label: string }[]).map(p => (
                       <button
-                        key={p}
-                        onClick={() => setProvider(p)}
+                        key={p.id}
+                        onClick={() => setProvider(p.id)}
                         className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
-                          provider === p
+                          provider === p.id
                             ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
                             : 'text-slate-500 hover:text-slate-300'
                         }`}
                       >
-                        {p === 'gemini' ? '✦ Gemini' : '⬡ Ollama'}
+                        {p.label}
                       </button>
                     ))}
                   </div>
+
+                  {/* OpenRouter model picker */}
+                  {provider === 'openrouter' && (
+                    <div className="mt-2 space-y-1">
+                      {OR_MODELS.map(m => (
+                        <button
+                          key={m.id}
+                          onClick={() => setOrModel(m.id)}
+                          className={`w-full text-left px-2 py-1.5 rounded-lg text-[10px] font-mono transition-all ${
+                            orModel === m.id
+                              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                              : 'bg-white/5 text-slate-500 border border-transparent hover:text-slate-300'
+                          }`}
+                        >
+                          {orModel === m.id ? '▶ ' : '  '}{m.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Ollama model picker */}
                   {provider === 'ollama' && (
                     <div className="mt-2">
                       {ollamaError ? (
