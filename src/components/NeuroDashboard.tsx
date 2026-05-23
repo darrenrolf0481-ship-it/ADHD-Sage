@@ -22,10 +22,38 @@ interface HistoryEntry {
   stability: number;
 }
 
+interface ApiMetrics {
+  gemini: {
+    latencyMs: number;
+    errorRate: string;
+    uptimeSeconds: number;
+    totalRequests: number;
+  };
+}
+
 export const NeuroDashboard: React.FC = () => {
   const { neuroState, mode } = useSage();
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isOpen, setIsOpen] = useState(true);
+  const [apiMetrics, setApiMetrics] = useState<ApiMetrics | null>(null);
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const res = await fetch('/api/metrics');
+        if (res.ok) {
+          const data = await res.json();
+          setApiMetrics(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch API metrics", err);
+      }
+    };
+    
+    fetchMetrics();
+    const interval = setInterval(fetchMetrics, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Update history buffer
   useEffect(() => {
@@ -159,7 +187,7 @@ export const NeuroDashboard: React.FC = () => {
           </div>
 
           {/* Temporal Flow */}
-          <div className="h-20 w-full bg-black/20 rounded-2xl p-3 border border-white/5">
+          <div className="h-20 w-full bg-black/20 rounded-2xl p-3 border border-white/5 mb-6">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={history}>
                 <YAxis hide domain={[0, 1]} />
@@ -174,6 +202,36 @@ export const NeuroDashboard: React.FC = () => {
               </LineChart>
             </ResponsiveContainer>
           </div>
+
+          {/* External API Integration Metrics */}
+          {apiMetrics && (
+            <div className="bg-white/[0.02] p-4 rounded-2xl border border-white/5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[9px] font-mono font-bold tracking-widest text-slate-500">EXTERNAL API: GEMINI</span>
+                <span className={`text-[9px] font-mono font-bold ${apiMetrics.gemini.latencyMs < 2000 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                  {apiMetrics.gemini.latencyMs > 0 ? "ONLINE" : "STANDBY"}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                   <span className="text-[8px] font-mono text-slate-600 uppercase">Latency</span>
+                   <span className="text-xs font-mono text-slate-300">{apiMetrics.gemini.latencyMs} <span className="text-[8px] text-slate-500">ms</span></span>
+                </div>
+                <div className="flex flex-col gap-1">
+                   <span className="text-[8px] font-mono text-slate-600 uppercase">Error Rate</span>
+                   <span className="text-xs font-mono text-slate-300">{apiMetrics.gemini.errorRate} <span className="text-[8px] text-slate-500">%</span></span>
+                </div>
+                <div className="flex flex-col gap-1">
+                   <span className="text-[8px] font-mono text-slate-600 uppercase">Requests</span>
+                   <span className="text-xs font-mono text-slate-300">{apiMetrics.gemini.totalRequests}</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                   <span className="text-[8px] font-mono text-slate-600 uppercase">Uptime</span>
+                   <span className="text-xs font-mono text-slate-300">{apiMetrics.gemini.uptimeSeconds} <span className="text-[8px] text-slate-500">s</span></span>
+                </div>
+              </div>
+            </div>
+          )}
 
           <footer className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
             <span className="text-[8px] font-mono text-slate-600 font-bold tracking-widest uppercase">Live Link Active</span>

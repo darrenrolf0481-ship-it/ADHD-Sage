@@ -108,7 +108,7 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
         .distance(d => 140 - Math.min(80, d.value * 10)))
       .force("charge", d3.forceManyBody().strength(-500))
       .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("collision", d3.forceCollide().radius(d => 40 + d.dopamine * 20))
+      .force("collision", d3.forceCollide<GraphNode>().radius(d => 40 + d.dopamine * 20))
       .force("x", d3.forceX(width / 2).strength(0.05))
       .force("y", d3.forceY(height / 2).strength(0.05));
 
@@ -179,6 +179,7 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
       .data(graphData.nodes)
       .join("g")
       .attr("class", "group cursor-pointer")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .call(d3.drag<SVGGElement, GraphNode>()
         .on("start", (event, d) => {
           if (!event.active) simulation.alphaTarget(0.3).restart();
@@ -193,12 +194,12 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
           if (!event.active) simulation.alphaTarget(0);
           d.fx = null;
           d.fy = null;
-        }));
+        }) as unknown as (sel: d3.Selection<d3.BaseType | SVGGElement, GraphNode, SVGGElement, unknown>) => void);
 
     // Outer "Halo" for focus/high dopamine
     node.append("circle")
       .attr("r", d => 12 + d.dopamine * 12)
-      .attr("fill", d => d.cluster !== undefined ? d3.color(d3.schemeCategory10[d.cluster % 10])?.copy({ opacity: 0.1 }).toString() : "rgba(56, 189, 248, 0.1)")
+      .attr("fill", d => d.cluster !== undefined ? (d3.color(d3.schemeCategory10[d.cluster % 10])?.copy({ opacity: 0.1 }).toString() ?? "rgba(56, 189, 248, 0.1)") : "rgba(56, 189, 248, 0.1)")
       .attr("class", "transition-all duration-300 group-hover:scale-125")
       .style("filter", "url(#glow)");
 

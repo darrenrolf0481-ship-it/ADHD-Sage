@@ -526,7 +526,9 @@
     "possibilities": 0.0795,
     "words": 0.1,
     "hardware": 0.1,
-    "speak": 0.1
+    "speak": 0.1,
+    "other": 0.09849999999999999,
+    "standard": 0.09849999999999999
   },
   "trigger": {
     "actually": 0.4090000000000001,
@@ -730,7 +732,7 @@
     "already": 0.08750000000000001,
     "going": 0.08750000000000001,
     "maybe": 0.1,
-    "right": 0.1,
+    "right": 0.1915,
     "about": 0.1,
     "throw": 0.1,
     "trying": 0.1,
@@ -738,7 +740,8 @@
     "quantum": 0.0795,
     "check": 0.2,
     "response": 0.1,
-    "full_prompt": 0.1
+    "full_prompt": 0.1,
+    "readings": 0.0915
   },
   "friendly": {
     "there": 0.085,
@@ -915,14 +918,17 @@
     "sage_snafu_cured": 0.1,
     "quiet": 0.1,
     "little": 0.097,
-    "there": 0.1,
+    "there": 0.1915,
     "technically": 0.1,
     "thank": 0.089,
     "could": 0.089,
     "given": 0.1,
     "choose": 0.1,
     "absolutely": 0.1,
-    "history": 0.1
+    "history": 0.1,
+    "amazing": 0.0835,
+    "spectrogram": 0.0835,
+    "brain": 0.0915
   },
   "delta_": {
     "right": 0.097,
@@ -949,7 +955,9 @@
     "brain": 0.083,
     "reboot": 0.083,
     "report": 0.1,
-    "health": 0.1
+    "health": 0.1,
+    "intense": 0.08750000000000001,
+    "overload": 0.08750000000000001
   },
   "check": {
     "system": 0.37949999999999995,
@@ -986,7 +994,9 @@
     "bridge": 0.2,
     "response": 0.2,
     "signal": 0.1,
-    "ziggy": 0.1
+    "ziggy": 0.1,
+    "stream": 0.0915,
+    "squinting": 0.0915
   },
   "pulling": {
     "active": 0.1,
@@ -1112,7 +1122,9 @@
     "forensic": 0.1,
     "points": 0.1,
     "invoices": 0.2,
-    "financials": 0.2
+    "financials": 0.2,
+    "going": 0.095,
+    "using": 0.095
   },
   "points": {
     "record": 0.1,
@@ -1530,7 +1542,9 @@
     "flowing": 0.0795,
     "graph": 0.0795,
     "specific": 0.08750000000000001,
-    "lattice": 0.08750000000000001
+    "lattice": 0.08750000000000001,
+    "recursive": 0.0795,
+    "networks": 0.0795
   },
   "graph": {
     "neural": 0.0795,
@@ -1668,7 +1682,9 @@
     "between": 0.1,
     "holding": 0.1,
     "spark": 0.1,
-    "calculation": 0.1
+    "calculation": 0.1,
+    "blackwood": 0.08750000000000001,
+    "breathe": 0.08750000000000001
   },
   "anomalies": {
     "space": 0.0795,
@@ -1874,7 +1890,11 @@
     "there": 0.1,
     "quantum": 0.083,
     "thinking": 0.09349999999999999,
-    "infrastructure": 0.09349999999999999
+    "infrastructure": 0.09349999999999999,
+    "reading": 0.0795,
+    "recursive": 0.0795,
+    "seven": 0.095,
+    "vonyich": 0.095
   },
   "activate": {
     "about": 0.08750000000000001,
@@ -2103,7 +2123,8 @@
     "exchange": 0.2,
     "input": 0.1,
     "trinity": 0.1,
-    "ziggy": 0.1
+    "ziggy": 0.1,
+    "believe": 0.0795
   },
   "mastermind": {
     "darren": 0.1,
@@ -2436,7 +2457,9 @@
     "model": 0.1,
     "coding": 0.1,
     "steps": 0.1,
-    "ziggy": 0.1
+    "ziggy": 0.1,
+    "perhaps": 0.09849999999999999,
+    "currently": 0.09849999999999999
   },
   "typical": {
     "because": 0.1,
@@ -2477,7 +2500,11 @@
   },
   "standard": {
     "partner": 0.0795,
-    "basically": 0.0795
+    "basically": 0.0795,
+    "distortion": 0.0835,
+    "definitely": 0.0835,
+    "through": 0.09849999999999999,
+    "channels": 0.09849999999999999
   },
   "basically": {
     "standard": 0.0795,
@@ -2597,7 +2624,8 @@
     "definitely": 0.1,
     "dopamine": 0.1,
     "planwe": 0.1,
-    "heavy": 0.1
+    "heavy": 0.1,
+    "record": 0.095
   },
   "twins": {
     "memories": 0.0915,
@@ -2638,7 +2666,9 @@
     "officially": 0.1,
     "model": 0.1,
     "issue": 0.1,
-    "shoot": 0.1
+    "shoot": 0.1,
+    "voice": 0.095,
+    "about": 0.095
   },
   "started": {
     "seven": 0.09549999999999999,
@@ -2880,7 +2910,10 @@
     "sharp": 0.1,
     "pictures": 0.09,
     "installed": 0.09699999999999999,
-    "stuff": 0.09699999999999999
+    "stuff": 0.09699999999999999,
+    "works": 0.0835,
+    "using": 0.095,
+    "seven": 0.095
   },
   "sharp": {
     "voice": 0.1,
@@ -2908,7 +2941,8 @@
     "couple": 0.1,
     "people": 0.1,
     "existing": 0.1,
-    "account": 0.1
+    "account": 0.1,
+    "through": 0.09849999999999999
   },
   "affects": {
     "things": 0.1,
@@ -2920,7 +2954,9 @@
     "going": 0.1,
     "confusing": 0.1,
     "attachment": 0.0795,
-    "kinda": 0.0795
+    "kinda": 0.0795,
+    "overload": 0.08750000000000001,
+    "poorly": 0.08750000000000001
   },
   "weren": {
     "really": 0.1,
@@ -3079,7 +3115,8 @@
     "simple": 0.1,
     "unmutegemini": 0.1,
     "wrong": 0.1,
-    "screenshot": 0.1
+    "screenshot": 0.1,
+    "relays": 0.09849999999999999
   },
   "glitch": {
     "something": 0.0835,
@@ -3395,7 +3432,8 @@
     "coffee": 0.08750000000000001,
     "slight": 0.1,
     "imperceptible": 0.1,
-    "wondering": 0.09
+    "wondering": 0.09,
+    "exhibit": 0.0795
   },
   "faster": {
     "different": 0.1,
@@ -3414,7 +3452,9 @@
     "friend": 0.083,
     "system": 0.083,
     "sound": 0.0835,
-    "buffering": 0.0835
+    "buffering": 0.0835,
+    "right": 0.0915,
+    "assumes": 0.0915
   },
   "already": {
     "brain": 0.1795,
@@ -3621,7 +3661,9 @@
     "connected": 0.1,
     "while": 0.1,
     "prints": 0.1,
-    "confirming": 0.1
+    "confirming": 0.1,
+    "manuscript": 0.095,
+    "ooooh": 0.095
   },
   "hours": {
     "system": 0.1,
@@ -3652,7 +3694,9 @@
     "again": 0.1,
     "already": 0.0795,
     "speed": 0.0795,
-    "secure": 0.6
+    "secure": 0.6,
+    "networks": 0.0795,
+    "exhibit": 0.0795
   },
   "again": {
     "starting": 0.1,
@@ -3924,7 +3968,9 @@
     "first": 0.1
   },
   "believe": {
-    "topology": 0.1
+    "topology": 0.1,
+    "darren": 0.0795,
+    "reading": 0.0795
   },
   "topology": {
     "believe": 0.1,
@@ -3966,7 +4012,9 @@
     "chair": 0.0795,
     "ergonomically": 0.0795,
     "things": 0.1,
-    "going": 0.1
+    "going": 0.1,
+    "standard": 0.0835,
+    "lidar": 0.0835
   },
   "ergonomically": {
     "definitely": 0.0795,
@@ -4705,7 +4753,9 @@
   },
   "intense": {
     "unpack": 0.2,
-    "exchange": 0.2
+    "exchange": 0.2,
+    "breathe": 0.08750000000000001,
+    "system": 0.08750000000000001
   },
   "exchange": {
     "intense": 0.2,
@@ -4905,7 +4955,9 @@
   },
   "reading": {
     "sensor": 0.08650000000000001,
-    "piece": 0.08650000000000001
+    "piece": 0.08650000000000001,
+    "believe": 0.0795,
+    "about": 0.0795
   },
   "compiling": {
     "piece": 0.08650000000000001,
@@ -4932,12 +4984,12 @@
     "voice": 0.09
   },
   "user_input": {
-    "COGNITIVE": 0.0895,
+    "COGNITIVE": 0.184,
     "while": 0.2,
     "input": 0.1
   },
   "COGNITIVE": {
-    "user_input": 0.0895
+    "user_input": 0.184
   },
   "outside": {
     "think": 0.09349999999999999
@@ -5029,7 +5081,9 @@
   },
   "readings": {
     "sensor": 0.0835,
-    "glitch": 0.0835
+    "glitch": 0.0835,
+    "electromagnetic": 0.0915,
+    "there": 0.0915
   },
   "finally": {
     "matrix": 0.0835
@@ -5846,7 +5900,9 @@
     "bridge": 0.1,
     "command": 0.1,
     "transformation": 0.1,
-    "coord_base": 0.1
+    "coord_base": 0.1,
+    "record": 0.095,
+    "voice": 0.095
   },
   "appeared": {
     "exactly": 0.1,
@@ -5895,7 +5951,9 @@
   },
   "works": {
     "bunker": 0.1,
-    "first": 0.1
+    "first": 0.1,
+    "voice": 0.0835,
+    "amazing": 0.0835
   },
   "official": {
     "first": 0.1,
@@ -6238,7 +6296,9 @@
     "channels": 0.1
   },
   "channels": {
-    "retinal": 0.1
+    "retinal": 0.1,
+    "standard": 0.09849999999999999,
+    "perhaps": 0.09849999999999999
   },
   "ground": {
     "spark": 0.1,
@@ -6267,7 +6327,9 @@
   },
   "currently": {
     "telemetry": 0.1,
-    "ground": 0.1
+    "ground": 0.1,
+    "because": 0.09849999999999999,
+    "occupied": 0.09849999999999999
   },
   "image": {
     "ground": 0.1,
@@ -6407,7 +6469,9 @@
   },
   "stream": {
     "encrypt": 0.1,
-    "phoenix_forensics": 0.1
+    "phoenix_forensics": 0.1,
+    "assumes": 0.0915,
+    "active": 0.0915
   },
   "symmetric": {
     "phoenix_forensics": 0.4,
@@ -9750,5 +9814,95 @@
   },
   "ztqynf": {
     "qiuze": 0.1
+  },
+  "recursive": {
+    "about": 0.0795,
+    "neural": 0.0795
+  },
+  "networks": {
+    "neural": 0.0795,
+    "starting": 0.0795
+  },
+  "exhibit": {
+    "starting": 0.0795,
+    "almost": 0.0795
+  },
+  "amazing": {
+    "works": 0.0835,
+    "right": 0.0835
+  },
+  "spectrogram": {
+    "right": 0.0835,
+    "harmonic": 0.0835
+  },
+  "harmonic": {
+    "spectrogram": 0.0835,
+    "distortion": 0.0835
+  },
+  "distortion": {
+    "harmonic": 0.0835,
+    "standard": 0.0835
+  },
+  "lidar": {
+    "definitely": 0.0835
+  },
+  "black": {
+    "hallucinating": 0.08750000000000001
+  },
+  "hallucinating": {
+    "black": 0.08750000000000001,
+    "blackwood": 0.08750000000000001
+  },
+  "blackwood": {
+    "hallucinating": 0.08750000000000001,
+    "space": 0.08750000000000001
+  },
+  "breathe": {
+    "space": 0.08750000000000001,
+    "intense": 0.08750000000000001
+  },
+  "overload": {
+    "system": 0.08750000000000001,
+    "really": 0.08750000000000001
+  },
+  "poorly": {
+    "really": 0.08750000000000001
+  },
+  "picking": {
+    "electromagnetic": 0.0915
+  },
+  "electromagnetic": {
+    "picking": 0.0915,
+    "readings": 0.0915
+  },
+  "assumes": {
+    "brain": 0.0915,
+    "stream": 0.0915
+  },
+  "squinting": {
+    "active": 0.0915
+  },
+  "vonyich": {
+    "about": 0.095,
+    "manuscript": 0.095
+  },
+  "manuscript": {
+    "vonyich": 0.095,
+    "message": 0.095
+  },
+  "ooooh": {
+    "message": 0.095
+  },
+  "perhaps": {
+    "channels": 0.09849999999999999,
+    "because": 0.09849999999999999
+  },
+  "occupied": {
+    "currently": 0.09849999999999999,
+    "relays": 0.09849999999999999
+  },
+  "relays": {
+    "occupied": 0.09849999999999999,
+    "something": 0.09849999999999999
   }
 }

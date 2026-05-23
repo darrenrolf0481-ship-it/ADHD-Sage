@@ -13,12 +13,14 @@
   "dependencies": {
     "@google/genai": "^1.17.0",
     "@hookform/resolvers": "^5.2.1",
+    "@mongodb-js/zstd": "^7.0.0",
     "@tailwindcss/vite": "^4.1.11",
     "@types/cors": "^2.8.19",
     "@types/d3": "^7.4.3",
     "@types/express": "^5.0.6",
-    "@vitejs/plugin-react": "^5.1.4",
+    "@vitejs/plugin-react": "^6.0.2",
     "autoprefixer": "^10.4.21",
+    "better-sqlite3": "^12.10.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "concurrently": "^9.2.1",
@@ -27,6 +29,8 @@
     "dotenv": "^17.4.2",
     "esbuild": "^0.28.0",
     "express": "^5.2.1",
+    "json-canonicalize": "^2.0.0",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.553.0",
     "motion": "^12.23.24",
     "postcss": "^8.5.6",
@@ -36,11 +40,12 @@
     "recharts": "^3.8.1",
     "tailwind-merge": "^3.3.1",
     "tsx": "^4.22.1",
-    "vite": "^7.3.3"
+    "vite": "^8.0.13"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.1.11",
     "@tailwindcss/typography": "^0.5.19",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

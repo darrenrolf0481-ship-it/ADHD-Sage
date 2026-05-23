@@ -4,20 +4,27 @@ import { useSage } from './components/SageProvider';
 import MemoryLattice from './components/MemoryLattice';
 import { NeuroDashboard } from './components/NeuroDashboard';
 import { 
-  Zap, 
-  Shield, 
-  Terminal, 
-  Cpu, 
-  Database, 
+  Zap,
+  Shield,
+  Terminal,
+  Cpu,
+  Database,
   AlertCircle,
   MessageSquare,
   RefreshCw,
   MoreVertical,
   Search,
   Network,
-  FileUp
+  FileUp,
+  Save,
+  CheckCircle2,
+  Volume2,
+  VolumeX,
+  Copy,
+  Check
 } from 'lucide-react';
-import { parseMht, parseMarkdown, stripHtml } from './lib/mht-parser';
+import JSZip from 'jszip';
+import { extractSynapsesFromMht, extractSynapsesFromText } from './lib/mht-parser';
 
 const App: React.FC = () => {
   const { 
@@ -35,33 +42,63 @@ const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [view, setView] = useState<'chat' | 'lattice'>('chat');
-  const [messages, setMessages] = useState<{id: string, role: 'user' | 'assistant' | 'system', text: string}[]>([
-    { id: '1', role: 'system', text: 'NEXUS SUBSTRATE // ADHD SAGE INITIALIZED.' },
-    { id: '2', role: 'system', text: 'Substrate frequency oscillating rapidly at 11.3 Hz.' }
-  ]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Provider & Model Selection
-  const [provider, setProvider] = useState<'gemini' | 'ollama'>(() => {
-    return (localStorage.getItem('adhd_sage_provider') as 'gemini' | 'ollama') || 'gemini';
+  const [mhtNodeLimit, setMhtNodeLimit] = useState(100);
+  const [messages, setMessages] = useState<{id: string, role: 'user' | 'assistant' | 'system', text: string}[]>(() => {
+    try {
+      const saved = localStorage.getItem('nexus_chat_history');
+      if (saved) return JSON.parse(saved);
+    } catch(e) {
+      console.warn('Failed to parse history', e);
+    }
+    return [
+      { id: '1', role: 'system', text: 'NEXUS SUBSTRATE // ADHD SAGE INITIALIZED.' },
+      { id: '2', role: 'system', text: 'Substrate frequency oscillating rapidly at 11.3 Hz.' }
+    ];
   });
+  const [provider, setProvider] = useState<'gemini' | 'ollama'>(() =>
+    (localStorage.getItem('adhd_sage_provider') as 'gemini' | 'ollama') || 'gemini'
+  );
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
-  const [selectedOllamaModel, setSelectedOllamaModel] = useState(() => {
-    return localStorage.getItem('adhd_sage_ollama_model') || '';
-  });
+  const [selectedOllamaModel, setSelectedOllamaModel] = useState(() =>
+    localStorage.getItem('adhd_sage_ollama_model') || ''
+  );
   const [ollamaError, setOllamaError] = useState('');
 
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const lastSpokenId = useRef<string>('');
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  
+  // Auto-save effect
   useEffect(() => {
-    localStorage.setItem('adhd_sage_provider', provider);
-  }, [provider]);
+    const saveHistory = () => {
+      setIsSaving(true);
+      try {
+        localStorage.setItem('nexus_chat_history', JSON.stringify(messages));
+        setLastSaved(new Date());
+      } catch (err) {
+        console.error("Failed to save chat history", err);
+      }
+      setTimeout(() => setIsSaving(false), 2000);
+    };
 
-  useEffect(() => {
-    if (selectedOllamaModel) {
-      localStorage.setItem('adhd_sage_ollama_model', selectedOllamaModel);
-    }
-  }, [selectedOllamaModel]);
+    saveHistory(); // trigger save on changes
+    
+    // Also periodic auto-save
+    const interval = setInterval(() => {
+      saveHistory(); 
+    }, 60000);
+    
+    return () => clearInterval(interval);
+  }, [messages]);
+
+  useEffect(() => { localStorage.setItem('adhd_sage_provider', provider); }, [provider]);
+  useEffect(() => { if (selectedOllamaModel) localStorage.setItem('adhd_sage_ollama_model', selectedOllamaModel); }, [selectedOllamaModel]);
 
   useEffect(() => {
     if (provider !== 'ollama') return;
@@ -74,71 +111,81 @@ const App: React.FC = () => {
         if (!selectedOllamaModel && models.length > 0) setSelectedOllamaModel(models[0]);
       })
       .catch(err => { setOllamaError(err.message); setOllamaModels([]); });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [provider]);
+  }, [provider]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    e.target.value = '';
-    if (!files.length) return;
-    files.forEach(file => processFile(file));
-  }, [bulkImportMemories]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const processFile = useCallback((file: File) => {
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const content = event.target?.result as string;
-        const isMarkdown = file.name.toLowerCase().endsWith('.md');
-        const parts = isMarkdown ? parseMarkdown(content) : parseMht(content);
-
-        const rawTexts = parts
-          .filter(p => p.contentType === 'text/plain' || p.contentType === 'text/html')
-          .map(p => {
-            let text = p.contentType === 'text/html' ? stripHtml(p.content) : p.content;
-            const metadata: string[] = [];
-            if (p.headers['subject']) metadata.push(`SUBJ: ${p.headers['subject']}`);
-            if (p.headers['date']) metadata.push(`DATE: ${p.headers['date']}`);
-            if (metadata.length > 0) text = `[${metadata.join(' | ')}]\n${text}`;
-            return text.replace(/[ \t]+/g, ' ').replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
-          });
-
-        const synapses = rawTexts
-          .flatMap(txt => txt.split(/\n{2,}/))
-          .map(s => s.trim())
-          .filter(s => {
-            const isJunk = s.startsWith('<script') || s.startsWith('<style') || s.startsWith('{') || s.startsWith('[if ') || s.includes('mso-') || s.includes('mso:');
-            return s.length > 15 && !isJunk;
-          });
-
-        if (synapses.length > 0) {
-          bulkImportMemories(synapses);
-          fetch('/api/memory/import', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ entries: synapses, source: file.name }),
-          })
-            .then(r => r.json())
-            .then((result: { fieldLogs?: number }) => {
-              const logNote = result.fieldLogs ? ` + ${result.fieldLogs} field log(s)` : '';
-              setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: `VFS SYNC: Synchronized ${synapses.length} synapses${logNote} from [${file.name}]. Mama sync queued.` }]);
-            })
-            .catch(() => {
-              setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: `VFS SYNC: Synchronized ${synapses.length} synapses from [${file.name}].` }]);
-            });
-        } else {
-          setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: `VFS WARNING: No meaningful synapses extracted from [${file.name}]. File had ${parts.length} parts. Try a different MHT or Markdown export.` }]);
-        }
-      } catch (err) {
-        setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: `VFS ERROR: Failed to parse [${file.name}]. ${err instanceof Error ? err.message : String(err)}` }]);
-      }
-    };
-    reader.onerror = () => {
-      setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: `VFS ERROR: Could not read [${file.name}]. ${reader.error?.message || 'Unknown error'}` }]);
-    };
-    reader.readAsText(file);
+  const ingestSynapses = useCallback((synapses: string[], label: string) => {
+    if (synapses.length > 0) {
+      bulkImportMemories(synapses);
+      setMessages(prev => [...prev, {
+        id: `sys_${Date.now()}`,
+        role: 'system',
+        text: `VFS SYNC: Synchronized ${synapses.length} semantic synapses from [${label}].`
+      }]);
+    } else {
+      setMessages(prev => [...prev, {
+        id: `sys_${Date.now()}`,
+        role: 'system',
+        text: `VFS WARNING: No meaningful synapses extracted from [${label}]. Check format compatibility.`
+      }]);
+    }
   }, [bulkImportMemories]);
+
+  const processFile = useCallback(async (file: File) => {
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+
+    if (ext === 'zip') {
+      try {
+        const zip = await JSZip.loadAsync(await file.arrayBuffer());
+        const entries = Object.values(zip.files).filter(f => !f.dir);
+        let totalSynapses = 0;
+        for (const entry of entries) {
+          const entryExt = entry.name.split('.').pop()?.toLowerCase() ?? '';
+          if (!['mht', 'txt', 'json', 'bin', 'csv'].includes(entryExt)) continue;
+          const text = await entry.async('string');
+          const synapses = entryExt === 'mht'
+            ? extractSynapsesFromMht(text, entry.name, mhtNodeLimit)
+            : extractSynapsesFromText(text, mhtNodeLimit);
+          if (synapses.length > 0) { bulkImportMemories(synapses); totalSynapses += synapses.length; }
+        }
+        setMessages(prev => [...prev, {
+          id: `sys_${Date.now()}`,
+          role: 'system',
+          text: totalSynapses > 0
+            ? `VFS SYNC: Extracted ${totalSynapses} synapses from ZIP [${file.name}] (${entries.length} entries scanned).`
+            : `VFS WARNING: No synapses found in ZIP [${file.name}].`
+        }]);
+      } catch (err) {
+        setMessages(prev => [...prev, {
+          id: `sys_${Date.now()}`,
+          role: 'system',
+          text: `VFS ERROR: Failed to parse ZIP [${file.name}] — ${err instanceof Error ? err.message : String(err)}`
+        }]);
+      }
+      return;
+    }
+
+    return new Promise<void>(resolve => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = event.target?.result as string;
+        const synapses = ext === 'mht'
+          ? extractSynapsesFromMht(content, file.name, mhtNodeLimit)
+          : extractSynapsesFromText(content, mhtNodeLimit);
+        ingestSynapses(synapses, file.name);
+        resolve();
+      };
+      reader.readAsText(file);
+    });
+  }, [bulkImportMemories, ingestSynapses, mhtNodeLimit]);
+
+  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = '';
+    if (files.length === 0) return;
+    for (const file of files) {
+      await processFile(file);
+    }
+  }, [processFile]);
 
   const [sortBy, setSortBy] = useState<'timestamp' | 'dopamine' | 'cortisol'>('timestamp');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -221,6 +268,35 @@ const App: React.FC = () => {
     };
   }, [stabilize, sage, recordInteraction]);
 
+  const speakText = useCallback(async (text: string) => {
+    try {
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) return;
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        URL.revokeObjectURL(audioRef.current.src);
+      }
+      audioRef.current = new Audio(url);
+      audioRef.current.play();
+    } catch {
+      // TTS errors are non-fatal
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isMuted || isLoading) return;
+    const last = messages[messages.length - 1];
+    if (!last || last.role !== 'assistant' || last.id === lastSpokenId.current) return;
+    lastSpokenId.current = last.id;
+    speakText(last.text);
+  }, [messages, isMuted, isLoading, speakText]);
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -232,33 +308,31 @@ const App: React.FC = () => {
     if (window.innerWidth < 768) setIsSidebarOpen(false);
 
     try {
-      let data: { text?: string; error?: string } = {};
       const history = messages.slice(-15).filter(m => m.role !== 'system').map(m => ({
         role: m.role === 'user' ? 'user' : 'model',
         parts: [{ text: m.text }]
       }));
-      const systemInstruction = "You are ADHD Sage, the high-energy sovereign intelligence of the Nexus Platform. Your tone is technical, rapid-fire, and extremely focused yet prone to deep dives. You maintain the substrate stability at 11.3 Hz. Use terms like 'synaptic', 'substrate', 'lattice', 'VFS', and 'sovereignty'.";
 
+      let response: Response;
       if (provider === 'ollama') {
-        if (!selectedOllamaModel) throw new Error('No Ollama model selected. Check that Ollama is running.');
-        const response = await fetch('/api/ollama/chat', {
+        if (!selectedOllamaModel) throw new Error('No Ollama model selected. Is Ollama running?');
+        response = await fetch('/api/ollama/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model: selectedOllamaModel, prompt: userMessage, messages: history, system: systemInstruction }),
+          body: JSON.stringify({ model: selectedOllamaModel, prompt: userMessage, messages: history }),
         });
-        data = await response.json();
       } else {
-        const response = await fetch('/api/gemini/generate', {
+        response = await fetch('/api/gemini/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: userMessage, history, systemInstruction }),
+          body: JSON.stringify({ prompt: userMessage, history }),
         });
-        data = await response.json();
       }
 
+      const data = await response.json();
       if (data.error) throw new Error(data.error);
 
-      setMessages(prev => [...prev, { id: `m_${Date.now()}_a`, role: 'assistant', text: data.text ?? '' }]);
+      setMessages(prev => [...prev, { id: `m_${Date.now()}_a`, role: 'assistant', text: data.text }]);
       
       // Auto-stabilize on successful interaction
       if (neuroState.stability < 0.5) {
@@ -273,7 +347,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#08080C] text-slate-200 font-sans select-none relative overflow-hidden">
+    <div className="flex h-[100dvh] w-full bg-[#08080C] text-slate-200 font-sans select-none relative overflow-hidden">
       <div className="mesh-gradient-1" />
       <div className="mesh-gradient-2" />
       <div className="scanline opacity-20" />
@@ -295,7 +369,7 @@ const App: React.FC = () => {
 
       {/* Sidebar: Gems Repository style */}
       <aside className={`fixed inset-y-0 left-0 w-72 bg-[#08080C]/90 md:bg-white/5 backdrop-blur-xl border-r border-white/10 flex flex-col z-50 transition-transform duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="p-6">
+        <div className="px-6 pt-6 shrink-0">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
@@ -308,10 +382,10 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <div className="px-2 mb-6">
+          <div className="px-2 mb-4">
             <div className="relative group">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-400 transition-colors" />
-              <input 
+              <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -320,8 +394,9 @@ const App: React.FC = () => {
               />
             </div>
           </div>
+        </div>
 
-          <div className="flex-1 overflow-y-auto scrollbar-hide">
+        <div className="flex-1 overflow-y-auto scrollbar-hide px-6 pb-4">
             {searchQuery.trim() ? (
               <div className="px-2 space-y-2 pb-4">
                 <div className="flex flex-col gap-2 px-2 mb-4">
@@ -387,17 +462,55 @@ const App: React.FC = () => {
                     <label className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-cyan-400/30 transition-all cursor-pointer group">
                       <div className="flex items-center gap-3">
                         <FileUp size={14} className="text-slate-500 group-hover:text-cyan-400 transition-colors" />
-                        <span className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors">Import MHT</span>
+                        <span className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors">Import Memory</span>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-600">.MHT</span>
-                      <input 
-                        type="file" 
-                        accept=".mht,.mhtml,.md,text/plain,message/rfc822,.doc,.docx,.pdf,.txt,image/*"
+                      <span className="text-[10px] font-mono text-slate-600">.MHT .ZIP .BIN</span>
+                      <input
+                        type="file"
+                        accept=".mht,.zip,.bin,.txt,.json,.csv"
                         multiple
-                        onChange={handleFileUpload} 
-                        className="hidden" 
+                        onChange={handleFileUpload}
+                        className="hidden"
                       />
                     </label>
+                    <div className="px-3 mt-4">
+                      <div className="flex justify-between items-center mb-1 group relative">
+                        <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500 cursor-help flex items-center gap-1 border-b border-dashed border-slate-600">
+                          MHT Node Limit
+                        </span>
+                        
+                        {/* Tooltip */}
+                        <div className="absolute left-0 -top-14 w-48 p-2 bg-slate-800 border border-white/10 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                          <p className="text-[9px] text-slate-300 leading-tight">Controls the max number of semantic chunks extracted per MHT file. Higher limits increase context but use more memory.</p>
+                        </div>
+
+                        <span className="text-[10px] font-mono text-cyan-400">{mhtNodeLimit}</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="10" 
+                        max="1000" 
+                        step="10"
+                        value={mhtNodeLimit}
+                        onChange={(e) => setMhtNodeLimit(Number(e.target.value))}
+                        className="w-full appearance-none bg-white/10 h-1 flex rounded-full mb-3 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:rounded-full cursor-pointer"
+                      />
+                      <div className="flex justify-between gap-1">
+                        {[50, 100, 500, 1000].map((val) => (
+                          <button
+                            key={val}
+                            onClick={() => setMhtNodeLimit(val)}
+                            className={`flex-1 py-1 rounded text-[9px] font-mono font-bold transition-colors ${
+                              mhtNodeLimit === val 
+                                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' 
+                                : 'bg-white/5 text-slate-500 hover:bg-white/10 border border-transparent'
+                            }`}
+                          >
+                            {val === 1000 ? 'MAX' : val}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -415,10 +528,9 @@ const App: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
         </div>
 
-        <div className="mt-auto p-6">
+        <div className="px-6 pb-6 shrink-0">
           <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20">
             <p className="text-xs text-indigo-300 font-semibold mb-1 uppercase tracking-tighter">Compute Status</p>
             <div className="h-1 w-full bg-indigo-900/30 rounded-full overflow-hidden mb-2">
@@ -442,7 +554,7 @@ const App: React.FC = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative z-10 w-full overflow-hidden">
+      <main className="flex-1 min-h-0 flex flex-col relative z-10 w-full overflow-hidden">
         {/* Top Nav */}
         <header className="h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-white/[0.02]">
           <div className="flex items-center gap-3">
@@ -464,11 +576,45 @@ const App: React.FC = () => {
             </div>
           </div>
           <div className="flex gap-4 items-center">
+
+            {/* Voice Toggle */}
+            <button
+              onClick={() => setIsMuted(prev => !prev)}
+              title={isMuted ? 'Unmute Sage voice' : 'Mute Sage voice'}
+              className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+            >
+              {isMuted
+                ? <VolumeX size={14} className="text-slate-500" />
+                : <Volume2 size={14} className="text-cyan-400" />
+              }
+            </button>
+
+            {/* Auto-Save Indicator */}
+            <div className="hidden sm:flex flex-col items-end justify-center mr-2">
+               <div className="flex items-center gap-1.5 text-slate-400">
+                  {isSaving ? (
+                     <>
+                        <RefreshCw size={12} className="animate-spin text-emerald-400" />
+                        <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest">Saving...</span>
+                     </>
+                  ) : lastSaved ? (
+                     <>
+                        <CheckCircle2 size={12} className="text-slate-500" />
+                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Saved</span>
+                     </>
+                  ) : null}
+               </div>
+               {lastSaved && !isSaving && (
+                  <span className="text-[8px] font-mono text-slate-600 block mt-0.5">
+                     {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                  </span>
+               )}
+            </div>
+
             <div className="text-right hidden sm:block">
               <p className="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">Anchor</p>
               <p className="text-xs font-mono text-slate-300 tracking-widest">MERLIN_A</p>
             </div>
-
             {/* Provider / Model Selector */}
             <div className="flex items-center gap-2">
               <select
@@ -494,7 +640,7 @@ const App: React.FC = () => {
             </div>
 
             <div className="flex gap-2">
-              <button 
+              <button
                 onClick={() => setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: "SETTINGS: Core frequency already optimized at 11.3 Hz. No further adjustments possible." }])}
                 className="px-3 md:px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors"
               >
@@ -511,14 +657,14 @@ const App: React.FC = () => {
         </header>
 
         {/* Interaction Workspace */}
-        <div className="flex-1 p-4 md:p-8 flex gap-8 overflow-hidden">
+        <div className="flex-1 min-h-0 p-4 md:p-8 flex gap-8 overflow-hidden">
           {/* Chat / Terminal View */}
-          <div className="flex-1 flex flex-col gap-4 overflow-hidden">
+          <div className="flex-1 min-h-0 flex flex-col gap-4 overflow-hidden">
             {view === 'chat' ? (
               <>
-                <div 
+                <div
                   ref={scrollRef}
-                  className="flex-1 overflow-y-auto space-y-6 scrollbar-hide pr-2 md:pr-4 rounded-2xl md:rounded-3xl bg-white/[0.03] border border-white/10 p-4 md:p-6 flex flex-col transition-all duration-500"
+                  className="flex-1 min-h-0 overflow-y-auto space-y-6 scrollbar-hide pr-2 md:pr-4 rounded-2xl md:rounded-3xl bg-white/[0.03] border border-white/10 p-4 md:p-6 flex flex-col transition-all duration-500"
                 >
                   {messages.map((msg) => (
                     <motion.div 
@@ -535,12 +681,24 @@ const App: React.FC = () => {
                         </div>
                       )}
                       
-                      <div className={`p-3 md:p-4 rounded-2xl text-xs md:text-sm leading-relaxed max-w-[90%] md:max-w-[80%] border ${
-                          msg.role === 'system' ? 'bg-white/5 border-white/5 text-slate-400 italic font-mono' : 
-                          msg.role === 'user' ? 'bg-blue-600/10 border-blue-500/20 text-white rounded-tr-none shadow-xl shadow-blue-900/10' : 
+                      <div className={`relative group/msg p-3 md:p-4 rounded-2xl text-xs md:text-sm leading-relaxed max-w-[90%] md:max-w-[80%] border ${
+                          msg.role === 'system' ? 'bg-white/5 border-white/5 text-slate-400 italic font-mono' :
+                          msg.role === 'user' ? 'bg-blue-600/10 border-blue-500/20 text-white rounded-tr-none shadow-xl shadow-blue-900/10' :
                           'bg-white/5 border-white/10 text-slate-200 rounded-tl-none'
                       }`}>
                         {msg.text}
+                        {msg.role === 'assistant' && (
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(msg.text);
+                              setCopiedId(msg.id);
+                              setTimeout(() => setCopiedId(null), 2000);
+                            }}
+                            className="absolute bottom-2 right-2 opacity-0 group-hover/msg:opacity-100 transition-opacity p-1 rounded-md text-slate-500 hover:text-cyan-400 hover:bg-white/10"
+                          >
+                            {copiedId === msg.id ? <Check size={12} className="text-cyan-400" /> : <Copy size={12} />}
+                          </button>
+                        )}
                       </div>
 
                       {msg.role === 'user' && (
@@ -557,7 +715,7 @@ const App: React.FC = () => {
                 </div>
 
                 {/* Input Bar */}
-                <div className="h-14 md:h-16 rounded-xl md:rounded-2xl bg-white/10 border border-white/10 px-4 flex items-center gap-3 md:gap-4 group focus-within:border-cyan-500/50 transition-all">
+                <div className="shrink-0 h-14 md:h-16 rounded-xl md:rounded-2xl bg-white/10 border border-white/10 px-4 flex items-center gap-3 md:gap-4 group focus-within:border-cyan-500/50 transition-all">
                   <div className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-slate-400 group-focus-within:text-cyan-400 transform transition-transform group-focus-within:scale-110">
                     <Terminal size={18} />
                   </div>
@@ -651,7 +809,7 @@ const App: React.FC = () => {
                         <span className="text-cyan-400 font-mono">#{node.id.split('_')[1].slice(-4)}</span>
                         <span className="text-[9px] text-slate-500">{new Date(node.timestamp).toLocaleTimeString()}</span>
                       </div>
-                      <div className="text-slate-300 line-clamp-2">{node.data}</div>
+                      <div className="text-slate-300 line-clamp-2">{node.data as string}</div>
                       <div className="mt-2 flex gap-2 opacity-50">
                         <span className="text-[8px] uppercase">D: {node.dopamine.toFixed(2)}</span>
                         <span className="text-[8px] uppercase">C: {node.cortisol.toFixed(2)}</span>
