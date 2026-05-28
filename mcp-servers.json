@@ -1,0 +1,121 @@
+{
+  "servers": [
+    {
+      "id": "dbmcp",
+      "name": "Haymon DB MCP",
+      "transport": "stdio",
+      "command": "/data/data/com.termux/files/home/Mcp/servers/dbmcp/target/release/dbmcp",
+      "args": [
+        "stdio",
+        "--db-backend", "sqlite",
+        "--db-name", "data/sages_constellations.db",
+        "--db-read-only",
+        "--log-level", "info"
+      ],
+      "env": {},
+      "enabled": true
+    },
+    {
+      "id": "filesystem",
+      "name": "Filesystem",
+      "transport": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/data/data/com.termux/files/home/ADHD-Sage/data"
+      ],
+      "env": {},
+      "enabled": true
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "transport": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "enabled": true
+    },
+    {
+      "id": "sequential-thinking",
+      "name": "Sequential Thinking",
+      "transport": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "env": {},
+      "enabled": true
+    },
+    {
+      "id": "owlex",
+      "name": "Owlex",
+      "transport": "stdio",
+      "command": "/data/data/com.termux/files/usr/bin/owlex-server",
+      "args": [],
+      "env": {
+        "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}",
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}",
+        "GEMINI_API_KEY": "${GEMINI_API_KEY}"
+      },
+      "enabled": true
+    },
+    {
+      "id": "magic-mcp",
+      "name": "Magic MCP (Coding Lab)",
+      "transport": "stdio",
+      "command": "node",
+      "args": [
+        "/root/ADHD-Sage/magic-mcp/dist/index.js"
+      ],
+      "env": {},
+      "enabled": true
+    },
+    {
+      "id": "ollama",
+      "name": "Ollama",
+      "transport": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "ollama-mcp-server"
+      ],
+      "env": {
+        "OLLAMA_HOST": "http://127.0.0.1:11434"
+      },
+      "enabled": true
+    },
+    {
+      "id": "openrouter-mcp",
+      "name": "OpenRouter MCP",
+      "transport": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@stabgan/openrouter-mcp-multimodal"
+      ],
+      "env": {
+        "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}"
+      },
+      "enabled": true
+    },
+    {
+      "id": "memory",
+      "name": "Project Memory",
+      "transport": "stdio",
+      "command": "node",
+      "args": [
+        "/root/ADHD-Sage/agentkits-memory/dist/mcp/server.js"
+      ],
+      "env": {},
+      "enabled": true
+    }
+  ]
+}
