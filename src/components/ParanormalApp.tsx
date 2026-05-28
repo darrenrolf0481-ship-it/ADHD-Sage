@@ -8,7 +8,7 @@ import { CrystallineRadar } from './CrystallineRadar';
 import { QuartzBarChart } from './QuartzBarChart';
 import { useLocalStorage, defaultSettings, Settings } from '../lib/store';
 import { useCrystalSocket } from '../lib/useCrystalSocket';
-import { fetchOllamaModels, generateResponse, fetchGithubTree, fetchGithubFileContent, fetchGithubFilePreviousContent, fetchLocalTree } from '../lib/api';
+import { fetchOllamaModels, generateResponse, fetchGithubTree, fetchGithubFileContent, fetchGithubFilePreviousContent, fetchLocalTree, type ChatProvider } from '../lib/api';
 
 // ---- Starfield Background ----
 const Starfield = React.forwardRef<HTMLDivElement, object>((props, ref) => {
@@ -160,7 +160,7 @@ function CoreTab() {
 
 // ---- Chat Tab (Models) ----
 function ChatTab({ settings }: { settings: Settings }) {
-  const [provider, setProvider] = useState<'ollama' | 'google' | 'grok' | 'openRouter'>('google');
+  const [provider, setProvider] = useState<ChatProvider>('gemini');
   const [modelOptions, setModelOptions] = useState<string[]>([]);
   const [selectedModel, setSelectedModel] = useState('');
   const [prompt, setPrompt] = useState('');
@@ -192,10 +192,10 @@ function ChatTab({ settings }: { settings: Settings }) {
         .catch(err => {
           setChatLog(prev => [...prev, { role: 'sys', text: `ERROR: ${err.message}` }]);
         });
-    } else if (provider === 'google') {
+    } else if (provider === 'gemini') {
       setModelOptions(['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-exp-1206']);
       setSelectedModel('gemini-1.5-flash');
-    } else if (provider === 'openRouter') {
+    } else if (provider === 'openrouter') {
       setModelOptions(['anthropic/claude-3-haiku', 'google/gemini-pro-1.5', 'meta-llama/llama-3-8b-instruct']);
       setSelectedModel('anthropic/claude-3-haiku');
     } else if (provider === 'grok') {
@@ -245,10 +245,10 @@ function ChatTab({ settings }: { settings: Settings }) {
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4">
-        {['google', 'ollama', 'openRouter', 'grok'].map(p => (
+        {(['gemini', 'ollama', 'openrouter', 'grok'] as ChatProvider[]).map(p => (
           <button 
             key={p}
-            onClick={() => setProvider(p as any)}
+            onClick={() => setProvider(p)}
             className={`px-4 py-1.5 text-[10px] font-bold tracking-wider uppercase rounded-full border transition-all duration-300 ${provider === p ? 'bg-[#22d3ee]/10 border-[#22d3ee] text-[#22d3ee] shadow-[0_0_10px_rgba(34,211,238,0.2)]' : 'border-white/10 text-white/40 hover:text-white/80 hover:border-white/20'}`}
           >
             {p}

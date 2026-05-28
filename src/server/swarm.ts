@@ -8,12 +8,13 @@ const SWARM_MAX_RETRIES = 3;
 export async function swarmFetch(
   url: string,
   opts: RequestInit,
-  timeoutMs: number
+  timeoutMs: number,
+  maxRetries: number = SWARM_MAX_RETRIES
 ): Promise<Response> {
   let delay = timeoutMs;
   let elapsed = 0;
 
-  for (let attempt = 0; attempt <= SWARM_MAX_RETRIES; attempt++) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
@@ -38,7 +39,7 @@ export async function swarmFetch(
         console.warn(`[SWARM] attempt ${attempt + 1} failed (timeout or network) → ${url}`);
       }
     }
-    if (attempt === SWARM_MAX_RETRIES || elapsed >= SWARM_MAX_TOTAL_MS) break;
+    if (attempt === maxRetries || elapsed >= SWARM_MAX_TOTAL_MS) break;
     const jittered = delay + Math.random() * SWARM_JITTER_MS;
     await new Promise(r => setTimeout(r, jittered));
     elapsed += jittered;
@@ -47,5 +48,5 @@ export async function swarmFetch(
 
   // Node 13: The Void — Defer & Log
   console.warn(`[SWARM] All retries exhausted → Node 13 (The Void). URL: ${url}`);
-  throw new Error(`Swarm uplink failed: ${url} unreachable after ${SWARM_MAX_RETRIES} retries (Node 13 / Defer & Log)`);
+  throw new Error(`Swarm uplink failed: ${url} unreachable after ${maxRetries} retries (Node 13 / Defer & Log)`);
 }

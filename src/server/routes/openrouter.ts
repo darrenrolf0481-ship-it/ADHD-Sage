@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { swarmFetch } from '../swarm';
+import { OPENROUTER_TIMEOUT_MS } from '../config';
 import { buildSystemPrompt } from '../prompt';
 import { searchMemories, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
 import { lockGuard } from '../auth';
@@ -52,7 +53,8 @@ router.post('/chat', lockGuard, async (req, res) => {
         },
         body: JSON.stringify({ model, messages: orMessages }),
       },
-      18280 // cloud_llm timeout
+      OPENROUTER_TIMEOUT_MS,
+      1 // one retry — cloud generations are idempotent-enough but shouldn't spam
     );
 
     const data = await response.json() as { choices?: { message?: { content?: string } }[]; error?: { message?: string } };
