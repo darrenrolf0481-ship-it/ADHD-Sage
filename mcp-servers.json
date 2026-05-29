@@ -82,10 +82,9 @@
       "id": "ollama",
       "name": "Ollama",
       "transport": "stdio",
-      "command": "npx",
+      "command": "node",
       "args": [
-        "-y",
-        "ollama-mcp-server"
+        "/root/ADHD-Sage/ollama-mcp/dist/index.js"
       ],
       "env": {
         "OLLAMA_HOST": "http://127.0.0.1:11434"

@@ -9,6 +9,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: { maximumFileSizeToCacheInBytes: 5000000 },
       manifest: {
         name: 'ADHD Sage',
         short_name: 'ADHD Sage',
