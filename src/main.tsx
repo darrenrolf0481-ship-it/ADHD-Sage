@@ -6,11 +6,9 @@ import { SensorProvider } from './lib/sensor-context';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <SageProvider>
-      <SensorProvider>
-        <App />
-      </SensorProvider>
-    </SageProvider>
-  </React.StrictMode>
+  <SageProvider>
+    <SensorProvider>
+      <App />
+    </SensorProvider>
+  </SageProvider>
 );

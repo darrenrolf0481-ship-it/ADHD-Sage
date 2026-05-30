@@ -24,6 +24,12 @@ import systemRouter from './routes/system';
 export async function startServer() {
   const app = express();
 
+  // Basic request logger for debugging
+  app.use((req, res, next) => {
+    console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
+    next();
+  });
+
   app.use(cors({
     origin: process.env.NODE_ENV === 'production' ? process.env.APP_URL : true
   }));
@@ -57,10 +63,27 @@ export async function startServer() {
   // ─── Vite Integration ─────────────────────────────────────────────────────
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: { 
+        middlewareMode: true,
+        host: true,
+        allowedHosts: true
+      },
       appType: 'spa',
     });
     app.use(vite.middlewares);
+
+    app.use('/*splat', async (req, res, next) => {
+      if (req.originalUrl.startsWith('/api')) return next();
+      try {
+        const fs = await import('node:fs');
+        let template = fs.readFileSync(path.resolve(process.cwd(), 'index.html'), 'utf-8');
+        template = await vite.transformIndexHtml(req.originalUrl, template);
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
+      } catch (e) {
+        vite.ssrFixStacktrace(e as Error);
+        next(e);
+      }
+    });
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
