@@ -41,9 +41,14 @@ export default defineConfig({
   server: {
     port: 3000,
     strictPort: true,
+    host: true,
+    allowedHosts: true,
+    hmr: {
+      port: 24679,
+    },
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:3002',
+        target: 'http://127.0.0.1:3000',
         changeOrigin: false,
       },
     },

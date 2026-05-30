@@ -4,16 +4,10 @@
       "id": "dbmcp",
       "name": "Haymon DB MCP",
       "transport": "stdio",
-      "command": "/data/data/com.termux/files/home/Mcp/servers/dbmcp/target/release/dbmcp",
-      "args": [
-        "stdio",
-        "--db-backend", "sqlite",
-        "--db-name", "data/sages_constellations.db",
-        "--db-read-only",
-        "--log-level", "info"
-      ],
+      "command": "/usr/bin/true",
+      "args": [],
       "env": {},
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "filesystem",
@@ -23,7 +17,7 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "/data/data/com.termux/files/home/ADHD-Sage/data"
+        "/home/workspace/ADHD-Sage/data"
       ],
       "env": {},
       "enabled": true
@@ -58,33 +52,28 @@
       "id": "owlex",
       "name": "Owlex",
       "transport": "stdio",
-      "command": "/data/data/com.termux/files/usr/bin/owlex-server",
+      "command": "/usr/bin/true",
       "args": [],
-      "env": {
-        "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}",
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}",
-        "GEMINI_API_KEY": "${GEMINI_API_KEY}"
-      },
-      "enabled": true
+      "env": {},
+      "enabled": false
     },
     {
       "id": "magic-mcp",
       "name": "Magic MCP (Coding Lab)",
       "transport": "stdio",
-      "command": "node",
-      "args": [
-        "/root/ADHD-Sage/magic-mcp/dist/index.js"
-      ],
+      "command": "/usr/bin/true",
+      "args": [],
       "env": {},
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "ollama",
       "name": "Ollama",
       "transport": "stdio",
-      "command": "node",
+      "command": "npx",
       "args": [
-        "/root/ADHD-Sage/ollama-mcp/dist/index.js"
+        "-y",
+        "ollama-mcp"
       ],
       "env": {
         "OLLAMA_HOST": "http://127.0.0.1:11434"
@@ -109,12 +98,10 @@
       "id": "memory",
       "name": "Project Memory",
       "transport": "stdio",
-      "command": "node",
-      "args": [
-        "/root/ADHD-Sage/agentkits-memory/dist/mcp/server.js"
-      ],
+      "command": "/usr/bin/true",
+      "args": [],
       "env": {},
-      "enabled": true
+      "enabled": false
     }
   ]
 }
