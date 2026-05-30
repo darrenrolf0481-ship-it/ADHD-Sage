@@ -8,6 +8,22 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Emergency SW purge to clear potential caching issues
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          for(let registration of registrations) {
+            registration.unregister().then(() => {
+              console.log('NEXUS: ServiceWorker purged.');
+            });
+          }
+        });
+      }
+      window.onerror = function(msg, url, line, col, error) {
+        console.error('NEXUS_CRASH:', msg, 'at', url, ':', line, ':', col);
+        document.body.innerHTML = '<div style="padding: 20px; color: #ff4444; font-family: monospace;"><h1>NEXUS_CRASH</h1><p>' + msg + '</p><pre>' + error?.stack + '</pre></div>';
+      };
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

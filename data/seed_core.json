@@ -18,7 +18,7 @@
         "data"
       ],
       "digest": "sha256:f63238fa4cde4902f306e9f73da514525fbbd472c4f97e6ada267234ef175efb",
-      "signature": "ed25519_sig:a25cfbd7a6d2ed333de83d4621a558f9fe361e04bc33d88c3f5c01d63c26230356bc5ef185d62fd6f9631f9417bc913e81278beb91dc47bda619f66dc4837d01",
+      "signature": "ed25519_sig:e7c59354b58f41a901d172c534c6e73b502263a3fc98ee96838ed97846d0d9fabde60e85e4e8410c2f63dfcbb29813c64baec1dcec13cad0ea04093895577905",
       "verification_key": {
         "source": "env:SAGE_CORE_PUBKEY",
         "validation": {
