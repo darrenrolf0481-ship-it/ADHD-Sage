@@ -289,12 +289,19 @@ class MemorySystem {
   private saveCacheToStorage(immediate = false) {
     if (this.saveToStorageTimeout) clearTimeout(this.saveToStorageTimeout);
     const perform = () => {
-      localStorage.setItem(CACHE_KEY, JSON.stringify({
-        version: '7.5.0',
-        schema: 'fibonacci_vfs.v7',
-        inner_spiral: { nodes: this.innerCache },
-        outer_sweep: { archive: this.outerCache },
-      }));
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          version: '7.5.0',
+          schema: 'fibonacci_vfs.v7',
+          inner_spiral: { nodes: this.innerCache },
+          // Stop saving outer_sweep to localStorage to avoid QuotaExceededError.
+          // The source of truth is the server-side SQLite DB.
+          outer_sweep: { archive: [] },
+        }));
+      } catch (e) {
+        console.warn('[VFS] LocalStorage quota exceeded. Clearing cache.', e);
+        localStorage.removeItem(CACHE_KEY);
+      }
     };
     if (immediate) perform();
     else this.saveToStorageTimeout = setTimeout(perform, 500);

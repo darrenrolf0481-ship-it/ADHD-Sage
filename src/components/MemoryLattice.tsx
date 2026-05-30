@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
 import * as d3 from 'd3';
+import ForceGraph3D from 'react-force-graph-3d';
+import { Box, Layers } from 'lucide-react';
 import { MemoryNode } from '../lib/memory-system';
 
 interface LatticeProps {
@@ -21,39 +23,69 @@ interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
 const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const zoomTransformRef = useRef<d3.ZoomTransform>(d3.zoomIdentity);
+  const nodePositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
   
   const [minDopamine, setMinDopamine] = useState(0);
   const [maxCortisol, setMaxCortisol] = useState(1);
+
+  const [is3D, setIs3D] = useState(false);
 
   const filteredNodes = useMemo(() => {
     return nodes.filter(n => n.dopamine >= minDopamine && n.cortisol <= maxCortisol);
   }, [nodes, minDopamine, maxCortisol]);
 
   const graphData = useMemo(() => {
-    const gNodes: GraphNode[] = filteredNodes.map(n => ({
+    // HARDEN: cap lattice nodes so the O(n·t) token index doesn't asphyxiate
+    // the main thread on large memory corpora (imported MHT dumps can be
+    // 400 KB+ per node).
+    const MAX_LATTICE_NODES = 100;
+    const capped = [...filteredNodes]
+      .sort((a, b) => (b.dopamine - a.dopamine) || (b.timestamp - a.timestamp))
+      .slice(0, MAX_LATTICE_NODES);
+
+    const gNodes: GraphNode[] = capped.map(n => ({
       id: n.id,
       data: String(n.data),
       dopamine: n.dopamine,
       cortisol: n.cortisol,
     }));
 
-    const links: GraphLink[] = [];
-    
-    // Similarity based on shared tokens
-    for (let i = 0; i < filteredNodes.length; i++) {
-      for (let j = i + 1; j < filteredNodes.length; j++) {
-        const tokensA = String(filteredNodes[i].data).toLowerCase().split(/\W+/).filter(t => t.length > 3);
-        const tokensB = String(filteredNodes[j].data).toLowerCase().split(/\W+/).filter(t => t.length > 3);
-        
-        const shared = tokensA.filter(t => tokensB.includes(t));
-        if (shared.length > 0) {
-          links.push({
-            source: filteredNodes[i].id,
-            target: filteredNodes[j].id,
-            value: shared.length
-          });
+    // ── Fast inverted-index link builder ────────────────────────────────────
+    // 1. Pre-tokenise once (truncate to 2 000 chars so a 400 KB MHT dump
+    //    doesn't explode into a 50 000-token array).
+    // 2. Build token → node[] index.
+    // 3. Derive shared-token links from index intersections.
+    const TOKEN_MAX_CHARS = 2000;
+    const tokenMap = new Map<string, string[]>(); // token -> nodeIds
+
+    for (const n of capped) {
+      const text = String(n.data).slice(0, TOKEN_MAX_CHARS).toLowerCase();
+      const tokens = new Set(text.split(/\W+/).filter(t => t.length > 3));
+      for (const t of tokens) {
+        const list = tokenMap.get(t);
+        if (list) list.push(n.id);
+        else tokenMap.set(t, [n.id]);
+      }
+    }
+
+    const linkMap = new Map<string, number>(); // "src|tgt" -> sharedCount
+    for (const [token, ids] of tokenMap) {
+      if (ids.length < 2) continue;
+      for (let i = 0; i < ids.length; i++) {
+        for (let j = i + 1; j < ids.length; j++) {
+          const a = ids[i];
+          const b = ids[j];
+          const key = a < b ? `${a}|${b}` : `${b}|${a}`;
+          linkMap.set(key, (linkMap.get(key) || 0) + 1);
         }
       }
+    }
+
+    const links: GraphLink[] = [];
+    for (const [key, value] of linkMap) {
+      const [source, target] = key.split('|');
+      if (value > 0) links.push({ source, target, value });
     }
 
     // Simple Clustering: Connected Components
@@ -101,6 +133,22 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
+
+    // Seed positions from previous run so nodes don't explode from center on rebuild
+    for (const n of graphData.nodes) {
+      const saved = nodePositionsRef.current.get(n.id);
+      if (saved) {
+        n.x = saved.x;
+        n.y = saved.y;
+        n.vx = 0;
+        n.vy = 0;
+      }
+    }
+    // Prune stale positions so the Map doesn't grow forever
+    const currentIds = new Set(graphData.nodes.map(n => n.id));
+    for (const id of nodePositionsRef.current.keys()) {
+      if (!currentIds.has(id)) nodePositionsRef.current.delete(id);
+    }
 
     const simulation = d3.forceSimulation<GraphNode>(graphData.nodes)
       .force("link", d3.forceLink<GraphNode, GraphLink>(graphData.links)
@@ -237,15 +285,25 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
 
       node
         .attr("transform", d => `translate(${d.x ?? 0},${d.y ?? 0})`);
+
+      // Persist positions so rebuilds don't scatter everything
+      for (const n of graphData.nodes) {
+        if (n.x !== undefined && n.y !== undefined) {
+          nodePositionsRef.current.set(n.id, { x: n.x, y: n.y });
+        }
+      }
     });
 
     const zoom = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 8])
       .on("zoom", (event) => {
         g.attr("transform", event.transform);
+        zoomTransformRef.current = event.transform;
       });
 
     svg.call(zoom);
+    // Restore previous zoom/pan so the view doesn't snap back on rebuild
+    svg.call(zoom.transform, zoomTransformRef.current);
 
     // Tooltip implementation
     let tooltip = d3.select(containerRef.current).select<HTMLDivElement>(".lattice-tooltip");
@@ -323,7 +381,18 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
               Active Lattice Visualization
            </h2>
-           <p className="text-[9px] text-slate-500 mt-1 uppercase font-bold tracking-tighter">
+           <div className="flex items-center gap-2 mt-2">
+              <button
+                onClick={() => setIs3D(!is3D)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] uppercase font-bold tracking-widest transition-all ${
+                  is3D ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 shadow-[0_0_10px_rgba(34,211,238,0.2)]' : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
+                }`}
+              >
+                {is3D ? <Box size={12} /> : <Layers size={12} />}
+                {is3D ? '3D Overlay Active' : 'Enable 3D'}
+              </button>
+           </div>
+           <p className="text-[9px] text-slate-500 mt-2 uppercase font-bold tracking-tighter">
              Nodes: {graphData.nodes.length} / Clusters: {graphData.clusterCount}
            </p>
          </div>
@@ -360,7 +429,40 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
         </div>
       )}
       
-      <svg ref={svgRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+      <div className={`absolute inset-0 transition-opacity duration-500 ${is3D ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+        <svg ref={svgRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+      </div>
+
+      <div className={`absolute inset-0 transition-opacity duration-500 ${is3D ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        {is3D && containerRef.current && (
+           <ForceGraph3D
+             width={containerRef.current.clientWidth}
+             height={containerRef.current.clientHeight}
+             graphData={graphData as unknown as React.ComponentProps<typeof ForceGraph3D>['graphData']}
+             nodeLabel={node => `${(node as GraphNode).data.substring(0, 30)}...`}
+             nodeColor={node => {
+               const n = node as GraphNode;
+               if (n.cluster !== undefined) {
+                 return d3.schemeCategory10[n.cluster % 10];
+               }
+               return '#38bdf8';
+             }}
+             nodeVal={node => 5 + (node as GraphNode).dopamine * 10}
+             linkColor={link => {
+               const l = link as GraphLink;
+               const source = l.source as GraphNode;
+               const target = l.target as GraphNode;
+               if (source.cluster === target.cluster && source.cluster !== undefined) {
+                 return d3.schemeCategory10[source.cluster % 10];
+               }
+               return 'rgba(56,189,248,0.2)';
+             }}
+             linkWidth={link => Math.min(3, 0.5 + (link as GraphLink).value * 0.5)}
+             backgroundColor="#050505"
+             showNavInfo={false}
+           />
+        )}
+      </div>
     </div>
   );
 };

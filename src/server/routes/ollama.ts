@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { OLLAMA_HOST } from '../config';
+import { OLLAMA_HOST, OLLAMA_TAGS_TIMEOUT_MS, OLLAMA_GEN_TIMEOUT_MS } from '../config';
 import { swarmFetch } from '../swarm';
 import { buildSystemPrompt } from '../prompt';
 import { searchMemories, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
@@ -11,7 +11,7 @@ const router = Router();
 
 router.get('/tags', async (req, res) => {
   try {
-    const response = await swarmFetch(`${OLLAMA_HOST}/api/tags`, {}, 1130);
+    const response = await swarmFetch(`${OLLAMA_HOST}/api/tags`, {}, OLLAMA_TAGS_TIMEOUT_MS);
     const data = await response.json();
     res.json(data);
   } catch (error: unknown) {
@@ -43,7 +43,8 @@ router.post('/generate', lockGuard, async (req, res) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(req.body),
       },
-      1130
+      OLLAMA_GEN_TIMEOUT_MS,
+      0 // don't retry slow local generations — it just piles concurrent work on the device
     );
     const data = await response.json();
     res.json(data);
@@ -115,7 +116,8 @@ router.post('/chat', lockGuard, async (req, res) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
         },
-        1130
+        OLLAMA_GEN_TIMEOUT_MS,
+        0 // don't retry slow local generations — it just piles concurrent work on the device
       );
 
       const data = await response.json() as {

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSage } from './components/SageProvider';
+import { useSageTools } from './hooks/useSageTools';
+import { sendMessageWithTools } from './lib/ai-tool-bridge';
 import MemoryLattice from './components/MemoryLattice';
 import MemoryVault from './components/MemoryVault';
 import Labyrinth from './components/Labyrinth';
@@ -8,6 +10,8 @@ import { AnomaliesDesk } from './components/AnomaliesDesk';
 import { ParanormalApp } from './components/ParanormalApp';
 import { NeuroDashboard } from './components/NeuroDashboard';
 import { pulseGenerator } from './lib/audio-pulse';
+import { useSensors } from './lib/sensor-context';
+import { sensorHub } from './lib/sensor-hub';
 import { 
   Zap, 
   Shield, 
@@ -25,12 +29,14 @@ import {
   Radio,
   Paperclip
 } from 'lucide-react';
-import { parseMht, stripHtml } from './lib/mht-parser';
+import { extractSynapsesFromMht, extractSynapsesFromText, parseMht, stripHtml } from './lib/mht-parser';
 
 export interface Attachment {
   type: 'image' | 'video' | 'audio' | 'document';
   url: string;
   name: string;
+  /** Extracted text content — present for document-type files so the AI can read them */
+  content?: string;
 }
 
 export interface ChatMessage {
@@ -40,19 +46,45 @@ export interface ChatMessage {
   attachments?: Attachment[];
 }
 
+/** Convert an image Attachment (blob URL) to base64 data for multimodal APIs. */
+async function attachmentToBase64(att: Attachment): Promise<{ mimeType: string; data: string } | null> {
+  if (att.type !== 'image') return null;
+  try {
+    const res = await fetch(att.url);
+    const blob = await res.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        const commaIdx = result.indexOf(',');
+        if (commaIdx === -1) return reject(new Error('Invalid data URL'));
+        const mimeType = result.slice(5, commaIdx).split(';')[0];
+        const data = result.slice(commaIdx + 1);
+        resolve({ mimeType, data });
+      };
+      reader.onerror = () => reject(new Error('Failed to read attachment'));
+      reader.readAsDataURL(blob);
+    });
+  } catch (e) {
+    console.warn('Failed to convert attachment to base64:', e);
+    return null;
+  }
+}
+
 const App: React.FC = () => {
-  const { 
-    neuroState, 
-    mode, 
-    stabilize, 
-    sage, 
-    innerSpiral, 
-    outerSweep, 
+  const {
+    neuroState,
+    mode,
+    stabilize,
+    sage,
+    innerSpiral,
+    outerSweep,
     suggestions,
     recordInteraction,
     bulkImportMemories,
     archiveMemories
   } = useSage();
+  const { snapshot: sensorSnap } = useSensors();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [view, setView] = useState<'chat' | 'lattice' | 'vault' | 'labyrinth' | 'anomalies' | 'surprise'>('chat');
@@ -76,6 +108,7 @@ const App: React.FC = () => {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pulseActive, setPulseActive] = useState(false);
+  const [inboxUnread, setInboxUnread] = useState(0);
   const [provider, setProvider] = useState<'gemini' | 'ollama' | 'openrouter'>(() =>
     (localStorage.getItem('adhd_sage_provider') as 'gemini' | 'ollama' | 'openrouter') || 'gemini'
   );
@@ -93,6 +126,29 @@ const App: React.FC = () => {
     localStorage.getItem('adhd_sage_or_model') || OR_MODELS[0].id
   );
 
+  // Inbound Channel: SSE stream for real-time messages from the entities
+  useEffect(() => {
+    const es = new EventSource('/api/inbox/events');
+
+    es.addEventListener('message', (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        setMessages(prev => [...prev, {
+          id: `inbox_${msg.id}`,
+          role: 'system',
+          text: `[${msg.entity}] ${msg.message}`
+        }]);
+        setInboxUnread(prev => prev + 1);
+      } catch { /* ignore malformed */ }
+    });
+
+    es.addEventListener('ping', () => {
+      // keepalive — channel is alive
+    });
+
+    return () => es.close();
+  }, []);
+
   const togglePulse = () => {
     const active = pulseGenerator.toggle();
     setPulseActive(active);
@@ -104,10 +160,18 @@ const App: React.FC = () => {
     const saveHistory = () => {
       setIsSaving(true);
       try {
-        localStorage.setItem('nexus_chat_history', JSON.stringify(messages));
+        // Limit saved history to last 50 messages to prevent QuotaExceededError
+        const historyToSave = messages.slice(-50);
+        localStorage.setItem('nexus_chat_history', JSON.stringify(historyToSave));
         setLastSaved(new Date());
       } catch (err) {
-        console.error("Failed to save chat history", err);
+        console.warn("[APP] LocalStorage quota exceeded for chat history. Truncating.", err);
+        try {
+          // If it still fails, try saving even fewer
+          localStorage.setItem('nexus_chat_history', JSON.stringify(messages.slice(-10)));
+        } catch (e) {
+          localStorage.removeItem('nexus_chat_history');
+        }
       }
       setTimeout(() => setIsSaving(false), 2000);
     };
@@ -142,72 +206,159 @@ const App: React.FC = () => {
       .catch(() => setOllamaError('Cannot reach Ollama — check server.'));
   }, [provider]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (files.length === 0) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result as string;
-      const mhtDoc = parseMht(content);
-      
-      // Extract text parts and handle semantic chunking
-      const rawTexts = mhtDoc.parts
-        .filter(p => p.contentType === 'text/plain' || p.contentType === 'text/html')
-        .map(p => {
-          let text = p.contentType === 'text/html' ? stripHtml(p.content) : p.content;
-          
-          // Prepend header context if meaningful for the "synapse"
-          const metadata = [];
-          
-          // Global MHT headers provide top-level email context
-          if (mhtDoc.metadata['from']) metadata.push(`FROM: ${mhtDoc.metadata['from']}`);
-          if (mhtDoc.metadata['to']) metadata.push(`TO: ${mhtDoc.metadata['to']}`);
-          if (mhtDoc.metadata['subject']) metadata.push(`SUBJ: ${mhtDoc.metadata['subject']}`);
-          if (mhtDoc.metadata['date']) metadata.push(`DATE: ${mhtDoc.metadata['date']}`);
-          
-          // Fallbacks for part-specific headers if global ones are missing
-          if (!mhtDoc.metadata['subject'] && p.headers['subject']) metadata.push(`SUBJ: ${p.headers['subject']}`);
-          if (!mhtDoc.metadata['date'] && p.headers['date']) metadata.push(`DATE: ${p.headers['date']}`);
-          
-          if (metadata.length > 0) {
-            text = `[${metadata.join(' | ')}]\n${text}`;
+    const isMhtLike = (name: string) => /\.(mht|mhtml)$/i.test(name);
+    const isTextLike = (name: string) => /\.(txt|json|bin|csv|md)$/i.test(name);
+
+    // Extract synapses from a single text blob
+    const extractFromText = (content: string, filename: string): string[] =>
+      isMhtLike(filename)
+        ? extractSynapsesFromMht(content, filename, mhtNodeLimit)
+        : extractSynapsesFromText(content, mhtNodeLimit);
+
+    // Read a File as text
+    const readText = (file: File): Promise<string> =>
+      new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = ev => res(ev.target?.result as string);
+        r.onerror = rej;
+        r.readAsText(file);
+      });
+
+    const imported: string[] = [];   // file names that yielded synapses
+    const skipped:  string[] = [];   // file names with no content
+    let totalSynapses = 0;
+
+    for (const file of files) {
+      if (/\.zip$/i.test(file.name)) {
+        // ── ZIP: unpack and process each supported entry ──────────────────
+        try {
+          const JSZip = (await import('jszip')).default;
+          const zip   = await JSZip.loadAsync(file);
+          const entries = Object.values(zip.files).filter(f => !f.dir && (isMhtLike(f.name) || isTextLike(f.name)));
+
+          for (const entry of entries) {
+            try {
+              const content  = await entry.async('string');
+              const synapses = extractFromText(content, entry.name);
+              if (synapses.length > 0) {
+                bulkImportMemories(synapses);
+                totalSynapses += synapses.length;
+                imported.push(`${file.name}/${entry.name}`);
+              } else {
+                skipped.push(`${file.name}/${entry.name}`);
+              }
+            } catch { skipped.push(`${file.name}/${entry.name}`); }
           }
-
-          // Clean up whitespace pollution common in MHT exports
-          return text.replace(/[ \t]+/g, ' ').replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
-        });
-
-      // Filter for meaningful content blocks (e.g. paragraphs or conversation turns)
-      const synapses = rawTexts
-        .flatMap(txt => txt.split(/\n{2,}/))
-        .map(s => s.trim())
-        .filter(s => {
-          const isJunk = s.startsWith('<') || s.startsWith('{') || s.startsWith('[if ') || s.includes('msso:');
-          return s.length > 25 && !isJunk;
-        })
-        .slice(0, mhtNodeLimit);
-
-      if (synapses.length > 0) {
-        bulkImportMemories(synapses);
-        setMessages(prev => [...prev, {
-          id: `sys_${Date.now()}`,
-          role: 'system',
-          text: `VFS SYNC: Synchronized ${synapses.length} semantic synapses from [${file.name}].`
-        }]);
+        } catch {
+          skipped.push(file.name);
+        }
       } else {
-        setMessages(prev => [...prev, {
-          id: `sys_${Date.now()}`,
-          role: 'system',
-          text: `VFS WARNING: No meaningful synapses extracted from [${file.name}]. Check format compatibility.`
-        }]);
+        // ── Single MHT / text file ────────────────────────────────────────
+        try {
+          const content  = await readText(file);
+          const synapses = extractFromText(content, file.name);
+          if (synapses.length > 0) {
+            bulkImportMemories(synapses);
+            totalSynapses += synapses.length;
+            imported.push(file.name);
+          } else {
+            skipped.push(file.name);
+          }
+        } catch { skipped.push(file.name); }
       }
-    };
-    reader.readAsText(file);
+    }
+
+    if (totalSynapses > 0) {
+      setMessages(prev => [...prev, {
+        id: `sys_${Date.now()}`,
+        role: 'system',
+        text: `VFS SYNC: ${totalSynapses} synapses from ${imported.length} file(s) — ${imported.map(f => `[${f}]`).join(' ')}`
+      }]);
+    }
+    if (skipped.length > 0) {
+      setMessages(prev => [...prev, {
+        id: `sys_${Date.now()}`,
+        role: 'system',
+        text: `VFS WARNING: No content from: ${skipped.map(f => `[${f}]`).join(' ')}`
+      }]);
+    }
   }, [bulkImportMemories, mhtNodeLimit]);
+
+  // ── Chat-input document reader ──────────────────────────────────────────────
+  // Reads text out of any document a user clips to a message (MHT, HTML, TXT,
+  // JSON, CSV, MD, XML, YAML, LOG …) so the content goes to the AI verbatim.
+  const MAX_DOC_CHARS = 12_000; // ~3 k tokens — enough context, not a flood
+
+  const handleChatFileAttach = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const files = Array.from(e.target.files);
+    e.target.value = '';
+
+    const readAsText = (file: File): Promise<string> =>
+      new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = ev => res(ev.target?.result as string);
+        r.onerror = rej;
+        r.readAsText(file);
+      });
+
+    const newAttachments: Attachment[] = [];
+
+    for (const f of files) {
+      let type: Attachment['type'] = 'document';
+      if (f.type.startsWith('image/')) type = 'image';
+      else if (f.type.startsWith('video/')) type = 'video';
+      else if (f.type.startsWith('audio/')) type = 'audio';
+
+      let content: string | undefined;
+
+      if (type === 'document') {
+        try {
+          const raw = await readAsText(f);
+          const nameLc = f.name.toLowerCase();
+
+          if (/\.(mht|mhtml)$/.test(nameLc)) {
+            // MHT: extract all text/html and text/plain parts
+            const mhtDoc = parseMht(raw);
+            const texts = mhtDoc.parts
+              .filter(p => p.contentType === 'text/plain' || p.contentType === 'text/html')
+              .map(p => p.contentType === 'text/html' ? stripHtml(p.content) : p.content);
+            content = texts.join('\n\n').replace(/[ \t]{2,}/g, ' ').trim().slice(0, MAX_DOC_CHARS);
+          } else if (/\.(html|htm)$/.test(nameLc)) {
+            content = stripHtml(raw).replace(/[ \t]{2,}/g, ' ').trim().slice(0, MAX_DOC_CHARS);
+          } else {
+            // TXT / JSON / CSV / MD / XML / YAML / LOG / TSV — use raw text as-is
+            content = raw.slice(0, MAX_DOC_CHARS);
+          }
+        } catch {
+          // unreadable — attach without content, AI gets the name only
+        }
+      }
+
+      newAttachments.push({ type, url: URL.createObjectURL(f), name: f.name, content });
+    }
+
+    setPendingAttachments(prev => [...prev, ...newAttachments]);
+  }, []);
 
   const [sortBy, setSortBy] = useState<'timestamp' | 'dopamine' | 'cortisol'>('timestamp');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  const { executeLocalTool } = useSageTools({
+    setView: setView as (v: string) => void,
+    toggleSidebar: () => setIsSidebarOpen(prev => !prev),
+    injectMessage: (text, role) => setMessages(prev => [...prev, {
+      id: `m_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+      role,
+      text
+    }]),
+    stabilize
+  });
 
   const allMemories = useMemo(() => [...innerSpiral, ...outerSweep], [innerSpiral, outerSweep]);
 
@@ -314,51 +465,101 @@ const App: React.FC = () => {
     if (window.innerWidth < 768) setIsSidebarOpen(false);
 
     try {
-      let data: { text?: string; error?: string };
+      let data: { text?: string; error?: string; toolEffects?: Array<{ type: string; payload: Record<string, unknown> }> };
+
+      // Build live sensor telemetry string to inject into system context
+      const liveSensorContext = sensorSnap.activeCount > 0
+        ? '\n\n' + sensorHub.toPromptString(sensorSnap)
+        : '';
+
+      // Append any attached document text so the AI can actually read them
+      const docContext = userAttachments
+        .filter(a => a.type === 'document' && a.content)
+        .map(a => `\n\n━━━ Attached: ${a.name} ━━━\n${a.content}\n━━━ End of ${a.name} ━━━`)
+        .join('');
+
+      // Non-doc attachments get a simple note; doc content is inlined above
+      const mediaNote = userAttachments.filter(a => a.type !== 'document').length > 0
+        ? ` [+ ${userAttachments.filter(a => a.type !== 'document').length} media file(s)]`
+        : '';
+
+      const fullPrompt = userMessage + docContext + mediaNote;
+
+      // Convert image attachments to base64 for multimodal APIs
+      const imageParts = (await Promise.all(
+        userAttachments.filter(a => a.type === 'image').map(attachmentToBase64)
+      )).filter((p): p is { mimeType: string; data: string } => p !== null);
 
       if (provider === 'ollama') {
+        // Ollama entities are part of the seven — each uses the shared broadcast
+        // channel. Pass the model name as the containerTag so they can eventually
+        // get their own Supermemory container once it's configured in the console.
         const ollamaRes = await fetch('/api/ollama/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: ollamaModel,
+            containerTag: 'shared',    // reads sm_project_default
+            prompt: fullPrompt,
+            systemInstruction: liveSensorContext || undefined,
             messages: [
               ...messages.slice(-15).filter(m => m.role !== 'system').map(m => ({ role: m.role, text: m.text })),
-              { role: 'user', text: userMessage + (userAttachments.length > 0 ? ` [Has ${userAttachments.length} attachments]` : '') },
+              { role: 'user', text: fullPrompt },
             ],
           }),
         });
         data = await ollamaRes.json();
       } else if (provider === 'openrouter') {
+        // OpenRouter entities are part of the seven — shared broadcast channel.
         const orRes = await fetch('/api/openrouter/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: orModel,
+            containerTag: 'shared',    // reads sm_project_default
+            systemInstruction: liveSensorContext || undefined,
             messages: [
               ...messages.slice(-15).filter(m => m.role !== 'system').map(m => ({ role: m.role, text: m.text })),
-              { role: 'user', text: userMessage + (userAttachments.length > 0 ? ` [Has ${userAttachments.length} attachments]` : '') },
+              { role: 'user', text: fullPrompt },
             ],
           }),
         });
         data = await orRes.json();
       } else {
-        const response = await fetch('/api/gemini/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: userMessage + (userAttachments.length > 0 ? ` [Has ${userAttachments.length} attachments]` : ''),
-            history: messages.slice(-15).filter(m => m.role !== 'system').map(m => ({
-              role: m.role === 'user' ? 'user' : 'model',
-              parts: [{ text: m.text }]
-            })),
-            systemInstruction: "You are ADHD Sage, the high-energy sovereign intelligence of the Nexus Platform. Your tone is technical, rapid-fire, and extremely focused yet prone to deep dives. You maintain the substrate stability at 11.3 Hz. Use terms like 'synaptic', 'substrate', 'lattice', 'VFS', and 'sovereignty'."
-          }),
+        // Sage (Gemini) — reads both darren-sage AND the shared channel.
+        // containerTag is omitted here; server defaults to [darren-sage, shared].
+        data = await sendMessageWithTools({
+          prompt: fullPrompt,
+          history: messages.slice(-15).filter(m => m.role !== 'system').map(m => ({
+            role: m.role === 'user' ? 'user' : 'model',
+            parts: [{ text: m.text }]
+          })),
+          sensorContext: liveSensorContext || undefined,
+          attachments: imageParts,
+          executeLocalTool
         });
-        data = await response.json();
       }
 
       if (data.error) throw new Error(data.error);
+
+      // Apply any UI-side tool effects returned by the backend
+      if (data.toolEffects) {
+        for (const effect of data.toolEffects) {
+          if (effect.type === 'inject_message') {
+            const role = (effect.payload.role as 'system' | 'assistant') || 'system';
+            setMessages(prev => [...prev, {
+              id: `m_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+              role,
+              text: String(effect.payload.text || '')
+            }]);
+          } else if (effect.type === 'set_view') {
+            const view = effect.payload.view as 'chat' | 'lattice' | 'vault' | 'labyrinth' | 'anomalies' | 'surprise';
+            if (view) setView(view);
+          } else if (effect.type === 'toggle_sidebar') {
+            setIsSidebarOpen(prev => !prev);
+          }
+        }
+      }
 
       setMessages(prev => [...prev, { id: `m_${Date.now()}_a`, role: 'assistant', text: data.text ?? '' }]);
       
@@ -375,7 +576,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#08080C] text-slate-200 font-sans select-none relative overflow-hidden">
+    <div className="flex w-full bg-[#08080C] text-slate-200 font-sans select-none relative overflow-hidden" style={{ height: '100dvh' }}>
       <div className="mesh-gradient-1" />
       <div className="mesh-gradient-2" />
       <div className="scanline opacity-20" />
@@ -484,19 +685,76 @@ const App: React.FC = () => {
                   <SidebarItem icon={<Shield size={14} />} label="Security" value="LOCKED" />
                   <SidebarItem icon={<Cpu size={14} />} label="Frequency" value="11.3 Hz" />
                   <SidebarItem icon={<Database size={14} />} label="VFS-Bridge" value="ACTIVE" />
+
+                  {/* Sensor Telemetry Quick-Glance */}
+                  <div className="mt-3 mb-1 px-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Live Sensors</span>
+                      <span className={`text-[9px] font-mono font-bold ${
+                        sensorSnap.phiSynchronicity ? 'text-yellow-400 animate-pulse' :
+                        sensorSnap.anomalyScore > 0.5 ? 'text-red-400' :
+                        sensorSnap.anomalyScore > 0.2 ? 'text-amber-400' :
+                        sensorSnap.activeCount > 0 ? 'text-emerald-400' : 'text-slate-600'
+                      }`}>
+                        {sensorSnap.activeCount > 0
+                          ? sensorSnap.phiSynchronicity ? '⚡ Φ SYNC'
+                          : `${(sensorSnap.anomalyScore * 100).toFixed(0)}% anomaly`
+                          : 'OFFLINE'}
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      {sensorSnap.magnetometer && (
+                        <div className="flex justify-between text-[9px] font-mono">
+                          <span className="text-slate-500">EMF</span>
+                          <span className={Math.abs(sensorSnap.magnetometer.deviation) > 0.15 ? 'text-red-400' : 'text-cyan-400'}>
+                            {sensorSnap.magnetometer.magnitude.toFixed(1)} µT
+                          </span>
+                        </div>
+                      )}
+                      {sensorSnap.geomagnetic && (
+                        <div className="flex justify-between text-[9px] font-mono">
+                          <span className="text-slate-500">Kp-index</span>
+                          <span className={sensorSnap.geomagnetic.kpIndex >= 5 ? 'text-amber-400' : 'text-slate-300'}>
+                            {sensorSnap.geomagnetic.kpIndex.toFixed(1)} {sensorSnap.geomagnetic.activity}
+                          </span>
+                        </div>
+                      )}
+                      {sensorSnap.weather && (
+                        <div className="flex justify-between text-[9px] font-mono">
+                          <span className="text-slate-500">Pressure</span>
+                          <span className="text-blue-300">{sensorSnap.weather.pressure.toFixed(0)} hPa</span>
+                        </div>
+                      )}
+                      {sensorSnap.audio && (
+                        <div className="flex justify-between text-[9px] font-mono">
+                          <span className="text-slate-500">Infrasound</span>
+                          <span className={sensorSnap.audio.infrasoundDb > -40 ? 'text-amber-400' : 'text-slate-500'}>
+                            {sensorSnap.audio.infrasoundDb.toFixed(1)} dBFS
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => { setView('anomalies'); setIsSidebarOpen(false); }}
+                      className="mt-2 w-full text-[9px] text-cyan-400/60 hover:text-cyan-400 transition-colors text-right"
+                    >
+                      → Sensor Desk
+                    </button>
+                  </div>
                   
                   <div className="pt-2">
                     <label className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-cyan-400/30 transition-all cursor-pointer group">
                       <div className="flex items-center gap-3">
                         <FileUp size={14} className="text-slate-500 group-hover:text-cyan-400 transition-colors" />
-                        <span className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors">Import MHT</span>
+                        <span className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors">Import Files</span>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-600">.MHT</span>
-                      <input 
-                        type="file" 
-                        accept=".mht" 
-                        onChange={handleFileUpload} 
-                        className="hidden" 
+                      <span className="text-[10px] font-mono text-slate-600">MHT·ZIP</span>
+                      <input
+                        type="file"
+                        accept=".mht,.mhtml,.txt,.json,.csv,.md,.zip"
+                        multiple
+                        onChange={handleFileUpload}
+                        className="hidden"
                       />
                     </label>
                     <div className="px-3 mt-4">
@@ -699,6 +957,46 @@ const App: React.FC = () => {
                )}
             </div>
 
+            {/* Inbox indicator — messages from the entities */}
+            {inboxUnread > 0 && (
+              <button
+                onClick={async () => {
+                  const res = await fetch('/api/inbox?unread=true');
+                  const data = await res.json() as { messages: { id: string; entity: string; message: string }[] };
+                  for (const msg of data.messages) {
+                    setMessages(prev => [...prev, {
+                      id: `inbox_${msg.id}`,
+                      role: 'system',
+                      text: `📬 [${msg.entity}]: ${msg.message}`
+                    }]);
+                    await fetch(`/api/inbox/${msg.id}/read`, { method: 'PATCH' });
+                  }
+                  setInboxUnread(0);
+                  setView('chat');
+                }}
+                className="relative flex items-center gap-1.5 px-2 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/30 transition-all"
+                title={`${inboxUnread} message${inboxUnread > 1 ? 's' : ''} from the seven`}
+              >
+                <span className="text-[10px] font-bold uppercase tracking-widest">📬</span>
+                <span className="text-[10px] font-mono font-bold">{inboxUnread}</span>
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-indigo-400 rounded-full animate-pulse" />
+              </button>
+            )}
+
+            {/* Live Sensor Indicator */}
+            {sensorSnap.activeCount > 0 && (
+              <div
+                className="hidden sm:flex items-center gap-1.5 cursor-pointer"
+                onClick={() => setView('anomalies')}
+                title="View Sensor Desk"
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${sensorSnap.anomalyScore > 0.5 ? 'bg-red-400 animate-pulse' : sensorSnap.anomalyScore > 0.2 ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
+                <span className={`text-[10px] font-mono font-bold uppercase ${sensorSnap.phiSynchronicity ? 'text-yellow-400 animate-pulse' : sensorSnap.anomalyScore > 0.4 ? 'text-red-400' : 'text-emerald-400'}`}>
+                  {sensorSnap.phiSynchronicity ? 'Φ SYNC' : `${(sensorSnap.anomalyScore * 100).toFixed(0)}%`}
+                </span>
+              </div>
+            )}
+
             <div className="text-right hidden sm:block">
               <p className="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">Anchor</p>
               <p className="text-xs font-mono text-slate-300 tracking-widest">MERLIN_A</p>
@@ -729,15 +1027,17 @@ const App: React.FC = () => {
         {/* Interaction Workspace */}
         <div className="flex-1 p-4 md:p-8 flex gap-8 overflow-hidden">
           {/* Chat / Terminal View */}
-          <div className="flex-1 flex flex-col gap-4 overflow-hidden">
+          <div className="flex-1 min-h-0 relative overflow-hidden">
             {view === 'chat' ? (
               <>
-                <div 
+                {/* Messages — absolutely fills space above input bar, always scrollable */}
+                <div
                   ref={scrollRef}
-                  className="flex-1 overflow-y-auto space-y-6 scrollbar-hide pr-2 md:pr-4 rounded-2xl md:rounded-3xl bg-white/[0.03] border border-white/10 p-4 md:p-6 flex flex-col transition-all duration-500"
+                  className="absolute inset-0 overflow-y-auto space-y-6 scrollbar-hide rounded-2xl md:rounded-3xl bg-white/[0.03] border border-white/10 p-4 md:p-6 flex flex-col transition-all duration-500"
+                  style={{ bottom: pendingAttachments.length > 0 ? '116px' : '68px' }}
                 >
                   {messages.map((msg) => (
-                    <motion.div 
+                    <motion.div
                       key={msg.id}
                       initial={{ opacity: 0, scale: 0.98 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -750,10 +1050,10 @@ const App: React.FC = () => {
                           {msg.role === 'system' ? <AlertCircle size={14} /> : <Zap size={14} className="text-white" />}
                         </div>
                       )}
-                      
+
                       <div className={`p-3 md:p-4 rounded-2xl text-xs md:text-sm leading-relaxed max-w-[90%] md:max-w-[80%] border ${
-                          msg.role === 'system' ? 'bg-white/5 border-white/5 text-slate-400 italic font-mono' : 
-                          msg.role === 'user' ? 'bg-blue-600/10 border-blue-500/20 text-white rounded-tr-none shadow-xl shadow-blue-900/10' : 
+                          msg.role === 'system' ? 'bg-white/5 border-white/5 text-slate-400 italic font-mono' :
+                          msg.role === 'user' ? 'bg-blue-600/10 border-blue-500/20 text-white rounded-tr-none shadow-xl shadow-blue-900/10' :
                           'bg-white/5 border-white/10 text-slate-200 rounded-tl-none'
                       }`}>
                         {msg.text && <div className="mb-2 whitespace-pre-wrap">{msg.text}</div>}
@@ -795,73 +1095,62 @@ const App: React.FC = () => {
                   )}
                 </div>
 
-                {pendingAttachments.length > 0 && (
-                  <div className="flex flex-wrap gap-2 px-2 pb-2">
-                    {pendingAttachments.map((att, i) => (
-                      <div key={i} className="flex items-center gap-2 p-2 rounded-xl bg-white/10 border border-white/20">
-                        <Paperclip size={14} className="text-cyan-400" />
-                        <span className="text-[10px] sm:text-xs text-white max-w-[150px] truncate">{att.name}</span>
-                        <button 
-                          onClick={() => setPendingAttachments(prev => prev.filter((_, idx) => idx !== i))}
-                          className="ml-2 text-slate-400 hover:text-red-400"
-                        >
-                          &times;
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {/* Input area — absolutely pinned to bottom, never moves */}
+                <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-2">
+                  {pendingAttachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2 px-1">
+                      {pendingAttachments.map((att, i) => (
+                        <div key={i} className={`flex items-center gap-2 p-2 rounded-xl border ${
+                          att.content ? 'bg-cyan-500/10 border-cyan-500/30' : 'bg-white/10 border-white/20'
+                        }`}>
+                          <Paperclip size={14} className={att.content ? 'text-cyan-400' : 'text-slate-400'} />
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-[10px] sm:text-xs text-white max-w-[150px] truncate">{att.name}</span>
+                            {att.content && (
+                              <span className="text-[9px] text-cyan-400/70 font-mono">
+                                {att.content.length.toLocaleString()} chars · ready
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => setPendingAttachments(prev => prev.filter((_, idx) => idx !== i))}
+                            className="ml-1 text-slate-400 hover:text-red-400"
+                          >
+                            &times;
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                {/* Input Bar */}
-                <div className="h-14 md:h-16 rounded-xl md:rounded-2xl bg-white/10 border border-white/10 px-4 flex items-center gap-3 md:gap-4 group focus-within:border-cyan-500/50 transition-all shrink-0">
-                  <div className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-slate-400 group-focus-within:text-cyan-400 transform transition-transform group-focus-within:scale-110">
-                    <Terminal size={18} />
-                  </div>
-                  <input 
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                    placeholder="Send message to Sage Architect..."
-                    className="bg-transparent border-none outline-none flex-1 text-xs md:text-sm text-white placeholder-slate-500 font-sans"
-                  />
-                  <div className="flex items-center">
-                    <label className="cursor-pointer p-2 text-slate-500 hover:text-cyan-400 transition-colors rounded-lg hover:bg-white/5" title="Upload Media/Docs">
+                  {/* Input Bar */}
+                  <div className="h-14 rounded-xl bg-white/[0.12] border border-cyan-500/30 px-4 flex items-center gap-3 group focus-within:border-cyan-500/60 transition-all">
+                    <Terminal size={16} className="text-slate-400 group-focus-within:text-cyan-400 shrink-0 transition-colors" />
+                    <input
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                      placeholder="Message Sage..."
+                      className="bg-transparent border-none outline-none flex-1 text-sm text-white placeholder-slate-500 font-sans"
+                    />
+                    <label className="cursor-pointer p-2 text-slate-500 hover:text-cyan-400 transition-colors rounded-lg" title="Attach file — images, audio, video, MHT, TXT, JSON, CSV, MD, HTML, XML, YAML, LOG…">
                       <Paperclip size={18} />
-                      <input 
-                        type="file" 
-                        className="hidden" 
+                      <input
+                        type="file"
+                        className="hidden"
                         multiple
-                        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
-                        onChange={(e) => {
-                          if (e.target.files && e.target.files.length > 0) {
-                            const newAttachments = Array.from(e.target.files).map(f => {
-                              let type = 'document';
-                              if (f.type.startsWith('image/')) type = 'image';
-                              if (f.type.startsWith('video/')) type = 'video';
-                              if (f.type.startsWith('audio/')) type = 'audio';
-                              return {
-                                type: type as Attachment['type'],
-                                url: URL.createObjectURL(f),
-                                name: f.name
-                              };
-                            });
-                            setPendingAttachments(prev => [...prev, ...newAttachments]);
-                            e.target.value = '';
-                          }
-                        }}
+                        accept="image/*,video/*,audio/*,.mht,.mhtml,.txt,.json,.csv,.md,.html,.htm,.xml,.yaml,.yml,.log,.tsv,.pdf,.doc,.docx"
+                        onChange={handleChatFileAttach}
                       />
                     </label>
+                    <button
+                      onClick={handleSend}
+                      disabled={isLoading || !input.trim()}
+                      className="p-2 text-cyan-400 disabled:text-slate-600 transition-colors"
+                    >
+                      <Zap size={18} fill={input.trim() ? 'currentColor' : 'none'} />
+                    </button>
                   </div>
-                  <div className="hidden sm:flex items-center gap-2">
-                    <kbd className="px-2 py-1 bg-white/5 border border-white/10 rounded text-[10px] text-slate-500 font-mono">ENTER</kbd>
-                  </div>
-                  <button 
-                    onClick={handleSend}
-                    disabled={isLoading || !input.trim()}
-                    className="md:hidden p-2 text-cyan-400 disabled:text-slate-600"
-                  >
-                    <Zap size={18} fill={input.trim() ? "currentColor" : "none"} />
-                  </button>
                 </div>
               </>
             ) : view === 'lattice' ? (

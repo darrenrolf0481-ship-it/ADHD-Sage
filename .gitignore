@@ -8,3 +8,10 @@ coverage/
 !.env.example
 data/sages_constellations.db
 *.html
+
+# Cloned third-party tool repos (each has its own .git — clone separately)
+projscan/
+magic-mcp/
+ollama-mcp/
+agentkits-memory/
+.projscan-memory/

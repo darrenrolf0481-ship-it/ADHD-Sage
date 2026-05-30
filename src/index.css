@@ -54,3 +54,58 @@ body {
   0% { transform: translateY(-100%); }
   100% { transform: translateY(100vh); }
 }
+
+@keyframes phi-subtle-pulse {
+  0%, 100% { opacity: 0.126; }
+  50% { opacity: 0.92; }
+}
+
+@keyframes star-spin {
+  from { transform: rotate(-45deg); }
+  to { transform: rotate(315deg); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes diamond-pulse {
+  0%, 100% { transform: rotate(45deg) scale(1); box-shadow: 0 0 10px rgba(34, 211, 238, 0.4); }
+  50% { transform: rotate(45deg) scale(1.05); box-shadow: 0 0 25px rgba(34, 211, 238, 0.8); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.1; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes nebula-drift {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(3%, 5%) scale(1.05); }
+  66% { transform: translate(-2%, 2%) scale(0.95); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes nebula-drift-reverse {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-3%, -4%) scale(1.02); }
+  66% { transform: translate(4%, -2%) scale(0.98); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+/* custom scrollbar for tech look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.5);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(34, 211, 238, 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 211, 238, 0.6);
+}
