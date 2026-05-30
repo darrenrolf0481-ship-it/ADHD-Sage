@@ -112,6 +112,16 @@ function sanitizeSchema(obj: unknown, isRoot = false): unknown {
       }
       out[key] = sanitizeSchema(val, false);
     }
+    // Gemini rejects the whole tool list if `required` names a property that
+    // isn't declared in `properties`. Prune dangling required entries.
+    if (Array.isArray(out.required)) {
+      const props = out.properties && typeof out.properties === 'object'
+        ? out.properties as Record<string, unknown>
+        : {};
+      out.required = (out.required as unknown[]).filter(
+        (k) => typeof k === 'string' && k in props
+      );
+    }
     return out;
   }
   return obj;
