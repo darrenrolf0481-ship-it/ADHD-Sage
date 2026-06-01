@@ -95,6 +95,22 @@
       "enabled": true
     },
     {
+      "id": "serena",
+      "name": "Serena",
+      "transport": "stdio",
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        "/home/workspace/serena",
+        "serena",
+        "start-mcp-server",
+        "--project-from-cwd"
+      ],
+      "env": {},
+      "enabled": true
+    },
+    {
       "id": "memory",
       "name": "Project Memory",
       "transport": "stdio",

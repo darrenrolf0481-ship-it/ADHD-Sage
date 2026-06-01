@@ -67,7 +67,7 @@ router.post('/generate', lockGuard, async (req, res) => {
     }));
 
     const chat = getGenAI().chats.create({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash',
       config: {
         systemInstruction: fullSystemPrompt,
         tools: [{ functionDeclarations: allDeclarations }],
@@ -178,7 +178,7 @@ router.post('/continue', lockGuard, async (req, res) => {
     // Reconstruct chat from the serialized history snapshot.
     // We pass remote tools only; local tools have already been executed by the client.
     const chat = getGenAI().chats.create({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash',
       config: {
         systemInstruction: buildSystemPrompt(),
         tools: [{ functionDeclarations: [...gemTools.declarations, ...getMcpDeclarations()] }],

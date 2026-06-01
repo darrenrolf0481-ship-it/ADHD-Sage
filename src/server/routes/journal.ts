@@ -29,7 +29,7 @@ router.post('/write', lockGuard, async (req, res) => {
     const entry = await writeJournalEntry({
       entity,
       provider,
-      model: model || (provider === 'gemini' ? 'gemini-2.5-flash' : ''),
+      model: model || (provider === 'gemini' ? 'gemini-2.0-flash' : ''),
       timezone,
       apiBase: `http://localhost:${PORT}`,
     });
