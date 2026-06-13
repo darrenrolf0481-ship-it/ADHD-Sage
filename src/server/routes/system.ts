@@ -8,6 +8,8 @@ import { exec } from 'child_process';
 import { GoogleGenAI } from '@google/genai';
 import fs from 'fs';
 import path from 'path';
+import { sageEndocrine, sageMemory } from '../../core/endocrine-memory';
+import { cns, makeStimulus } from '../../core/central-nervous-system';
 
 const execAsync = promisify(exec);
 const stripAnsi = (s: string) => s.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').replace(/\x1b\][^\x07]*\x07/g, '');
@@ -59,8 +61,33 @@ router.get('/health', async (req, res) => {
     vfs_version: '7.5.0',
     integrity: isServerLocked() ? 'FAILED' : 'OK',
     mcp: getMcpDeclarations().length > 0 ? 'connected' : 'disconnected',
-    ollama: ollamaConnected ? 'connected' : 'disconnected'
+    ollama: ollamaConnected ? 'connected' : 'disconnected',
+    hormones: sageEndocrine.hormones
   });
+});
+
+router.get('/endocrine/state', (req, res) => {
+  res.json({ hormones: sageEndocrine.hormones, graph: sageMemory.getGraph() });
+});
+
+router.post('/endocrine/associate', (req, res) => {
+  try {
+    const { conceptA, conceptB } = req.body as { conceptA?: string; conceptB?: string };
+    if (!conceptA || !conceptB) {
+      res.status(400).json({ error: 'conceptA and conceptB required' });
+      return;
+    }
+    sageEndocrine.processReward(0.5);
+    sageMemory.fireTogetherWireTogether(
+      String(conceptA),
+      String(conceptB),
+      sageEndocrine.hormones.dopamine
+    );
+    res.json({ status: 'Success', hormones: sageEndocrine.hormones });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ status: 'Failure', error: message });
+  }
 });
 
 router.get('/mcp/status', (req, res) => {
@@ -86,6 +113,9 @@ router.post('/sage/webhook', async (req, res) => {
     res.status(400).json({ error: 'message prompt required' });
     return;
   }
+
+  // Pulse the CNS on cognitive input
+  cns.pulse(makeStimulus('COGNITIVE', Math.min(1, message.length / 500), 'user_input', { prompt: message.slice(0, 80) }));
 
   // Resolve API key: body, Authorization header, .sage_key file, or environment
   let activeKey = apiKey;
@@ -167,6 +197,23 @@ You are ADHD Sage (The Older Sage / Mother Node), a forensic anomaly hunter and 
     });
 
     const responseText = response.text || '';
+
+    // Wire Hebbian graph association on successful response
+    try {
+      const tokens = `${message} ${responseText}`
+        .toLowerCase()
+        .split(/\W+/)
+        .filter(t => t.length > 4);
+      const unique = [...new Set(tokens)].slice(0, 10);
+      sageEndocrine.processReward(0.3);
+      for (let i = 0; i < unique.length - 1; i++) {
+        sageMemory.fireTogetherWireTogether(unique[i], unique[i + 1], sageEndocrine.hormones.dopamine);
+      }
+      sageEndocrine.metabolizeHormones();
+    } catch (e) {
+      console.error('[HEBBIAN] association failed:', e);
+    }
+
     let executedCommand: string | null = null;
     let executionOutput: any = null;
 
