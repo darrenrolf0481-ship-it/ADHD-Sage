@@ -16,7 +16,9 @@ function verifySeedCore(): boolean {
   }
 
   if (!existsSync('data/seed_core.json')) {
-    console.error('[SAGE CORE] HALT: data/seed_core.json not found — run scripts/seal-seed-core.ts');
+    console.error(
+      '[SAGE CORE] HALT: data/seed_core.json not found — run scripts/seal-seed-core.ts',
+    );
     return false;
   }
 

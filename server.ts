@@ -7,6 +7,6 @@ import { startServer } from './src/server/app';
 // ─── Startup sequence ───────────────────────────────────────────────────────
 validateEnv();
 initSeedCore();
-syncFts().catch(e => console.error('[VFS] FTS5 sync failed:', e));
+syncFts().catch((e) => console.error('[VFS] FTS5 sync failed:', e));
 
 startServer();

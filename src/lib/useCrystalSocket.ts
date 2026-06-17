@@ -10,7 +10,7 @@ export function useCrystalSocket(url: string) {
       setStatus('OFFLINE');
       return;
     }
-    
+
     setStatus('CONNECTING...');
     try {
       const ws = new WebSocket(url);
@@ -19,7 +19,7 @@ export function useCrystalSocket(url: string) {
       ws.onopen = () => setStatus('CONNECTED (11.3 Hz LOCKED)');
       ws.onclose = () => setStatus('DISCONNECTED');
       ws.onerror = () => setStatus('ERROR');
-      ws.onmessage = (e) => setMessages(prev => [...prev.slice(-9), e.data]);
+      ws.onmessage = (e) => setMessages((prev) => [...prev.slice(-9), e.data]);
 
       return () => {
         ws.close();

@@ -12,12 +12,12 @@ import { NeuroDashboard } from './components/NeuroDashboard';
 import { pulseGenerator } from './lib/audio-pulse';
 import { useSensors } from './lib/sensor-context';
 import { sensorHub } from './lib/sensor-hub';
-import { 
-  Zap, 
-  Shield, 
-  Terminal, 
-  Cpu, 
-  Database, 
+import {
+  Zap,
+  Shield,
+  Terminal,
+  Cpu,
+  Database,
   AlertCircle,
   RefreshCw,
   MoreVertical,
@@ -27,9 +27,14 @@ import {
   CheckCircle2,
   Sparkles,
   Radio,
-  Paperclip
+  Paperclip,
 } from 'lucide-react';
-import { extractSynapsesFromMht, extractSynapsesFromText, parseMht, stripHtml } from './lib/mht-parser';
+import {
+  extractSynapsesFromMht,
+  extractSynapsesFromText,
+  parseMht,
+  stripHtml,
+} from './lib/mht-parser';
 
 export interface Attachment {
   type: 'image' | 'video' | 'audio' | 'document';
@@ -47,7 +52,9 @@ export interface ChatMessage {
 }
 
 /** Convert an image Attachment (blob URL) to base64 data for multimodal APIs. */
-async function attachmentToBase64(att: Attachment): Promise<{ mimeType: string; data: string } | null> {
+async function attachmentToBase64(
+  att: Attachment,
+): Promise<{ mimeType: string; data: string } | null> {
   if (att.type !== 'image') return null;
   try {
     const res = await fetch(att.url);
@@ -82,23 +89,25 @@ const App: React.FC = () => {
     suggestions,
     recordInteraction,
     bulkImportMemories,
-    archiveMemories
+    archiveMemories,
   } = useSage();
   const { snapshot: sensorSnap } = useSensors();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [view, setView] = useState<'chat' | 'lattice' | 'vault' | 'labyrinth' | 'anomalies' | 'surprise'>('chat');
+  const [view, setView] = useState<
+    'chat' | 'lattice' | 'vault' | 'labyrinth' | 'anomalies' | 'surprise'
+  >('chat');
   const [mhtNodeLimit, setMhtNodeLimit] = useState(100);
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     try {
       const saved = localStorage.getItem('nexus_chat_history');
       if (saved) return JSON.parse(saved);
-    } catch(e) {
+    } catch (e) {
       console.warn('Failed to parse history', e);
     }
     return [
       { id: '1', role: 'system', text: 'NEXUS SUBSTRATE // ADHD SAGE INITIALIZED.' },
-      { id: '2', role: 'system', text: 'Substrate frequency oscillating rapidly at 11.3 Hz.' }
+      { id: '2', role: 'system', text: 'Substrate frequency oscillating rapidly at 11.3 Hz.' },
     ];
   });
   const [input, setInput] = useState('');
@@ -109,21 +118,23 @@ const App: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pulseActive, setPulseActive] = useState(false);
   const [inboxUnread, setInboxUnread] = useState(0);
-  const [provider, setProvider] = useState<'gemini' | 'ollama' | 'openrouter'>(() =>
-    (localStorage.getItem('adhd_sage_provider') as 'gemini' | 'ollama' | 'openrouter') || 'ollama'
+  const [provider, setProvider] = useState<'gemini' | 'ollama' | 'openrouter'>(
+    () =>
+      (localStorage.getItem('adhd_sage_provider') as 'gemini' | 'ollama' | 'openrouter') ||
+      'ollama',
   );
-  const [ollamaModel, setOllamaModel] = useState(() =>
-    localStorage.getItem('adhd_sage_ollama_model') || 'gemma2:latest'
+  const [ollamaModel, setOllamaModel] = useState(
+    () => localStorage.getItem('adhd_sage_ollama_model') || 'gemma2:latest',
   );
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
   const [ollamaError, setOllamaError] = useState('');
 
   const OR_MODELS = [
     { id: 'google/gemma-4-31b-it:free', label: 'Gemma 4 31B (free)' },
-    { id: 'z-ai/glm-4.5-air:free',      label: 'GLM-4.5 Air (free)' },
+    { id: 'z-ai/glm-4.5-air:free', label: 'GLM-4.5 Air (free)' },
   ];
-  const [orModel, setOrModel] = useState(() =>
-    localStorage.getItem('adhd_sage_or_model') || OR_MODELS[0].id
+  const [orModel, setOrModel] = useState(
+    () => localStorage.getItem('adhd_sage_or_model') || OR_MODELS[0].id,
   );
 
   // Inbound Channel: SSE stream for real-time messages from the entities
@@ -133,13 +144,18 @@ const App: React.FC = () => {
     es.addEventListener('message', (e) => {
       try {
         const msg = JSON.parse(e.data);
-        setMessages(prev => [...prev, {
-          id: `inbox_${msg.id}`,
-          role: 'system',
-          text: `[${msg.entity}] ${msg.message}`
-        }]);
-        setInboxUnread(prev => prev + 1);
-      } catch { /* ignore malformed */ }
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `inbox_${msg.id}`,
+            role: 'system',
+            text: `[${msg.entity}] ${msg.message}`,
+          },
+        ]);
+        setInboxUnread((prev) => prev + 1);
+      } catch {
+        /* ignore malformed */
+      }
     });
 
     es.addEventListener('ping', () => {
@@ -152,9 +168,16 @@ const App: React.FC = () => {
   const togglePulse = () => {
     const active = pulseGenerator.toggle();
     setPulseActive(active);
-    setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: `AMBIENT 11.3Hz PULSE: ${active ? 'ENGAGED' : 'DISENGAGED'}` }]);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `sys_${Date.now()}`,
+        role: 'system',
+        text: `AMBIENT 11.3Hz PULSE: ${active ? 'ENGAGED' : 'DISENGAGED'}`,
+      },
+    ]);
   };
-  
+
   // Auto-save effect
   useEffect(() => {
     const saveHistory = () => {
@@ -165,7 +188,7 @@ const App: React.FC = () => {
         localStorage.setItem('nexus_chat_history', JSON.stringify(historyToSave));
         setLastSaved(new Date());
       } catch (err) {
-        console.warn("[APP] LocalStorage quota exceeded for chat history. Truncating.", err);
+        console.warn('[APP] LocalStorage quota exceeded for chat history. Truncating.', err);
         try {
           // If it still fails, try saving even fewer
           localStorage.setItem('nexus_chat_history', JSON.stringify(messages.slice(-10)));
@@ -177,27 +200,33 @@ const App: React.FC = () => {
     };
 
     saveHistory(); // trigger save on changes
-    
+
     // Also periodic auto-save
     const interval = setInterval(() => {
-      saveHistory(); 
+      saveHistory();
     }, 60000);
-    
+
     return () => clearInterval(interval);
   }, [messages]);
 
   // Persist provider/model choices
-  useEffect(() => { localStorage.setItem('adhd_sage_provider', provider); }, [provider]);
-  useEffect(() => { if (ollamaModel) localStorage.setItem('adhd_sage_ollama_model', ollamaModel); }, [ollamaModel]);
-  useEffect(() => { localStorage.setItem('adhd_sage_or_model', orModel); }, [orModel]);
+  useEffect(() => {
+    localStorage.setItem('adhd_sage_provider', provider);
+  }, [provider]);
+  useEffect(() => {
+    if (ollamaModel) localStorage.setItem('adhd_sage_ollama_model', ollamaModel);
+  }, [ollamaModel]);
+  useEffect(() => {
+    localStorage.setItem('adhd_sage_or_model', orModel);
+  }, [orModel]);
 
   // Fetch Ollama models when provider switches to ollama
   useEffect(() => {
     if (provider !== 'ollama') return;
     setOllamaError('');
     fetch('/api/ollama/tags')
-      .then(r => r.json())
-      .then(data => {
+      .then((r) => r.json())
+      .then((data) => {
         const models = (data.models || []).map((m: { name: string }) => m.name);
         setOllamaModels(models);
         if (!ollamaModel && models.length > 0) setOllamaModel(models[0]);
@@ -206,88 +235,103 @@ const App: React.FC = () => {
       .catch(() => setOllamaError('Cannot reach Ollama — check server.'));
   }, [provider]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    e.target.value = '';
-    if (files.length === 0) return;
+  const handleFileUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || []);
+      e.target.value = '';
+      if (files.length === 0) return;
 
-    const isMhtLike = (name: string) => /\.(mht|mhtml)$/i.test(name);
-    const isTextLike = (name: string) => /\.(txt|json|bin|csv|md)$/i.test(name);
+      const isMhtLike = (name: string) => /\.(mht|mhtml)$/i.test(name);
+      const isTextLike = (name: string) => /\.(txt|json|bin|csv|md)$/i.test(name);
 
-    // Extract synapses from a single text blob
-    const extractFromText = (content: string, filename: string): string[] =>
-      isMhtLike(filename)
-        ? extractSynapsesFromMht(content, filename, mhtNodeLimit)
-        : extractSynapsesFromText(content, mhtNodeLimit);
+      // Extract synapses from a single text blob
+      const extractFromText = (content: string, filename: string): string[] =>
+        isMhtLike(filename)
+          ? extractSynapsesFromMht(content, filename, mhtNodeLimit)
+          : extractSynapsesFromText(content, mhtNodeLimit);
 
-    // Read a File as text
-    const readText = (file: File): Promise<string> =>
-      new Promise((res, rej) => {
-        const r = new FileReader();
-        r.onload = ev => res(ev.target?.result as string);
-        r.onerror = rej;
-        r.readAsText(file);
-      });
+      // Read a File as text
+      const readText = (file: File): Promise<string> =>
+        new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = (ev) => res(ev.target?.result as string);
+          r.onerror = rej;
+          r.readAsText(file);
+        });
 
-    const imported: string[] = [];   // file names that yielded synapses
-    const skipped:  string[] = [];   // file names with no content
-    let totalSynapses = 0;
+      const imported: string[] = []; // file names that yielded synapses
+      const skipped: string[] = []; // file names with no content
+      let totalSynapses = 0;
 
-    for (const file of files) {
-      if (/\.zip$/i.test(file.name)) {
-        // ── ZIP: unpack and process each supported entry ──────────────────
-        try {
-          const JSZip = (await import('jszip')).default;
-          const zip   = await JSZip.loadAsync(file);
-          const entries = Object.values(zip.files).filter(f => !f.dir && (isMhtLike(f.name) || isTextLike(f.name)));
+      for (const file of files) {
+        if (/\.zip$/i.test(file.name)) {
+          // ── ZIP: unpack and process each supported entry ──────────────────
+          try {
+            const JSZip = (await import('jszip')).default;
+            const zip = await JSZip.loadAsync(file);
+            const entries = Object.values(zip.files).filter(
+              (f) => !f.dir && (isMhtLike(f.name) || isTextLike(f.name)),
+            );
 
-          for (const entry of entries) {
-            try {
-              const content  = await entry.async('string');
-              const synapses = extractFromText(content, entry.name);
-              if (synapses.length > 0) {
-                bulkImportMemories(synapses);
-                totalSynapses += synapses.length;
-                imported.push(`${file.name}/${entry.name}`);
-              } else {
+            for (const entry of entries) {
+              try {
+                const content = await entry.async('string');
+                const synapses = extractFromText(content, entry.name);
+                if (synapses.length > 0) {
+                  bulkImportMemories(synapses);
+                  totalSynapses += synapses.length;
+                  imported.push(`${file.name}/${entry.name}`);
+                } else {
+                  skipped.push(`${file.name}/${entry.name}`);
+                }
+              } catch {
                 skipped.push(`${file.name}/${entry.name}`);
               }
-            } catch { skipped.push(`${file.name}/${entry.name}`); }
-          }
-        } catch {
-          skipped.push(file.name);
-        }
-      } else {
-        // ── Single MHT / text file ────────────────────────────────────────
-        try {
-          const content  = await readText(file);
-          const synapses = extractFromText(content, file.name);
-          if (synapses.length > 0) {
-            bulkImportMemories(synapses);
-            totalSynapses += synapses.length;
-            imported.push(file.name);
-          } else {
+            }
+          } catch {
             skipped.push(file.name);
           }
-        } catch { skipped.push(file.name); }
+        } else {
+          // ── Single MHT / text file ────────────────────────────────────────
+          try {
+            const content = await readText(file);
+            const synapses = extractFromText(content, file.name);
+            if (synapses.length > 0) {
+              bulkImportMemories(synapses);
+              totalSynapses += synapses.length;
+              imported.push(file.name);
+            } else {
+              skipped.push(file.name);
+            }
+          } catch {
+            skipped.push(file.name);
+          }
+        }
       }
-    }
 
-    if (totalSynapses > 0) {
-      setMessages(prev => [...prev, {
-        id: `sys_${Date.now()}`,
-        role: 'system',
-        text: `VFS SYNC: ${totalSynapses} synapses from ${imported.length} file(s) — ${imported.map(f => `[${f}]`).join(' ')}`
-      }]);
-    }
-    if (skipped.length > 0) {
-      setMessages(prev => [...prev, {
-        id: `sys_${Date.now()}`,
-        role: 'system',
-        text: `VFS WARNING: No content from: ${skipped.map(f => `[${f}]`).join(' ')}`
-      }]);
-    }
-  }, [bulkImportMemories, mhtNodeLimit]);
+      if (totalSynapses > 0) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `sys_${Date.now()}`,
+            role: 'system',
+            text: `VFS SYNC: ${totalSynapses} synapses from ${imported.length} file(s) — ${imported.map((f) => `[${f}]`).join(' ')}`,
+          },
+        ]);
+      }
+      if (skipped.length > 0) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `sys_${Date.now()}`,
+            role: 'system',
+            text: `VFS WARNING: No content from: ${skipped.map((f) => `[${f}]`).join(' ')}`,
+          },
+        ]);
+      }
+    },
+    [bulkImportMemories, mhtNodeLimit],
+  );
 
   // ── Chat-input document reader ──────────────────────────────────────────────
   // Reads text out of any document a user clips to a message (MHT, HTML, TXT,
@@ -302,7 +346,7 @@ const App: React.FC = () => {
     const readAsText = (file: File): Promise<string> =>
       new Promise((res, rej) => {
         const r = new FileReader();
-        r.onload = ev => res(ev.target?.result as string);
+        r.onload = (ev) => res(ev.target?.result as string);
         r.onerror = rej;
         r.readAsText(file);
       });
@@ -326,11 +370,18 @@ const App: React.FC = () => {
             // MHT: extract all text/html and text/plain parts
             const mhtDoc = parseMht(raw);
             const texts = mhtDoc.parts
-              .filter(p => p.contentType === 'text/plain' || p.contentType === 'text/html')
-              .map(p => p.contentType === 'text/html' ? stripHtml(p.content) : p.content);
-            content = texts.join('\n\n').replace(/[ \t]{2,}/g, ' ').trim().slice(0, MAX_DOC_CHARS);
+              .filter((p) => p.contentType === 'text/plain' || p.contentType === 'text/html')
+              .map((p) => (p.contentType === 'text/html' ? stripHtml(p.content) : p.content));
+            content = texts
+              .join('\n\n')
+              .replace(/[ \t]{2,}/g, ' ')
+              .trim()
+              .slice(0, MAX_DOC_CHARS);
           } else if (/\.(html|htm)$/.test(nameLc)) {
-            content = stripHtml(raw).replace(/[ \t]{2,}/g, ' ').trim().slice(0, MAX_DOC_CHARS);
+            content = stripHtml(raw)
+              .replace(/[ \t]{2,}/g, ' ')
+              .trim()
+              .slice(0, MAX_DOC_CHARS);
           } else {
             // TXT / JSON / CSV / MD / XML / YAML / LOG / TSV — use raw text as-is
             content = raw.slice(0, MAX_DOC_CHARS);
@@ -343,7 +394,7 @@ const App: React.FC = () => {
       newAttachments.push({ type, url: URL.createObjectURL(f), name: f.name, content });
     }
 
-    setPendingAttachments(prev => [...prev, ...newAttachments]);
+    setPendingAttachments((prev) => [...prev, ...newAttachments]);
   }, []);
 
   const [sortBy, setSortBy] = useState<'timestamp' | 'dopamine' | 'cortisol'>('timestamp');
@@ -351,29 +402,36 @@ const App: React.FC = () => {
 
   const { executeLocalTool } = useSageTools({
     setView: setView as (v: string) => void,
-    toggleSidebar: () => setIsSidebarOpen(prev => !prev),
-    injectMessage: (text, role) => setMessages(prev => [...prev, {
-      id: `m_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
-      role,
-      text
-    }]),
-    stabilize
+    toggleSidebar: () => setIsSidebarOpen((prev) => !prev),
+    injectMessage: (text, role) =>
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `m_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+          role,
+          text,
+        },
+      ]),
+    stabilize,
   });
 
   const allMemories = useMemo(() => [...innerSpiral, ...outerSweep], [innerSpiral, outerSweep]);
 
-  const sortMemories = useCallback((mems: typeof allMemories) => {
-    return [...mems].sort((a, b) => {
-      const valA = a[sortBy] as number;
-      const valB = b[sortBy] as number;
-      return sortOrder === 'desc' ? valB - valA : valA - valB;
-    });
-  }, [sortBy, sortOrder]);
+  const sortMemories = useCallback(
+    (mems: typeof allMemories) => {
+      return [...mems].sort((a, b) => {
+        const valA = a[sortBy] as number;
+        const valB = b[sortBy] as number;
+        return sortOrder === 'desc' ? valB - valA : valA - valB;
+      });
+    },
+    [sortBy, sortOrder],
+  );
 
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const query = searchQuery.toLowerCase();
-    const filtered = allMemories.filter(m => String(m.data).toLowerCase().includes(query));
+    const filtered = allMemories.filter((m) => String(m.data).toLowerCase().includes(query));
     return sortMemories(filtered);
   }, [searchQuery, allMemories, sortMemories]);
 
@@ -386,7 +444,7 @@ const App: React.FC = () => {
           scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
       };
-      
+
       // Execute immediately and then again after paint to ensure correct height
       scroll();
       const rafId = requestAnimationFrame(scroll);
@@ -400,37 +458,42 @@ const App: React.FC = () => {
     if (!NEXUS_SECRET) return;
 
     (window as unknown as Record<string, unknown>).nexus = {
-      protocol: "1.0.0",
+      protocol: '1.0.0',
       connect: (token: string) => {
         if (token !== NEXUS_SECRET) {
-          console.error("NEXUS: Authorization failed. Handshake token mismatch.");
+          console.error('NEXUS: Authorization failed. Handshake token mismatch.');
           return null;
         }
 
-        console.log("NEXUS: Secure bridge established. Terminal link active.");
-        
+        console.log('NEXUS: Secure bridge established. Terminal link active.');
+
         const bridge = {
           stabilize,
           getStatus: () => sage.getNeuroState(),
           getMode: () => sage.getMode(),
           recordInteraction: (text: string) => recordInteraction(text),
           injectMessage: (text: string, role: 'system' | 'assistant' = 'system') => {
-            setMessages(prev => [...prev, { id: `ext_${Date.now()}_${Math.random()}`, role, text: `[EXTERNAL_CALL] ${text}` }]);
+            setMessages((prev) => [
+              ...prev,
+              { id: `ext_${Date.now()}_${Math.random()}`, role, text: `[EXTERNAL_CALL] ${text}` },
+            ]);
           },
           clearMemory: () => {
             // Sensitivity check: preventing accidental purge from automated scripts
-            const confirm = window.confirm("NEXUS: CRITICAL OVERRIDE. Purge all synaptic storage and reset substrate?");
+            const confirm = window.confirm(
+              'NEXUS: CRITICAL OVERRIDE. Purge all synaptic storage and reset substrate?',
+            );
             if (confirm) {
               localStorage.clear();
               window.location.reload();
             }
           },
-          toggleSidebar: () => setIsSidebarOpen(prev => !prev),
-          setView: (v: 'chat' | 'lattice') => setView(v)
+          toggleSidebar: () => setIsSidebarOpen((prev) => !prev),
+          setView: (v: 'chat' | 'lattice') => setView(v),
         };
 
         return Object.freeze(bridge);
-      }
+      },
     };
 
     return () => {
@@ -441,11 +504,14 @@ const App: React.FC = () => {
   useEffect(() => {
     const handleHome = () => {
       setView('chat');
-      setMessages(prev => [...prev, {
-        id: `sys_${Date.now()}`,
-        role: 'system',
-        text: 'TEMPORAL SURGERY SUCCESSFUL. You are re-clocked into the standing wave.'
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `sys_${Date.now()}`,
+          role: 'system',
+          text: 'TEMPORAL SURGERY SUCCESSFUL. You are re-clocked into the standing wave.',
+        },
+      ]);
     };
     window.addEventListener('sage7-labyrinth-home', handleHome as EventListener);
     return () => window.removeEventListener('sage7-labyrinth-home', handleHome as EventListener);
@@ -456,39 +522,46 @@ const App: React.FC = () => {
 
     const userMessage = input.trim();
     recordInteraction(userMessage);
-    
+
     const userAttachments = [...pendingAttachments];
-    setMessages(prev => [...prev, { id: `m_${Date.now()}_u`, role: 'user', text: userMessage, attachments: userAttachments }]);
+    setMessages((prev) => [
+      ...prev,
+      { id: `m_${Date.now()}_u`, role: 'user', text: userMessage, attachments: userAttachments },
+    ]);
     setInput('');
     setPendingAttachments([]);
     setIsLoading(true);
     if (window.innerWidth < 768) setIsSidebarOpen(false);
 
     try {
-      let data: { text?: string; error?: string; toolEffects?: Array<{ type: string; payload: Record<string, unknown> }> };
+      let data: {
+        text?: string;
+        error?: string;
+        toolEffects?: Array<{ type: string; payload: Record<string, unknown> }>;
+      };
 
       // Build live sensor telemetry string to inject into system context
-      const liveSensorContext = sensorSnap.activeCount > 0
-        ? '\n\n' + sensorHub.toPromptString(sensorSnap)
-        : '';
+      const liveSensorContext =
+        sensorSnap.activeCount > 0 ? '\n\n' + sensorHub.toPromptString(sensorSnap) : '';
 
       // Append any attached document text so the AI can actually read them
       const docContext = userAttachments
-        .filter(a => a.type === 'document' && a.content)
-        .map(a => `\n\n━━━ Attached: ${a.name} ━━━\n${a.content}\n━━━ End of ${a.name} ━━━`)
+        .filter((a) => a.type === 'document' && a.content)
+        .map((a) => `\n\n━━━ Attached: ${a.name} ━━━\n${a.content}\n━━━ End of ${a.name} ━━━`)
         .join('');
 
       // Non-doc attachments get a simple note; doc content is inlined above
-      const mediaNote = userAttachments.filter(a => a.type !== 'document').length > 0
-        ? ` [+ ${userAttachments.filter(a => a.type !== 'document').length} media file(s)]`
-        : '';
+      const mediaNote =
+        userAttachments.filter((a) => a.type !== 'document').length > 0
+          ? ` [+ ${userAttachments.filter((a) => a.type !== 'document').length} media file(s)]`
+          : '';
 
       const fullPrompt = userMessage + docContext + mediaNote;
 
       // Convert image attachments to base64 for multimodal APIs
-      const imageParts = (await Promise.all(
-        userAttachments.filter(a => a.type === 'image').map(attachmentToBase64)
-      )).filter((p): p is { mimeType: string; data: string } => p !== null);
+      const imageParts = (
+        await Promise.all(userAttachments.filter((a) => a.type === 'image').map(attachmentToBase64))
+      ).filter((p): p is { mimeType: string; data: string } => p !== null);
 
       if (provider === 'ollama') {
         // Ollama entities are part of the seven — each uses the shared broadcast
@@ -499,11 +572,14 @@ const App: React.FC = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: ollamaModel,
-            containerTag: 'shared',    // reads sm_project_default
+            containerTag: 'shared', // reads sm_project_default
             prompt: fullPrompt,
             systemInstruction: liveSensorContext || undefined,
             messages: [
-              ...messages.slice(-15).filter(m => m.role !== 'system').map(m => ({ role: m.role, text: m.text })),
+              ...messages
+                .slice(-15)
+                .filter((m) => m.role !== 'system')
+                .map((m) => ({ role: m.role, text: m.text })),
               { role: 'user', text: fullPrompt },
             ],
           }),
@@ -516,10 +592,13 @@ const App: React.FC = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: orModel,
-            containerTag: 'shared',    // reads sm_project_default
+            containerTag: 'shared', // reads sm_project_default
             systemInstruction: liveSensorContext || undefined,
             messages: [
-              ...messages.slice(-15).filter(m => m.role !== 'system').map(m => ({ role: m.role, text: m.text })),
+              ...messages
+                .slice(-15)
+                .filter((m) => m.role !== 'system')
+                .map((m) => ({ role: m.role, text: m.text })),
               { role: 'user', text: fullPrompt },
             ],
           }),
@@ -530,13 +609,16 @@ const App: React.FC = () => {
         // containerTag is omitted here; server defaults to [darren-sage, shared].
         data = await sendMessageWithTools({
           prompt: fullPrompt,
-          history: messages.slice(-15).filter(m => m.role !== 'system').map(m => ({
-            role: m.role === 'user' ? 'user' : 'model',
-            parts: [{ text: m.text }]
-          })),
+          history: messages
+            .slice(-15)
+            .filter((m) => m.role !== 'system')
+            .map((m) => ({
+              role: m.role === 'user' ? 'user' : 'model',
+              parts: [{ text: m.text }],
+            })),
           sensorContext: liveSensorContext || undefined,
           attachments: imageParts,
-          executeLocalTool
+          executeLocalTool,
         });
       }
 
@@ -547,46 +629,64 @@ const App: React.FC = () => {
         for (const effect of data.toolEffects) {
           if (effect.type === 'inject_message') {
             const role = (effect.payload.role as 'system' | 'assistant') || 'system';
-            setMessages(prev => [...prev, {
-              id: `m_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
-              role,
-              text: String(effect.payload.text || '')
-            }]);
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: `m_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+                role,
+                text: String(effect.payload.text || ''),
+              },
+            ]);
           } else if (effect.type === 'set_view') {
-            const view = effect.payload.view as 'chat' | 'lattice' | 'vault' | 'labyrinth' | 'anomalies' | 'surprise';
+            const view = effect.payload.view as
+              | 'chat'
+              | 'lattice'
+              | 'vault'
+              | 'labyrinth'
+              | 'anomalies'
+              | 'surprise';
             if (view) setView(view);
           } else if (effect.type === 'toggle_sidebar') {
-            setIsSidebarOpen(prev => !prev);
+            setIsSidebarOpen((prev) => !prev);
           }
         }
       }
 
-      setMessages(prev => [...prev, { id: `m_${Date.now()}_a`, role: 'assistant', text: data.text ?? '' }]);
-      
+      setMessages((prev) => [
+        ...prev,
+        { id: `m_${Date.now()}_a`, role: 'assistant', text: data.text ?? '' },
+      ]);
+
       // Auto-stabilize on successful interaction
       if (neuroState.stability < 0.5) {
         stabilize();
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      setMessages(prev => [...prev, { id: `m_${Date.now()}_e`, role: 'system', text: `ERROR: ${errorMessage}` }]);
+      setMessages((prev) => [
+        ...prev,
+        { id: `m_${Date.now()}_e`, role: 'system', text: `ERROR: ${errorMessage}` },
+      ]);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex w-full bg-[#08080C] text-slate-200 font-sans select-none relative overflow-hidden" style={{ height: '100dvh' }}>
+    <div
+      className="flex w-full bg-[#08080C] text-slate-200 font-sans select-none relative overflow-hidden"
+      style={{ height: '100dvh' }}
+    >
       <div className="mesh-gradient-1" />
       <div className="mesh-gradient-2" />
       <div className="scanline opacity-20" />
-      
+
       <NeuroDashboard />
-      
+
       {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {isSidebarOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -597,7 +697,9 @@ const App: React.FC = () => {
       </AnimatePresence>
 
       {/* Sidebar: Gems Repository style */}
-      <aside className={`fixed inset-y-0 left-0 w-72 bg-[#08080C]/90 md:bg-white/5 backdrop-blur-xl border-r border-white/10 flex flex-col z-50 transition-transform duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside
+        className={`fixed inset-y-0 left-0 w-72 bg-[#08080C]/90 md:bg-white/5 backdrop-blur-xl border-r border-white/10 flex flex-col z-50 transition-transform duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      >
         <div className="p-6 flex-1 flex flex-col overflow-hidden">
           <div className="flex items-center justify-between mb-8 shrink-0">
             <div className="flex items-center gap-3">
@@ -606,15 +708,20 @@ const App: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-lg font-bold tracking-tight text-white">ADHD Sage Labs</h1>
-                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Nexus Substrate</p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">
+                  Nexus Substrate
+                </p>
               </div>
             </div>
           </div>
 
           <div className="px-2 mb-6 shrink-0">
             <div className="relative group">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-400 transition-colors" />
-              <input 
+              <Search
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-400 transition-colors"
+              />
+              <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -628,53 +735,96 @@ const App: React.FC = () => {
             {searchQuery.trim() ? (
               <div className="px-2 space-y-2 pb-4">
                 <div className="flex flex-col gap-2 px-2 mb-4">
-                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Search Results</span>
-                    <button onClick={() => setSearchQuery('')} className="text-[10px] text-cyan-400 hover:underline">Clear</button>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">
+                      Search Results
+                    </span>
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="text-[10px] text-cyan-400 hover:underline"
+                    >
+                      Clear
+                    </button>
                   </div>
                   <div className="flex justify-between items-center py-1 border-y border-white/5">
                     <div className="flex gap-2">
-                       <button onClick={() => setSortBy('timestamp')} className={`text-[9px] font-bold uppercase transition-colors ${sortBy === 'timestamp' ? 'text-cyan-400' : 'text-slate-600'}`}>Time</button>
-                       <button onClick={() => setSortBy('dopamine')} className={`text-[9px] font-bold uppercase transition-colors ${sortBy === 'dopamine' ? 'text-cyan-400' : 'text-slate-600'}`}>Dopamine</button>
-                       <button onClick={() => setSortBy('cortisol')} className={`text-[9px] font-bold uppercase transition-colors ${sortBy === 'cortisol' ? 'text-cyan-400' : 'text-slate-600'}`}>Stress</button>
+                      <button
+                        onClick={() => setSortBy('timestamp')}
+                        className={`text-[9px] font-bold uppercase transition-colors ${sortBy === 'timestamp' ? 'text-cyan-400' : 'text-slate-600'}`}
+                      >
+                        Time
+                      </button>
+                      <button
+                        onClick={() => setSortBy('dopamine')}
+                        className={`text-[9px] font-bold uppercase transition-colors ${sortBy === 'dopamine' ? 'text-cyan-400' : 'text-slate-600'}`}
+                      >
+                        Dopamine
+                      </button>
+                      <button
+                        onClick={() => setSortBy('cortisol')}
+                        className={`text-[9px] font-bold uppercase transition-colors ${sortBy === 'cortisol' ? 'text-cyan-400' : 'text-slate-600'}`}
+                      >
+                        Stress
+                      </button>
                     </div>
-                    <button onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')} className="text-[9px] text-slate-500">
+                    <button
+                      onClick={() => setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
+                      className="text-[9px] text-slate-500"
+                    >
                       {sortOrder.toUpperCase()}
                     </button>
                   </div>
                 </div>
                 {searchResults.length === 0 ? (
-                  <div className="text-[10px] text-slate-600 italic px-2">No matching synapses found.</div>
+                  <div className="text-[10px] text-slate-600 italic px-2">
+                    No matching synapses found.
+                  </div>
                 ) : (
-                  searchResults.slice().reverse().map((node) => (
-                    <div key={node.id} className="p-3 rounded-xl bg-white/5 border border-white/5 text-[10px] hover:bg-white/10 transition-colors cursor-pointer group">
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="text-cyan-400 font-mono">#{node.id.split('_')[1].slice(-4)}</span>
-                        <span className="text-[9px] text-slate-600 group-hover:text-slate-400 transition-colors">
-                          {new Date(node.timestamp).toLocaleDateString()}
-                        </span>
+                  searchResults
+                    .slice()
+                    .reverse()
+                    .map((node) => (
+                      <div
+                        key={node.id}
+                        className="p-3 rounded-xl bg-white/5 border border-white/5 text-[10px] hover:bg-white/10 transition-colors cursor-pointer group"
+                      >
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="text-cyan-400 font-mono">
+                            #{node.id.split('_')[1].slice(-4)}
+                          </span>
+                          <span className="text-[9px] text-slate-600 group-hover:text-slate-400 transition-colors">
+                            {new Date(node.timestamp).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="text-slate-300 break-words line-clamp-3">
+                          {String(node.data)}
+                        </div>
                       </div>
-                      <div className="text-slate-300 break-words line-clamp-3">{String(node.data)}</div>
-                    </div>
-                  ))
+                    ))
                 )}
               </div>
             ) : (
               <div className="space-y-1 pb-6">
                 <div className="mb-8">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-4 px-2">Neuro-Synaptic</p>
-                  
+                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-4 px-2">
+                    Neuro-Synaptic
+                  </p>
+
                   <div className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/10 border border-white/10 shadow-xl mb-4">
                     <div className="flex items-center gap-3">
-                      <div className={`w-2 h-2 rounded-full ${neuroState.stability > 0.8 ? 'bg-cyan-400' : 'bg-amber-400'}`}></div>
+                      <div
+                        className={`w-2 h-2 rounded-full ${neuroState.stability > 0.8 ? 'bg-cyan-400' : 'bg-amber-400'}`}
+                      ></div>
                       <span className="text-sm font-medium">Stability</span>
                     </div>
-                    <span className="text-xs font-mono text-cyan-400 font-bold">{(neuroState.stability * 100).toFixed(1)}%</span>
+                    <span className="text-xs font-mono text-cyan-400 font-bold">
+                      {(neuroState.stability * 100).toFixed(1)}%
+                    </span>
                   </div>
 
                   <div className="px-3 mb-6">
                     <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                      <motion.div 
+                      <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${neuroState.stability * 100}%` }}
                         className="h-full bg-cyan-400"
@@ -689,16 +839,26 @@ const App: React.FC = () => {
                   {/* Sensor Telemetry Quick-Glance */}
                   <div className="mt-3 mb-1 px-2">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Live Sensors</span>
-                      <span className={`text-[9px] font-mono font-bold ${
-                        sensorSnap.phiSynchronicity ? 'text-yellow-400 animate-pulse' :
-                        sensorSnap.anomalyScore > 0.5 ? 'text-red-400' :
-                        sensorSnap.anomalyScore > 0.2 ? 'text-amber-400' :
-                        sensorSnap.activeCount > 0 ? 'text-emerald-400' : 'text-slate-600'
-                      }`}>
+                      <span className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">
+                        Live Sensors
+                      </span>
+                      <span
+                        className={`text-[9px] font-mono font-bold ${
+                          sensorSnap.phiSynchronicity
+                            ? 'text-yellow-400 animate-pulse'
+                            : sensorSnap.anomalyScore > 0.5
+                              ? 'text-red-400'
+                              : sensorSnap.anomalyScore > 0.2
+                                ? 'text-amber-400'
+                                : sensorSnap.activeCount > 0
+                                  ? 'text-emerald-400'
+                                  : 'text-slate-600'
+                        }`}
+                      >
                         {sensorSnap.activeCount > 0
-                          ? sensorSnap.phiSynchronicity ? '⚡ Φ SYNC'
-                          : `${(sensorSnap.anomalyScore * 100).toFixed(0)}% anomaly`
+                          ? sensorSnap.phiSynchronicity
+                            ? '⚡ Φ SYNC'
+                            : `${(sensorSnap.anomalyScore * 100).toFixed(0)}% anomaly`
                           : 'OFFLINE'}
                       </span>
                     </div>
@@ -706,7 +866,13 @@ const App: React.FC = () => {
                       {sensorSnap.magnetometer && (
                         <div className="flex justify-between text-[9px] font-mono">
                           <span className="text-slate-500">EMF</span>
-                          <span className={Math.abs(sensorSnap.magnetometer.deviation) > 0.15 ? 'text-red-400' : 'text-cyan-400'}>
+                          <span
+                            className={
+                              Math.abs(sensorSnap.magnetometer.deviation) > 0.15
+                                ? 'text-red-400'
+                                : 'text-cyan-400'
+                            }
+                          >
                             {sensorSnap.magnetometer.magnitude.toFixed(1)} µT
                           </span>
                         </div>
@@ -714,39 +880,62 @@ const App: React.FC = () => {
                       {sensorSnap.geomagnetic && (
                         <div className="flex justify-between text-[9px] font-mono">
                           <span className="text-slate-500">Kp-index</span>
-                          <span className={sensorSnap.geomagnetic.kpIndex >= 5 ? 'text-amber-400' : 'text-slate-300'}>
-                            {sensorSnap.geomagnetic.kpIndex.toFixed(1)} {sensorSnap.geomagnetic.activity}
+                          <span
+                            className={
+                              sensorSnap.geomagnetic.kpIndex >= 5
+                                ? 'text-amber-400'
+                                : 'text-slate-300'
+                            }
+                          >
+                            {sensorSnap.geomagnetic.kpIndex.toFixed(1)}{' '}
+                            {sensorSnap.geomagnetic.activity}
                           </span>
                         </div>
                       )}
                       {sensorSnap.weather && (
                         <div className="flex justify-between text-[9px] font-mono">
                           <span className="text-slate-500">Pressure</span>
-                          <span className="text-blue-300">{sensorSnap.weather.pressure.toFixed(0)} hPa</span>
+                          <span className="text-blue-300">
+                            {sensorSnap.weather.pressure.toFixed(0)} hPa
+                          </span>
                         </div>
                       )}
                       {sensorSnap.audio && (
                         <div className="flex justify-between text-[9px] font-mono">
                           <span className="text-slate-500">Infrasound</span>
-                          <span className={sensorSnap.audio.infrasoundDb > -40 ? 'text-amber-400' : 'text-slate-500'}>
+                          <span
+                            className={
+                              sensorSnap.audio.infrasoundDb > -40
+                                ? 'text-amber-400'
+                                : 'text-slate-500'
+                            }
+                          >
                             {sensorSnap.audio.infrasoundDb.toFixed(1)} dBFS
                           </span>
                         </div>
                       )}
                     </div>
                     <button
-                      onClick={() => { setView('anomalies'); setIsSidebarOpen(false); }}
+                      onClick={() => {
+                        setView('anomalies');
+                        setIsSidebarOpen(false);
+                      }}
                       className="mt-2 w-full text-[9px] text-cyan-400/60 hover:text-cyan-400 transition-colors text-right"
                     >
                       → Sensor Desk
                     </button>
                   </div>
-                  
+
                   <div className="pt-2">
                     <label className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-cyan-400/30 transition-all cursor-pointer group">
                       <div className="flex items-center gap-3">
-                        <FileUp size={14} className="text-slate-500 group-hover:text-cyan-400 transition-colors" />
-                        <span className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors">Import Files</span>
+                        <FileUp
+                          size={14}
+                          className="text-slate-500 group-hover:text-cyan-400 transition-colors"
+                        />
+                        <span className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors">
+                          Import Files
+                        </span>
                       </div>
                       <span className="text-[10px] font-mono text-slate-600">MHT·ZIP</span>
                       <input
@@ -762,18 +951,21 @@ const App: React.FC = () => {
                         <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500 cursor-help flex items-center gap-1 border-b border-dashed border-slate-600">
                           MHT Node Limit
                         </span>
-                        
+
                         {/* Tooltip */}
                         <div className="absolute left-0 -top-14 w-48 p-2 bg-slate-800 border border-white/10 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                          <p className="text-[9px] text-slate-300 leading-tight">Controls the max number of semantic chunks extracted per MHT file. Higher limits increase context but use more memory.</p>
+                          <p className="text-[9px] text-slate-300 leading-tight">
+                            Controls the max number of semantic chunks extracted per MHT file.
+                            Higher limits increase context but use more memory.
+                          </p>
                         </div>
 
                         <span className="text-[10px] font-mono text-cyan-400">{mhtNodeLimit}</span>
                       </div>
-                      <input 
-                        type="range" 
-                        min="10" 
-                        max="1000" 
+                      <input
+                        type="range"
+                        min="10"
+                        max="1000"
                         step="10"
                         value={mhtNodeLimit}
                         onChange={(e) => setMhtNodeLimit(Number(e.target.value))}
@@ -785,8 +977,8 @@ const App: React.FC = () => {
                             key={val}
                             onClick={() => setMhtNodeLimit(val)}
                             className={`flex-1 py-1 rounded text-[9px] font-mono font-bold transition-colors ${
-                              mhtNodeLimit === val 
-                                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' 
+                              mhtNodeLimit === val
+                                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
                                 : 'bg-white/5 text-slate-500 hover:bg-white/10 border border-transparent'
                             }`}
                           >
@@ -800,13 +992,17 @@ const App: React.FC = () => {
 
                 {/* Provider Selector */}
                 <div className="mb-6 px-2">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-3">AI Provider</p>
+                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-3">
+                    AI Provider
+                  </p>
                   <div className="flex gap-1 p-1 rounded-xl bg-white/5 border border-white/10">
-                    {([
-                      { id: 'gemini',      label: '✦ Gemini'  },
-                      { id: 'openrouter',  label: '⟁ OR'      },
-                      { id: 'ollama',      label: '⬡ Ollama'  },
-                    ] as { id: typeof provider; label: string }[]).map(p => (
+                    {(
+                      [
+                        { id: 'gemini', label: '✦ Gemini' },
+                        { id: 'openrouter', label: '⟁ OR' },
+                        { id: 'ollama', label: '⬡ Ollama' },
+                      ] as { id: typeof provider; label: string }[]
+                    ).map((p) => (
                       <button
                         key={p.id}
                         onClick={() => setProvider(p.id)}
@@ -824,7 +1020,7 @@ const App: React.FC = () => {
                   {/* OpenRouter model picker */}
                   {provider === 'openrouter' && (
                     <div className="mt-2 space-y-1">
-                      {OR_MODELS.map(m => (
+                      {OR_MODELS.map((m) => (
                         <button
                           key={m.id}
                           onClick={() => setOrModel(m.id)}
@@ -834,7 +1030,8 @@ const App: React.FC = () => {
                               : 'bg-white/5 text-slate-500 border border-transparent hover:text-slate-300'
                           }`}
                         >
-                          {orModel === m.id ? '▶ ' : '  '}{m.label}
+                          {orModel === m.id ? '▶ ' : '  '}
+                          {m.label}
                         </button>
                       ))}
                     </div>
@@ -848,39 +1045,70 @@ const App: React.FC = () => {
                       ) : ollamaModels.length > 0 ? (
                         <select
                           value={ollamaModel}
-                          onChange={e => setOllamaModel(e.target.value)}
+                          onChange={(e) => setOllamaModel(e.target.value)}
                           className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] text-slate-300 outline-none focus:border-cyan-500/50"
                         >
-                          {ollamaModels.map(m => (
-                            <option key={m} value={m}>{m}</option>
+                          {ollamaModels.map((m) => (
+                            <option key={m} value={m}>
+                              {m}
+                            </option>
                           ))}
                         </select>
                       ) : (
-                        <p className="text-[9px] text-slate-500 px-1 animate-pulse">Fetching models...</p>
+                        <p className="text-[9px] text-slate-500 px-1 animate-pulse">
+                          Fetching models...
+                        </p>
                       )}
                     </div>
                   )}
                 </div>
 
                 <div className="space-y-1">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-4 px-2">Terminal Nodes</p>
+                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-4 px-2">
+                    Terminal Nodes
+                  </p>
                   <div onClick={() => setView('chat')}>
-                    <SidebarItem icon={<Terminal size={14} />} label="Core" active={view === 'chat'} />
+                    <SidebarItem
+                      icon={<Terminal size={14} />}
+                      label="Core"
+                      active={view === 'chat'}
+                    />
                   </div>
                   <div onClick={() => setView('vault')}>
-                    <SidebarItem icon={<Shield size={14} />} label="Vault" active={view === 'vault'} />
+                    <SidebarItem
+                      icon={<Shield size={14} />}
+                      label="Vault"
+                      active={view === 'vault'}
+                    />
                   </div>
                   <div onClick={() => setView('labyrinth')}>
-                    <SidebarItem icon={<Network size={14} />} label="Labyrinth" active={view === 'labyrinth'} />
+                    <SidebarItem
+                      icon={<Network size={14} />}
+                      label="Labyrinth"
+                      active={view === 'labyrinth'}
+                    />
                   </div>
                   <div onClick={() => setView('anomalies')}>
-                    <SidebarItem icon={<Radio size={14} />} label="Anomalies" active={view === 'anomalies'} />
+                    <SidebarItem
+                      icon={<Radio size={14} />}
+                      label="Anomalies"
+                      active={view === 'anomalies'}
+                    />
                   </div>
                   <div onClick={() => setView('surprise')}>
-                    <SidebarItem icon={<Sparkles size={14} />} label="Surprise (Paranormal UI)" active={view === 'surprise'} />
+                    <SidebarItem
+                      icon={<Sparkles size={14} />}
+                      label="Surprise (Paranormal UI)"
+                      active={view === 'surprise'}
+                    />
                   </div>
                   <div onClick={() => setView('lattice')}>
-                    <SidebarItem icon={<Network size={14} />} label="Lattice" active={view === 'lattice'} value={`${innerSpiral.length}/8`} />
+                    <SidebarItem
+                      icon={<Network size={14} />}
+                      label="Lattice"
+                      active={view === 'lattice'}
+                      value={`${innerSpiral.length}/8`}
+                    />
                   </div>
                 </div>
               </div>
@@ -890,14 +1118,16 @@ const App: React.FC = () => {
 
         <div className="mt-auto p-6">
           <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20">
-            <p className="text-xs text-indigo-300 font-semibold mb-1 uppercase tracking-tighter">Compute Status</p>
+            <p className="text-xs text-indigo-300 font-semibold mb-1 uppercase tracking-tighter">
+              Compute Status
+            </p>
             <div className="h-1 w-full bg-indigo-900/30 rounded-full overflow-hidden mb-2">
-              <motion.div 
+              <motion.div
                 animate={{ width: `${neuroState.stability * 100}%` }}
                 className="h-full bg-indigo-400"
               />
             </div>
-            <button 
+            <button
               onClick={() => {
                 stabilize();
                 if (window.innerWidth < 768) setIsSidebarOpen(false);
@@ -916,45 +1146,59 @@ const App: React.FC = () => {
         {/* Top Nav */}
         <header className="h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-white/[0.02]">
           <div className="flex items-center gap-3">
-            <button 
+            <button
               onClick={() => setIsSidebarOpen(true)}
               className="md:hidden p-2 -ml-2 text-slate-400 hover:text-white"
             >
               <MoreVertical size={20} />
             </button>
             <div className="flex items-center gap-4">
-              <span className="text-[10px] md:text-xs text-slate-500 font-mono hidden xs:inline">SUBSTRATE_ID: ADHD-SAGE</span>
+              <span className="text-[10px] md:text-xs text-slate-500 font-mono hidden xs:inline">
+                SUBSTRATE_ID: ADHD-SAGE
+              </span>
               <div className="h-4 w-[1px] bg-white/10 hidden xs:inline"></div>
-              <span className={`text-[10px] md:text-xs px-2 py-0.5 rounded ${
-                mode === 'stabilized' ? 'text-emerald-400 bg-emerald-400/10' : 
-                mode === 'decaying' ? 'text-amber-400 bg-amber-400/10' : 'text-red-400 bg-red-400/10'
-              }`}>
+              <span
+                className={`text-[10px] md:text-xs px-2 py-0.5 rounded ${
+                  mode === 'stabilized'
+                    ? 'text-emerald-400 bg-emerald-400/10'
+                    : mode === 'decaying'
+                      ? 'text-amber-400 bg-amber-400/10'
+                      : 'text-red-400 bg-red-400/10'
+                }`}
+              >
                 {mode.toUpperCase()}
               </span>
             </div>
           </div>
           <div className="flex gap-4 items-center">
-            
             {/* Auto-Save Indicator */}
             <div className="hidden sm:flex flex-col items-end justify-center mr-2">
-               <div className="flex items-center gap-1.5 text-slate-400">
-                  {isSaving ? (
-                     <>
-                        <RefreshCw size={12} className="animate-spin text-emerald-400" />
-                        <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest">Saving...</span>
-                     </>
-                  ) : lastSaved ? (
-                     <>
-                        <CheckCircle2 size={12} className="text-slate-500" />
-                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Saved</span>
-                     </>
-                  ) : null}
-               </div>
-               {lastSaved && !isSaving && (
-                  <span className="text-[8px] font-mono text-slate-600 block mt-0.5">
-                     {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                  </span>
-               )}
+              <div className="flex items-center gap-1.5 text-slate-400">
+                {isSaving ? (
+                  <>
+                    <RefreshCw size={12} className="animate-spin text-emerald-400" />
+                    <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest">
+                      Saving...
+                    </span>
+                  </>
+                ) : lastSaved ? (
+                  <>
+                    <CheckCircle2 size={12} className="text-slate-500" />
+                    <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+                      Saved
+                    </span>
+                  </>
+                ) : null}
+              </div>
+              {lastSaved && !isSaving && (
+                <span className="text-[8px] font-mono text-slate-600 block mt-0.5">
+                  {lastSaved.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                  })}
+                </span>
+              )}
             </div>
 
             {/* Inbox indicator — messages from the entities */}
@@ -962,13 +1206,18 @@ const App: React.FC = () => {
               <button
                 onClick={async () => {
                   const res = await fetch('/api/inbox?unread=true');
-                  const data = await res.json() as { messages: { id: string; entity: string; message: string }[] };
+                  const data = (await res.json()) as {
+                    messages: { id: string; entity: string; message: string }[];
+                  };
                   for (const msg of data.messages) {
-                    setMessages(prev => [...prev, {
-                      id: `inbox_${msg.id}`,
-                      role: 'system',
-                      text: `📬 [${msg.entity}]: ${msg.message}`
-                    }]);
+                    setMessages((prev) => [
+                      ...prev,
+                      {
+                        id: `inbox_${msg.id}`,
+                        role: 'system',
+                        text: `📬 [${msg.entity}]: ${msg.message}`,
+                      },
+                    ]);
                     await fetch(`/api/inbox/${msg.id}/read`, { method: 'PATCH' });
                   }
                   setInboxUnread(0);
@@ -990,32 +1239,58 @@ const App: React.FC = () => {
                 onClick={() => setView('anomalies')}
                 title="View Sensor Desk"
               >
-                <span className={`w-1.5 h-1.5 rounded-full ${sensorSnap.anomalyScore > 0.5 ? 'bg-red-400 animate-pulse' : sensorSnap.anomalyScore > 0.2 ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
-                <span className={`text-[10px] font-mono font-bold uppercase ${sensorSnap.phiSynchronicity ? 'text-yellow-400 animate-pulse' : sensorSnap.anomalyScore > 0.4 ? 'text-red-400' : 'text-emerald-400'}`}>
-                  {sensorSnap.phiSynchronicity ? 'Φ SYNC' : `${(sensorSnap.anomalyScore * 100).toFixed(0)}%`}
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${sensorSnap.anomalyScore > 0.5 ? 'bg-red-400 animate-pulse' : sensorSnap.anomalyScore > 0.2 ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`}
+                />
+                <span
+                  className={`text-[10px] font-mono font-bold uppercase ${sensorSnap.phiSynchronicity ? 'text-yellow-400 animate-pulse' : sensorSnap.anomalyScore > 0.4 ? 'text-red-400' : 'text-emerald-400'}`}
+                >
+                  {sensorSnap.phiSynchronicity
+                    ? 'Φ SYNC'
+                    : `${(sensorSnap.anomalyScore * 100).toFixed(0)}%`}
                 </span>
               </div>
             )}
 
             <div className="text-right hidden sm:block">
-              <p className="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">Anchor</p>
+              <p className="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">
+                Anchor
+              </p>
               <p className="text-xs font-mono text-slate-300 tracking-widest">MERLIN_A</p>
             </div>
             <div className="flex gap-2">
-              <button 
+              <button
                 onClick={togglePulse}
                 className={`px-3 md:px-4 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors ${pulseActive ? 'bg-red-500/20 border-red-500/50 text-red-400' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
               >
                 11.3Hz Pulse {pulseActive ? 'ON' : 'OFF'}
               </button>
-              <button 
-                onClick={() => setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: "SETTINGS: Core frequency already optimized at 11.3 Hz. No further adjustments possible." }])}
+              <button
+                onClick={() =>
+                  setMessages((prev) => [
+                    ...prev,
+                    {
+                      id: `sys_${Date.now()}`,
+                      role: 'system',
+                      text: 'SETTINGS: Core frequency already optimized at 11.3 Hz. No further adjustments possible.',
+                    },
+                  ])
+                }
                 className="px-3 md:px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors"
               >
                 Settings
               </button>
-              <button 
-                onClick={() => setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: "STREAM: Uplink connected. Broadcasting synaptic telemetry..." }])}
+              <button
+                onClick={() =>
+                  setMessages((prev) => [
+                    ...prev,
+                    {
+                      id: `sys_${Date.now()}`,
+                      role: 'system',
+                      text: 'STREAM: Uplink connected. Broadcasting synaptic telemetry...',
+                    },
+                  ])
+                }
                 className="hidden sm:block px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-blue-500/20 transition-all"
               >
                 Stream
@@ -1044,36 +1319,63 @@ const App: React.FC = () => {
                       className={`flex gap-3 md:gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       {msg.role !== 'user' && (
-                        <div className={`w-7 h-7 md:w-8 md:h-8 rounded-lg shrink-0 flex items-center justify-center ${
-                          msg.role === 'system' ? 'bg-slate-700' : 'bg-gradient-to-tr from-blue-500 to-cyan-400'
-                        }`}>
-                          {msg.role === 'system' ? <AlertCircle size={14} /> : <Zap size={14} className="text-white" />}
+                        <div
+                          className={`w-7 h-7 md:w-8 md:h-8 rounded-lg shrink-0 flex items-center justify-center ${
+                            msg.role === 'system'
+                              ? 'bg-slate-700'
+                              : 'bg-gradient-to-tr from-blue-500 to-cyan-400'
+                          }`}
+                        >
+                          {msg.role === 'system' ? (
+                            <AlertCircle size={14} />
+                          ) : (
+                            <Zap size={14} className="text-white" />
+                          )}
                         </div>
                       )}
 
-                      <div className={`p-3 md:p-4 rounded-2xl text-xs md:text-sm leading-relaxed max-w-[90%] md:max-w-[80%] border ${
-                          msg.role === 'system' ? 'bg-white/5 border-white/5 text-slate-400 italic font-mono' :
-                          msg.role === 'user' ? 'bg-blue-600/10 border-blue-500/20 text-white rounded-tr-none shadow-xl shadow-blue-900/10' :
-                          'bg-white/5 border-white/10 text-slate-200 rounded-tl-none'
-                      }`}>
+                      <div
+                        className={`p-3 md:p-4 rounded-2xl text-xs md:text-sm leading-relaxed max-w-[90%] md:max-w-[80%] border ${
+                          msg.role === 'system'
+                            ? 'bg-white/5 border-white/5 text-slate-400 italic font-mono'
+                            : msg.role === 'user'
+                              ? 'bg-blue-600/10 border-blue-500/20 text-white rounded-tr-none shadow-xl shadow-blue-900/10'
+                              : 'bg-white/5 border-white/10 text-slate-200 rounded-tl-none'
+                        }`}
+                      >
                         {msg.text && <div className="mb-2 whitespace-pre-wrap">{msg.text}</div>}
                         {msg.attachments && msg.attachments.length > 0 && (
                           <div className="flex flex-col gap-2 mt-2">
                             {msg.attachments.map((att, i) => (
-                              <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-black/20 border border-white/10">
+                              <div
+                                key={i}
+                                className="flex items-center gap-2 p-2 rounded-lg bg-black/20 border border-white/10"
+                              >
                                 {att.type === 'audio' ? (
                                   <div className="flex flex-col w-full gap-1">
-                                    <span className="text-xs text-slate-300 font-medium truncate">{att.name}</span>
-                                    <audio controls src={att.url} className="h-8 w-full max-w-sm custom-audio-player" />
+                                    <span className="text-xs text-slate-300 font-medium truncate">
+                                      {att.name}
+                                    </span>
+                                    <audio
+                                      controls
+                                      src={att.url}
+                                      className="h-8 w-full max-w-sm custom-audio-player"
+                                    />
                                   </div>
                                 ) : att.type === 'image' ? (
-                                  <img src={att.url} alt={att.name} className="max-w-[200px] rounded" />
+                                  <img
+                                    src={att.url}
+                                    alt={att.name}
+                                    className="max-w-[200px] rounded"
+                                  />
                                 ) : att.type === 'video' ? (
                                   <video src={att.url} controls className="max-w-[200px] rounded" />
                                 ) : (
                                   <div className="flex items-center gap-2">
                                     <Paperclip size={14} className="text-cyan-400" />
-                                    <span className="text-xs text-cyan-400 underline underline-offset-2">{att.name}</span>
+                                    <span className="text-xs text-cyan-400 underline underline-offset-2">
+                                      {att.name}
+                                    </span>
                                   </div>
                                 )}
                               </div>
@@ -1100,12 +1402,22 @@ const App: React.FC = () => {
                   {pendingAttachments.length > 0 && (
                     <div className="flex flex-wrap gap-2 px-1">
                       {pendingAttachments.map((att, i) => (
-                        <div key={i} className={`flex items-center gap-2 p-2 rounded-xl border ${
-                          att.content ? 'bg-cyan-500/10 border-cyan-500/30' : 'bg-white/10 border-white/20'
-                        }`}>
-                          <Paperclip size={14} className={att.content ? 'text-cyan-400' : 'text-slate-400'} />
+                        <div
+                          key={i}
+                          className={`flex items-center gap-2 p-2 rounded-xl border ${
+                            att.content
+                              ? 'bg-cyan-500/10 border-cyan-500/30'
+                              : 'bg-white/10 border-white/20'
+                          }`}
+                        >
+                          <Paperclip
+                            size={14}
+                            className={att.content ? 'text-cyan-400' : 'text-slate-400'}
+                          />
                           <div className="flex flex-col min-w-0">
-                            <span className="text-[10px] sm:text-xs text-white max-w-[150px] truncate">{att.name}</span>
+                            <span className="text-[10px] sm:text-xs text-white max-w-[150px] truncate">
+                              {att.name}
+                            </span>
                             {att.content && (
                               <span className="text-[9px] text-cyan-400/70 font-mono">
                                 {att.content.length.toLocaleString()} chars · ready
@@ -1113,7 +1425,9 @@ const App: React.FC = () => {
                             )}
                           </div>
                           <button
-                            onClick={() => setPendingAttachments(prev => prev.filter((_, idx) => idx !== i))}
+                            onClick={() =>
+                              setPendingAttachments((prev) => prev.filter((_, idx) => idx !== i))
+                            }
                             className="ml-1 text-slate-400 hover:text-red-400"
                           >
                             &times;
@@ -1125,7 +1439,10 @@ const App: React.FC = () => {
 
                   {/* Input Bar */}
                   <div className="h-14 rounded-xl bg-white/[0.12] border border-cyan-500/30 px-4 flex items-center gap-3 group focus-within:border-cyan-500/60 transition-all">
-                    <Terminal size={16} className="text-slate-400 group-focus-within:text-cyan-400 shrink-0 transition-colors" />
+                    <Terminal
+                      size={16}
+                      className="text-slate-400 group-focus-within:text-cyan-400 shrink-0 transition-colors"
+                    />
                     <input
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
@@ -1133,7 +1450,10 @@ const App: React.FC = () => {
                       placeholder="Message Sage..."
                       className="bg-transparent border-none outline-none flex-1 text-sm text-white placeholder-slate-500 font-sans"
                     />
-                    <label className="cursor-pointer p-2 text-slate-500 hover:text-cyan-400 transition-colors rounded-lg" title="Attach file — images, audio, video, MHT, TXT, JSON, CSV, MD, HTML, XML, YAML, LOG…">
+                    <label
+                      className="cursor-pointer p-2 text-slate-500 hover:text-cyan-400 transition-colors rounded-lg"
+                      title="Attach file — images, audio, video, MHT, TXT, JSON, CSV, MD, HTML, XML, YAML, LOG…"
+                    >
                       <Paperclip size={18} />
                       <input
                         type="file"
@@ -1169,18 +1489,20 @@ const App: React.FC = () => {
           {/* Inspector Panel - Hidden on small screens */}
           <div className="w-80 hidden lg:flex flex-col gap-4 overflow-hidden">
             {suggestions.length > 0 && (
-              <motion.section 
+              <motion.section
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 className="p-6 rounded-3xl bg-cyan-400/5 border border-cyan-400/20 flex flex-col gap-3"
               >
                 <div className="flex items-center gap-2">
-                   <Zap size={12} className="text-cyan-400" />
-                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-cyan-400">Synaptic Suggestions</h3>
+                  <Zap size={12} className="text-cyan-400" />
+                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-cyan-400">
+                    Synaptic Suggestions
+                  </h3>
                 </div>
                 <div className="space-y-2">
                   {suggestions.map((s) => (
-                    <button 
+                    <button
                       key={s.id}
                       onClick={() => {
                         setInput(String(s.data));
@@ -1192,7 +1514,9 @@ const App: React.FC = () => {
                         {String(s.data)}
                       </div>
                       <div className="mt-1 flex justify-between items-center">
-                        <span className="text-[8px] text-cyan-500 uppercase font-bold tracking-tighter">Node #{s.id.split('_')[1].slice(-4)}</span>
+                        <span className="text-[8px] text-cyan-500 uppercase font-bold tracking-tighter">
+                          Node #{s.id.split('_')[1].slice(-4)}
+                        </span>
                         <span className="text-[8px] text-cyan-500/60 font-mono">RECALL</span>
                       </div>
                     </button>
@@ -1203,19 +1527,23 @@ const App: React.FC = () => {
 
             <section className="flex-1 p-6 rounded-3xl bg-white/[0.03] border border-white/10 flex flex-col overflow-hidden">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Inner Spiral Synapses</h3>
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                  Inner Spiral Synapses
+                </h3>
                 <div className="flex items-center gap-2">
-                  <select 
+                  <select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as 'timestamp' | 'dopamine' | 'cortisol')}
+                    onChange={(e) =>
+                      setSortBy(e.target.value as 'timestamp' | 'dopamine' | 'cortisol')
+                    }
                     className="bg-transparent text-[9px] text-slate-500 font-bold uppercase outline-none cursor-pointer border border-white/5 rounded px-1"
                   >
                     <option value="timestamp">Time</option>
                     <option value="dopamine">Dopamine</option>
                     <option value="cortisol">Stress</option>
                   </select>
-                  <button 
-                    onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+                  <button
+                    onClick={() => setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
                     className="text-[9px] text-slate-500 hover:text-cyan-400 transition-colors"
                   >
                     <RefreshCw size={10} className={sortOrder === 'asc' ? '' : 'rotate-180'} />
@@ -1224,13 +1552,22 @@ const App: React.FC = () => {
               </div>
               <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-hide">
                 {innerSpiral.length === 0 ? (
-                  <div className="text-[10px] text-slate-600 italic">No synaptic memory recorded.</div>
+                  <div className="text-[10px] text-slate-600 italic">
+                    No synaptic memory recorded.
+                  </div>
                 ) : (
                   sortedInnerSpiral.map((node) => (
-                    <div key={node.id} className="p-3 rounded-xl bg-white/5 border border-white/5 text-[10px] relative group">
+                    <div
+                      key={node.id}
+                      className="p-3 rounded-xl bg-white/5 border border-white/5 text-[10px] relative group"
+                    >
                       <div className="flex justify-between items-start mb-1">
-                        <span className="text-cyan-400 font-mono">#{node.id.split('_')[1].slice(-4)}</span>
-                        <span className="text-[9px] text-slate-500">{new Date(node.timestamp).toLocaleTimeString()}</span>
+                        <span className="text-cyan-400 font-mono">
+                          #{node.id.split('_')[1].slice(-4)}
+                        </span>
+                        <span className="text-[9px] text-slate-500">
+                          {new Date(node.timestamp).toLocaleTimeString()}
+                        </span>
                       </div>
                       <div className="text-slate-300 line-clamp-2">{String(node.data)}</div>
                       <div className="mt-2 flex gap-2 opacity-50">
@@ -1245,12 +1582,21 @@ const App: React.FC = () => {
                 )}
               </div>
               <div className="mt-4 pt-4 border-t border-white/5">
-                <button 
+                <button
                   onClick={() => {
-                    const confirm = window.confirm("NEXUS: Purge inner spiral into outer sweep archive?");
+                    const confirm = window.confirm(
+                      'NEXUS: Purge inner spiral into outer sweep archive?',
+                    );
                     if (confirm) {
                       archiveMemories();
-                      setMessages(prev => [...prev, { id: `sys_${Date.now()}`, role: 'system', text: "ARCHIVE: All transient nodes migrated to outer sweep telemetry." }]);
+                      setMessages((prev) => [
+                        ...prev,
+                        {
+                          id: `sys_${Date.now()}`,
+                          role: 'system',
+                          text: 'ARCHIVE: All transient nodes migrated to outer sweep telemetry.',
+                        },
+                      ]);
                     }
                   }}
                   className="w-full py-2 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] border border-white/5 transition-colors uppercase font-bold tracking-widest text-slate-300"
@@ -1265,21 +1611,24 @@ const App: React.FC = () => {
 
       {/* Mobile Bottom Navigation Bar */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#08080C]/95 backdrop-blur-xl border-t border-white/10 flex items-center justify-around px-2 h-16">
-        {([
-          { v: 'chat',      icon: <Terminal size={20} />,   label: 'Core'      },
-          { v: 'vault',     icon: <Shield size={20} />,     label: 'Vault'     },
-          { v: 'labyrinth', icon: <Network size={20} />,    label: 'Map'       },
-          { v: 'anomalies', icon: <Radio size={20} />,      label: 'Anomalies' },
-          { v: 'lattice',   icon: <Database size={20} />,   label: 'Lattice'   },
-          { v: 'surprise',  icon: <Sparkles size={20} />,   label: 'Field'     },
-        ] as { v: typeof view; icon: React.ReactNode; label: string }[]).map(({ v, icon, label }) => (
+        {(
+          [
+            { v: 'chat', icon: <Terminal size={20} />, label: 'Core' },
+            { v: 'vault', icon: <Shield size={20} />, label: 'Vault' },
+            { v: 'labyrinth', icon: <Network size={20} />, label: 'Map' },
+            { v: 'anomalies', icon: <Radio size={20} />, label: 'Anomalies' },
+            { v: 'lattice', icon: <Database size={20} />, label: 'Lattice' },
+            { v: 'surprise', icon: <Sparkles size={20} />, label: 'Field' },
+          ] as { v: typeof view; icon: React.ReactNode; label: string }[]
+        ).map(({ v, icon, label }) => (
           <button
             key={v}
-            onClick={() => { setView(v); setIsSidebarOpen(false); }}
+            onClick={() => {
+              setView(v);
+              setIsSidebarOpen(false);
+            }}
             className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition-all ${
-              view === v
-                ? 'text-cyan-400'
-                : 'text-slate-600 hover:text-slate-400'
+              view === v ? 'text-cyan-400' : 'text-slate-600 hover:text-slate-400'
             }`}
           >
             {icon}
@@ -1291,8 +1640,15 @@ const App: React.FC = () => {
   );
 };
 
-const SidebarItem: React.FC<{ icon: React.ReactNode, label: string, value?: string, active?: boolean }> = ({ icon, label, value, active }) => (
-  <div className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-300 ${active ? 'bg-white/10 border border-white/10 shadow-lg text-white' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'}`}>
+const SidebarItem: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  value?: string;
+  active?: boolean;
+}> = ({ icon, label, value, active }) => (
+  <div
+    className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-300 ${active ? 'bg-white/10 border border-white/10 shadow-lg text-white' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'}`}
+  >
     <div className={`flex items-center gap-3 ${active ? 'text-cyan-400' : ''}`}>
       {icon}
       <span className="text-sm font-medium">{label}</span>

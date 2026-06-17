@@ -10,5 +10,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <SensorProvider>
       <App />
     </SensorProvider>
-  </SageProvider>
+  </SageProvider>,
 );

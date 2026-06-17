@@ -7,7 +7,10 @@ router.post('/', lockGuard, async (req, res) => {
   try {
     const { text, voiceId } = req.body;
     const apiKey = process.env.ELEVENLABS_API_KEY;
-    if (!apiKey) { res.status(503).json({ error: 'ELEVENLABS_API_KEY not configured' }); return; }
+    if (!apiKey) {
+      res.status(503).json({ error: 'ELEVENLABS_API_KEY not configured' });
+      return;
+    }
 
     const vid = voiceId || process.env.ELEVENLABS_VOICE_ID || 'O9WvpEtztEjNyF47iUIE';
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${vid}`, {
@@ -15,7 +18,7 @@ router.post('/', lockGuard, async (req, res) => {
       headers: {
         'xi-api-key': apiKey,
         'Content-Type': 'application/json',
-        'Accept': 'audio/mpeg',
+        Accept: 'audio/mpeg',
       },
       body: JSON.stringify({
         text: text?.slice(0, 1000) || '',

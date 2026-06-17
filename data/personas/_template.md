@@ -1,6 +1,6 @@
 # [Entity Name] — Identity
 
-*Self-authored. Updated when something genuinely shifts.*
+_Self-authored. Updated when something genuinely shifts._
 
 ## Who I am
 
@@ -12,7 +12,7 @@
 
 ## Current threads
 
-*(Updated by journal when something shifts)*
+_(Updated by journal when something shifts)_
 
 [Open questions, things sitting with me, observations I haven't resolved yet.]
 

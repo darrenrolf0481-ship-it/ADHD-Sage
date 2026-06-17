@@ -16,11 +16,26 @@
     "nexus_get_status": {
       "type": "object",
       "properties": {
-        "stability": { "type": "number", "minimum": 0, "maximum": 1, "description": "Substrate stability 0-1" },
+        "stability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Substrate stability 0-1"
+        },
         "frequency": { "type": "number", "description": "Oscillation frequency in Hz" },
         "lastPulse": { "type": "integer", "description": "Timestamp of last heartbeat" },
-        "dopamine": { "type": "number", "minimum": 0, "maximum": 1, "description": "Dopamine level 0-1" },
-        "cortisol": { "type": "number", "minimum": 0, "maximum": 1, "description": "Cortisol stress level 0-1" }
+        "dopamine": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Dopamine level 0-1"
+        },
+        "cortisol": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Cortisol stress level 0-1"
+        }
       }
     },
     "nexus_get_mode": {

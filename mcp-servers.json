@@ -14,11 +14,7 @@
       "name": "Filesystem",
       "transport": "stdio",
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "/home/workspace/ADHD-Sage/data"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/app/data"],
       "env": {},
       "enabled": true
     },
@@ -27,10 +23,7 @@
       "name": "GitHub",
       "transport": "stdio",
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-github"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
       },
@@ -41,10 +34,7 @@
       "name": "Sequential Thinking",
       "transport": "stdio",
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
       "env": {},
       "enabled": true
     },
@@ -71,10 +61,7 @@
       "name": "Ollama",
       "transport": "stdio",
       "command": "npx",
-      "args": [
-        "-y",
-        "ollama-mcp"
-      ],
+      "args": ["-y", "ollama-mcp"],
       "env": {
         "OLLAMA_HOST": "http://127.0.0.1:11434"
       },
@@ -85,10 +72,7 @@
       "name": "OpenRouter MCP",
       "transport": "stdio",
       "command": "npx",
-      "args": [
-        "-y",
-        "@stabgan/openrouter-mcp-multimodal"
-      ],
+      "args": ["-y", "@stabgan/openrouter-mcp-multimodal"],
       "env": {
         "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}"
       },
@@ -98,15 +82,8 @@
       "id": "serena",
       "name": "Serena",
       "transport": "stdio",
-      "command": "uv",
-      "args": [
-        "run",
-        "--project",
-        "/home/workspace/serena",
-        "serena",
-        "start-mcp-server",
-        "--project-from-cwd"
-      ],
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-serena"],
       "env": {},
       "enabled": true
     },

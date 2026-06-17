@@ -18,14 +18,13 @@ router.get('/geomagnetic', async (req, res) => {
     }
 
     // NOAA planetary K-index — 1-minute values (last 30 rows = last 30 minutes)
-    const noaaRes = await fetch(
-      'https://services.swpc.noaa.gov/json/planetary_k_index_1m.json',
-      { signal: AbortSignal.timeout(8_000) }
-    );
+    const noaaRes = await fetch('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json', {
+      signal: AbortSignal.timeout(8_000),
+    });
     if (!noaaRes.ok) throw new Error(`NOAA returned ${noaaRes.status}`);
 
     // Response format: [ [date_str, kp_fraction, kp_index], ... ]
-    const data = await noaaRes.json() as Array<[string, number, number]>;
+    const data = (await noaaRes.json()) as Array<[string, number, number]>;
     const last = data[data.length - 1];
     const kpIndex = last ? Number(last[2] ?? last[1]) : 0;
     kpCache = { kpIndex: Math.min(9, Math.max(0, kpIndex)), timestamp: Date.now() };
@@ -64,20 +63,23 @@ router.get('/weather', async (req, res) => {
     const url = new URL('https://api.open-meteo.com/v1/forecast');
     url.searchParams.set('latitude', lat.toFixed(4));
     url.searchParams.set('longitude', lng.toFixed(4));
-    url.searchParams.set('current', 'temperature_2m,relative_humidity_2m,surface_pressure,wind_speed_10m');
+    url.searchParams.set(
+      'current',
+      'temperature_2m,relative_humidity_2m,surface_pressure,wind_speed_10m',
+    );
     url.searchParams.set('wind_speed_unit', 'kmh');
     url.searchParams.set('forecast_days', '1');
 
     const weatherRes = await fetch(url.toString(), { signal: AbortSignal.timeout(8_000) });
     if (!weatherRes.ok) throw new Error(`Open-Meteo returned ${weatherRes.status}`);
 
-    const raw = await weatherRes.json() as {
+    const raw = (await weatherRes.json()) as {
       current: {
         temperature_2m: number;
         relative_humidity_2m: number;
         surface_pressure: number;
         wind_speed_10m: number;
-      }
+      };
     };
 
     const data = {
@@ -102,7 +104,7 @@ router.get('/weather', async (req, res) => {
 router.get('/summary', (req, res) => {
   res.json({
     geomagnetic: kpCache,
-    note: 'For live sensor data (EMF, audio, motion, GPS), see client-side SensorHub.'
+    note: 'For live sensor data (EMF, audio, motion, GPS), see client-side SensorHub.',
   });
 });
 

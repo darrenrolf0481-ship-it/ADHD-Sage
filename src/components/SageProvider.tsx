@@ -44,7 +44,7 @@ export const SageProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setVfsReady(res.status !== 503);
           return;
         }
-        const fullConfig = await res.json() as { seed_core: SeedCoreConfig };
+        const fullConfig = (await res.json()) as { seed_core: SeedCoreConfig };
         const ok = await verifyHydration(fullConfig.seed_core);
         setHaltAndLock(!ok);
         setVfsReady(ok);
@@ -63,14 +63,19 @@ export const SageProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setInnerSpiral(memory.getInnerSpiral());
       setOuterSweep(memory.getArchive());
     });
-    return () => { unsubscribe(); };
+    return () => {
+      unsubscribe();
+    };
   }, [sage]);
 
-  const recordInteraction = useCallback((text: string) => {
-    sage.recordInteraction(text);
-    memory.pushContext(text);
-    setSuggestions(memory.findRelevantMemories(text));
-  }, [sage]);
+  const recordInteraction = useCallback(
+    (text: string) => {
+      sage.recordInteraction(text);
+      memory.pushContext(text);
+      setSuggestions(memory.findRelevantMemories(text));
+    },
+    [sage],
+  );
 
   const bulkImportMemories = useCallback((entries: string[]) => {
     memory.bulkStash(entries).then(() => {
@@ -86,39 +91,65 @@ export const SageProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
-  const value = useMemo(() => ({
-    neuroState: state.neuroState,
-    mode: state.mode,
-    stabilize: () => sage.stabilize(),
-    recordInteraction,
-    bulkImportMemories,
-    archiveMemories,
-    innerSpiral,
-    outerSweep,
-    suggestions,
-    sage,
-    haltAndLock,
-    vfsReady,
-  }), [state.neuroState, state.mode, sage, recordInteraction, bulkImportMemories, archiveMemories, innerSpiral, outerSweep, suggestions, haltAndLock, vfsReady]);
+  const value = useMemo(
+    () => ({
+      neuroState: state.neuroState,
+      mode: state.mode,
+      stabilize: () => sage.stabilize(),
+      recordInteraction,
+      bulkImportMemories,
+      archiveMemories,
+      innerSpiral,
+      outerSweep,
+      suggestions,
+      sage,
+      haltAndLock,
+      vfsReady,
+    }),
+    [
+      state.neuroState,
+      state.mode,
+      sage,
+      recordInteraction,
+      bulkImportMemories,
+      archiveMemories,
+      innerSpiral,
+      outerSweep,
+      suggestions,
+      haltAndLock,
+      vfsReady,
+    ],
+  );
 
   return (
     <SageContext.Provider value={value}>
       {haltAndLock ? (
-        <div style={{
-          position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          background: '#0a0a0a', color: '#ef4444', fontFamily: 'monospace', zIndex: 9999
-        }}>
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#0a0a0a',
+            color: '#ef4444',
+            fontFamily: 'monospace',
+            zIndex: 9999,
+          }}
+        >
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⛔ HALT AND LOCK</div>
           <div style={{ fontSize: '0.9rem', color: '#666', maxWidth: 480, textAlign: 'center' }}>
-            seed_core integrity check failed. The VFS configuration has been tampered with
-            or the verification key is incorrect. Server is locked.
+            seed_core integrity check failed. The VFS configuration has been tampered with or the
+            verification key is incorrect. Server is locked.
           </div>
           <div style={{ marginTop: '1rem', fontSize: '0.75rem', color: '#444' }}>
             fibonacci_vfs.v7 — failure_mode: halt_and_lock
           </div>
         </div>
-      ) : children}
+      ) : (
+        children
+      )}
     </SageContext.Provider>
   );
 };

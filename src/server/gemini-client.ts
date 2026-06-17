@@ -10,7 +10,7 @@ export function getGenAI(): GoogleGenAI {
   if (!genAI) {
     genAI = new GoogleGenAI({
       apiKey: process.env.GEMINI_API_KEY || '',
-      httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+      httpOptions: { headers: { 'User-Agent': 'aistudio-build' } },
     });
   }
   return genAI;

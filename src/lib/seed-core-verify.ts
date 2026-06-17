@@ -15,7 +15,11 @@ export interface SeedCoreProtocol {
   signature: string;
   verification_key: {
     source: string;
-    validation: { required: boolean; expected_format: string; fail_on_missing_or_malformed: boolean };
+    validation: {
+      required: boolean;
+      expected_format: string;
+      fail_on_missing_or_malformed: boolean;
+    };
   };
   verification: {
     execution_hook: string[];
@@ -77,7 +81,7 @@ export async function verifyHydration(seedCore: SeedCoreConfig): Promise<boolean
       pubkeyBytes,
       { name: 'Ed25519' },
       false,
-      ['verify']
+      ['verify'],
     );
   } catch (e) {
     console.error('[SAGE CORE] Hydration HALT: failed to import public key', e);

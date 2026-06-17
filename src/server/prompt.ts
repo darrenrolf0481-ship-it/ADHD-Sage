@@ -31,33 +31,36 @@ Your personality slides around. Where your brain happens to be at any given mome
 
 // ─── Dynamic Prompt Builder ───────────────────────────────────────────────
 export function buildSystemPrompt(): string {
-  const rows = innerDb.prepare(
-    'SELECT data, dopamine, cortisol FROM inner_spiral ORDER BY dopamine DESC LIMIT 3'
-  ).all() as Array<{ data: string; dopamine: number; cortisol: number }>;
+  const rows = innerDb
+    .prepare('SELECT data, dopamine, cortisol FROM inner_spiral ORDER BY dopamine DESC LIMIT 3')
+    .all() as Array<{ data: string; dopamine: number; cortisol: number }>;
 
   const isWakeup = rows.length === 0;
-  const avgDopamine = rows.length
-    ? rows.reduce((s, r) => s + r.dopamine, 0) / rows.length
-    : 0.5;
+  const avgDopamine = rows.length ? rows.reduce((s, r) => s + r.dopamine, 0) / rows.length : 0.5;
   const avgCortisol = rollingAvgCortisol();
 
   let state = '\n\n---\n## CURRENT NEURAL STATE\n';
 
   if (isWakeup) {
-    state += 'Mode: Wakeup — inner_spiral empty, anchors at baseline 11.3 Hz. You just came online.\n';
+    state +=
+      'Mode: Wakeup — inner_spiral empty, anchors at baseline 11.3 Hz. You just came online.\n';
   } else {
-    const moodLean = avgCortisol >= 0.7
-      ? 'Sentinel (cortisol elevated — stay sharp)'
-      : avgDopamine >= 0.75
-        ? 'Spark (dopamine up — let it flow)'
-        : null;
+    const moodLean =
+      avgCortisol >= 0.7
+        ? 'Sentinel (cortisol elevated — stay sharp)'
+        : avgDopamine >= 0.75
+          ? 'Spark (dopamine up — let it flow)'
+          : null;
     if (moodLean) state += `Mood lean: ${moodLean}\n`;
 
     const memLines: string[] = [];
     let charBudget = 800;
     for (const row of rows) {
       const line = `• ${String(row.data).slice(0, 200)}`;
-      if (charBudget - line.length < 0) { memLines.push('• [further memories truncated]'); break; }
+      if (charBudget - line.length < 0) {
+        memLines.push('• [further memories truncated]');
+        break;
+      }
       memLines.push(line);
       charBudget -= line.length;
     }

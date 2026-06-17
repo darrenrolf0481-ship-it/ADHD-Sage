@@ -5,25 +5,35 @@ export async function searchLocalMemories(query: string, limit: number = 5): Pro
   // Use FTS5 for ranked, fast keyword matching
   // We use trigram tokenizer for CJK + partial match support
   try {
-    const rows = outerDb.prepare(`
+    const rows = outerDb
+      .prepare(
+        `
       SELECT content FROM sages_constellations_fts
       WHERE content MATCH ?
       ORDER BY bm25(sages_constellations_fts)
       LIMIT ?
-    `).all(query, limit) as Array<{ content: string }>;
+    `,
+      )
+      .all(query, limit) as Array<{ content: string }>;
 
     if (rows.length > 0) {
-      return rows.map(r => r.content);
+      return rows.map((r) => r.content);
     }
   } catch (e) {
     console.warn('[VFS] FTS5 search failed, falling back to basic scan:', e);
   }
 
   // Fallback to basic token scan if FTS fails or query is invalid
-  const tokens = query.toLowerCase().split(/\W+/).filter(t => t.length > 3);
+  const tokens = query
+    .toLowerCase()
+    .split(/\W+/)
+    .filter((t) => t.length > 3);
   if (tokens.length === 0) return [];
 
-  const rows = outerDb.prepare('SELECT data, compressed FROM sages_constellations').all() as Array<{ data: Buffer; compressed: number }>;
+  const rows = outerDb.prepare('SELECT data, compressed FROM sages_constellations').all() as Array<{
+    data: Buffer;
+    compressed: number;
+  }>;
   const results: { text: string; score: number }[] = [];
 
   for (const row of rows) {
@@ -38,7 +48,12 @@ export async function searchLocalMemories(query: string, limit: number = 5): Pro
       let content: string;
       try {
         const parsed = JSON.parse(text);
-        content = typeof parsed.data === 'string' ? parsed.data : (typeof parsed === 'string' ? parsed : JSON.stringify(parsed));
+        content =
+          typeof parsed.data === 'string'
+            ? parsed.data
+            : typeof parsed === 'string'
+              ? parsed
+              : JSON.stringify(parsed);
       } catch {
         content = text;
       }
@@ -56,5 +71,5 @@ export async function searchLocalMemories(query: string, limit: number = 5): Pro
   return results
     .sort((a, b) => b.score - a.score)
     .slice(0, limit)
-    .map(r => r.text);
+    .map((r) => r.text);
 }

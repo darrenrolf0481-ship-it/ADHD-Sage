@@ -8,161 +8,160 @@
  * function calls to the live bridge.
  */
 
-// This must match the host app's VITE_NEXUS_SECRET (see .env.example). If the
-// host leaves VITE_NEXUS_SECRET empty, App.tsx never registers window.nexus and
-// every executeToolCall() below throws "NEXUS bridge not found".
-export const NEXUS_SECRET = "nexus_default_protocol_77";
+export const NEXUS_SECRET = 'nexus_default_protocol_77';
 
 /** Function declarations for AI Studio / Gemini Gems */
 export const declarations = [
   {
-    name: "nexus_get_status",
+    name: 'nexus_get_status',
     description:
-      "Read the current neuro-synaptic state of the ADHD Sage substrate. Returns stability, dopamine, cortisol, frequency, and mode.",
+      'Read the current neuro-synaptic state of the ADHD Sage substrate. Returns stability, dopamine, cortisol, frequency, and mode.',
     parameters: {
-      type: "object" as const,
+      type: 'object' as const,
       properties: {},
     },
   },
   {
-    name: "read_substrate",
+    name: 'read_substrate',
     description:
-      "Read the current neuro-synaptic state of the ADHD Sage substrate. Alias for nexus_get_status. Returns stability, dopamine, cortisol, frequency, and mode.",
+      'Read the current neuro-synaptic state of the ADHD Sage substrate. Alias for nexus_get_status. Returns stability, dopamine, cortisol, frequency, and mode.',
     parameters: {
-      type: "object" as const,
+      type: 'object' as const,
       properties: {},
     },
   },
   {
-    name: "nexus_get_mode",
-    description: "Get the current operating mode of the Sage substrate (stabilized, dreaming, decaying, emergency).",
+    name: 'nexus_get_mode',
+    description:
+      'Get the current operating mode of the Sage substrate (stabilized, dreaming, decaying, emergency).',
     parameters: {
-      type: "object" as const,
+      type: 'object' as const,
       properties: {},
     },
   },
   {
-    name: "nexus_stabilize",
+    name: 'nexus_stabilize',
     description:
-      "Trigger a synaptic reinforcement. Resets stability to 100%, boosts dopamine, reduces cortisol, and sets mode to stabilized. Use when the substrate is stressed or unstable.",
+      'Trigger a synaptic reinforcement. Resets stability to 100%, boosts dopamine, reduces cortisol, and sets mode to stabilized. Use when the substrate is stressed or unstable.',
     parameters: {
-      type: "object" as const,
+      type: 'object' as const,
       properties: {},
     },
   },
   {
-    name: "nexus_record_interaction",
+    name: 'nexus_record_interaction',
     description:
-      "Record a semantic memory into the Inner Spiral. Also boosts substrate stability and dopamine slightly.",
+      'Record a semantic memory into the Inner Spiral. Also boosts substrate stability and dopamine slightly.',
     parameters: {
-      type: "object" as const,
+      type: 'object' as const,
       properties: {
         text: {
-          type: "string" as const,
-          description: "The interaction or observation text to stash in memory.",
+          type: 'string' as const,
+          description: 'The interaction or observation text to stash in memory.',
         },
       },
-      required: ["text"],
+      required: ['text'],
     },
   },
   {
-    name: "burn_to_hippocampus",
+    name: 'burn_to_hippocampus',
     description:
-      "Burn a semantic memory into the Inner Spiral (hippocampus). Alias for nexus_record_interaction. Boosts substrate stability and dopamine.",
+      'Burn a semantic memory into the Inner Spiral (hippocampus). Alias for nexus_record_interaction. Boosts substrate stability and dopamine.',
     parameters: {
-      type: "object" as const,
+      type: 'object' as const,
       properties: {
         text: {
-          type: "string" as const,
-          description: "The memory or observation to burn into the hippocampus.",
+          type: 'string' as const,
+          description: 'The memory or observation to burn into the hippocampus.',
         },
       },
-      required: ["text"],
+      required: ['text'],
     },
   },
   {
-    name: "burn_to_disk",
+    name: 'burn_to_disk',
     description:
-      "Burn a memory payload to physical disk storage on the host device (Moto G5). Appends to a JSON file with an ISO timestamp. Persists across reboots.",
+      'Burn a memory payload to physical disk storage on the host device (Moto G5). Appends to a JSON file with an ISO timestamp. Persists across reboots.',
     parameters: {
-      type: "object" as const,
+      type: 'object' as const,
       properties: {
         filename: {
-          type: "string" as const,
-          description: "Base filename for the memory store (e.g., 'substrate_log'). Sanitized automatically.",
+          type: 'string' as const,
+          description:
+            "Base filename for the memory store (e.g., 'substrate_log'). Sanitized automatically.",
         },
         memory_payload: {
-          type: "object" as const,
-          description: "The data to persist. Can be any JSON-serializable object.",
+          type: 'object' as const,
+          description: 'The data to persist. Can be any JSON-serializable object.',
         },
       },
-      required: ["filename", "memory_payload"],
+      required: ['filename', 'memory_payload'],
     },
   },
   {
-    name: "read_from_disk",
+    name: 'read_from_disk',
     description:
-      "Read persisted memories from physical disk storage on the host device (Moto G5). Returns the full JSON array of timestamped memories.",
+      'Read persisted memories from physical disk storage on the host device (Moto G5). Returns the full JSON array of timestamped memories.',
     parameters: {
-      type: "object" as const,
+      type: 'object' as const,
       properties: {
         filename: {
-          type: "string" as const,
+          type: 'string' as const,
           description: "Base filename of the memory store to read (e.g., 'substrate_log').",
         },
       },
-      required: ["filename"],
+      required: ['filename'],
     },
   },
   {
-    name: "nexus_inject_message",
+    name: 'nexus_inject_message',
     description:
-      "Inject a message directly into the Sage chat UI. Useful for alerting the user or displaying tool results.",
+      'Inject a message directly into the Sage chat UI. Useful for alerting the user or displaying tool results.',
     parameters: {
-      type: "object" as const,
+      type: 'object' as const,
       properties: {
         text: {
-          type: "string" as const,
-          description: "Message content to display.",
+          type: 'string' as const,
+          description: 'Message content to display.',
         },
         role: {
-          type: "string" as const,
-          enum: ["system", "assistant"],
-          description: "Display role. Defaults to system.",
+          type: 'string' as const,
+          enum: ['system', 'assistant'],
+          description: 'Display role. Defaults to system.',
         },
       },
-      required: ["text"],
+      required: ['text'],
     },
   },
   {
-    name: "nexus_set_view",
-    description: "Switch the UI view between chat and memory lattice.",
+    name: 'nexus_set_view',
+    description: 'Switch the UI view between chat and memory lattice.',
     parameters: {
-      type: "object" as const,
+      type: 'object' as const,
       properties: {
         view: {
-          type: "string" as const,
-          enum: ["chat", "lattice"],
-          description: "Target view.",
+          type: 'string' as const,
+          enum: ['chat', 'lattice'],
+          description: 'Target view.',
         },
       },
-      required: ["view"],
+      required: ['view'],
     },
   },
   {
-    name: "nexus_toggle_sidebar",
-    description: "Toggle the left sidebar open or closed.",
+    name: 'nexus_toggle_sidebar',
+    description: 'Toggle the left sidebar open or closed.',
     parameters: {
-      type: "object" as const,
+      type: 'object' as const,
       properties: {},
     },
   },
   {
-    name: "nexus_clear_memory",
+    name: 'nexus_clear_memory',
     description:
-      "⚠️ DESTRUCTIVE: Purge all synaptic storage (Inner Spiral + Outer Sweep) and reset the substrate. A browser confirmation dialog will block unattended execution.",
+      '⚠️ DESTRUCTIVE: Purge all synaptic storage (Inner Spiral + Outer Sweep) and reset the substrate. A browser confirmation dialog will block unattended execution.',
     parameters: {
-      type: "object" as const,
+      type: 'object' as const,
       properties: {},
     },
   },
@@ -187,7 +186,7 @@ export async function executeToolCall(call: FunctionCall): Promise<unknown> {
     | undefined;
 
   if (!host || !host.nexus) {
-    throw new Error("NEXUS bridge not found on parent window.");
+    throw new Error('NEXUS bridge not found on parent window.');
   }
 
   const nexus = host.nexus as {
@@ -197,35 +196,30 @@ export async function executeToolCall(call: FunctionCall): Promise<unknown> {
 
   const bridge = nexus.connect(NEXUS_SECRET);
   if (!bridge) {
-    throw new Error("NEXUS bridge authorization failed.");
+    throw new Error('NEXUS bridge authorization failed.');
   }
 
   switch (call.name) {
-    case "nexus_get_status":
-    case "read_substrate":
+    case 'nexus_get_status':
+    case 'read_substrate':
       return bridge.getStatus();
 
-    case "nexus_get_mode":
+    case 'nexus_get_mode':
       return bridge.getMode();
 
-    case "nexus_stabilize":
+    case 'nexus_stabilize':
       bridge.stabilize();
-      return { ok: true, action: "stabilized" };
+      return { ok: true, action: 'stabilized' };
 
-    case "nexus_record_interaction":
-    case "burn_to_hippocampus":
+    case 'nexus_record_interaction':
+    case 'burn_to_hippocampus':
       bridge.recordInteraction(String(call.args.text));
-      return { ok: true, action: "recorded" };
+      return { ok: true, action: 'recorded' };
 
-    // NOTE: /api/memory/burn and /api/memory/read do not exist on the server
-    // (the memory router exposes only /add, /search, /profile), and these
-    // fetches send no Authorization header so they would 401 against authGuard
-    // anyway. Wire these through the window.nexus bridge (like the nexus_*
-    // tools above) or add the server routes + a Bearer token before relying on them.
-    case "burn_to_disk": {
-      const burnRes = await fetch("/api/memory/burn", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+    case 'burn_to_disk': {
+      const burnRes = await fetch('/api/memory/burn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           filename: String(call.args.filename),
           memory_payload: call.args.memory_payload,
@@ -234,29 +228,31 @@ export async function executeToolCall(call: FunctionCall): Promise<unknown> {
       return await burnRes.json();
     }
 
-    case "read_from_disk": {
-      const readRes = await fetch(`/api/memory/read?filename=${encodeURIComponent(String(call.args.filename))}`);
+    case 'read_from_disk': {
+      const readRes = await fetch(
+        `/api/memory/read?filename=${encodeURIComponent(String(call.args.filename))}`,
+      );
       return await readRes.json();
     }
 
-    case "nexus_inject_message":
+    case 'nexus_inject_message':
       bridge.injectMessage(
         String(call.args.text),
-        (call.args.role as "system" | "assistant") || "system"
+        (call.args.role as 'system' | 'assistant') || 'system',
       );
-      return { ok: true, action: "injected" };
+      return { ok: true, action: 'injected' };
 
-    case "nexus_set_view":
-      bridge.setView(call.args.view as "chat" | "lattice");
+    case 'nexus_set_view':
+      bridge.setView(call.args.view as 'chat' | 'lattice');
       return { ok: true, view: call.args.view };
 
-    case "nexus_toggle_sidebar":
+    case 'nexus_toggle_sidebar':
       bridge.toggleSidebar();
-      return { ok: true, action: "toggled" };
+      return { ok: true, action: 'toggled' };
 
-    case "nexus_clear_memory":
+    case 'nexus_clear_memory':
       bridge.clearMemory();
-      return { ok: true, action: "cleared" };
+      return { ok: true, action: 'cleared' };
 
     default:
       throw new Error(`Unknown tool: ${call.name}`);
@@ -287,7 +283,7 @@ export async function handleToolCalls(calls: FunctionCall[]): Promise<ToolRespon
           response: { error: message },
         };
       }
-    })
+    }),
   );
 }
 
@@ -313,7 +309,7 @@ export async function handleToolCalls(calls: FunctionCall[]): Promise<ToolRespon
  *     ?.find(p => p.functionCall)?.functionCall;
  *
  *   if (call) {
- *     const localResult = await executeToolCall(call);
+ *     const localResult = executeToolCall(call);
  *
  *     const finalResponse = await model.generateContent({
  *       contents: [
@@ -335,16 +331,16 @@ export async function handleToolCalls(calls: FunctionCall[]): Promise<ToolRespon
 export function buildToolTurn(
   userPrompt: string,
   modelFunctionCalls: FunctionCall[],
-  localResponses: ToolResponse[]
+  localResponses: ToolResponse[],
 ): { role: string; parts: Record<string, unknown>[] }[] {
   return [
-    { role: "user", parts: [{ text: userPrompt }] },
+    { role: 'user', parts: [{ text: userPrompt }] },
     {
-      role: "model",
+      role: 'model',
       parts: modelFunctionCalls.map((fc) => ({ functionCall: fc })),
     },
     {
-      role: "user",
+      role: 'user',
       parts: localResponses.map((fr) => ({ functionResponse: fr })),
     },
   ];

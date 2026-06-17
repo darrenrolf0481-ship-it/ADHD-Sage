@@ -1,15 +1,17 @@
-import { Settings } from "./store";
+import { Settings } from './store';
 
 export async function fetchOllamaModels(_baseUrl: string, _apiKey?: string) {
   // Routed through ADHD-Sage backend proxy — no CORS needed on Ollama
   try {
     const res = await fetch('/api/ollama/tags');
-    if (!res.ok) throw new Error("Failed connecting to Ollama proxy");
+    if (!res.ok) throw new Error('Failed connecting to Ollama proxy');
     const data = await res.json();
     return data.models || [];
   } catch (err: any) {
-    console.error("fetchOllamaModels failed:", err);
-    throw new Error('Failed to fetch Ollama models via proxy. Ensure the ADHD-Sage server and Ollama are running.');
+    console.error('fetchOllamaModels failed:', err);
+    throw new Error(
+      'Failed to fetch Ollama models via proxy. Ensure the ADHD-Sage server and Ollama are running.',
+    );
   }
 }
 
@@ -37,7 +39,7 @@ export async function generateResponse(
   provider: ChatProvider,
   model: string,
   prompt: string,
-  settings: Settings
+  settings: Settings,
 ) {
   // gemini / ollama / openrouter all route through the ADHD-Sage backend so they
   // share the same system prompt, long-term memory enrichment, tool-calling,
@@ -72,13 +74,13 @@ export async function generateResponse(
     const res = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${settings.grokApi}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${settings.grokApi}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         model: model || 'grok-beta',
-        messages: [{ role: 'user', content: prompt }]
-      })
+        messages: [{ role: 'user', content: prompt }],
+      }),
     });
     if (!res.ok) throw new Error(`Grok error: ${res.statusText}`);
     const data = await res.json();
@@ -90,15 +92,19 @@ export async function generateResponse(
 
 export async function fetchGithubTree(repoUrl: string, token: string) {
   const match = repoUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
-  if (!match) throw new Error("Invalid GitHub URL. Must be in format https://github.com/owner/repo");
+  if (!match)
+    throw new Error('Invalid GitHub URL. Must be in format https://github.com/owner/repo');
   const [, owner, repo] = match;
-  
+
   const headers: Record<string, string> = {
-    'Accept': 'application/vnd.github.v3+json'
+    Accept: 'application/vnd.github.v3+json',
   };
   if (token) headers['Authorization'] = `token ${token}`;
 
-  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/main?recursive=1`, { headers });
+  const res = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/git/trees/main?recursive=1`,
+    { headers },
+  );
   if (!res.ok) throw new Error(`Failed to fetch repo: ${res.statusText}`);
   const data = await res.json();
   return data.tree; // Array of file nodes
@@ -106,12 +112,12 @@ export async function fetchGithubTree(repoUrl: string, token: string) {
 
 export async function fetchGithubFileContent(url: string, token: string) {
   const headers: Record<string, string> = {
-    'Accept': 'application/vnd.github.v3.raw'
+    Accept: 'application/vnd.github.v3.raw',
   };
   if (token) headers['Authorization'] = `token ${token}`;
 
   const res = await fetch(url, { headers });
-  if (!res.ok) throw new Error("Failed to fetch file content");
+  if (!res.ok) throw new Error('Failed to fetch file content');
   return await res.text();
 }
 
@@ -124,19 +130,25 @@ export async function fetchGithubFilePreviousContent(repoUrl: string, path: stri
   if (token) headers['Authorization'] = `token ${token}`;
 
   try {
-    const commitsRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits?path=${path}`, { headers });
+    const commitsRes = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/commits?path=${path}`,
+      { headers },
+    );
     if (!commitsRes.ok) return null;
     const commits = await commitsRes.json();
 
     if (commits && commits.length > 1) {
       const prevSha = commits[1].sha;
-      const contentReqHeaders = { ...headers, 'Accept': 'application/vnd.github.v3.raw' };
-      const contentRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${prevSha}`, { headers: contentReqHeaders });
+      const contentReqHeaders = { ...headers, Accept: 'application/vnd.github.v3.raw' };
+      const contentRes = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${prevSha}`,
+        { headers: contentReqHeaders },
+      );
       if (!contentRes.ok) return null;
       return await contentRes.text();
     }
   } catch (err) {
-    console.error("Failed to fetch previous content:", err);
+    console.error('Failed to fetch previous content:', err);
   }
   return null;
 }

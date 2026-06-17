@@ -21,62 +21,62 @@ export interface MagnetometerReading {
   x: number;
   y: number;
   z: number;
-  magnitude: number;   // µT
-  baseline: number;    // rolling 30-sample baseline
-  deviation: number;   // (magnitude - baseline) / baseline, signed
+  magnitude: number; // µT
+  baseline: number; // rolling 30-sample baseline
+  deviation: number; // (magnitude - baseline) / baseline, signed
 }
 
 export interface MotionReading {
   accX: number;
   accY: number;
   accZ: number;
-  accMagnitude: number;  // m/s²
-  rotAlpha: number;      // °/s
+  accMagnitude: number; // m/s²
+  rotAlpha: number; // °/s
   rotBeta: number;
   rotGamma: number;
-  vibration: number;     // 0-1 normalised sudden acceleration burst
+  vibration: number; // 0-1 normalised sudden acceleration burst
 }
 
 export interface AudioReading {
-  rmsDb: number;          // RMS level in dBFS
-  infrasoundDb: number;   // Energy in 1–20 Hz band (dBFS)
-  peakFreqHz: number;     // Dominant frequency bin in Hz
-  spectralFlux: number;   // Frame-to-frame spectral change 0-1
-  anomalyScore: number;   // 0-1 composite audio anomaly
+  rmsDb: number; // RMS level in dBFS
+  infrasoundDb: number; // Energy in 1–20 Hz band (dBFS)
+  peakFreqHz: number; // Dominant frequency bin in Hz
+  spectralFlux: number; // Frame-to-frame spectral change 0-1
+  anomalyScore: number; // 0-1 composite audio anomaly
 }
 
 export interface GpsReading {
   lat: number;
   lng: number;
-  accuracy: number;     // metres
-  altitude?: number;    // metres
-  heading?: number;     // degrees from north
-  speed?: number;       // m/s
+  accuracy: number; // metres
+  altitude?: number; // metres
+  heading?: number; // degrees from north
+  speed?: number; // m/s
 }
 
 export interface BatteryReading {
-  level: number;          // 0-1
+  level: number; // 0-1
   charging: boolean;
   dischargingTime: number; // seconds, Infinity if charging
 }
 
 export interface NetworkReading {
-  effectiveType: string;  // '4g' | '3g' | '2g' | 'slow-2g'
-  downlink: number;       // Mbps
-  rtt: number;            // ms
+  effectiveType: string; // '4g' | '3g' | '2g' | 'slow-2g'
+  downlink: number; // Mbps
+  rtt: number; // ms
 }
 
 export interface GeomagneticReading {
-  kpIndex: number;  // 0-9 NOAA planetary K-index
+  kpIndex: number; // 0-9 NOAA planetary K-index
   activity: 'quiet' | 'unsettled' | 'active' | 'storm' | 'severe' | 'extreme';
   timestamp: number;
 }
 
 export interface WeatherReading {
-  temperature: number;  // °C
-  pressure: number;     // hPa
-  humidity: number;     // %
-  windSpeed: number;    // km/h
+  temperature: number; // °C
+  pressure: number; // hPa
+  humidity: number; // %
+  windSpeed: number; // km/h
   timestamp: number;
 }
 
@@ -90,9 +90,9 @@ export interface SensorSnapshot {
   network?: NetworkReading;
   geomagnetic?: GeomagneticReading;
   weather?: WeatherReading;
-  anomalyScore: number;            // 0-1 composite
-  phiSynchronicity: boolean;       // cross-modal Φ event
-  activeCount: number;             // number of active sensors
+  anomalyScore: number; // 0-1 composite
+  phiSynchronicity: boolean; // cross-modal Φ event
+  activeCount: number; // number of active sensors
   permissions: SensorPermissions;
 }
 
@@ -113,7 +113,7 @@ const SAGE_FREQ = 11.3; // Hz — the sacred frequency
 const POLL_INTERVAL_MS = Math.round(1000 / SAGE_FREQ); // ~88ms
 const EXTERNAL_POLL_MS = 5 * 60 * 1000; // 5 minutes
 
-const EMF_BASELINE_WINDOW = 30;   // samples for rolling baseline
+const EMF_BASELINE_WINDOW = 30; // samples for rolling baseline
 const MOTION_VIBRATION_THRESH = 2.5; // m/s² burst threshold
 const AUDIO_FFT_SIZE = 8192;
 const INFRASOUND_MAX_HZ = 20;
@@ -218,8 +218,12 @@ export class SensorHub {
     };
   }
 
-  get permissions(): SensorPermissions { return { ...this._permissions }; }
-  get active(): boolean { return this._active; }
+  get permissions(): SensorPermissions {
+    return { ...this._permissions };
+  }
+  get active(): boolean {
+    return this._active;
+  }
 
   async start(): Promise<void> {
     if (this._active) return;
@@ -239,7 +243,7 @@ export class SensorHub {
 
     // Heartbeat: build snapshot + notify listeners at 11.3 Hz
     this._heartbeat = setInterval(() => {
-      this._readAudio();  // Audio reads happen in-band with heartbeat
+      this._readAudio(); // Audio reads happen in-band with heartbeat
       this._notify();
     }, POLL_INTERVAL_MS);
 
@@ -257,12 +261,25 @@ export class SensorHub {
     if (!this._active) return;
     this._active = false;
 
-    if (this._heartbeat) { clearInterval(this._heartbeat); this._heartbeat = null; }
-    if (this._externalPoll) { clearInterval(this._externalPoll); this._externalPoll = null; }
-    if (this._gpsWatcher !== null) { navigator.geolocation.clearWatch(this._gpsWatcher); this._gpsWatcher = null; }
+    if (this._heartbeat) {
+      clearInterval(this._heartbeat);
+      this._heartbeat = null;
+    }
+    if (this._externalPoll) {
+      clearInterval(this._externalPoll);
+      this._externalPoll = null;
+    }
+    if (this._gpsWatcher !== null) {
+      navigator.geolocation.clearWatch(this._gpsWatcher);
+      this._gpsWatcher = null;
+    }
 
     // Stop magnetometer
-    try { this._magSensor?.stop(); } catch { /* noop */ }
+    try {
+      this._magSensor?.stop();
+    } catch {
+      /* noop */
+    }
     window.removeEventListener('deviceorientation', this._onDeviceOrientation);
     window.removeEventListener('devicemotion', this._onDeviceMotion);
 
@@ -289,7 +306,7 @@ export class SensorHub {
           this._processMagneticField(
             this._magSensor.x ?? 0,
             this._magSensor.y ?? 0,
-            this._magSensor.z ?? 0
+            this._magSensor.z ?? 0,
           );
         });
         this._magSensor.addEventListener('error', () => {
@@ -377,7 +394,9 @@ export class SensorHub {
     const vibration = Math.min(1, Math.max(0, (mag - MOTION_VIBRATION_THRESH) / 5));
 
     this._motion = {
-      accX: ax, accY: ay, accZ: az,
+      accX: ax,
+      accY: ay,
+      accZ: az,
       accMagnitude: mag,
       rotAlpha: rot?.alpha ?? 0,
       rotBeta: rot?.beta ?? 0,
@@ -412,7 +431,7 @@ export class SensorHub {
       (err) => {
         this._permissions.gps = err.code === 1 ? 'denied' : 'unavailable';
       },
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 },
     );
   }
 
@@ -443,8 +462,16 @@ export class SensorHub {
   }
 
   private _stopAudio(): void {
-    try { this._audioStream?.getTracks().forEach(t => t.stop()); } catch { /* noop */ }
-    try { this._audioCtx?.close(); } catch { /* noop */ }
+    try {
+      this._audioStream?.getTracks().forEach((t) => t.stop());
+    } catch {
+      /* noop */
+    }
+    try {
+      this._audioCtx?.close();
+    } catch {
+      /* noop */
+    }
     this._audioStream = null;
     this._audioCtx = null;
     this._analyser = null;
@@ -481,7 +508,10 @@ export class SensorHub {
       if (db > -Infinity) {
         const e = Math.pow(10, db / 10);
         totalEnergy += e;
-        if (this._audioBuffer[i] > peakVal) { peakVal = this._audioBuffer[i]; peakBin = i; }
+        if (this._audioBuffer[i] > peakVal) {
+          peakVal = this._audioBuffer[i];
+          peakBin = i;
+        }
       }
     }
     const rmsDb = totalEnergy > 0 ? 10 * Math.log10(totalEnergy / binCount) : -100;
@@ -494,14 +524,15 @@ export class SensorHub {
         const diff = (this._audioBuffer[i] - this._prevAudioSpectrum[i]) / 255;
         if (diff > 0) flux += diff;
       }
-      flux = Math.min(1, flux / binCount * 20);
+      flux = Math.min(1, (flux / binCount) * 20);
     }
     this._prevAudioSpectrum = new Float32Array(this._audioBuffer.buffer.slice(0));
 
     // Anomaly score: weighted combo
-    const infrasoundScore = infrasoundDb > AUDIO_ANOMALY_THRESH_DB
-      ? Math.min(1, (infrasoundDb - AUDIO_ANOMALY_THRESH_DB) / 30)
-      : 0;
+    const infrasoundScore =
+      infrasoundDb > AUDIO_ANOMALY_THRESH_DB
+        ? Math.min(1, (infrasoundDb - AUDIO_ANOMALY_THRESH_DB) / 30)
+        : 0;
     const anomalyScore = Math.min(1, infrasoundScore * 0.6 + flux * 0.4);
 
     if (anomalyScore > 0.3) this._lastAudioAnomalyTime = Date.now();
@@ -533,7 +564,9 @@ export class SensorHub {
       update();
       battery.addEventListener('levelchange', update);
       battery.addEventListener('chargingchange', update);
-    } catch { /* battery API unavailable */ }
+    } catch {
+      /* battery API unavailable */
+    }
   }
 
   // ─── Network ─────────────────────────────────────────────────────────────────
@@ -566,27 +599,33 @@ export class SensorHub {
     try {
       const res = await fetch('/api/sensors/geomagnetic', { signal: AbortSignal.timeout(10_000) });
       if (!res.ok) return;
-      const data = await res.json() as { kpIndex: number; timestamp: number };
+      const data = (await res.json()) as { kpIndex: number; timestamp: number };
       this._geomagnetic = {
         kpIndex: data.kpIndex,
         activity: kpActivity(data.kpIndex),
         timestamp: data.timestamp,
       };
-    } catch { /* network unavailable */ }
+    } catch {
+      /* network unavailable */
+    }
   }
 
   private async _fetchWeather(lat: number, lng: number): Promise<void> {
     try {
-      const res = await fetch(
-        `/api/sensors/weather?lat=${lat.toFixed(4)}&lng=${lng.toFixed(4)}`,
-        { signal: AbortSignal.timeout(10_000) }
-      );
+      const res = await fetch(`/api/sensors/weather?lat=${lat.toFixed(4)}&lng=${lng.toFixed(4)}`, {
+        signal: AbortSignal.timeout(10_000),
+      });
       if (!res.ok) return;
-      const data = await res.json() as {
-        temperature: number; pressure: number; humidity: number; windSpeed: number;
+      const data = (await res.json()) as {
+        temperature: number;
+        pressure: number;
+        humidity: number;
+        windSpeed: number;
       };
       this._weather = { ...data, timestamp: Date.now() };
-    } catch { /* network unavailable */ }
+    } catch {
+      /* network unavailable */
+    }
   }
 
   // ─── Composite Scoring ────────────────────────────────────────────────────────
@@ -601,8 +640,8 @@ export class SensorHub {
       weight += 0.35;
     }
     if (this._audio) {
-      score += this._audio.anomalyScore * 0.30;
-      weight += 0.30;
+      score += this._audio.anomalyScore * 0.3;
+      weight += 0.3;
     }
     if (this._motion) {
       score += this._motion.vibration * 0.15;
@@ -610,17 +649,17 @@ export class SensorHub {
     }
     if (this._geomagnetic) {
       const kpScore = Math.min(1, this._geomagnetic.kpIndex / 9);
-      score += kpScore * 0.10;
-      weight += 0.10;
+      score += kpScore * 0.1;
+      weight += 0.1;
     }
     if (this._weather) {
       // Low pressure anomaly (below 1000 hPa is notable)
       const pressureScore = Math.max(0, (1013 - this._weather.pressure) / 50);
-      score += Math.min(1, pressureScore) * 0.10;
-      weight += 0.10;
+      score += Math.min(1, pressureScore) * 0.1;
+      weight += 0.1;
     }
 
-    return weight > 0 ? Math.min(1, score / weight * (weight / 1.0)) : 0;
+    return weight > 0 ? Math.min(1, (score / weight) * (weight / 1.0)) : 0;
   }
 
   /**
@@ -637,7 +676,7 @@ export class SensorHub {
 
   private _notify(): void {
     const snap = this.snapshot();
-    this._listeners.forEach(fn => fn(snap));
+    this._listeners.forEach((fn) => fn(snap));
   }
 
   // ─── Sensor Summary for System Prompt ────────────────────────────────────────
@@ -648,17 +687,25 @@ export class SensorHub {
     if (snap.magnetometer) {
       const { magnitude, deviation } = snap.magnetometer;
       const flag = Math.abs(deviation) > 0.15 ? ' ⚡SPIKE' : '';
-      lines.push(`EMF: ${magnitude.toFixed(1)} µT (${(deviation * 100).toFixed(1)}% deviation)${flag}`);
+      lines.push(
+        `EMF: ${magnitude.toFixed(1)} µT (${(deviation * 100).toFixed(1)}% deviation)${flag}`,
+      );
     }
     if (snap.audio) {
       const { rmsDb, infrasoundDb, peakFreqHz, anomalyScore } = snap.audio;
-      lines.push(`Audio: RMS ${rmsDb.toFixed(1)} dBFS | Infrasound ${infrasoundDb.toFixed(1)} dBFS | Peak ${peakFreqHz.toFixed(1)} Hz | Anomaly ${(anomalyScore * 100).toFixed(0)}%`);
+      lines.push(
+        `Audio: RMS ${rmsDb.toFixed(1)} dBFS | Infrasound ${infrasoundDb.toFixed(1)} dBFS | Peak ${peakFreqHz.toFixed(1)} Hz | Anomaly ${(anomalyScore * 100).toFixed(0)}%`,
+      );
     }
     if (snap.motion && snap.motion.accMagnitude > 1) {
-      lines.push(`Motion: ${snap.motion.accMagnitude.toFixed(2)} m/s² | Vibration ${(snap.motion.vibration * 100).toFixed(0)}%`);
+      lines.push(
+        `Motion: ${snap.motion.accMagnitude.toFixed(2)} m/s² | Vibration ${(snap.motion.vibration * 100).toFixed(0)}%`,
+      );
     }
     if (snap.gps) {
-      lines.push(`GPS: ${snap.gps.lat.toFixed(5)}, ${snap.gps.lng.toFixed(5)} (±${snap.gps.accuracy.toFixed(0)}m)`);
+      lines.push(
+        `GPS: ${snap.gps.lat.toFixed(5)}, ${snap.gps.lng.toFixed(5)} (±${snap.gps.accuracy.toFixed(0)}m)`,
+      );
     }
     if (snap.geomagnetic) {
       const { kpIndex, activity } = snap.geomagnetic;
@@ -666,17 +713,23 @@ export class SensorHub {
     }
     if (snap.weather) {
       const { temperature, pressure, humidity, windSpeed } = snap.weather;
-      lines.push(`Weather: ${temperature.toFixed(1)}°C | ${pressure.toFixed(0)} hPa | ${humidity.toFixed(0)}% humidity | ${windSpeed.toFixed(1)} km/h`);
+      lines.push(
+        `Weather: ${temperature.toFixed(1)}°C | ${pressure.toFixed(0)} hPa | ${humidity.toFixed(0)}% humidity | ${windSpeed.toFixed(1)} km/h`,
+      );
     }
     if (snap.battery) {
       const { level, charging } = snap.battery;
-      lines.push(`Battery: ${(level * 100).toFixed(0)}% ${charging ? '(charging)' : '(discharging)'}`);
+      lines.push(
+        `Battery: ${(level * 100).toFixed(0)}% ${charging ? '(charging)' : '(discharging)'}`,
+      );
     }
 
     lines.push(`Composite Anomaly Score: ${(snap.anomalyScore * 100).toFixed(1)}%`);
 
     if (snap.phiSynchronicity) {
-      lines.push(`⚡ QUANTUM_SYNCHRONICITY_EVENT — EMF + Audio cross-modal Φ correlation at 11.3 Hz!`);
+      lines.push(
+        `⚡ QUANTUM_SYNCHRONICITY_EVENT — EMF + Audio cross-modal Φ correlation at 11.3 Hz!`,
+      );
     }
 
     return lines.join('\n');

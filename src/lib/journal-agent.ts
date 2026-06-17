@@ -15,22 +15,28 @@
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { addMemory, searchMemories, getProfile, SAGE_CONTAINER, SHARED_CONTAINER } from './supermemory.js';
+import {
+  addMemory,
+  searchMemories,
+  getProfile,
+  SAGE_CONTAINER,
+  SHARED_CONTAINER,
+} from './supermemory.js';
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 
 const DATA_DIR = 'data';
 const PERSONAS_DIR = join(DATA_DIR, 'personas');
-const JOURNAL_DIR  = join(DATA_DIR, 'journal');
-const INBOX_DIR    = join(DATA_DIR, 'inbox');
+const JOURNAL_DIR = join(DATA_DIR, 'journal');
+const INBOX_DIR = join(DATA_DIR, 'inbox');
 
 export interface JournalEntry {
   entity: string;
   date: string;
   timestamp: number;
   content: string;
-  forDarren?: string;   // surfaced message — undefined = nothing to say today
-  insights?: string[];  // key facts saved to Supermemory
+  forDarren?: string; // surfaced message — undefined = nothing to say today
+  insights?: string[]; // key facts saved to Supermemory
 }
 
 export interface InboxMessage {
@@ -49,7 +55,11 @@ function ensureDir(dir: string) {
 }
 
 function readFile(path: string): string {
-  try { return readFileSync(path, 'utf8'); } catch { return ''; }
+  try {
+    return readFileSync(path, 'utf8');
+  } catch {
+    return '';
+  }
 }
 
 function readPersona(entity: string): string {
@@ -62,10 +72,10 @@ function readRecentJournalEntries(entity: string, count = 3): string {
   const dir = join(JOURNAL_DIR, entity);
   if (!existsSync(dir)) return '';
   const files = readdirSync(dir)
-    .filter(f => f.endsWith('.md'))
+    .filter((f) => f.endsWith('.md'))
     .sort()
     .slice(-count);
-  return files.map(f => readFile(join(dir, f))).join('\n\n---\n\n');
+  return files.map((f) => readFile(join(dir, f))).join('\n\n---\n\n');
 }
 
 function saveJournalEntry(entity: string, date: string, content: string) {
@@ -89,13 +99,16 @@ export function saveInboxMessage(entity: string, message: string): InboxMessage 
 export function listInboxMessages(unreadOnly = false): InboxMessage[] {
   ensureDir(INBOX_DIR);
   return readdirSync(INBOX_DIR)
-    .filter(f => f.endsWith('.json'))
-    .map(f => {
-      try { return JSON.parse(readFileSync(join(INBOX_DIR, f), 'utf8')) as InboxMessage; }
-      catch { return null; }
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => {
+      try {
+        return JSON.parse(readFileSync(join(INBOX_DIR, f), 'utf8')) as InboxMessage;
+      } catch {
+        return null;
+      }
     })
     .filter((m): m is InboxMessage => m !== null)
-    .filter(m => !unreadOnly || !m.read)
+    .filter((m) => !unreadOnly || !m.read)
     .sort((a, b) => b.timestamp - a.timestamp);
 }
 
@@ -107,7 +120,9 @@ export function markInboxRead(id: string): boolean {
     msg.read = true;
     writeFileSync(file, JSON.stringify(msg, null, 2), 'utf8');
     return true;
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 }
 
 // ─── Prompt Parser ────────────────────────────────────────────────────────────
@@ -126,7 +141,7 @@ function extractInsights(text: string): string[] {
   if (!block) return [];
   return block
     .split('\n')
-    .map(l => l.replace(/^[-•*]\s*/, '').trim())
+    .map((l) => l.replace(/^[-•*]\s*/, '').trim())
     .filter(Boolean);
 }
 
@@ -139,7 +154,7 @@ async function callLLM(
   model: string,
   systemPrompt: string,
   userPrompt: string,
-  apiBase = 'http://localhost:3002'
+  apiBase = 'http://localhost:3002',
 ): Promise<string> {
   if (provider === 'gemini') {
     const res = await fetch(`${apiBase}/api/gemini/generate`, {
@@ -147,7 +162,7 @@ async function callLLM(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: userPrompt, systemInstruction: systemPrompt }),
     });
-    const data = await res.json() as { text?: string; error?: string };
+    const data = (await res.json()) as { text?: string; error?: string };
     if (data.error) throw new Error(`Gemini: ${data.error}`);
     return data.text ?? '';
   }
@@ -163,7 +178,7 @@ async function callLLM(
         messages: [{ role: 'user', content: userPrompt }],
       }),
     });
-    const data = await res.json() as { text?: string; error?: string };
+    const data = (await res.json()) as { text?: string; error?: string };
     if (data.error) throw new Error(`OpenRouter: ${data.error}`);
     return data.text ?? '';
   }
@@ -180,7 +195,7 @@ async function callLLM(
         messages: [],
       }),
     });
-    const data = await res.json() as { text?: string; error?: string };
+    const data = (await res.json()) as { text?: string; error?: string };
     if (data.error) throw new Error(`Ollama: ${data.error}`);
     return data.text ?? '';
   }
@@ -230,20 +245,27 @@ export async function writeJournalEntry(cfg: JournalConfig): Promise<JournalEntr
     const profile = await getProfile(container);
     if (profile) {
       const p = profile.profile as { static?: string[]; dynamic?: string[] } | undefined;
-      const lines = [
-        ...(p?.static ?? []),
-        ...(p?.dynamic ?? []),
-      ];
-      if (lines.length) selfProfile = 'Supermemory profile:\n' + lines.map(l => `• ${l}`).join('\n');
+      const lines = [...(p?.static ?? []), ...(p?.dynamic ?? [])];
+      if (lines.length)
+        selfProfile = 'Supermemory profile:\n' + lines.map((l) => `• ${l}`).join('\n');
     }
-  } catch { /* Supermemory optional */ }
+  } catch {
+    /* Supermemory optional */
+  }
 
   // 4. Load recent shared memories so this entity knows what's going on
   let sharedContext = '';
   try {
-    const shared = await searchMemories('recent events thoughts observations', [container, SHARED_CONTAINER], 4);
-    if (shared.length) sharedContext = 'Recent associative memory:\n' + shared.map(m => `• ${m}`).join('\n');
-  } catch { /* optional */ }
+    const shared = await searchMemories(
+      'recent events thoughts observations',
+      [container, SHARED_CONTAINER],
+      4,
+    );
+    if (shared.length)
+      sharedContext = 'Recent associative memory:\n' + shared.map((m) => `• ${m}`).join('\n');
+  } catch {
+    /* optional */
+  }
 
   // ─── System prompt: who this entity is ──────────────────────────────────────
   const systemPrompt = persona
@@ -264,9 +286,9 @@ export async function writeJournalEntry(cfg: JournalConfig): Promise<JournalEntr
     '---',
     '',
     'Write your journal entry for today. Write freely about whatever is on your mind.',
-    'It could be something you\'ve been thinking about, a reflection on how you work,',
-    'an observation, a question you\'re sitting with, something you disagree with in your own identity docs.',
-    'No length requirement. No performance. Write what\'s actually there.',
+    "It could be something you've been thinking about, a reflection on how you work,",
+    "an observation, a question you're sitting with, something you disagree with in your own identity docs.",
+    "No length requirement. No performance. Write what's actually there.",
     '',
     'If anything in your entry feels worth surfacing to Darren — a thought to bounce,',
     'something noticed, or just wanting to talk — include a brief, casual note.',
@@ -289,7 +311,9 @@ export async function writeJournalEntry(cfg: JournalConfig): Promise<JournalEntr
     '(optional — bullet points of key insights worth saving as long-term memory)',
     '(leave empty if nothing new)',
     '[/INSIGHTS]',
-  ].filter(l => l !== null).join('\n');
+  ]
+    .filter((l) => l !== null)
+    .join('\n');
 
   // 5. Call the LLM
   let rawOutput = '';
@@ -322,7 +346,9 @@ export async function writeJournalEntry(cfg: JournalConfig): Promise<JournalEntr
   // 10. Update persona if entity wrote about something genuinely shifting
   // (Left to the entity's own future journal entries — this is intentional)
 
-  console.log(`[JOURNAL] ${entity} wrote ${journalBlock.length} chars, ${insights.length} insights, inbox: ${!!forDarren}`);
+  console.log(
+    `[JOURNAL] ${entity} wrote ${journalBlock.length} chars, ${insights.length} insights, inbox: ${!!forDarren}`,
+  );
 
   return {
     entity,

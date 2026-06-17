@@ -40,9 +40,9 @@ export const useAudioRecorder = () => {
           resolve({ blob, base64 });
         };
         setIsRecording(false);
-        
+
         // Stop all tracks to release the microphone
-        mediaRecorder.current?.stream.getTracks().forEach(track => track.stop());
+        mediaRecorder.current?.stream.getTracks().forEach((track) => track.stop());
       };
 
       mediaRecorder.current.stop();
