@@ -49,6 +49,7 @@ type NeuralGraph = Record<string, Record<string, number>>;
 export class AssociativeMemory {
   private storagePath: string;
   private neuralGraph: NeuralGraph;
+  private saveTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(storagePath = path.join(process.cwd(), 'data', 'sage_neural_graph.json')) {
     this.storagePath = storagePath;
@@ -62,9 +63,25 @@ export class AssociativeMemory {
     return {};
   }
 
+  // Debounced persistence: the in-memory graph is the source of truth during a
+  // run. Coalescing many rapid mutations (every salient stimulus) into a single
+  // disk write keeps the event loop from being blocked N times per chat turn and
+  // prevents interleaved half-written graph files across concurrent turns.
   private saveGraph(): void {
-    fs.mkdirSync(path.dirname(this.storagePath), { recursive: true });
-    fs.writeFileSync(this.storagePath, JSON.stringify(this.neuralGraph, null, 2));
+    if (this.saveTimer) return;          // a flush is already scheduled
+    this.saveTimer = setTimeout(() => {
+      this.saveTimer = null;
+      this.flushGraph();
+    }, 250);
+  }
+
+  private flushGraph(): void {
+    try {
+      fs.mkdirSync(path.dirname(this.storagePath), { recursive: true });
+      fs.writeFileSync(this.storagePath, JSON.stringify(this.neuralGraph, null, 2));
+    } catch (err) {
+      console.error('[endocrine] failed to persist neural graph:', err);
+    }
   }
 
   // Long-Term Potentiation (Hebbian learning)

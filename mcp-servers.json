@@ -17,7 +17,7 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "/app/data"
+        "/home/workspace/ADHD-Sage/data"
       ],
       "env": {},
       "enabled": true
@@ -98,10 +98,14 @@
       "id": "serena",
       "name": "Serena",
       "transport": "stdio",
-      "command": "npx",
+      "command": "uv",
       "args": [
-        "-y",
-        "@modelcontextprotocol/server-serena"
+        "run",
+        "--project",
+        "/home/workspace/serena",
+        "serena",
+        "start-mcp-server",
+        "--project-from-cwd"
       ],
       "env": {},
       "enabled": true

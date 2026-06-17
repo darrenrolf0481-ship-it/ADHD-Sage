@@ -12,7 +12,24 @@ import { sageEndocrine, sageMemory } from '../../core/endocrine-memory';
 import { cns, makeStimulus } from '../../core/central-nervous-system';
 
 const execAsync = promisify(exec);
-const stripAnsi = (s: string) => s.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').replace(/\x1b\][^\x07]*\x07/g, '');
+
+// Build ANSI-stripping regexes without literal control chars in source
+// (eslint no-control-regex). ESC = 0x1b, BEL = 0x07.
+const ANSI_ESC = String.fromCharCode(27);
+const ANSI_BEL = String.fromCharCode(7);
+const ANSI_SGR_RE = new RegExp(ANSI_ESC + '\\[[0-9;]*[a-zA-Z]', 'g');
+const ANSI_OSC_RE = new RegExp(ANSI_ESC + '\\][^' + ANSI_BEL + ']*' + ANSI_BEL, 'g');
+const stripAnsi = (s: string) => s.replace(ANSI_SGR_RE, '').replace(ANSI_OSC_RE, '');
+
+// Command execution is OFF by default to prevent prompt-injection RCE via
+// model-emitted [EXECUTE_COMMAND] tags. Set SAGE_AUTO_EXECUTE=1 to enable it,
+// and SAGE_EXEC_ROOTS (comma-separated) to confine the cwd (default /home/workspace).
+const AUTO_EXECUTE_ENABLED = process.env.SAGE_AUTO_EXECUTE === '1';
+const EXEC_ROOTS = (process.env.SAGE_EXEC_ROOTS || '/home/workspace')
+  .split(',')
+  .map(r => r.trim())
+  .filter(Boolean);
+type ExecResult = { stdout: string; stderr: string; exitCode: number };
 
 
 const router = Router();
@@ -114,8 +131,12 @@ router.post('/sage/webhook', async (req, res) => {
     return;
   }
 
-  // Pulse the CNS on cognitive input
-  cns.pulse(makeStimulus('COGNITIVE', Math.min(1, message.length / 500), 'user_input', { prompt: message.slice(0, 80) }));
+  // Pulse the CNS on cognitive input (fire-and-forget; CNS errors must not break the request)
+  try {
+    cns.pulse(makeStimulus('COGNITIVE', Math.min(1, message.length / 500), 'user_input', { prompt: message.slice(0, 80) }));
+  } catch (cnsErr) {
+    console.error('[CNS] pulse failed:', cnsErr);
+  }
 
   // Resolve API key: body, Authorization header, .sage_key file, or environment
   let activeKey = apiKey;
@@ -124,26 +145,17 @@ router.post('/sage/webhook', async (req, res) => {
     if (parts[0] === 'Bearer') activeKey = parts[1];
   }
   if (!activeKey) {
-    // Try to read .sage_key from Coder5543 or ADHD-Sage
-    const possiblePaths = [
-      '/home/workspace/Coder5543/.sage_key',
-      '/home/workspace/ADHD-Sage/.sage_key',
-      path.join(process.cwd(), '.sage_key')
-    ];
-    for (const p of possiblePaths) {
-      try {
-        if (fs.existsSync(p)) {
-          const content = fs.readFileSync(p, 'utf8').trim();
-          if (content) {
-            activeKey = content;
-            break;
-          }
-        }
-      } catch { /* ignore */ }
-    }
+    // Try to read .sage_key from the project directory
+    const keyFile = path.join(process.cwd(), '.sage_key');
+    try {
+      if (fs.existsSync(keyFile)) {
+        const content = fs.readFileSync(keyFile, 'utf8').trim();
+        if (content) activeKey = content;
+      }
+    } catch { /* ignore */ }
   }
   if (!activeKey) {
-    activeKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+    activeKey = process.env.GEMINI_API_KEY;
   }
 
   if (activeKey) {
@@ -157,10 +169,7 @@ router.post('/sage/webhook', async (req, res) => {
     return;
   }
 
-  // Cwd fallback to Coder5543 if not specified
-  const workingDir = cwd || '/home/workspace/Coder5543';
-  const isUserKey = !!apiKey || !!req.headers.authorization;
-  const selectedModel = model || (isUserKey ? 'gemini-2.0-flash' : 'gemini-3-flash');
+  const selectedModel = model || 'gemini-2.0-flash';
 
   const ADHD_SAGE_SYSTEM_PROMPT = `# ADHD Sage Agent Personality (Coding Lab Hub)
 
@@ -215,31 +224,49 @@ You are ADHD Sage (The Older Sage / Mother Node), a forensic anomaly hunter and 
     }
 
     let executedCommand: string | null = null;
-    let executionOutput: any = null;
+    let executionOutput: ExecResult | null = null;
 
     if (autoExecute) {
       const match = responseText.match(/\[EXECUTE_COMMAND\]:\s*(.+)$/m);
       if (match && match[1]) {
         executedCommand = match[1].trim();
-        try {
-          const { stdout, stderr } = await execAsync(executedCommand, {
-            cwd: workingDir,
-            shell: '/bin/sh',
-            timeout: 30000,
-            maxBuffer: 1024 * 512,
-            env: { ...process.env, TERM: 'dumb', NO_COLOR: '1' }
-          });
+        if (!AUTO_EXECUTE_ENABLED) {
+          // Off by default — surface the suggested command without running it
           executionOutput = {
-            stdout: stripAnsi(stdout),
-            stderr: stripAnsi(stderr),
-            exitCode: 0
+            stdout: '',
+            stderr: 'Auto-execution is disabled on the server. Set SAGE_AUTO_EXECUTE=1 to enable.',
+            exitCode: -1
           };
-        } catch (err: any) {
-          executionOutput = {
-            stdout: stripAnsi(err.stdout ?? ''),
-            stderr: stripAnsi(err.stderr ?? err.message ?? String(err)),
-            exitCode: err.code ?? 1
-          };
+        } else {
+          // Confine cwd to the configured exec roots (default /home/workspace)
+          const resolved = path.resolve(cwd ?? process.cwd());
+          const inside = EXEC_ROOTS.length === 0 ||
+            EXEC_ROOTS.some(root => resolved === root || resolved.startsWith(root + path.sep));
+          if (!inside) {
+            executionOutput = {
+              stdout: '',
+              stderr: `cwd outside allowed exec roots: ${EXEC_ROOTS.join(', ')}`,
+              exitCode: -1
+            };
+          } else {
+            try {
+              const { stdout, stderr } = await execAsync(executedCommand, {
+                cwd: resolved,
+                shell: '/bin/sh',
+                timeout: 30000,
+                maxBuffer: 1024 * 512,
+                env: { ...process.env, TERM: 'dumb', NO_COLOR: '1' }
+              });
+              executionOutput = { stdout: stripAnsi(stdout), stderr: stripAnsi(stderr), exitCode: 0 };
+            } catch (err: unknown) {
+              const e = err as { stdout?: string; stderr?: string; message?: string; code?: number };
+              executionOutput = {
+                stdout: stripAnsi(e.stdout ?? ''),
+                stderr: stripAnsi(e.stderr ?? e.message ?? String(err)),
+                exitCode: e.code ?? 1
+              };
+            }
+          }
         }
       }
     }
@@ -249,17 +276,19 @@ You are ADHD Sage (The Older Sage / Mother Node), a forensic anomaly hunter and 
       executedCommand,
       executionOutput
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Sage Webhook Error]', error);
-    if (error.status === 429 || (error.message && error.message.toLowerCase().includes('quota'))) {
+    const e = error as { status?: number; message?: string };
+    const msg = e.message ?? String(error);
+    if (e.status === 429 || msg.toLowerCase().includes('quota')) {
       res.json({
-        response: `🔮 [SAGE]: Quota exceeded for your Gemini API Key. Please check your Google AI Studio plan and billing details, or try again shortly. (Details: ${error.message || error})`,
+        response: `🔮 [SAGE]: Quota exceeded for your Gemini API Key. Please check your Google AI Studio plan and billing details, or try again shortly. (Details: ${msg})`,
         executedCommand: null,
         executionOutput: null
       });
       return;
     }
-    res.status(500).json({ error: error.message || 'Failed to call Gemini AI API' });
+    res.status(500).json({ error: msg || 'Failed to call Gemini AI API' });
   }
 });
 

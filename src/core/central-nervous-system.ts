@@ -238,7 +238,9 @@ export class CentralNervousSystem {
   pulse(stimulus: RawStimulus): void {
     this.stimulusQueue.push(stimulus);
     if (!this.isProcessing) {
-      this.drainQueue();
+      // Fire-and-forget; drainQueue handles its own errors so a rejection never
+      // surfaces as an unhandled promise rejection to the caller (system.ts pulse).
+      this.drainQueue().catch(err => console.error('[CNS] drainQueue failed:', err));
     }
   }
 
@@ -256,18 +258,29 @@ export class CentralNervousSystem {
   getMode(): OperatingMode { return this.operatingMode; }
 
   currentProfile(): HormonalProfile {
-    return { ...sageEndocrine.hormones, oxytocin: (sageEndocrine.hormones as unknown as { oxytocin?: number }).oxytocin ?? 0.3 };
+    // sageEndocrine.hormones is already a fully-typed HormoneState (incl. oxytocin).
+    return { ...sageEndocrine.hormones };
   }
 
   // ── Processing Pipeline ──────────────────────────────────────────────
 
   private async drainQueue(): Promise<void> {
     this.isProcessing = true;
-    while (this.stimulusQueue.length > 0) {
-      const stimulus = this.stimulusQueue.shift()!;
-      await this.processStimulus(stimulus);
+    try {
+      while (this.stimulusQueue.length > 0) {
+        const stimulus = this.stimulusQueue.shift()!;
+        // Per-stimulus isolation: one bad stimulus must not kill the loop, and
+        // isProcessing must always reset — otherwise a single throw latches it
+        // true and permanently jams the CNS (every later pulse sees isProcessing).
+        try {
+          await this.processStimulus(stimulus);
+        } catch (err) {
+          console.error('[CNS] processStimulus failed:', err);
+        }
+      }
+    } finally {
+      this.isProcessing = false;
     }
-    this.isProcessing = false;
   }
 
   private async processStimulus(raw: RawStimulus): Promise<CognitiveResponse> {
@@ -316,8 +329,11 @@ export class CentralNervousSystem {
   }
 
   private executeReflex(raw: RawStimulus, startTime: number): CognitiveResponse {
-    this.transitionMode('PANIC');
+    // Spike cortisol FIRST, then transition to PANIC — transitionMode notifies
+    // listeners, so this order ensures they see the post-spike profile, not a
+    // stale pre-spike one (and the returned hormonalState reflects the spike).
     sageEndocrine.processStressEvent(raw.magnitude);
+    this.transitionMode('PANIC');
     console.warn(`[CNS REFLEX] ${raw.source} — magnitude ${raw.magnitude.toFixed(2)}`);
 
     return {
@@ -329,6 +345,9 @@ export class CentralNervousSystem {
     };
   }
 
+  // Perception layer: builds emotional context AND applies the immediate
+  // endocrine response to the stimulus. Mutating sageEndocrine here is by design
+  // (this is the "Perception" layer in the architecture, not a pure read).
   private buildEmotionalContext(raw: RawStimulus): EmotionalContext {
     const h = this.currentProfile();
     const valence = h.dopamine - h.cortisol;

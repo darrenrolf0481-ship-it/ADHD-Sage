@@ -8,6 +8,9 @@
  * function calls to the live bridge.
  */
 
+// This must match the host app's VITE_NEXUS_SECRET (see .env.example). If the
+// host leaves VITE_NEXUS_SECRET empty, App.tsx never registers window.nexus and
+// every executeToolCall() below throws "NEXUS bridge not found".
 export const NEXUS_SECRET = "nexus_default_protocol_77";
 
 /** Function declarations for AI Studio / Gemini Gems */
@@ -214,6 +217,11 @@ export async function executeToolCall(call: FunctionCall): Promise<unknown> {
       bridge.recordInteraction(String(call.args.text));
       return { ok: true, action: "recorded" };
 
+    // NOTE: /api/memory/burn and /api/memory/read do not exist on the server
+    // (the memory router exposes only /add, /search, /profile), and these
+    // fetches send no Authorization header so they would 401 against authGuard
+    // anyway. Wire these through the window.nexus bridge (like the nexus_*
+    // tools above) or add the server routes + a Bearer token before relying on them.
     case "burn_to_disk": {
       const burnRes = await fetch("/api/memory/burn", {
         method: "POST",
@@ -305,7 +313,7 @@ export async function handleToolCalls(calls: FunctionCall[]): Promise<ToolRespon
  *     ?.find(p => p.functionCall)?.functionCall;
  *
  *   if (call) {
- *     const localResult = executeToolCall(call);
+ *     const localResult = await executeToolCall(call);
  *
  *     const finalResponse = await model.generateContent({
  *       contents: [
