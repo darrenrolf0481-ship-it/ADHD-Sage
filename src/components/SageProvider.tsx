@@ -76,14 +76,14 @@ export const SageProvider: React.FC<{ children: React.ReactNode }> = ({ children
     memory.bulkStash(entries).then(() => {
       setInnerSpiral(memory.getInnerSpiral());
       setOuterSweep(memory.getArchive());
-    });
+    }).catch(err => console.warn('[SAGE] bulkStash failed:', err));
   }, []);
 
   const archiveMemories = useCallback(() => {
     memory.archiveAll().then(() => {
       setInnerSpiral(memory.getInnerSpiral());
       setOuterSweep(memory.getArchive());
-    });
+    }).catch(err => console.warn('[SAGE] archiveAll failed:', err));
   }, []);
 
   const value = useMemo(() => ({

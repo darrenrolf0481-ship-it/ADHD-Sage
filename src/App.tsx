@@ -71,6 +71,12 @@ async function attachmentToBase64(att: Attachment): Promise<{ mimeType: string; 
   }
 }
 
+type AppView = 'chat' | 'lattice' | 'vault' | 'labyrinth' | 'anomalies' | 'surprise';
+const APP_VIEWS: readonly AppView[] = ['chat', 'lattice', 'vault', 'labyrinth', 'anomalies', 'surprise'];
+
+/** Short, crash-safe display suffix for a memory node id (server-sourced ids may lack '_'). */
+const shortId = (id: string): string => (id.split('_')[1] ?? id).slice(-4);
+
 const App: React.FC = () => {
   const {
     neuroState,
@@ -87,7 +93,7 @@ const App: React.FC = () => {
   const { snapshot: sensorSnap } = useSensors();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [view, setView] = useState<'chat' | 'lattice' | 'vault' | 'labyrinth' | 'anomalies' | 'surprise'>('chat');
+  const [view, setView] = useState<AppView>('chat');
   const [mhtNodeLimit, setMhtNodeLimit] = useState(100);
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     try {
@@ -146,6 +152,12 @@ const App: React.FC = () => {
       // keepalive — channel is alive
     });
 
+    es.addEventListener('error', (e) => {
+      // The browser auto-reconnects EventSource after errors; just log so silent
+      // backend downtime isn't invisible. Do NOT es.close() here — that stops reconnect.
+      console.warn('[SSE] inbox stream error (will auto-reconnect):', e);
+    });
+
     return () => es.close();
   }, []);
 
@@ -157,6 +169,7 @@ const App: React.FC = () => {
   
   // Auto-save effect
   useEffect(() => {
+    let saveTimer: ReturnType<typeof setTimeout> | null = null;
     const saveHistory = () => {
       setIsSaving(true);
       try {
@@ -173,17 +186,22 @@ const App: React.FC = () => {
           localStorage.removeItem('nexus_chat_history');
         }
       }
-      setTimeout(() => setIsSaving(false), 2000);
+      // Clear any pending timer so repeated saves don't stack setState-after-unmount.
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => setIsSaving(false), 2000);
     };
 
     saveHistory(); // trigger save on changes
-    
+
     // Also periodic auto-save
     const interval = setInterval(() => {
-      saveHistory(); 
+      saveHistory();
     }, 60000);
-    
-    return () => clearInterval(interval);
+
+    return () => {
+      clearInterval(interval);
+      if (saveTimer) clearTimeout(saveTimer);
+    };
   }, [messages]);
 
   // Persist provider/model choices
@@ -350,7 +368,12 @@ const App: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const { executeLocalTool } = useSageTools({
-    setView: setView as (v: string) => void,
+    // Validate the tool-bridge view string against the real union instead of
+    // widening the setter to (v: string) => void (which would let an invalid
+    // view string slip into state with no type/runtime error).
+    setView: (v: string) => {
+      if (APP_VIEWS.includes(v as AppView)) setView(v as AppView);
+    },
     toggleSidebar: () => setIsSidebarOpen(prev => !prev),
     injectMessage: (text, role) => setMessages(prev => [...prev, {
       id: `m_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
@@ -497,6 +520,7 @@ const App: React.FC = () => {
         const ollamaRes = await fetch('/api/ollama/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(180000),
           body: JSON.stringify({
             model: ollamaModel,
             containerTag: 'shared',    // reads sm_project_default
@@ -514,6 +538,7 @@ const App: React.FC = () => {
         const orRes = await fetch('/api/openrouter/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(120000),
           body: JSON.stringify({
             model: orModel,
             containerTag: 'shared',    // reads sm_project_default
@@ -649,7 +674,7 @@ const App: React.FC = () => {
                   searchResults.slice().reverse().map((node) => (
                     <div key={node.id} className="p-3 rounded-xl bg-white/5 border border-white/5 text-[10px] hover:bg-white/10 transition-colors cursor-pointer group">
                       <div className="flex justify-between items-start mb-1">
-                        <span className="text-cyan-400 font-mono">#{node.id.split('_')[1].slice(-4)}</span>
+                        <span className="text-cyan-400 font-mono">#{shortId(node.id)}</span>
                         <span className="text-[9px] text-slate-600 group-hover:text-slate-400 transition-colors">
                           {new Date(node.timestamp).toLocaleDateString()}
                         </span>
@@ -1113,7 +1138,11 @@ const App: React.FC = () => {
                             )}
                           </div>
                           <button
-                            onClick={() => setPendingAttachments(prev => prev.filter((_, idx) => idx !== i))}
+                            onClick={() => setPendingAttachments(prev => {
+                              const removed = prev[i];
+                              if (removed) URL.revokeObjectURL(removed.url);
+                              return prev.filter((_, idx) => idx !== i);
+                            })}
                             className="ml-1 text-slate-400 hover:text-red-400"
                           >
                             &times;
@@ -1192,7 +1221,7 @@ const App: React.FC = () => {
                         {String(s.data)}
                       </div>
                       <div className="mt-1 flex justify-between items-center">
-                        <span className="text-[8px] text-cyan-500 uppercase font-bold tracking-tighter">Node #{s.id.split('_')[1].slice(-4)}</span>
+                        <span className="text-[8px] text-cyan-500 uppercase font-bold tracking-tighter">Node #{shortId(s.id)}</span>
                         <span className="text-[8px] text-cyan-500/60 font-mono">RECALL</span>
                       </div>
                     </button>
@@ -1229,7 +1258,7 @@ const App: React.FC = () => {
                   sortedInnerSpiral.map((node) => (
                     <div key={node.id} className="p-3 rounded-xl bg-white/5 border border-white/5 text-[10px] relative group">
                       <div className="flex justify-between items-start mb-1">
-                        <span className="text-cyan-400 font-mono">#{node.id.split('_')[1].slice(-4)}</span>
+                        <span className="text-cyan-400 font-mono">#{shortId(node.id)}</span>
                         <span className="text-[9px] text-slate-500">{new Date(node.timestamp).toLocaleTimeString()}</span>
                       </div>
                       <div className="text-slate-300 line-clamp-2">{String(node.data)}</div>
