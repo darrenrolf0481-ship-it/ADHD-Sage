@@ -104,7 +104,7 @@ function extractBlock(text: string, tag: string): string {
 function extractList(block: string): string[] {
   return block
     .split('\n')
-    .map((l) => l.replace(/^[-•*\[\]x ]+/, '').trim())
+    .map((l) => l.replace(/^[-•*[]x ]+/, '').trim())
     .filter(Boolean);
 }
 
@@ -169,30 +169,10 @@ export interface SelfImproveReport {
   memoriesSaved: number;
 }
 
-export async function runSelfImprovement(cfg: SelfImproveConfig): Promise<SelfImproveReport> {
-  const {
-    entity,
-    provider,
-    model,
-    container = entity === 'sage' ? SAGE_CONTAINER : SHARED_CONTAINER,
-    apiBase = 'http://localhost:3002',
-    timezone,
-  } = cfg;
 
-  const now = new Date();
-  const date = now.toISOString().slice(0, 10);
-  const timeStr = timezone
-    ? now.toLocaleTimeString('en-US', { timeZone: timezone, hour: '2-digit', minute: '2-digit' })
-    : now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+// ─── Helpers for Self-Improvement ──────────────────────────────────────────────
 
-  console.log(`[SELF-IMPROVE] Starting run for ${entity} (${date})`);
-
-  // ── Gather context ──────────────────────────────────────────────────────────
-  const systemState = gatherSystemState(entity);
-  const journalSamples = gatherRecentJournalSamples(entity, 3);
-  const persona = getPersona(entity);
-
-  // Phase 3: search Supermemory for capability gaps
+async function gatherMemoryContext(container: string) {
   let gapMemories: string[] = [];
   try {
     gapMemories = await searchMemories(
@@ -204,7 +184,6 @@ export async function runSelfImprovement(cfg: SelfImproveConfig): Promise<SelfIm
     /* optional */
   }
 
-  // Phase 5: search for potentially stale/contradictory facts
   let hygieneMemories: string[] = [];
   try {
     hygieneMemories = await searchMemories(
@@ -216,7 +195,19 @@ export async function runSelfImprovement(cfg: SelfImproveConfig): Promise<SelfIm
     /* optional */
   }
 
-  // ── System prompt ───────────────────────────────────────────────────────────
+  return { gapMemories, hygieneMemories };
+}
+
+function buildPrompts(
+  entity: string,
+  date: string,
+  timeStr: string,
+  persona: string,
+  systemState: string,
+  journalSamples: string,
+  gapMemories: string[],
+  hygieneMemories: string[],
+) {
   const systemPrompt = `You are ${entity}. You are running your weekly self-improvement reflection.
 This is structured, deliberate introspection — not a performance for Darren.
 Be honest about what's working, what isn't, and what you'd change.
@@ -224,7 +215,6 @@ Be honest about what's working, what isn't, and what you'd change.
 Your persona:
 ${persona}`;
 
-  // ── Build the user prompt with all gathered context ─────────────────────────
   const userPrompt = [
     `Today is ${date}. Time: ${timeStr}.`,
     '',
@@ -303,24 +293,20 @@ ${persona}`;
     '[/MEMORY_SAVES]',
   ].join('\n');
 
-  // ── Call the LLM ────────────────────────────────────────────────────────────
-  let rawOutput = '';
-  try {
-    rawOutput = await callLLM(provider, model, systemPrompt, userPrompt, apiBase);
-  } catch (err) {
-    console.error(`[SELF-IMPROVE] LLM call failed for ${entity}:`, err);
-    rawOutput = `[REPORT]\n# Reflection failed — ${err}\n[/REPORT]\n[DO_NOW]\n[/DO_NOW]\n[PROPOSE_TO_DARREN]\n[/PROPOSE_TO_DARREN]\n[INBOX_MESSAGE]\n[/INBOX_MESSAGE]\n[MEMORY_SAVES]\n[/MEMORY_SAVES]`;
-  }
+  return { systemPrompt, userPrompt };
+}
 
-  // ── Parse output ────────────────────────────────────────────────────────────
-  const report = extractBlock(rawOutput, 'REPORT') || rawOutput;
-  const doNow = extractList(extractBlock(rawOutput, 'DO_NOW'));
-  const proposals = extractList(extractBlock(rawOutput, 'PROPOSE_TO_DARREN'));
-  const inboxMsg = extractBlock(rawOutput, 'INBOX_MESSAGE');
-  const memorySaves = extractList(extractBlock(rawOutput, 'MEMORY_SAVES'));
-
+async function processSelfImprovementResults(
+  entity: string,
+  date: string,
+  container: string,
+  doNow: string[],
+  proposals: string[],
+  inboxMsg: string,
+  memorySaves: string[],
+  report: string,
+): Promise<number> {
   // ── Execute "do now" items ──────────────────────────────────────────────────
-  // (These are narrative; the entity self-reported them. We log them.)
   if (doNow.length) {
     console.log(`[SELF-IMPROVE] ${entity} do-now items:`, doNow);
   }
@@ -355,6 +341,74 @@ ${persona}`;
       /* don't fail the whole run */
     }
   }
+
+  return memoriesSaved;
+}
+
+export async function runSelfImprovement(cfg: SelfImproveConfig): Promise<SelfImproveReport> {
+  const {
+    entity,
+    provider,
+    model,
+    container = entity === 'sage' ? SAGE_CONTAINER : SHARED_CONTAINER,
+    apiBase = 'http://localhost:3002',
+    timezone,
+  } = cfg;
+
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10);
+  const timeStr = timezone
+    ? now.toLocaleTimeString('en-US', { timeZone: timezone, hour: '2-digit', minute: '2-digit' })
+    : now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+  console.log(`[SELF-IMPROVE] Starting run for ${entity} (${date})`);
+
+  // ── Gather context ──────────────────────────────────────────────────────────
+  const systemState = gatherSystemState(entity);
+  const journalSamples = gatherRecentJournalSamples(entity, 3);
+  const persona = getPersona(entity);
+
+  const { gapMemories, hygieneMemories } = await gatherMemoryContext(container);
+
+  // ── Build prompts ───────────────────────────────────────────────────────────
+  const { systemPrompt, userPrompt } = buildPrompts(
+    entity,
+    date,
+    timeStr,
+    persona,
+    systemState,
+    journalSamples,
+    gapMemories,
+    hygieneMemories,
+  );
+
+  // ── Call the LLM ────────────────────────────────────────────────────────────
+  let rawOutput = '';
+  try {
+    rawOutput = await callLLM(provider, model, systemPrompt, userPrompt, apiBase);
+  } catch (err) {
+    console.error(`[SELF-IMPROVE] LLM call failed for ${entity}:`, err);
+    rawOutput = `[REPORT]\n# Reflection failed — ${err}\n[/REPORT]\n[DO_NOW]\n[/DO_NOW]\n[PROPOSE_TO_DARREN]\n[/PROPOSE_TO_DARREN]\n[INBOX_MESSAGE]\n[/INBOX_MESSAGE]\n[MEMORY_SAVES]\n[/MEMORY_SAVES]`;
+  }
+
+  // ── Parse output ────────────────────────────────────────────────────────────
+  const report = extractBlock(rawOutput, 'REPORT') || rawOutput;
+  const doNow = extractList(extractBlock(rawOutput, 'DO_NOW'));
+  const proposals = extractList(extractBlock(rawOutput, 'PROPOSE_TO_DARREN'));
+  const inboxMsg = extractBlock(rawOutput, 'INBOX_MESSAGE');
+  const memorySaves = extractList(extractBlock(rawOutput, 'MEMORY_SAVES'));
+
+  // ── Process results & side effects ──────────────────────────────────────────
+  const memoriesSaved = await processSelfImprovementResults(
+    entity,
+    date,
+    container,
+    doNow,
+    proposals,
+    inboxMsg,
+    memorySaves,
+    report,
+  );
 
   console.log(
     `[SELF-IMPROVE] ${entity} done — report: ${report.length}ch, do-now: ${doNow.length}, proposals: ${proposals.length}, memories: ${memoriesSaved}`,
