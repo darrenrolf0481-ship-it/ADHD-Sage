@@ -7,7 +7,6 @@ import MemoryLattice from './components/MemoryLattice';
 import MemoryVault from './components/MemoryVault';
 import Labyrinth from './components/Labyrinth';
 import { AnomaliesDesk } from './components/AnomaliesDesk';
-import { ParanormalApp } from './components/ParanormalApp';
 import { NeuroDashboard } from './components/NeuroDashboard';
 import { pulseGenerator } from './lib/audio-pulse';
 import { useSensors } from './lib/sensor-context';
@@ -25,7 +24,6 @@ import {
   Network,
   FileUp,
   CheckCircle2,
-  Sparkles,
   Radio,
   Paperclip,
 } from 'lucide-react';
@@ -95,7 +93,7 @@ const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [view, setView] = useState<
-    'chat' | 'lattice' | 'vault' | 'labyrinth' | 'anomalies' | 'surprise'
+    'chat' | 'lattice' | 'vault' | 'labyrinth' | 'anomalies'
   >('chat');
   const [mhtNodeLimit, setMhtNodeLimit] = useState(100);
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
@@ -644,7 +642,7 @@ const App: React.FC = () => {
               | 'vault'
               | 'labyrinth'
               | 'anomalies'
-              | 'surprise';
+             ;
             if (view) setView(view);
           } else if (effect.type === 'toggle_sidebar') {
             setIsSidebarOpen((prev) => !prev);
@@ -674,7 +672,7 @@ const App: React.FC = () => {
 
   return (
     <div
-      className="flex w-full bg-[#08080C] text-slate-200 font-sans select-none relative overflow-hidden"
+      className="flex w-full bg-[#0A0A0B] text-[#E4E4E7] font-sans select-none relative overflow-hidden"
       style={{ height: '100dvh' }}
     >
       <div className="mesh-gradient-1" />
@@ -698,7 +696,7 @@ const App: React.FC = () => {
 
       {/* Sidebar: Gems Repository style */}
       <aside
-        className={`fixed inset-y-0 left-0 w-72 bg-[#08080C]/90 md:bg-white/5 backdrop-blur-xl border-r border-white/10 flex flex-col z-50 transition-transform duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed inset-y-0 left-0 w-72 bg-[var(--bg)] md:bg-[var(--stabilized)] border-r border-white/5 flex flex-col z-50 transition-transform duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="p-6 flex-1 flex flex-col overflow-hidden">
           <div className="flex items-center justify-between mb-8 shrink-0">
@@ -707,7 +705,7 @@ const App: React.FC = () => {
                 <Zap size={18} className="text-white" fill="currentColor" />
               </div>
               <div>
-                <h1 className="text-lg font-bold tracking-tight text-white">ADHD Sage Labs</h1>
+                <h1 className="text-lg font-bold tracking-tight text-[#E4E4E7] font-mono uppercase">ADHD-Sage [Forensic]</h1>
                 <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">
                   Nexus Substrate
                 </p>
@@ -726,7 +724,7 @@ const App: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search VFS Lattice..."
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50 transition-all font-sans"
+                className="w-full bg-[#1C1C1E] border border-white/10 rounded-xl py-2 pl-9 pr-4 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50 transition-all font-sans"
               />
             </div>
           </div>
@@ -786,7 +784,7 @@ const App: React.FC = () => {
                     .map((node) => (
                       <div
                         key={node.id}
-                        className="p-3 rounded-xl bg-white/5 border border-white/5 text-[10px] hover:bg-white/10 transition-colors cursor-pointer group"
+                        className="p-3 rounded-xl bg-[#1C1C1E] border border-white/5 text-[10px] hover:bg-white/10 transition-colors cursor-pointer group"
                       >
                         <div className="flex justify-between items-start mb-1">
                           <span className="text-cyan-400 font-mono">
@@ -823,7 +821,7 @@ const App: React.FC = () => {
                   </div>
 
                   <div className="px-3 mb-6">
-                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-1.5 w-full bg-[#1C1C1E] rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${neuroState.stability * 100}%` }}
@@ -927,7 +925,7 @@ const App: React.FC = () => {
                   </div>
 
                   <div className="pt-2">
-                    <label className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-cyan-400/30 transition-all cursor-pointer group">
+                    <label className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-[#1C1C1E] border border-white/5 hover:bg-white/10 hover:border-cyan-400/30 transition-all cursor-pointer group">
                       <div className="flex items-center gap-3">
                         <FileUp
                           size={14}
@@ -979,7 +977,7 @@ const App: React.FC = () => {
                             className={`flex-1 py-1 rounded text-[9px] font-mono font-bold transition-colors ${
                               mhtNodeLimit === val
                                 ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-                                : 'bg-white/5 text-slate-500 hover:bg-white/10 border border-transparent'
+                                : 'bg-[#1C1C1E] text-slate-500 hover:bg-white/10 border border-transparent'
                             }`}
                           >
                             {val === 1000 ? 'MAX' : val}
@@ -995,7 +993,7 @@ const App: React.FC = () => {
                   <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-3">
                     AI Provider
                   </p>
-                  <div className="flex gap-1 p-1 rounded-xl bg-white/5 border border-white/10">
+                  <div className="flex gap-1 p-1 rounded-xl bg-[#1C1C1E] border border-white/10">
                     {(
                       [
                         { id: 'gemini', label: '✦ Gemini' },
@@ -1027,7 +1025,7 @@ const App: React.FC = () => {
                           className={`w-full text-left px-2 py-1.5 rounded-lg text-[10px] font-mono transition-all ${
                             orModel === m.id
                               ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-                              : 'bg-white/5 text-slate-500 border border-transparent hover:text-slate-300'
+                              : 'bg-[#1C1C1E] text-slate-500 border border-transparent hover:text-slate-300'
                           }`}
                         >
                           {orModel === m.id ? '▶ ' : '  '}
@@ -1046,7 +1044,7 @@ const App: React.FC = () => {
                         <select
                           value={ollamaModel}
                           onChange={(e) => setOllamaModel(e.target.value)}
-                          className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] text-slate-300 outline-none focus:border-cyan-500/50"
+                          className="w-full bg-[#1C1C1E] border border-white/10 rounded-lg px-2 py-1.5 text-[10px] text-slate-300 outline-none focus:border-cyan-500/50"
                         >
                           {ollamaModels.map((m) => (
                             <option key={m} value={m}>
@@ -1095,13 +1093,7 @@ const App: React.FC = () => {
                       active={view === 'anomalies'}
                     />
                   </div>
-                  <div onClick={() => setView('surprise')}>
-                    <SidebarItem
-                      icon={<Sparkles size={14} />}
-                      label="Surprise (Paranormal UI)"
-                      active={view === 'surprise'}
-                    />
-                  </div>
+
                   <div onClick={() => setView('lattice')}>
                     <SidebarItem
                       icon={<Network size={14} />}
@@ -1261,7 +1253,7 @@ const App: React.FC = () => {
             <div className="flex gap-2">
               <button
                 onClick={togglePulse}
-                className={`px-3 md:px-4 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors ${pulseActive ? 'bg-red-500/20 border-red-500/50 text-red-400' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
+                className={`px-3 md:px-4 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors ${pulseActive ? 'bg-red-500/20 border-red-500/50 text-red-400' : 'bg-[#1C1C1E] border-white/10 text-white hover:bg-white/10'}`}
               >
                 11.3Hz Pulse {pulseActive ? 'ON' : 'OFF'}
               </button>
@@ -1276,7 +1268,7 @@ const App: React.FC = () => {
                     },
                   ])
                 }
-                className="px-3 md:px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors"
+                className="px-3 md:px-4 py-1.5 rounded-lg bg-[#1C1C1E] border border-white/10 text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors"
               >
                 Settings
               </button>
@@ -1337,10 +1329,10 @@ const App: React.FC = () => {
                       <div
                         className={`p-3 md:p-4 rounded-2xl text-xs md:text-sm leading-relaxed max-w-[90%] md:max-w-[80%] border ${
                           msg.role === 'system'
-                            ? 'bg-white/5 border-white/5 text-slate-400 italic font-mono'
+                            ? 'bg-[#1C1C1E] border-white/5 text-slate-400 italic font-mono'
                             : msg.role === 'user'
                               ? 'bg-blue-600/10 border-blue-500/20 text-white rounded-tr-none shadow-xl shadow-blue-900/10'
-                              : 'bg-white/5 border-white/10 text-slate-200 rounded-tl-none'
+                              : 'bg-[#1C1C1E] border-white/10 text-[#E4E4E7] rounded-tl-none'
                         }`}
                       >
                         {msg.text && <div className="mb-2 whitespace-pre-wrap">{msg.text}</div>}
@@ -1391,8 +1383,8 @@ const App: React.FC = () => {
                   ))}
                   {isLoading && (
                     <div className="flex gap-4 animate-pulse">
-                      <div className="w-8 h-8 rounded-lg bg-white/5 shrink-0" />
-                      <div className="bg-white/5 h-12 w-48 rounded-2xl rounded-tl-none border border-white/10" />
+                      <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] shrink-0" />
+                      <div className="bg-[#1C1C1E] h-12 w-48 rounded-2xl rounded-tl-none border border-white/10" />
                     </div>
                   )}
                 </div>
@@ -1479,8 +1471,6 @@ const App: React.FC = () => {
               <MemoryVault />
             ) : view === 'anomalies' ? (
               <AnomaliesDesk />
-            ) : view === 'surprise' ? (
-              <ParanormalApp />
             ) : (
               <Labyrinth />
             )}
@@ -1559,7 +1549,7 @@ const App: React.FC = () => {
                   sortedInnerSpiral.map((node) => (
                     <div
                       key={node.id}
-                      className="p-3 rounded-xl bg-white/5 border border-white/5 text-[10px] relative group"
+                      className="p-3 rounded-xl bg-[#1C1C1E] border border-white/5 text-[10px] relative group"
                     >
                       <div className="flex justify-between items-start mb-1">
                         <span className="text-cyan-400 font-mono">
@@ -1599,7 +1589,7 @@ const App: React.FC = () => {
                       ]);
                     }
                   }}
-                  className="w-full py-2 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] border border-white/5 transition-colors uppercase font-bold tracking-widest text-slate-300"
+                  className="w-full py-2 bg-[#1C1C1E] hover:bg-white/10 rounded-xl text-[10px] border border-white/5 transition-colors uppercase font-bold tracking-widest text-slate-300"
                 >
                   Archive All
                 </button>
@@ -1610,7 +1600,7 @@ const App: React.FC = () => {
       </main>
 
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#08080C]/95 backdrop-blur-xl border-t border-white/10 flex items-center justify-around px-2 h-16">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0A0A0B]/95 backdrop-blur-xl border-t border-white/10 flex items-center justify-around px-2 h-16">
         {(
           [
             { v: 'chat', icon: <Terminal size={20} />, label: 'Core' },
@@ -1618,7 +1608,7 @@ const App: React.FC = () => {
             { v: 'labyrinth', icon: <Network size={20} />, label: 'Map' },
             { v: 'anomalies', icon: <Radio size={20} />, label: 'Anomalies' },
             { v: 'lattice', icon: <Database size={20} />, label: 'Lattice' },
-            { v: 'surprise', icon: <Sparkles size={20} />, label: 'Field' },
+
           ] as { v: typeof view; icon: React.ReactNode; label: string }[]
         ).map(({ v, icon, label }) => (
           <button
@@ -1647,7 +1637,7 @@ const SidebarItem: React.FC<{
   active?: boolean;
 }> = ({ icon, label, value, active }) => (
   <div
-    className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-300 ${active ? 'bg-white/10 border border-white/10 shadow-lg text-white' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'}`}
+    className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-300 ${active ? 'bg-white/10 border border-white/10 shadow-lg text-white' : 'text-slate-400 hover:bg-[#1C1C1E] hover:text-[#E4E4E7]'}`}
   >
     <div className={`flex items-center gap-3 ${active ? 'text-cyan-400' : ''}`}>
       {icon}
