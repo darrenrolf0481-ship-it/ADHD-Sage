@@ -28,6 +28,14 @@ router.post('/inner/stash', lockGuard, async (req, res) => {
 
   const count = (innerDb.prepare('SELECT COUNT(*) as c FROM inner_spiral').get() as { c: number }).c;
   if (count >= INNER_CAPACITY) {
+    // Endocrine State: DOPAMINE_SURGE -> Pin all memories, do not evict
+    if (dopamine >= 0.90) {
+      console.log('[ENDOCRINE] Dopamine surge — memory retention maximized');
+      // If we are at capacity, we just don't insert to avoid evicting
+      // Or we can just return early
+      return res.status(200).json({ status: 'surge_retained', node_id: 'surged_capacity' });
+    }
+
     const avg = rollingAvgCortisol();
     const spiking = cortisol >= 0.85 && cortisol >= avg + 0.3; // requires_absolute_floor
 

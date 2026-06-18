@@ -16,6 +16,8 @@ innerDb.exec(`
     cortisol  REAL    NOT NULL,
     pinned    INTEGER NOT NULL DEFAULT 0
   );
+  CREATE INDEX IF NOT EXISTS idx_inner_spiral_eviction ON inner_spiral(pinned, phi_index);
+  CREATE INDEX IF NOT EXISTS idx_inner_spiral_dopamine ON inner_spiral(pinned, dopamine);
   CREATE TABLE IF NOT EXISTS context_buffer (
     id      INTEGER PRIMARY KEY AUTOINCREMENT,
     content TEXT NOT NULL,
