@@ -98,6 +98,14 @@ export async function startServer() {
   // Initialize MCP connections before accepting traffic
   await initMcpManager();
 
+  // Global error handler
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('[API Error]', err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: err.message || 'Internal Server Error' });
+    }
+  });
+
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`[SAGE] Server running on http://0.0.0.0:${PORT}`);
     if (API_BEARER_TOKEN || MCP_KEY_SECRET) {
