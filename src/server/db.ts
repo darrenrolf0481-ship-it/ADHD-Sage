@@ -8,13 +8,14 @@ import { decompress } from '@mongodb-js/zstd';
 export const innerDb = new Database(':memory:');
 innerDb.exec(`
   CREATE TABLE IF NOT EXISTS inner_spiral (
-    phi_index INTEGER PRIMARY KEY AUTOINCREMENT,
-    node_id   TEXT    NOT NULL UNIQUE,
-    data      TEXT    NOT NULL,
-    timestamp INTEGER NOT NULL,
-    dopamine  REAL    NOT NULL,
-    cortisol  REAL    NOT NULL,
-    pinned    INTEGER NOT NULL DEFAULT 0
+    phi_index   INTEGER PRIMARY KEY AUTOINCREMENT,
+    node_id     TEXT    NOT NULL UNIQUE,
+    data        TEXT    NOT NULL,
+    timestamp   INTEGER NOT NULL,
+    dopamine    REAL    NOT NULL,
+    cortisol    REAL    NOT NULL,
+    pinned      INTEGER NOT NULL DEFAULT 0,
+    provenance  TEXT
   );
   -- Cover the common eviction/prompt queries: WHERE pinned = 0 ORDER BY phi_index|dopamine
   CREATE INDEX IF NOT EXISTS idx_inner_spiral_eviction ON inner_spiral(pinned, phi_index);
@@ -39,7 +40,8 @@ outerDb.exec(`
     dopamine    REAL    NOT NULL,
     cortisol    REAL    NOT NULL,
     pinned      INTEGER NOT NULL DEFAULT 0,
-    archived_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
+    archived_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
+    provenance  TEXT
   );
   -- FTS5 virtual table for fast ranked search
   CREATE VIRTUAL TABLE IF NOT EXISTS sages_constellations_fts USING fts5(
@@ -48,6 +50,16 @@ outerDb.exec(`
     tokenize='trigram'
   );
 `);
+
+// Migrate existing databases to include provenance column
+function addProvenanceColumnIfMissing(db: Database.Database, table: string) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+  if (!cols.some(c => c.name === 'provenance')) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN provenance TEXT`);
+  }
+}
+addProvenanceColumnIfMissing(innerDb, 'inner_spiral');
+addProvenanceColumnIfMissing(outerDb, 'sages_constellations');
 
 /** Synchronize FTS5 index from the main table if it's empty */
 export async function syncFts() {

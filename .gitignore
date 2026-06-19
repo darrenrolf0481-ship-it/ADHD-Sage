@@ -15,3 +15,7 @@ magic-mcp/
 ollama-mcp/
 agentkits-memory/
 .projscan-memory/
+
+# memory pipeline backups / intermediate snapshots (kept locally, not in git)
+data/memories/*.bak
+data/memories/imported.post-*.json

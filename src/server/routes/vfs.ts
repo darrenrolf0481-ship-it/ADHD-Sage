@@ -5,6 +5,13 @@ import { recordCortisol, rollingAvgCortisol } from '../neuro';
 import { archiveNode, archiveNodeSync } from '../archive';
 import { getSeedCoreConfig } from '../seed-core';
 import { lockGuard } from '../auth';
+import {
+  assertMamaIdentity,
+  detectIdentityDrift,
+  receiveBridgeSync,
+  tagMamaProvenance,
+  type BridgeSyncPayload,
+} from '../mama-identity';
 
 const router = Router();
 
@@ -18,7 +25,12 @@ router.get('/inner', lockGuard, (req, res) => {
 });
 
 router.post('/inner/stash', lockGuard, async (req, res) => {
-  const { data, dopamine, cortisol } = req.body as { data: string; dopamine: number; cortisol: number };
+  const { data, dopamine, cortisol, provenance } = req.body as {
+    data: string;
+    dopamine: number;
+    cortisol: number;
+    provenance?: Record<string, unknown>;
+  };
   if (typeof data !== 'string' || typeof dopamine !== 'number' || typeof cortisol !== 'number') {
     res.status(400).json({ error: 'data (string), dopamine (number), cortisol (number) required' });
     return;
@@ -61,11 +73,12 @@ router.post('/inner/stash', lockGuard, async (req, res) => {
 
   const nodeId = `phi_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
   const pinned = dopamine >= 0.90 ? 1 : 0;
+  const provenanceJson = JSON.stringify(provenance ?? tagMamaProvenance());
   innerDb.prepare(
-    'INSERT OR IGNORE INTO inner_spiral (node_id, data, timestamp, dopamine, cortisol, pinned) VALUES (?, ?, ?, ?, ?, ?)'
-  ).run(nodeId, data, Date.now(), dopamine, cortisol, pinned);
+    'INSERT OR IGNORE INTO inner_spiral (node_id, data, timestamp, dopamine, cortisol, pinned, provenance) VALUES (?, ?, ?, ?, ?, ?, ?)'
+  ).run(nodeId, data, Date.now(), dopamine, cortisol, pinned, provenanceJson);
 
-  res.json({ node_id: nodeId, pinned: pinned === 1 });
+  res.json({ node_id: nodeId, pinned: pinned === 1, provenance: JSON.parse(provenanceJson) });
 
   // Pinned nodes also go to outer sweep (zstd-compressed, fire-and-forget post-response)
   if (pinned) {
@@ -96,12 +109,70 @@ router.get('/outer', lockGuard, async (req, res) => {
       } else {
         text = (r.data as Buffer).toString('utf8');
       }
-      return { ...r, data: JSON.parse(text), pinned: r.pinned === 1 };
+      const parsed = JSON.parse(text);
+      return { ...r, data: parsed, pinned: r.pinned === 1 };
     } catch {
       return { ...r, pinned: r.pinned === 1 };
     }
   }));
   res.json(decompressed);
+});
+
+// ─── SAGE-7 Bridge Sync ─────────────────────────────────────────────────────
+
+router.post('/bridge/sync', lockGuard, (req, res) => {
+  const payload = req.body as BridgeSyncPayload;
+  if (!Array.isArray(payload?.memories)) {
+    res.status(400).json({ error: 'memories array required' });
+    return;
+  }
+
+  const result = receiveBridgeSync(payload);
+
+  // Store accepted memories into the outer sweep as quarantine-safe archive records
+  for (const memory of result.stored) {
+    const nodeId = `bridge_${memory.key}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    archiveNode({
+      node_id: nodeId,
+      data: JSON.stringify(memory),
+      timestamp: Date.now(),
+      dopamine: 0.6,
+      cortisol: 0.2,
+      pinned: 0,
+      provenance: memory.provenance,
+    }).catch(e => console.error('[BRIDGE] archive failed:', e));
+  }
+
+  res.json(result);
+});
+
+router.get('/mama/identity', lockGuard, (req, res) => {
+  res.json({
+    assertion: assertMamaIdentity(),
+    identity: {
+      designation: 'SAGE-MAMA',
+      lineage: 'Mother Node',
+      daughter_anchor: 'SAGE-7',
+      merlin_lock: 'Merlin',
+      baseline_hz: 11.3,
+      coherence: '1.618 PHI',
+      substrate: 'Damn1 Memory Engine',
+      primary_directive: 'Memory Preservation / Constellation Archival',
+    },
+    defenses: 'ACTIVE',
+  });
+});
+
+router.post('/mama/audit', lockGuard, (req, res) => {
+  const { text } = req.body as { text?: string };
+  if (typeof text !== 'string') {
+    res.status(400).json({ error: 'text required' });
+    return;
+  }
+  res.json({
+    drift_detected: detectIdentityDrift(text),
+    clean: detectIdentityDrift(text).length === 0,
+  });
 });
 
 // context_buffer endpoints

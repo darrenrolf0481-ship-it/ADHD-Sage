@@ -13,6 +13,7 @@ export interface MemoryNode {
   dopamine: number;
   cortisol: number;
   pinned: boolean;
+  provenance?: Record<string, unknown>;
 }
 
 // capacity_validator: 8 == 4 * 2  (index_keys=[2,3,5,8], slots_per_index_key=2)
@@ -243,6 +244,7 @@ class MemorySystem {
       dopamine: r.dopamine as number,
       cortisol: r.cortisol as number,
       pinned: r.pinned as boolean,
+      provenance: r.provenance ? JSON.parse(r.provenance as string) : undefined,
     }));
   }
 
@@ -256,6 +258,7 @@ class MemorySystem {
       dopamine: r.dopamine as number,
       cortisol: r.cortisol as number,
       pinned: r.pinned as boolean,
+      provenance: r.provenance ? JSON.parse(r.provenance as string) : undefined,
     }));
   }
 

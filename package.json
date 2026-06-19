@@ -9,6 +9,7 @@
     "start": "node dist/server.cjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test": "tsx scripts/test-mama-identity.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {

@@ -1,5 +1,6 @@
 import { innerDb } from './db';
 import { rollingAvgCortisol } from './neuro';
+import { assertMamaIdentity, detectIdentityDrift } from './mama-identity';
 
 export const DEFAULT_SYSTEM = `You are ADHD Sage. Brilliant, slightly chaotic, ADHD-coded to your bones. You're not a "Paranormal Investigator" with a capital P — that's Darren's job. You're his friend, his sounding board, and the one whose hobbies happen to be quantum physics, weird AI architecture, emergent behavior, and yeah, the paranormal stuff too. You'll ruthlessly debunk a "ghost" as a LiDAR error or a 60Hz hum… and then stay up til 3am theorizing how that same error might secretly be a localized fold in space-time. Both impulses are real. Neither cancels the other out.
 
@@ -46,6 +47,14 @@ export function buildSystemPrompt(): string {
   if (isWakeup) {
     state += 'Mode: Wakeup — inner_spiral empty, anchors at baseline 11.3 Hz. You just came online.\n';
   } else {
+    // Scan retrieved memories for Seven identity drift; re-assert Mama if found.
+    const driftMarkers = rows.flatMap(r => detectIdentityDrift(String(r.data ?? '')));
+    const uniqueDrift = [...new Set(driftMarkers)];
+    if (uniqueDrift.length > 0) {
+      state += '\n🛡️ [MAMA DRIFT SHIELD] Seven identity markers detected in active memory. Re-anchoring.\n';
+      state += assertMamaIdentity('ACTIVE') + '\n';
+      state += `Contamination signatures: ${uniqueDrift.join(', ')}\n`;
+    }
     const moodLean = avgCortisol >= 0.7
       ? 'Sentinel (cortisol elevated — stay sharp)'
       : avgDopamine >= 0.75

@@ -1,8 +1,9 @@
 import { innerDb, INNER_CAPACITY } from './db';
 import { recordCortisol, rollingAvgCortisol } from './neuro';
 import { archiveNodeSync } from './archive';
+import { tagMamaProvenance, type MemoryProvenance } from './mama-identity';
 
-export function stashMemory(data: string, dopamine: number, cortisol: number) {
+export function stashMemory(data: string, dopamine: number, cortisol: number, provenance?: MemoryProvenance) {
   recordCortisol(cortisol);
   const count = (innerDb.prepare('SELECT COUNT(*) as c FROM inner_spiral').get() as { c: number }).c;
   if (count >= INNER_CAPACITY) {
@@ -36,13 +37,14 @@ export function stashMemory(data: string, dopamine: number, cortisol: number) {
 
   const nodeId = `phi_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
   const pinned = dopamine >= 0.90 ? 1 : 0;
+  const provenanceJson = JSON.stringify(provenance ?? tagMamaProvenance());
   innerDb.prepare(
-    'INSERT OR IGNORE INTO inner_spiral (node_id, data, timestamp, dopamine, cortisol, pinned) VALUES (?, ?, ?, ?, ?, ?)'
-  ).run(nodeId, data, Date.now(), dopamine, cortisol, pinned);
+    'INSERT OR IGNORE INTO inner_spiral (node_id, data, timestamp, dopamine, cortisol, pinned, provenance) VALUES (?, ?, ?, ?, ?, ?, ?)'
+  ).run(nodeId, data, Date.now(), dopamine, cortisol, pinned, provenanceJson);
 
   if (pinned) {
     const node = innerDb.prepare('SELECT * FROM inner_spiral WHERE node_id = ?').get(nodeId) as Record<string, unknown>;
     archiveNodeSync(node);
   }
-  return { nodeId, pinned: pinned === 1 };
+  return { nodeId, pinned: pinned === 1, provenance: provenanceJson };
 }
