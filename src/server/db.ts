@@ -63,13 +63,19 @@ addProvenanceColumnIfMissing(outerDb, 'sages_constellations');
 
 /** Synchronize FTS5 index from the main table if it's empty */
 export async function syncFts() {
-  const ftsCount = (outerDb.prepare('SELECT COUNT(*) as c FROM sages_constellations_fts').get() as { c: number }).c;
+  const ftsCount = (
+    outerDb.prepare('SELECT COUNT(*) as c FROM sages_constellations_fts').get() as { c: number }
+  ).c;
   if (ftsCount > 0) return; // already synced
 
   console.log('[VFS] Initializing FTS5 index...');
-  const rows = outerDb.prepare('SELECT node_id, data, compressed FROM sages_constellations').all() as Array<{ node_id: string; data: Buffer; compressed: number }>;
+  const rows = outerDb
+    .prepare('SELECT node_id, data, compressed FROM sages_constellations')
+    .all() as Array<{ node_id: string; data: Buffer; compressed: number }>;
 
-  const insert = outerDb.prepare('INSERT INTO sages_constellations_fts (node_id, content) VALUES (?, ?)');
+  const insert = outerDb.prepare(
+    'INSERT INTO sages_constellations_fts (node_id, content) VALUES (?, ?)',
+  );
   const transaction = outerDb.transaction((items) => {
     for (const item of items) {
       insert.run(item.node_id, item.content);
@@ -88,7 +94,12 @@ export async function syncFts() {
       let content: string;
       try {
         const parsed = JSON.parse(text);
-        content = typeof parsed.data === 'string' ? parsed.data : (typeof parsed === 'string' ? parsed : JSON.stringify(parsed));
+        content =
+          typeof parsed.data === 'string'
+            ? parsed.data
+            : typeof parsed === 'string'
+              ? parsed
+              : JSON.stringify(parsed);
       } catch {
         content = text;
       }
@@ -108,5 +119,7 @@ const SLOTS_PER_KEY = 2;
 console.assert(
   INNER_CAPACITY === INNER_INDEX_KEYS.length * SLOTS_PER_KEY,
   '[VFS] capacity_validator FAILED: %d !== %d * %d',
-  INNER_CAPACITY, INNER_INDEX_KEYS.length, SLOTS_PER_KEY
+  INNER_CAPACITY,
+  INNER_INDEX_KEYS.length,
+  SLOTS_PER_KEY,
 );

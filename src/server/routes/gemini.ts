@@ -15,7 +15,15 @@ const router = Router();
 router.post('/generate', lockGuard, async (req, res) => {
   const startMs = Date.now();
   try {
-    const { prompt = '', history, systemInstruction, sensorContext, containerTag, attachments, localToolDeclarations } = req.body;
+    const {
+      prompt = '',
+      history,
+      systemInstruction,
+      sensorContext,
+      containerTag,
+      attachments,
+      localToolDeclarations,
+    } = req.body;
     if (!process.env.GEMINI_API_KEY) throw new Error('GEMINI_API_KEY not set');
 
     // Build system prompt: base + VFS memory state + live sensor telemetry
@@ -29,41 +37,50 @@ router.post('/generate', lockGuard, async (req, res) => {
     if (prompt) {
       const [cloudMemories, localMemories] = await Promise.all([
         searchMemories(prompt, [SAGE_CONTAINER, SHARED_CONTAINER], 6),
-        searchLocalMemories(prompt, 6)
+        searchLocalMemories(prompt, 6),
       ]);
 
       if (localMemories.length > 0) {
         fullSystemPrompt +=
-          '\n\n---\n## LOCAL MEMORIES (SQLite)\n' +
-          localMemories.map(m => `• ${m}`).join('\n');
+          '\n\n---\n## LOCAL MEMORIES (SQLite)\n' + localMemories.map((m) => `• ${m}`).join('\n');
       }
 
       if (cloudMemories.length > 0) {
         fullSystemPrompt +=
           '\n\n---\n## CLOUD MEMORIES (Supermemory)\n' +
-          cloudMemories.map(m => `• ${m}`).join('\n');
+          cloudMemories.map((m) => `• ${m}`).join('\n');
       }
     }
 
     // Merge remote tools with any local tools the frontend registered
-    const localToolNames = new Set((localToolDeclarations || []).map((d: { name: string }) => d.name));
+    const localToolNames = new Set(
+      (localToolDeclarations || []).map((d: { name: string }) => d.name),
+    );
     const mcpDeclarations = getMcpDeclarations();
     // Avoid duplicate declarations — gemTools and localToolDeclarations overlap
-    const gemDeclarations = gemTools.declarations.filter((d: { name: string }) => !localToolNames.has(d.name));
-    const allDeclarations = [...gemDeclarations, ...(localToolDeclarations || []), ...mcpDeclarations];
+    const gemDeclarations = gemTools.declarations.filter(
+      (d: { name: string }) => !localToolNames.has(d.name),
+    );
+    const allDeclarations = [
+      ...gemDeclarations,
+      ...(localToolDeclarations || []),
+      ...mcpDeclarations,
+    ];
 
     // Clean history to ensure compatibility with SDK
     const cleanHistory = (history || []).map((h: any) => ({
       role: h.role,
-      parts: (h.parts || []).map((p: any) => {
-        if (typeof p === 'string') return { text: p };
-        const part: any = {};
-        if (p.text !== undefined) part.text = p.text;
-        if (p.inlineData) part.inlineData = p.inlineData;
-        if (p.functionCall) part.functionCall = p.functionCall;
-        if (p.functionResponse) part.functionResponse = p.functionResponse;
-        return part;
-      }).filter((p: any) => Object.keys(p).length > 0)
+      parts: (h.parts || [])
+        .map((p: any) => {
+          if (typeof p === 'string') return { text: p };
+          const part: any = {};
+          if (p.text !== undefined) part.text = p.text;
+          if (p.inlineData) part.inlineData = p.inlineData;
+          if (p.functionCall) part.functionCall = p.functionCall;
+          if (p.functionResponse) part.functionResponse = p.functionResponse;
+          return part;
+        })
+        .filter((p: any) => Object.keys(p).length > 0),
     }));
 
     const chat = getGenAI().chats.create({
@@ -73,9 +90,9 @@ router.post('/generate', lockGuard, async (req, res) => {
         tools: [{ functionDeclarations: allDeclarations }],
         toolConfig: {
           functionCallingConfig: {
-            mode: FunctionCallingConfigMode.AUTO
-          }
-        }
+            mode: FunctionCallingConfigMode.AUTO,
+          },
+        },
       },
       history: cleanHistory,
     });
@@ -86,8 +103,8 @@ router.post('/generate', lockGuard, async (req, res) => {
       ...(attachments || [])
         .filter((att: any) => att && att.mimeType && att.data)
         .map((att: { mimeType: string; data: string }) => ({
-          inlineData: { mimeType: att.mimeType, data: att.data }
-        }))
+          inlineData: { mimeType: att.mimeType, data: att.data },
+        })),
     ];
 
     let result = await chat.sendMessage({ message: parts });
@@ -98,21 +115,22 @@ router.post('/generate', lockGuard, async (req, res) => {
     while (result.functionCalls && result.functionCalls.length > 0 && loopCount < 5) {
       loopCount++;
 
-      const remoteCalls = result.functionCalls.filter(fc => !localToolNames.has(fc.name || ''));
-      const localCalls = result.functionCalls.filter(fc => localToolNames.has(fc.name || ''));
+      const remoteCalls = result.functionCalls.filter((fc) => !localToolNames.has(fc.name || ''));
+      const localCalls = result.functionCalls.filter((fc) => localToolNames.has(fc.name || ''));
 
       // Execute remote calls on the backend
-      const remoteResults: Array<{ id?: string; name: string; response: Record<string, unknown> }> = [];
+      const remoteResults: Array<{ id?: string; name: string; response: Record<string, unknown> }> =
+        [];
       for (const fc of remoteCalls) {
         const toolResult = await executeTool(
           fc.name || '',
-          fc.args as Record<string, unknown> || {},
-          toolEffects
+          (fc.args as Record<string, unknown>) || {},
+          toolEffects,
         );
         remoteResults.push({
           id: fc.id,
           name: fc.name || '',
-          response: cleanResponse(toolResult)
+          response: cleanResponse(toolResult),
         });
       }
 
@@ -120,20 +138,20 @@ router.post('/generate', lockGuard, async (req, res) => {
       if (localCalls.length > 0) {
         return res.json({
           status: 'pending_local',
-          localCalls: localCalls.map(fc => ({ id: fc.id, name: fc.name, args: fc.args })),
+          localCalls: localCalls.map((fc) => ({ id: fc.id, name: fc.name, args: fc.args })),
           remoteResults,
           history: chat.getHistory(),
-          toolEffects
+          toolEffects,
         });
       }
 
       // All calls were remote — feed results back to Gemini and continue looping
-      const responseParts = remoteResults.map(r => ({
+      const responseParts = remoteResults.map((r) => ({
         functionResponse: {
           id: r.id,
           name: r.name,
-          response: r.response
-        }
+          response: r.response,
+        },
       }));
       result = await chat.sendMessage({ message: responseParts });
     }
@@ -164,15 +182,17 @@ router.post('/continue', lockGuard, async (req, res) => {
     // Clean history to ensure compatibility with SDK
     const cleanHistory = (history || []).map((h: any) => ({
       role: h.role,
-      parts: (h.parts || []).map((p: any) => {
-        if (typeof p === 'string') return { text: p };
-        const part: any = {};
-        if (p.text !== undefined) part.text = p.text;
-        if (p.inlineData) part.inlineData = p.inlineData;
-        if (p.functionCall) part.functionCall = p.functionCall;
-        if (p.functionResponse) part.functionResponse = p.functionResponse;
-        return part;
-      }).filter((p: any) => Object.keys(p).length > 0)
+      parts: (h.parts || [])
+        .map((p: any) => {
+          if (typeof p === 'string') return { text: p };
+          const part: any = {};
+          if (p.text !== undefined) part.text = p.text;
+          if (p.inlineData) part.inlineData = p.inlineData;
+          if (p.functionCall) part.functionCall = p.functionCall;
+          if (p.functionResponse) part.functionResponse = p.functionResponse;
+          return part;
+        })
+        .filter((p: any) => Object.keys(p).length > 0),
     }));
 
     // Reconstruct chat from the serialized history snapshot.
@@ -184,26 +204,25 @@ router.post('/continue', lockGuard, async (req, res) => {
         tools: [{ functionDeclarations: [...gemTools.declarations, ...getMcpDeclarations()] }],
         toolConfig: {
           functionCallingConfig: {
-            mode: FunctionCallingConfigMode.AUTO
-          }
-        }
+            mode: FunctionCallingConfigMode.AUTO,
+          },
+        },
       },
-      history: cleanHistory
+      history: cleanHistory,
     });
 
     // Feed all function responses (remote + local) back to Gemini in one turn
-    const allResults = [
-      ...(remoteResults || []),
-      ...(localResults || [])
-    ];
+    const allResults = [...(remoteResults || []), ...(localResults || [])];
 
-    const responseParts = allResults.map((r: { id?: string; name: string; response: Record<string, unknown> }) => ({
-      functionResponse: {
-        id: r.id,
-        name: r.name,
-        response: cleanResponse(r.response)
-      }
-    }));
+    const responseParts = allResults.map(
+      (r: { id?: string; name: string; response: Record<string, unknown> }) => ({
+        functionResponse: {
+          id: r.id,
+          name: r.name,
+          response: cleanResponse(r.response),
+        },
+      }),
+    );
 
     let result = await chat.sendMessage({ message: responseParts });
     const toolEffects: ToolEffect[] = [];
@@ -216,17 +235,17 @@ router.post('/continue', lockGuard, async (req, res) => {
         result.functionCalls.map(async (fc) => {
           const toolResult = await executeTool(
             fc.name || '',
-            fc.args as Record<string, unknown> || {},
-            toolEffects
+            (fc.args as Record<string, unknown>) || {},
+            toolEffects,
           );
           return {
             functionResponse: {
               id: fc.id,
               name: fc.name || '',
-              response: cleanResponse(toolResult)
-            }
+              response: cleanResponse(toolResult),
+            },
           };
-        })
+        }),
       );
       result = await chat.sendMessage({ message: responseParts2 });
     }

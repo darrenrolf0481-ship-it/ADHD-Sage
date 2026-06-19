@@ -6,7 +6,12 @@ import { isServerLocked } from './seed-core';
 // ─── Lock guard middleware ─────────────────────────────────────────────────
 export function lockGuard(req: express.Request, res: express.Response, next: express.NextFunction) {
   if (isServerLocked()) {
-    res.status(503).json({ error: 'halt_and_lock', message: 'seed_core integrity check failed — server is locked' });
+    res
+      .status(503)
+      .json({
+        error: 'halt_and_lock',
+        message: 'seed_core integrity check failed — server is locked',
+      });
     return;
   }
   next();
@@ -15,14 +20,23 @@ export function lockGuard(req: express.Request, res: express.Response, next: exp
 // ─── Auth: Bearer + MCP-Key-Exchange ──────────────────────────────────────
 export const API_BEARER_TOKEN = process.env.API_BEARER_TOKEN;
 export const MCP_KEY_SECRET = process.env.MCP_KEY_SECRET || API_BEARER_TOKEN || '';
-const PUBLIC_API_PATHS = new Set(['/api/health', '/api/inbox/events', '/api/auth/exchange', '/api/ollama/status']);
+const PUBLIC_API_PATHS = new Set([
+  '/api/health',
+  '/api/inbox/events',
+  '/api/auth/exchange',
+  '/api/ollama/status',
+]);
 export const DEFAULT_EXCHANGE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
 
 export function signExchangePayload(payload: string): string {
   return createHmac('sha256', MCP_KEY_SECRET).update(payload).digest('hex');
 }
 
-export function verifyExchangeToken(token: string): { clientId: string; scope: string; valid: boolean } {
+export function verifyExchangeToken(token: string): {
+  clientId: string;
+  scope: string;
+  valid: boolean;
+} {
   try {
     const decoded = Buffer.from(token, 'base64url').toString('utf8');
     const lastColon = decoded.lastIndexOf(':');
@@ -36,7 +50,8 @@ export function verifyExchangeToken(token: string): { clientId: string; scope: s
     if (!sigBuf.equals(expBuf)) return { clientId: '', scope: '', valid: false };
     const [clientId, expiresAtStr, scope] = payload.split(':');
     const expiresAt = parseInt(expiresAtStr, 10);
-    if (isNaN(expiresAt) || Date.now() > expiresAt) return { clientId: '', scope: '', valid: false };
+    if (isNaN(expiresAt) || Date.now() > expiresAt)
+      return { clientId: '', scope: '', valid: false };
     return { clientId: clientId || '', scope: scope || 'api', valid: true };
   } catch {
     return { clientId: '', scope: '', valid: false };
@@ -61,7 +76,8 @@ export function authGuard(req: express.Request, res: express.Response, next: exp
   const provided = header.startsWith('Bearer ') ? header.slice(7) : queryToken;
   if (!provided) {
     res.status(401).set('WWW-Authenticate', 'Bearer').json({
-      error: 'Unauthorized', message: 'Missing token. Provide Authorization: Bearer <token> or ?token=<token>'
+      error: 'Unauthorized',
+      message: 'Missing token. Provide Authorization: Bearer <token> or ?token=<token>',
     });
     return;
   }
@@ -81,6 +97,7 @@ export function authGuard(req: express.Request, res: express.Response, next: exp
   }
 
   res.status(401).set('WWW-Authenticate', 'Bearer').json({
-    error: 'Unauthorized', message: 'Invalid token. Use static Bearer token or a valid MCP-Key-Exchange token.'
+    error: 'Unauthorized',
+    message: 'Invalid token. Use static Bearer token or a valid MCP-Key-Exchange token.',
   });
 }

@@ -35,7 +35,7 @@
           "max_nodes": 8,
           "endocrine_thresholds": {
             "evict_on_cortisol_spike": 0.85,
-            "pin_on_dopamine_spike": 0.90
+            "pin_on_dopamine_spike": 0.9
           }
         },
         "data": {

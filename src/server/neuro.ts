@@ -20,14 +20,12 @@ export function clearCortisol() {
 }
 
 export function getCurrentMode(): string {
-  const rows = innerDb.prepare(
-    'SELECT data, dopamine, cortisol FROM inner_spiral ORDER BY dopamine DESC LIMIT 3'
-  ).all() as Array<{ data: string; dopamine: number; cortisol: number }>;
+  const rows = innerDb
+    .prepare('SELECT data, dopamine, cortisol FROM inner_spiral ORDER BY dopamine DESC LIMIT 3')
+    .all() as Array<{ data: string; dopamine: number; cortisol: number }>;
   const isWakeup = rows.length === 0;
   if (isWakeup) return 'wakeup';
-  const avgDopamine = rows.length
-    ? rows.reduce((s, r) => s + r.dopamine, 0) / rows.length
-    : 0.5;
+  const avgDopamine = rows.length ? rows.reduce((s, r) => s + r.dopamine, 0) / rows.length : 0.5;
   const avgCortisol = rollingAvgCortisol();
   if (avgCortisol >= 0.7) return 'sentinel';
   if (avgDopamine >= 0.75) return 'spark';

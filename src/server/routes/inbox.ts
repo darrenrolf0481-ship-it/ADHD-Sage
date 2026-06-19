@@ -13,7 +13,7 @@ const router = Router();
 router.get('/', lockGuard, (req, res) => {
   const unreadOnly = req.query.unread === 'true';
   const messages = listInboxMessages(unreadOnly);
-  res.json({ messages, unread: messages.filter(m => !m.read).length });
+  res.json({ messages, unread: messages.filter((m) => !m.read).length });
 });
 
 /**

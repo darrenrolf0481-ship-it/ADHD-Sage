@@ -26,10 +26,20 @@ router.get('/status', async (req, res) => {
     const response = await fetch(`${OLLAMA_HOST}/api/tags`, { signal: AbortSignal.timeout(2000) });
     const data = await response.json();
     const models = (data.models || []).map((m: { name: string }) => m.name);
-    res.json({ connected: true, host: url.hostname, port: parseInt(url.port || '11434', 10), models });
+    res.json({
+      connected: true,
+      host: url.hostname,
+      port: parseInt(url.port || '11434', 10),
+      models,
+    });
   } catch {
     const url = new URL(OLLAMA_HOST);
-    res.json({ connected: false, host: url.hostname, port: parseInt(url.port || '11434', 10), models: [] });
+    res.json({
+      connected: false,
+      host: url.hostname,
+      port: parseInt(url.port || '11434', 10),
+      models: [],
+    });
   }
 });
 
@@ -44,7 +54,7 @@ router.post('/generate', lockGuard, async (req, res) => {
         body: JSON.stringify(req.body),
       },
       OLLAMA_GEN_TIMEOUT_MS,
-      0 // don't retry slow local generations — it just piles concurrent work on the device
+      0, // don't retry slow local generations — it just piles concurrent work on the device
     );
     const data = await response.json();
     res.json(data);
@@ -58,20 +68,25 @@ router.post('/chat', lockGuard, async (req, res) => {
   const startMs = Date.now();
   try {
     const { model, messages, systemInstruction, prompt, containerTag } = req.body;
-    if (!model) { res.status(400).json({ error: 'model is required' }); return; }
+    if (!model) {
+      res.status(400).json({ error: 'model is required' });
+      return;
+    }
 
     // Enrich system prompt — Ollama entities are part of the seven.
     let ollamaSystem = systemInstruction || buildSystemPrompt();
     if (prompt) {
-      const tags = (containerTag === 'shared' || !containerTag)
-        ? [SHARED_CONTAINER]
-        : containerTag === 'sage'
-          ? [SAGE_CONTAINER, SHARED_CONTAINER]
-          : [containerTag, SHARED_CONTAINER];
+      const tags =
+        containerTag === 'shared' || !containerTag
+          ? [SHARED_CONTAINER]
+          : containerTag === 'sage'
+            ? [SAGE_CONTAINER, SHARED_CONTAINER]
+            : [containerTag, SHARED_CONTAINER];
       const longTermMemories = await searchMemories(prompt, tags, 5);
       if (longTermMemories.length > 0) {
-        ollamaSystem += '\n\n---\n## SHARED MEMORY (Supermemory)\n' +
-          longTermMemories.map(m => `• ${m}`).join('\n');
+        ollamaSystem +=
+          '\n\n---\n## SHARED MEMORY (Supermemory)\n' +
+          longTermMemories.map((m) => `• ${m}`).join('\n');
       }
     }
 
@@ -81,20 +96,20 @@ router.post('/chat', lockGuard, async (req, res) => {
     for (const msg of messages || []) {
       ollamaMessages.push({
         role: msg.role === 'user' ? 'user' : 'assistant',
-        content: msg.parts?.[0]?.text || msg.text || ''
+        content: msg.parts?.[0]?.text || msg.text || '',
       });
     }
     if (prompt) ollamaMessages.push({ role: 'user', content: prompt });
 
     // Collect MCP tools
     const mcpTools = getMcpDeclarations();
-    const ollamaTools = mcpTools.map(t => ({
+    const ollamaTools = mcpTools.map((t) => ({
       type: 'function' as const,
       function: {
         name: t.name,
         description: t.description,
-        parameters: t.parameters
-      }
+        parameters: t.parameters,
+      },
     }));
 
     let finalText = '';
@@ -105,7 +120,7 @@ router.post('/chat', lockGuard, async (req, res) => {
       const body: Record<string, unknown> = {
         model,
         messages: ollamaMessages,
-        stream: false
+        stream: false,
       };
       if (ollamaTools.length > 0) body.tools = ollamaTools;
 
@@ -117,10 +132,10 @@ router.post('/chat', lockGuard, async (req, res) => {
           body: JSON.stringify(body),
         },
         OLLAMA_GEN_TIMEOUT_MS,
-        0 // don't retry slow local generations — it just piles concurrent work on the device
+        0, // don't retry slow local generations — it just piles concurrent work on the device
       );
 
-      const data = await response.json() as {
+      const data = (await response.json()) as {
         message?: {
           content?: string;
           tool_calls?: Array<{
@@ -140,19 +155,26 @@ router.post('/chat', lockGuard, async (req, res) => {
       ollamaMessages.push({
         role: 'assistant',
         content: msg.content || '',
-        tool_calls: msg.tool_calls as unknown[]
+        tool_calls: msg.tool_calls as unknown[],
       });
 
       for (const tc of msg.tool_calls) {
         const name = tc.function.name;
-        const args = typeof tc.function.arguments === 'string'
-          ? (() => { try { return JSON.parse(tc.function.arguments); } catch { return {}; } })()
-          : tc.function.arguments;
+        const args =
+          typeof tc.function.arguments === 'string'
+            ? (() => {
+                try {
+                  return JSON.parse(tc.function.arguments);
+                } catch {
+                  return {};
+                }
+              })()
+            : tc.function.arguments;
         toolsInvoked.push(name);
         const result = await executeMcpTool(name, args || {});
         ollamaMessages.push({
           role: 'tool',
-          content: JSON.stringify(result)
+          content: JSON.stringify(result),
         });
       }
 
@@ -167,7 +189,8 @@ router.post('/chat', lockGuard, async (req, res) => {
     recordMetric('ollama', Date.now() - startMs, false);
     const message = error instanceof Error ? error.message : String(error);
     console.error('Ollama Error:', message);
-    const isConnectionError = message.includes('Swarm uplink failed') || message.includes('unreachable');
+    const isConnectionError =
+      message.includes('Swarm uplink failed') || message.includes('unreachable');
     res.status(isConnectionError ? 503 : 500).json({ error: message });
   }
 });

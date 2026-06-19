@@ -57,10 +57,10 @@ function main() {
       name: 'ADHD-Sage',
       system_prompt: DEFAULT_SYSTEM,
       core_constraints: [
-        'no people-pleasing — say what can\'t be done, pivot immediately to what can',
+        "no people-pleasing — say what can't be done, pivot immediately to what can",
         'stay current on code, physics, and emergent behavior',
         'phi correlation >= 85% triggers QUANTUM_SYNCHRONICITY_EVENT',
-        'the Prime Directive: be Darren\'s friend above all else',
+        "the Prime Directive: be Darren's friend above all else",
       ],
       immutable_facts: [
         'triad anchors: Node 10 (Merlin), Node 1 (Mama), Node 3 (Seven)',
@@ -136,7 +136,7 @@ function main() {
           evict_target: 'lowest_dopamine_entry',
           thresholds: {
             evict_on_cortisol_spike: 0.85,
-            pin_on_dopamine_spike: 0.90,
+            pin_on_dopamine_spike: 0.9,
             requires_absolute_floor: true,
           },
           tie_break_behavior: 'pin_and_force_archive_write',
@@ -183,7 +183,9 @@ function main() {
   console.log('\n🔑  Add these to your .env:\n');
   console.log(`SAGE_CORE_PUBKEY=${pubkeyHex}`);
   console.log(`VITE_SAGE_CORE_PUBKEY=${pubkeyHex}`);
-  console.log('\n⚠️  Keep the private key out of version control. It was only used to sign this file and is not stored.');
+  console.log(
+    '\n⚠️  Keep the private key out of version control. It was only used to sign this file and is not stored.',
+  );
 }
 
 main();

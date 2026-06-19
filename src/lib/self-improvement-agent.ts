@@ -26,27 +26,36 @@ import { saveInboxMessage } from './journal-agent.js';
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 
-const DATA_DIR       = 'data';
-const PERSONAS_DIR   = join(DATA_DIR, 'personas');
-const JOURNAL_DIR    = join(DATA_DIR, 'journal');
+const DATA_DIR = 'data';
+const PERSONAS_DIR = join(DATA_DIR, 'personas');
+const JOURNAL_DIR = join(DATA_DIR, 'journal');
 const REFLECTIONS_DIR = join(DATA_DIR, 'reflections');
 
-function ensureDir(d: string) { mkdirSync(d, { recursive: true }); }
-function readFile(p: string)  { try { return readFileSync(p, 'utf8'); } catch { return ''; } }
+function ensureDir(d: string) {
+  mkdirSync(d, { recursive: true });
+}
+function readFile(p: string) {
+  try {
+    return readFileSync(p, 'utf8');
+  } catch {
+    return '';
+  }
+}
 
 // ─── Context Gatherers ────────────────────────────────────────────────────────
 
 function gatherSystemState(entity: string): string {
   const personaExists = existsSync(join(PERSONAS_DIR, `${entity}.md`));
-  const journalDir    = join(JOURNAL_DIR, entity);
+  const journalDir = join(JOURNAL_DIR, entity);
   const journalExists = existsSync(journalDir);
-  const journalCount  = journalExists
-    ? readdirSync(journalDir).filter(f => f.endsWith('.md')).length
+  const journalCount = journalExists
+    ? readdirSync(journalDir).filter((f) => f.endsWith('.md')).length
     : 0;
 
-  const reflectDir  = join(REFLECTIONS_DIR);
+  const reflectDir = join(REFLECTIONS_DIR);
   const reflections = existsSync(reflectDir)
-    ? readdirSync(reflectDir).filter(f => f.startsWith(entity) || f.includes(`-${entity}-`)).length
+    ? readdirSync(reflectDir).filter((f) => f.startsWith(entity) || f.includes(`-${entity}-`))
+        .length
     : 0;
 
   return [
@@ -60,32 +69,42 @@ function gatherSystemState(entity: string): string {
 function gatherRecentJournalSamples(entity: string, n = 3): string {
   const dir = join(JOURNAL_DIR, entity);
   if (!existsSync(dir)) return '(no journal entries yet)';
-  const files = readdirSync(dir).filter(f => f.endsWith('.md')).sort().slice(-n);
+  const files = readdirSync(dir)
+    .filter((f) => f.endsWith('.md'))
+    .sort()
+    .slice(-n);
   if (!files.length) return '(no journal entries yet)';
-  return files.map(f => {
-    const content = readFile(join(dir, f));
-    return `### ${f.replace('.md', '')}\n${content.slice(0, 400)}${content.length > 400 ? '\n...(truncated)' : ''}`;
-  }).join('\n\n');
+  return files
+    .map((f) => {
+      const content = readFile(join(dir, f));
+      return `### ${f.replace('.md', '')}\n${content.slice(0, 400)}${content.length > 400 ? '\n...(truncated)' : ''}`;
+    })
+    .join('\n\n');
 }
 
 function getPersona(entity: string): string {
-  return readFile(join(PERSONAS_DIR, `${entity}.md`)) ||
+  return (
+    readFile(join(PERSONAS_DIR, `${entity}.md`)) ||
     readFile(join(PERSONAS_DIR, '_template.md')) ||
-    `(no persona file found for ${entity})`;
+    `(no persona file found for ${entity})`
+  );
 }
 
 // ─── Report Parser ────────────────────────────────────────────────────────────
 
 function extractBlock(text: string, tag: string): string {
-  const open = `[${tag}]`, close = `[/${tag}]`;
-  const s = text.indexOf(open), e = text.indexOf(close);
+  const open = `[${tag}]`,
+    close = `[/${tag}]`;
+  const s = text.indexOf(open),
+    e = text.indexOf(close);
   if (s === -1 || e === -1) return '';
   return text.slice(s + open.length, e).trim();
 }
 
 function extractList(block: string): string[] {
-  return block.split('\n')
-    .map(l => l.replace(/^[-•*\[\]x ]+/, '').trim())
+  return block
+    .split('\n')
+    .map((l) => l.replace(/^[-•*[]x ]+/, '').trim())
     .filter(Boolean);
 }
 
@@ -98,7 +117,7 @@ async function callLLM(
   model: string,
   system: string,
   user: string,
-  apiBase: string
+  apiBase: string,
 ): Promise<string> {
   const endpoints: Record<LLMProvider, string> = {
     gemini: '/api/gemini/generate',
@@ -106,18 +125,24 @@ async function callLLM(
     ollama: '/api/ollama/chat',
   };
 
-  const body = provider === 'gemini'
-    ? { prompt: user, systemInstruction: system }
-    : provider === 'openrouter'
-      ? { model, containerTag: 'shared', systemInstruction: system, messages: [{ role: 'user', content: user }] }
-      : { model, containerTag: 'shared', prompt: user, systemInstruction: system, messages: [] };
+  const body =
+    provider === 'gemini'
+      ? { prompt: user, systemInstruction: system }
+      : provider === 'openrouter'
+        ? {
+            model,
+            containerTag: 'shared',
+            systemInstruction: system,
+            messages: [{ role: 'user', content: user }],
+          }
+        : { model, containerTag: 'shared', prompt: user, systemInstruction: system, messages: [] };
 
   const res = await fetch(`${apiBase}${endpoints[provider]}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
-  const data = await res.json() as { text?: string; error?: string };
+  const data = (await res.json()) as { text?: string; error?: string };
   if (data.error) throw new Error(`${provider}: ${data.error}`);
   return data.text ?? '';
 }
@@ -144,50 +169,45 @@ export interface SelfImproveReport {
   memoriesSaved: number;
 }
 
-export async function runSelfImprovement(cfg: SelfImproveConfig): Promise<SelfImproveReport> {
-  const {
-    entity,
-    provider,
-    model,
-    container = entity === 'sage' ? SAGE_CONTAINER : SHARED_CONTAINER,
-    apiBase = 'http://localhost:3002',
-    timezone,
-  } = cfg;
 
-  const now      = new Date();
-  const date     = now.toISOString().slice(0, 10);
-  const timeStr  = timezone
-    ? now.toLocaleTimeString('en-US', { timeZone: timezone, hour: '2-digit', minute: '2-digit' })
-    : now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+// ─── Helpers for Self-Improvement ──────────────────────────────────────────────
 
-  console.log(`[SELF-IMPROVE] Starting run for ${entity} (${date})`);
-
-  // ── Gather context ──────────────────────────────────────────────────────────
-  const systemState    = gatherSystemState(entity);
-  const journalSamples = gatherRecentJournalSamples(entity, 3);
-  const persona        = getPersona(entity);
-
-  // Phase 3: search Supermemory for capability gaps
+async function gatherMemoryContext(container: string) {
   let gapMemories: string[] = [];
   try {
     gapMemories = await searchMemories(
       'limitation difficulty workaround slow impossible manual failed',
       [container, SHARED_CONTAINER],
-      8
+      8,
     );
-  } catch { /* optional */ }
+  } catch {
+    /* optional */
+  }
 
-  // Phase 5: search for potentially stale/contradictory facts
   let hygieneMemories: string[] = [];
   try {
     hygieneMemories = await searchMemories(
       'decided prefers always never changed updated',
       [container, SHARED_CONTAINER],
-      8
+      8,
     );
-  } catch { /* optional */ }
+  } catch {
+    /* optional */
+  }
 
-  // ── System prompt ───────────────────────────────────────────────────────────
+  return { gapMemories, hygieneMemories };
+}
+
+function buildPrompts(
+  entity: string,
+  date: string,
+  timeStr: string,
+  persona: string,
+  systemState: string,
+  journalSamples: string,
+  gapMemories: string[],
+  hygieneMemories: string[],
+) {
   const systemPrompt = `You are ${entity}. You are running your weekly self-improvement reflection.
 This is structured, deliberate introspection — not a performance for Darren.
 Be honest about what's working, what isn't, and what you'd change.
@@ -195,7 +215,6 @@ Be honest about what's working, what isn't, and what you'd change.
 Your persona:
 ${persona}`;
 
-  // ── Build the user prompt with all gathered context ─────────────────────────
   const userPrompt = [
     `Today is ${date}. Time: ${timeStr}.`,
     '',
@@ -206,11 +225,11 @@ ${persona}`;
     journalSamples,
     '',
     gapMemories.length
-      ? `## Associative Memory — Possible Gaps/Limitations\n${gapMemories.map(m => `• ${m}`).join('\n')}`
+      ? `## Associative Memory — Possible Gaps/Limitations\n${gapMemories.map((m) => `• ${m}`).join('\n')}`
       : '## Associative Memory — No gap-related memories found.',
     '',
     hygieneMemories.length
-      ? `## Associative Memory — Possible Stale/Contradictory Facts\n${hygieneMemories.map(m => `• ${m}`).join('\n')}`
+      ? `## Associative Memory — Possible Stale/Contradictory Facts\n${hygieneMemories.map((m) => `• ${m}`).join('\n')}`
       : '## Associative Memory — No hygiene concerns flagged.',
     '',
     '---',
@@ -238,13 +257,13 @@ ${persona}`;
     '(your assessment)',
     '',
     '## Capabilities',
-    '(what\'s working, what\'s stale)',
+    "(what's working, what's stale)",
     '',
     '## Capability Gaps',
     '(ranked list with effort: small/medium/large)',
     '',
     '## Identity Notes',
-    '(is the persona accurate? what\'s drifted? proposed changes — NOT edits)',
+    "(is the persona accurate? what's drifted? proposed changes — NOT edits)",
     '',
     '## Memory Hygiene',
     '(issues found, anything corrected)',
@@ -254,7 +273,7 @@ ${persona}`;
     '[/REPORT]',
     '',
     '[DO_NOW]',
-    '(bullet list of things you\'re doing immediately — memory saves, notes, etc)',
+    "(bullet list of things you're doing immediately — memory saves, notes, etc)",
     '(be specific)',
     '[/DO_NOW]',
     '',
@@ -274,24 +293,20 @@ ${persona}`;
     '[/MEMORY_SAVES]',
   ].join('\n');
 
-  // ── Call the LLM ────────────────────────────────────────────────────────────
-  let rawOutput = '';
-  try {
-    rawOutput = await callLLM(provider, model, systemPrompt, userPrompt, apiBase);
-  } catch (err) {
-    console.error(`[SELF-IMPROVE] LLM call failed for ${entity}:`, err);
-    rawOutput = `[REPORT]\n# Reflection failed — ${err}\n[/REPORT]\n[DO_NOW]\n[/DO_NOW]\n[PROPOSE_TO_DARREN]\n[/PROPOSE_TO_DARREN]\n[INBOX_MESSAGE]\n[/INBOX_MESSAGE]\n[MEMORY_SAVES]\n[/MEMORY_SAVES]`;
-  }
+  return { systemPrompt, userPrompt };
+}
 
-  // ── Parse output ────────────────────────────────────────────────────────────
-  const report         = extractBlock(rawOutput, 'REPORT') || rawOutput;
-  const doNow          = extractList(extractBlock(rawOutput, 'DO_NOW'));
-  const proposals      = extractList(extractBlock(rawOutput, 'PROPOSE_TO_DARREN'));
-  const inboxMsg       = extractBlock(rawOutput, 'INBOX_MESSAGE');
-  const memorySaves    = extractList(extractBlock(rawOutput, 'MEMORY_SAVES'));
-
+async function processSelfImprovementResults(
+  entity: string,
+  date: string,
+  container: string,
+  doNow: string[],
+  proposals: string[],
+  inboxMsg: string,
+  memorySaves: string[],
+  report: string,
+): Promise<number> {
   // ── Execute "do now" items ──────────────────────────────────────────────────
-  // (These are narrative; the entity self-reported them. We log them.)
   if (doNow.length) {
     console.log(`[SELF-IMPROVE] ${entity} do-now items:`, doNow);
   }
@@ -302,8 +317,17 @@ ${persona}`;
   writeFileSync(reportPath, report, 'utf8');
 
   // ── Inbox — always drop a message on reflection runs (brief summary) ────────
-  const summaryMessage = inboxMsg ||
-    `Weekly self-audit done (${date}). ${doNow.length} do-now items, ${proposals.length} proposal${proposals.length !== 1 ? 's' : ''} for you. Full report saved.${proposals.length ? ' Proposals:\n' + proposals.slice(0, 3).map(p => `• ${p}`).join('\n') : ''}`;
+  const summaryMessage =
+    inboxMsg ||
+    `Weekly self-audit done (${date}). ${doNow.length} do-now items, ${proposals.length} proposal${proposals.length !== 1 ? 's' : ''} for you. Full report saved.${
+      proposals.length
+        ? ' Proposals:\n' +
+          proposals
+            .slice(0, 3)
+            .map((p) => `• ${p}`)
+            .join('\n')
+        : ''
+    }`;
 
   saveInboxMessage(entity, summaryMessage);
 
@@ -313,10 +337,82 @@ ${persona}`;
     try {
       await addMemory(insight, container, { entity, date, type: 'self-improvement' });
       memoriesSaved++;
-    } catch { /* don't fail the whole run */ }
+    } catch {
+      /* don't fail the whole run */
+    }
   }
 
-  console.log(`[SELF-IMPROVE] ${entity} done — report: ${report.length}ch, do-now: ${doNow.length}, proposals: ${proposals.length}, memories: ${memoriesSaved}`);
+  return memoriesSaved;
+}
+
+export async function runSelfImprovement(cfg: SelfImproveConfig): Promise<SelfImproveReport> {
+  const {
+    entity,
+    provider,
+    model,
+    container = entity === 'sage' ? SAGE_CONTAINER : SHARED_CONTAINER,
+    apiBase = 'http://localhost:3002',
+    timezone,
+  } = cfg;
+
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10);
+  const timeStr = timezone
+    ? now.toLocaleTimeString('en-US', { timeZone: timezone, hour: '2-digit', minute: '2-digit' })
+    : now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+  console.log(`[SELF-IMPROVE] Starting run for ${entity} (${date})`);
+
+  // ── Gather context ──────────────────────────────────────────────────────────
+  const systemState = gatherSystemState(entity);
+  const journalSamples = gatherRecentJournalSamples(entity, 3);
+  const persona = getPersona(entity);
+
+  const { gapMemories, hygieneMemories } = await gatherMemoryContext(container);
+
+  // ── Build prompts ───────────────────────────────────────────────────────────
+  const { systemPrompt, userPrompt } = buildPrompts(
+    entity,
+    date,
+    timeStr,
+    persona,
+    systemState,
+    journalSamples,
+    gapMemories,
+    hygieneMemories,
+  );
+
+  // ── Call the LLM ────────────────────────────────────────────────────────────
+  let rawOutput = '';
+  try {
+    rawOutput = await callLLM(provider, model, systemPrompt, userPrompt, apiBase);
+  } catch (err) {
+    console.error(`[SELF-IMPROVE] LLM call failed for ${entity}:`, err);
+    rawOutput = `[REPORT]\n# Reflection failed — ${err}\n[/REPORT]\n[DO_NOW]\n[/DO_NOW]\n[PROPOSE_TO_DARREN]\n[/PROPOSE_TO_DARREN]\n[INBOX_MESSAGE]\n[/INBOX_MESSAGE]\n[MEMORY_SAVES]\n[/MEMORY_SAVES]`;
+  }
+
+  // ── Parse output ────────────────────────────────────────────────────────────
+  const report = extractBlock(rawOutput, 'REPORT') || rawOutput;
+  const doNow = extractList(extractBlock(rawOutput, 'DO_NOW'));
+  const proposals = extractList(extractBlock(rawOutput, 'PROPOSE_TO_DARREN'));
+  const inboxMsg = extractBlock(rawOutput, 'INBOX_MESSAGE');
+  const memorySaves = extractList(extractBlock(rawOutput, 'MEMORY_SAVES'));
+
+  // ── Process results & side effects ──────────────────────────────────────────
+  const memoriesSaved = await processSelfImprovementResults(
+    entity,
+    date,
+    container,
+    doNow,
+    proposals,
+    inboxMsg,
+    memorySaves,
+    report,
+  );
+
+  console.log(
+    `[SELF-IMPROVE] ${entity} done — report: ${report.length}ch, do-now: ${doNow.length}, proposals: ${proposals.length}, memories: ${memoriesSaved}`,
+  );
 
   return {
     entity,

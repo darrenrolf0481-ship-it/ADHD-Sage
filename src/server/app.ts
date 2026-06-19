@@ -30,9 +30,11 @@ export async function startServer() {
     next();
   });
 
-  app.use(cors({
-    origin: process.env.NODE_ENV === 'production' ? process.env.APP_URL : true
-  }));
+  app.use(
+    cors({
+      origin: process.env.NODE_ENV === 'production' ? process.env.APP_URL : true,
+    }),
+  );
   app.use(express.json({ limit: '50mb' }));
 
   // Apply auth to all API routes
@@ -63,10 +65,10 @@ export async function startServer() {
   // ─── Vite Integration ─────────────────────────────────────────────────────
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
-      server: { 
+      server: {
         middlewareMode: true,
         host: true,
-        allowedHosts: true
+        allowedHosts: true,
       },
       appType: 'spa',
     });
@@ -96,10 +98,21 @@ export async function startServer() {
   // Initialize MCP connections before accepting traffic
   await initMcpManager();
 
+  // Global error handler
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('[API Error]', err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: err.message || 'Internal Server Error' });
+    }
+  });
+
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`[SAGE] Server running on http://0.0.0.0:${PORT}`);
     if (API_BEARER_TOKEN || MCP_KEY_SECRET) {
-      const modes = [API_BEARER_TOKEN ? 'static Bearer' : '', MCP_KEY_SECRET ? 'MCP-Key-Exchange' : ''].filter(Boolean);
+      const modes = [
+        API_BEARER_TOKEN ? 'static Bearer' : '',
+        MCP_KEY_SECRET ? 'MCP-Key-Exchange' : '',
+      ].filter(Boolean);
       console.log(`[AUTH] Protection active — modes: ${modes.join(' + ')}`);
     } else {
       console.log('[AUTH] No tokens configured — endpoints are open');

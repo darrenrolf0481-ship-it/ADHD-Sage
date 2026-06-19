@@ -50,7 +50,7 @@ class PulseGenerator {
   private stop() {
     if (this.gainNode && this.audioCtx) {
       this.gainNode.gain.setTargetAtTime(0, this.audioCtx.currentTime, 0.5);
-      
+
       const osc = this.oscillator;
       const gain = this.gainNode;
       setTimeout(() => {
@@ -58,9 +58,9 @@ class PulseGenerator {
           osc?.stop();
           osc?.disconnect();
           gain.disconnect();
-        } catch(e) {}
+        } catch (e) {}
       }, 1000);
-      
+
       this.oscillator = null;
       this.gainNode = null;
     }

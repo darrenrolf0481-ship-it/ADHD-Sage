@@ -51,9 +51,12 @@ router.post('/run', lockGuard, async (req, res) => {
  */
 router.get('/report/:entity', lockGuard, (req, res) => {
   const entity = Array.isArray(req.params.entity) ? req.params.entity[0] : req.params.entity;
-  const date   = (req.query.date as string) || new Date().toISOString().slice(0, 10);
+  const date = (req.query.date as string) || new Date().toISOString().slice(0, 10);
   const p = `data/reflections/${date}-${entity}.md`;
-  if (!existsSync(p)) { res.status(404).json({ error: 'No report for that entity/date' }); return; }
+  if (!existsSync(p)) {
+    res.status(404).json({ error: 'No report for that entity/date' });
+    return;
+  }
   res.json({ entity, date, content: readFileSync(p, 'utf8') });
 });
 

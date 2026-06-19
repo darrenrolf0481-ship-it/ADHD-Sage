@@ -15,18 +15,18 @@ import { sageEndocrine, sageMemory } from './endocrine-memory';
 // ── Domain Models ──────────────────────────────────────────────────────────
 
 export type StimulusType =
-  | 'NOCICEPTIVE'    // pain / threat signal
-  | 'CHEMORECEPTOR'  // chemical / mood shift
+  | 'NOCICEPTIVE' // pain / threat signal
+  | 'CHEMORECEPTOR' // chemical / mood shift
   | 'THERMORECEPTOR' // thermal / ambient change
-  | 'MECHANORECEPTOR'// physical / haptic input
-  | 'COGNITIVE';     // language / reasoning input
+  | 'MECHANORECEPTOR' // physical / haptic input
+  | 'COGNITIVE'; // language / reasoning input
 
 export type OperatingMode = 'RELAXED' | 'ALERT' | 'STRESS' | 'PANIC' | 'SLEEP';
 export type MotorResponse = 'WITHDRAW' | 'APPROACH' | 'FREEZE' | 'INVESTIGATE' | 'REST';
 
 export interface RawStimulus {
   type: StimulusType;
-  magnitude: number;        // 0–1
+  magnitude: number; // 0–1
   source: string;
   timestamp: number;
   metadata: Record<string, unknown>;
@@ -39,7 +39,7 @@ export function makeStimulus(
   type: StimulusType,
   magnitude: number,
   source: string,
-  metadata: Record<string, unknown> = {}
+  metadata: Record<string, unknown> = {},
 ): RawStimulus {
   return {
     type,
@@ -59,8 +59,8 @@ export interface HormonalProfile {
 }
 
 export interface EmotionalContext {
-  valence: number;    // -1 (negative) to +1 (positive)
-  arousal: number;    // 0 (calm) to 1 (agitated)
+  valence: number; // -1 (negative) to +1 (positive)
+  arousal: number; // 0 (calm) to 1 (agitated)
   hormonalProfile: HormonalProfile;
 }
 
@@ -153,7 +153,7 @@ class ConditionActionEngine {
       }
     }
 
-    this.rules = this.rules.filter(r => !toRemove.includes(r.id));
+    this.rules = this.rules.filter((r) => !toRemove.includes(r.id));
     return { triggered, errors };
   }
 }
@@ -238,9 +238,7 @@ export class CentralNervousSystem {
   pulse(stimulus: RawStimulus): void {
     this.stimulusQueue.push(stimulus);
     if (!this.isProcessing) {
-      // Fire-and-forget; drainQueue handles its own errors so a rejection never
-      // surfaces as an unhandled promise rejection to the caller (system.ts pulse).
-      this.drainQueue().catch(err => console.error('[CNS] drainQueue failed:', err));
+      this.drainQueue();
     }
   }
 
@@ -255,32 +253,26 @@ export class CentralNervousSystem {
     return () => this.listeners.delete(listener);
   }
 
-  getMode(): OperatingMode { return this.operatingMode; }
+  getMode(): OperatingMode {
+    return this.operatingMode;
+  }
 
   currentProfile(): HormonalProfile {
-    // sageEndocrine.hormones is already a fully-typed HormoneState (incl. oxytocin).
-    return { ...sageEndocrine.hormones };
+    return {
+      ...sageEndocrine.hormones,
+      oxytocin: (sageEndocrine.hormones as unknown as { oxytocin?: number }).oxytocin ?? 0.3,
+    };
   }
 
   // ── Processing Pipeline ──────────────────────────────────────────────
 
   private async drainQueue(): Promise<void> {
     this.isProcessing = true;
-    try {
-      while (this.stimulusQueue.length > 0) {
-        const stimulus = this.stimulusQueue.shift()!;
-        // Per-stimulus isolation: one bad stimulus must not kill the loop, and
-        // isProcessing must always reset — otherwise a single throw latches it
-        // true and permanently jams the CNS (every later pulse sees isProcessing).
-        try {
-          await this.processStimulus(stimulus);
-        } catch (err) {
-          console.error('[CNS] processStimulus failed:', err);
-        }
-      }
-    } finally {
-      this.isProcessing = false;
+    while (this.stimulusQueue.length > 0) {
+      const stimulus = this.stimulusQueue.shift()!;
+      await this.processStimulus(stimulus);
     }
+    this.isProcessing = false;
   }
 
   private async processStimulus(raw: RawStimulus): Promise<CognitiveResponse> {
@@ -299,7 +291,7 @@ export class CentralNervousSystem {
     const perception = this.buildPerception(raw);
     const report = this.logicEngine.evaluate(perception, emotionalContext.hormonalProfile);
     if (report.errors.length > 0) {
-      report.errors.forEach(e => console.error('[CNS Rule Error]', e));
+      report.errors.forEach((e) => console.error('[CNS Rule Error]', e));
     }
 
     // 4. MEMORY — Hebbian association on salient stimuli
@@ -307,8 +299,9 @@ export class CentralNervousSystem {
       const concepts = [raw.source, raw.type].filter(Boolean);
       for (let i = 0; i < concepts.length - 1; i++) {
         sageMemory.fireTogetherWireTogether(
-          concepts[i], concepts[i + 1],
-          emotionalContext.hormonalProfile.dopamine
+          concepts[i],
+          concepts[i + 1],
+          emotionalContext.hormonalProfile.dopamine,
         );
       }
     }
@@ -329,11 +322,8 @@ export class CentralNervousSystem {
   }
 
   private executeReflex(raw: RawStimulus, startTime: number): CognitiveResponse {
-    // Spike cortisol FIRST, then transition to PANIC — transitionMode notifies
-    // listeners, so this order ensures they see the post-spike profile, not a
-    // stale pre-spike one (and the returned hormonalState reflects the spike).
-    sageEndocrine.processStressEvent(raw.magnitude);
     this.transitionMode('PANIC');
+    sageEndocrine.processStressEvent(raw.magnitude);
     console.warn(`[CNS REFLEX] ${raw.source} — magnitude ${raw.magnitude.toFixed(2)}`);
 
     return {
@@ -345,9 +335,6 @@ export class CentralNervousSystem {
     };
   }
 
-  // Perception layer: builds emotional context AND applies the immediate
-  // endocrine response to the stimulus. Mutating sageEndocrine here is by design
-  // (this is the "Perception" layer in the architecture, not a pure read).
   private buildEmotionalContext(raw: RawStimulus): EmotionalContext {
     const h = this.currentProfile();
     const valence = h.dopamine - h.cortisol;
@@ -374,7 +361,7 @@ export class CentralNervousSystem {
   private cognize(
     raw: RawStimulus,
     ctx: EmotionalContext,
-    triggeredRules: string[]
+    triggeredRules: string[],
   ): CognitiveDecision {
     if (triggeredRules.includes('pain_withdrawal')) {
       return { action: 'WITHDRAW', priority: 100, reasoning: 'Rule: pain_withdrawal fired' };
@@ -383,7 +370,11 @@ export class CentralNervousSystem {
       return { action: 'FREEZE', priority: 80, reasoning: 'Rule: stress_freeze fired' };
     }
     if (triggeredRules.includes('dopamine_approach')) {
-      return { action: 'APPROACH', priority: 60, reasoning: 'Rule: dopamine_approach — reward signal' };
+      return {
+        action: 'APPROACH',
+        priority: 60,
+        reasoning: 'Rule: dopamine_approach — reward signal',
+      };
     }
     if (triggeredRules.includes('sleep_rest')) {
       return { action: 'REST', priority: 10, reasoning: 'Rule: sleep_rest — low arousal state' };
@@ -391,10 +382,18 @@ export class CentralNervousSystem {
 
     // Fallback: valence-driven decision
     if (ctx.valence > 0.2) {
-      return { action: 'INVESTIGATE', priority: 30, reasoning: `Positive valence (${ctx.valence.toFixed(2)})` };
+      return {
+        action: 'INVESTIGATE',
+        priority: 30,
+        reasoning: `Positive valence (${ctx.valence.toFixed(2)})`,
+      };
     }
     if (ctx.valence < -0.2) {
-      return { action: 'FREEZE', priority: 40, reasoning: `Negative valence (${ctx.valence.toFixed(2)})` };
+      return {
+        action: 'FREEZE',
+        priority: 40,
+        reasoning: `Negative valence (${ctx.valence.toFixed(2)})`,
+      };
     }
     return { action: 'REST', priority: 5, reasoning: 'Neutral state — no salient signal' };
   }
@@ -436,7 +435,7 @@ export class CentralNervousSystem {
 
   private notify(): void {
     const profile = this.currentProfile();
-    this.listeners.forEach(cb => cb(this.operatingMode, profile));
+    this.listeners.forEach((cb) => cb(this.operatingMode, profile));
   }
 }
 

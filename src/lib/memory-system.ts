@@ -40,7 +40,9 @@ class MemorySystem {
   private constructor() {
     this.loadCacheFromStorage();
     // Hydrate from server on init
-    this.syncFromServer().catch(() => {/* offline — cache is fine */});
+    this.syncFromServer().catch(() => {
+      /* offline — cache is fine */
+    });
   }
 
   static getInstance(): MemorySystem {
@@ -62,7 +64,9 @@ class MemorySystem {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: text }),
-    }).catch(() => {/* fire-and-forget */});
+    }).catch(() => {
+      /* fire-and-forget */
+    });
   }
 
   getContextBuffer(): string[] {
@@ -77,13 +81,19 @@ class MemorySystem {
       const res = await fetch('/api/vfs/inner/stash', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: text, dopamine: endocrine.dopamine, cortisol: endocrine.cortisol }),
+        body: JSON.stringify({
+          data: text,
+          dopamine: endocrine.dopamine,
+          cortisol: endocrine.cortisol,
+        }),
       });
       if (res.ok) {
         await this.syncFromServer();
         return;
       }
-    } catch { /* offline fallback */ }
+    } catch {
+      /* offline fallback */
+    }
 
     // Offline: run eviction locally
     this.localEvict(endocrine.cortisol);
@@ -93,7 +103,7 @@ class MemorySystem {
       timestamp: Date.now(),
       dopamine: endocrine.dopamine,
       cortisol: endocrine.cortisol,
-      pinned: endocrine.dopamine >= 0.90,
+      pinned: endocrine.dopamine >= 0.9,
     };
     this.innerCache.push(node);
     if (node.pinned) this.localArchive(node);
@@ -104,39 +114,54 @@ class MemorySystem {
     // Fire all stash POSTs in parallel batches; defer the expensive syncFromServer
     // to a single call at the end instead of once per entry (was: 3 requests × N).
     const BATCH = 4;
-    const valid = entries.filter(t => t.trim());
+    const valid = entries.filter((t) => t.trim());
     for (let i = 0; i < valid.length; i += BATCH) {
       const slice = valid.slice(i, i + BATCH);
-      await Promise.all(slice.map(text => this.stashSilent(text, { dopamine: 0.6 + Math.random() * 0.2, cortisol: 0.1 })));
+      await Promise.all(
+        slice.map((text) =>
+          this.stashSilent(text, { dopamine: 0.6 + Math.random() * 0.2, cortisol: 0.1 }),
+        ),
+      );
     }
     // One sync at the very end to refresh local caches
-    await this.syncFromServer().catch(() => {/* offline — cache is fine */});
+    await this.syncFromServer().catch(() => {
+      /* offline — cache is fine */
+    });
   }
 
   /** Like stash() but skips the per-entry syncFromServer round-trip. */
-  private async stashSilent(text: string, endocrine: { dopamine: number; cortisol: number }): Promise<void> {
+  private async stashSilent(
+    text: string,
+    endocrine: { dopamine: number; cortisol: number },
+  ): Promise<void> {
     this.recordCortisol(endocrine.cortisol);
     try {
       await fetch('/api/vfs/inner/stash', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: text, dopamine: endocrine.dopamine, cortisol: endocrine.cortisol }),
+        body: JSON.stringify({
+          data: text,
+          dopamine: endocrine.dopamine,
+          cortisol: endocrine.cortisol,
+        }),
       });
-    } catch { /* offline fallback */ }
+    } catch {
+      /* offline fallback */
+    }
   }
 
   async archiveAll(): Promise<void> {
     try {
       const inner = await this.fetchInner();
-      await Promise.all(inner.map(node => this.archiveNodeToServer(node)));
+      await Promise.all(inner.map((node) => this.archiveNodeToServer(node)));
       // Clear inner spiral
-      await Promise.all(inner.map(n =>
-        fetch(`/api/vfs/inner/${n.id}`, { method: 'DELETE' }).catch(() => {})
-      ));
+      await Promise.all(
+        inner.map((n) => fetch(`/api/vfs/inner/${n.id}`, { method: 'DELETE' }).catch(() => {})),
+      );
       await this.syncFromServer();
     } catch {
       // Offline fallback
-      this.innerCache.forEach(n => this.localArchive(n));
+      this.innerCache.forEach((n) => this.localArchive(n));
       this.innerCache = [];
       this.saveCacheToStorage();
     }
@@ -164,13 +189,18 @@ class MemorySystem {
 
   findRelevantMemories(context: string, limit = 3): MemoryNode[] {
     const all = [...this.innerCache, ...this.outerCache];
-    const tokens = context.toLowerCase().split(/\W+/).filter(t => t.length > 3);
+    const tokens = context
+      .toLowerCase()
+      .split(/\W+/)
+      .filter((t) => t.length > 3);
     if (tokens.length === 0) return [];
 
-    const scored = all.map(node => {
+    const scored = all.map((node) => {
       const nodeText = String(node.data).toLowerCase();
       let hits = 0;
-      tokens.forEach(t => { if (nodeText.includes(t)) hits += 1; });
+      tokens.forEach((t) => {
+        if (nodeText.includes(t)) hits += 1;
+      });
       const overlap = hits / tokens.length; // 0..1 Jaccard-like ratio
       // Cubic polynomial friction: near-perfect matches stay high, weak matches collapse
       const fidelity = Math.pow(overlap, 3) * (1 + node.dopamine);
@@ -178,10 +208,10 @@ class MemorySystem {
     });
 
     return scored
-      .filter(s => s.score > 0)
+      .filter((s) => s.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
-      .map(s => s.node);
+      .map((s) => s.node);
   }
 
   clear() {
@@ -208,11 +238,16 @@ class MemorySystem {
     const spiking = currentCortisol >= 0.85 && currentCortisol >= avg + 0.3; // requires_absolute_floor
 
     if (spiking) {
-      const idx = this.innerCache.findIndex(n => !n.pinned);
-      if (idx !== -1) { this.localArchive(this.innerCache[idx]); this.innerCache.splice(idx, 1); return; }
+      const idx = this.innerCache.findIndex((n) => !n.pinned);
+      if (idx !== -1) {
+        this.localArchive(this.innerCache[idx]);
+        this.innerCache.splice(idx, 1);
+        return;
+      }
     }
 
-    let lowestIdx = -1, lowestVal = Infinity;
+    let lowestIdx = -1,
+      lowestVal = Infinity;
     for (let i = 0; i < this.innerCache.length; i++) {
       if (!this.innerCache[i].pinned && this.innerCache[i].dopamine < lowestVal) {
         lowestVal = this.innerCache[i].dopamine;
@@ -229,15 +264,15 @@ class MemorySystem {
   }
 
   private localArchive(node: MemoryNode) {
-    if (this.outerCache.some(a => a.data === node.data)) return;
+    if (this.outerCache.some((a) => a.data === node.data)) return;
     this.outerCache.push({ ...node });
     if (this.outerCache.length > 89) this.outerCache.shift(); // outer_sweep max index_key
   }
 
   private async fetchInner(): Promise<MemoryNode[]> {
     const res = await fetch('/api/vfs/inner');
-    const rows = await res.json() as Array<Record<string, unknown>>;
-    return rows.map(r => ({
+    const rows = (await res.json()) as Array<Record<string, unknown>>;
+    return rows.map((r) => ({
       id: r.node_id as string,
       data: r.data,
       timestamp: r.timestamp as number,
@@ -250,8 +285,8 @@ class MemorySystem {
 
   private async fetchOuter(): Promise<MemoryNode[]> {
     const res = await fetch('/api/vfs/outer');
-    const rows = await res.json() as Array<Record<string, unknown>>;
-    return rows.map(r => ({
+    const rows = (await res.json()) as Array<Record<string, unknown>>;
+    return rows.map((r) => ({
       id: r.node_id as string,
       data: r.data,
       timestamp: r.timestamp as number,
@@ -284,7 +319,9 @@ class MemorySystem {
       const saved = JSON.parse(raw);
       this.innerCache = saved.inner_spiral?.nodes || [];
       this.outerCache = saved.outer_sweep?.archive || [];
-    } catch { /* corrupt cache — ignore */ }
+    } catch {
+      /* corrupt cache — ignore */
+    }
   }
 
   private saveToStorageTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -293,14 +330,17 @@ class MemorySystem {
     if (this.saveToStorageTimeout) clearTimeout(this.saveToStorageTimeout);
     const perform = () => {
       try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify({
-          version: '7.5.0',
-          schema: 'fibonacci_vfs.v7',
-          inner_spiral: { nodes: this.innerCache },
-          // Stop saving outer_sweep to localStorage to avoid QuotaExceededError.
-          // The source of truth is the server-side SQLite DB.
-          outer_sweep: { archive: [] },
-        }));
+        localStorage.setItem(
+          CACHE_KEY,
+          JSON.stringify({
+            version: '7.5.0',
+            schema: 'fibonacci_vfs.v7',
+            inner_spiral: { nodes: this.innerCache },
+            // Stop saving outer_sweep to localStorage to avoid QuotaExceededError.
+            // The source of truth is the server-side SQLite DB.
+            outer_sweep: { archive: [] },
+          }),
+        );
       } catch (e) {
         console.warn('[VFS] LocalStorage quota exceeded. Clearing cache.', e);
         localStorage.removeItem(CACHE_KEY);

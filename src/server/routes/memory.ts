@@ -1,5 +1,11 @@
 import { Router } from 'express';
-import { addMemory, searchMemories, getProfile, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
+import {
+  addMemory,
+  searchMemories,
+  getProfile,
+  SAGE_CONTAINER,
+  SHARED_CONTAINER,
+} from '../../lib/supermemory';
 import { lockGuard } from '../auth';
 
 const router = Router();
@@ -27,11 +33,12 @@ router.post('/add', lockGuard, async (req, res) => {
     res.status(400).json({ error: 'content (string) required' });
     return;
   }
-  const containerTag = entity === 'sage'
-    ? SAGE_CONTAINER
-    : entity && entity !== 'shared'
-      ? entity          // literal tag for a named individual of the seven
-      : SHARED_CONTAINER;
+  const containerTag =
+    entity === 'sage'
+      ? SAGE_CONTAINER
+      : entity && entity !== 'shared'
+        ? entity // literal tag for a named individual of the seven
+        : SHARED_CONTAINER;
   const id = await addMemory(content, containerTag, metadata);
   if (id === null && !process.env.SUPERMEMORY_API_KEY) {
     res.status(503).json({ error: 'SUPERMEMORY_API_KEY not configured' });
@@ -57,9 +64,11 @@ router.get('/search', lockGuard, async (req, res) => {
     return;
   }
   const tags =
-    scope === 'sage'   ? [SAGE_CONTAINER] :
-    scope === 'shared' ? [SHARED_CONTAINER] :
-                         [SAGE_CONTAINER, SHARED_CONTAINER];
+    scope === 'sage'
+      ? [SAGE_CONTAINER]
+      : scope === 'shared'
+        ? [SHARED_CONTAINER]
+        : [SAGE_CONTAINER, SHARED_CONTAINER];
   const results = await searchMemories(q, tags, limit);
   res.json({ results, scope, containers: tags });
 });

@@ -12,39 +12,40 @@ export const LOCAL_TOOL_DECLARATIONS = [
     name: 'nexus_get_status',
     description:
       'Read the current neuro-synaptic state of the ADHD Sage substrate from the local client state. Returns stability (0-1), dopamine (0-1), cortisol (0-1), frequency (Hz), and current mode.',
-    parameters: { type: 'object', properties: {} }
+    parameters: { type: 'object', properties: {} },
   },
   {
     name: 'nexus_get_mode',
     description:
       'Get the current operating mode of the Sage substrate from local client state. Returns one of: stabilized, dreaming, decaying, emergency.',
-    parameters: { type: 'object', properties: {} }
+    parameters: { type: 'object', properties: {} },
   },
   {
     name: 'nexus_stabilize',
     description:
       'Trigger a synaptic reinforcement locally. Resets stability to 100%, sets mode to stabilized. Use when the substrate is stressed or decaying.',
-    parameters: { type: 'object', properties: {} }
+    parameters: { type: 'object', properties: {} },
   },
   {
     name: 'nexus_set_view',
-    description: 'Switch the UI view between the chat terminal and the memory lattice visualization.',
+    description:
+      'Switch the UI view between the chat terminal and the memory lattice visualization.',
     parameters: {
       type: 'object',
       properties: {
         view: {
           type: 'string',
           enum: ['chat', 'lattice'],
-          description: 'Target view to activate.'
-        }
+          description: 'Target view to activate.',
+        },
       },
-      required: ['view']
-    }
+      required: ['view'],
+    },
   },
   {
     name: 'nexus_toggle_sidebar',
     description: 'Toggle the left sidebar open or closed.',
-    parameters: { type: 'object', properties: {} }
+    parameters: { type: 'object', properties: {} },
   },
   {
     name: 'nexus_inject_message',
@@ -57,12 +58,13 @@ export const LOCAL_TOOL_DECLARATIONS = [
         role: {
           type: 'string',
           enum: ['system', 'assistant'],
-          description: "Display role. 'system' for telemetry, 'assistant' for Sage-voiced responses. Defaults to system."
-        }
+          description:
+            "Display role. 'system' for telemetry, 'assistant' for Sage-voiced responses. Defaults to system.",
+        },
       },
-      required: ['text']
-    }
-  }
+      required: ['text'],
+    },
+  },
 ];
 
 export interface SageToolAPI {
@@ -87,7 +89,7 @@ export function useSageTools(api: SageToolAPI) {
             cortisol: neuroState.cortisol,
             frequency: 11.3,
             mode,
-            timestamp: Date.now()
+            timestamp: Date.now(),
           };
         case 'nexus_get_mode':
           return { mode };
@@ -106,7 +108,7 @@ export function useSageTools(api: SageToolAPI) {
         }
         case 'nexus_inject_message': {
           const text = String(call.args.text || '');
-          const role = (String(call.args.role || 'system') as 'system' | 'assistant');
+          const role = String(call.args.role || 'system') as 'system' | 'assistant';
           api.injectMessage(text, role);
           return { ok: true, action: 'injected' };
         }
@@ -114,7 +116,7 @@ export function useSageTools(api: SageToolAPI) {
           return { ok: false, error: `Local tool not found: ${call.name}` };
       }
     },
-    [neuroState, mode, api]
+    [neuroState, mode, api],
   );
 
   return { executeLocalTool, localDeclarations: LOCAL_TOOL_DECLARATIONS };

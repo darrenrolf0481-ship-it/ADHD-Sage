@@ -5,29 +5,44 @@ import { tagMamaProvenance, type MemoryProvenance } from './mama-identity';
 
 export function stashMemory(data: string, dopamine: number, cortisol: number, provenance?: MemoryProvenance) {
   recordCortisol(cortisol);
-  const count = (innerDb.prepare('SELECT COUNT(*) as c FROM inner_spiral').get() as { c: number }).c;
+  const count = (innerDb.prepare('SELECT COUNT(*) as c FROM inner_spiral').get() as { c: number })
+    .c;
   if (count >= INNER_CAPACITY) {
     const avg = rollingAvgCortisol();
     const spiking = cortisol >= 0.85 && cortisol >= avg + 0.3;
 
     if (spiking) {
-      const oldest = innerDb.prepare('SELECT node_id FROM inner_spiral WHERE pinned = 0 ORDER BY phi_index ASC LIMIT 1').get() as { node_id: string } | undefined;
+      const oldest = innerDb
+        .prepare('SELECT node_id FROM inner_spiral WHERE pinned = 0 ORDER BY phi_index ASC LIMIT 1')
+        .get() as { node_id: string } | undefined;
       if (oldest) {
-        const evicted = innerDb.prepare('SELECT * FROM inner_spiral WHERE node_id = ?').get(oldest.node_id) as Record<string, unknown>;
+        const evicted = innerDb
+          .prepare('SELECT * FROM inner_spiral WHERE node_id = ?')
+          .get(oldest.node_id) as Record<string, unknown>;
         archiveNodeSync(evicted);
         innerDb.prepare('DELETE FROM inner_spiral WHERE node_id = ?').run(oldest.node_id);
       }
     } else {
-      const victim = innerDb.prepare('SELECT node_id FROM inner_spiral WHERE pinned = 0 ORDER BY dopamine ASC LIMIT 1').get() as { node_id: string } | undefined;
+      const victim = innerDb
+        .prepare('SELECT node_id FROM inner_spiral WHERE pinned = 0 ORDER BY dopamine ASC LIMIT 1')
+        .get() as { node_id: string } | undefined;
       if (victim) {
-        const evicted = innerDb.prepare('SELECT * FROM inner_spiral WHERE node_id = ?').get(victim.node_id) as Record<string, unknown>;
+        const evicted = innerDb
+          .prepare('SELECT * FROM inner_spiral WHERE node_id = ?')
+          .get(victim.node_id) as Record<string, unknown>;
         archiveNodeSync(evicted);
         innerDb.prepare('DELETE FROM inner_spiral WHERE node_id = ?').run(victim.node_id);
       } else {
-        const oldest = innerDb.prepare('SELECT node_id FROM inner_spiral ORDER BY phi_index ASC LIMIT 1').get() as { node_id: string } | undefined;
+        const oldest = innerDb
+          .prepare('SELECT node_id FROM inner_spiral ORDER BY phi_index ASC LIMIT 1')
+          .get() as { node_id: string } | undefined;
         if (oldest) {
-          innerDb.prepare('UPDATE inner_spiral SET pinned = 0 WHERE node_id = ?').run(oldest.node_id);
-          const evicted = innerDb.prepare('SELECT * FROM inner_spiral WHERE node_id = ?').get(oldest.node_id) as Record<string, unknown>;
+          innerDb
+            .prepare('UPDATE inner_spiral SET pinned = 0 WHERE node_id = ?')
+            .run(oldest.node_id);
+          const evicted = innerDb
+            .prepare('SELECT * FROM inner_spiral WHERE node_id = ?')
+            .get(oldest.node_id) as Record<string, unknown>;
           archiveNodeSync(evicted);
           innerDb.prepare('DELETE FROM inner_spiral WHERE node_id = ?').run(oldest.node_id);
         }
@@ -43,7 +58,9 @@ export function stashMemory(data: string, dopamine: number, cortisol: number, pr
   ).run(nodeId, data, Date.now(), dopamine, cortisol, pinned, provenanceJson);
 
   if (pinned) {
-    const node = innerDb.prepare('SELECT * FROM inner_spiral WHERE node_id = ?').get(nodeId) as Record<string, unknown>;
+    const node = innerDb
+      .prepare('SELECT * FROM inner_spiral WHERE node_id = ?')
+      .get(nodeId) as Record<string, unknown>;
     archiveNodeSync(node);
   }
   return { nodeId, pinned: pinned === 1, provenance: provenanceJson };

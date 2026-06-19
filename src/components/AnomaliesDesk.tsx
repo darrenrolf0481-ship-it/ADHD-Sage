@@ -14,19 +14,42 @@
  */
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Radio, Activity, Fingerprint, Mic, MapPin, Zap, Wind, Thermometer, Battery, Wifi } from 'lucide-react';
+import {
+  Radio,
+  Activity,
+  Fingerprint,
+  Mic,
+  MapPin,
+  Zap,
+  Wind,
+  Thermometer,
+  Battery,
+  Wifi,
+} from 'lucide-react';
 import { useSensors, anomalyColor, permLabel } from '../lib/sensor-context';
 import { SensorSnapshot } from '../lib/sensor-hub';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function Bar({ value, max = 1, color = 'bg-cyan-400', label }: {
-  value: number; max?: number; color?: string; label?: string;
+function Bar({
+  value,
+  max = 1,
+  color = 'bg-cyan-400',
+  label,
+}: {
+  value: number;
+  max?: number;
+  color?: string;
+  label?: string;
 }) {
   const pct = Math.min(100, (value / max) * 100);
   return (
     <div className="w-full">
-      {label && <div className="text-[9px] text-white/30 font-mono mb-1 uppercase tracking-widest">{label}</div>}
+      {label && (
+        <div className="text-[9px] text-white/30 font-mono mb-1 uppercase tracking-widest">
+          {label}
+        </div>
+      )}
       <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-100 ${color}`}
@@ -39,7 +62,9 @@ function Bar({ value, max = 1, color = 'bg-cyan-400', label }: {
 
 function StatusDot({ active }: { active: boolean }) {
   return (
-    <span className={`inline-block w-1.5 h-1.5 rounded-full ${active ? 'bg-emerald-400 animate-pulse' : 'bg-slate-600'}`} />
+    <span
+      className={`inline-block w-1.5 h-1.5 rounded-full ${active ? 'bg-emerald-400 animate-pulse' : 'bg-slate-600'}`}
+    />
   );
 }
 
@@ -48,13 +73,20 @@ function StatusDot({ active }: { active: boolean }) {
 function EmfPanel({ snap }: { snap: SensorSnapshot }) {
   const mag = snap.magnetometer;
   const isSpike = mag && Math.abs(mag.deviation) > 0.15;
-  const emfColor = isSpike ? 'bg-red-500' : mag && Math.abs(mag.deviation) > 0.07 ? 'bg-amber-500' : 'bg-cyan-400';
+  const emfColor = isSpike
+    ? 'bg-red-500'
+    : mag && Math.abs(mag.deviation) > 0.07
+      ? 'bg-amber-500'
+      : 'bg-cyan-400';
 
   return (
     <div className="bg-[#08080C] border border-white/10 p-4 rounded-2xl space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-mono tracking-widest uppercase text-slate-400 flex items-center gap-2">
-          <Activity size={12} className={isSpike ? 'text-red-400 animate-pulse' : 'text-slate-500'} />
+          <Activity
+            size={12}
+            className={isSpike ? 'text-red-400 animate-pulse' : 'text-slate-500'}
+          />
           Magnetometer (EMF)
         </span>
         <StatusDot active={!!mag} />
@@ -63,7 +95,11 @@ function EmfPanel({ snap }: { snap: SensorSnapshot }) {
       {mag ? (
         <>
           <div className="grid grid-cols-3 gap-2 text-center">
-            {[['X', mag.x], ['Y', mag.y], ['Z', mag.z]].map(([axis, val]) => (
+            {[
+              ['X', mag.x],
+              ['Y', mag.y],
+              ['Z', mag.z],
+            ].map(([axis, val]) => (
               <div key={axis as string} className="bg-white/5 rounded-lg py-1.5">
                 <div className="text-[8px] text-slate-500 font-mono">{axis as string}</div>
                 <div className="text-xs font-mono text-cyan-300">{Number(val).toFixed(1)}</div>
@@ -84,9 +120,11 @@ function EmfPanel({ snap }: { snap: SensorSnapshot }) {
         </>
       ) : (
         <div className="text-[10px] text-slate-600 italic font-mono">
-          {snap.permissions.magnetometer === 'denied' ? 'Permission denied' :
-           snap.permissions.magnetometer === 'unavailable' ? 'Sensor unavailable' :
-           'Waiting for sensor…'}
+          {snap.permissions.magnetometer === 'denied'
+            ? 'Permission denied'
+            : snap.permissions.magnetometer === 'unavailable'
+              ? 'Sensor unavailable'
+              : 'Waiting for sensor…'}
         </div>
       )}
     </div>
@@ -95,7 +133,13 @@ function EmfPanel({ snap }: { snap: SensorSnapshot }) {
 
 // ─── Audio Panel ─────────────────────────────────────────────────────────────
 
-function AudioPanel({ snap, onRequestAudio }: { snap: SensorSnapshot; onRequestAudio: () => void }) {
+function AudioPanel({
+  snap,
+  onRequestAudio,
+}: {
+  snap: SensorSnapshot;
+  onRequestAudio: () => void;
+}) {
   const audio = snap.audio;
   const perm = snap.permissions.audio;
 
@@ -148,11 +192,17 @@ function AudioPanel({ snap, onRequestAudio }: { snap: SensorSnapshot; onRequestA
           </div>
         </>
       ) : perm === 'denied' ? (
-        <div className="text-[10px] text-red-400 italic font-mono">Microphone permission denied.</div>
+        <div className="text-[10px] text-red-400 italic font-mono">
+          Microphone permission denied.
+        </div>
       ) : perm === 'granted' ? (
-        <div className="text-[10px] text-slate-600 italic font-mono animate-pulse">Acquiring audio…</div>
+        <div className="text-[10px] text-slate-600 italic font-mono animate-pulse">
+          Acquiring audio…
+        </div>
       ) : (
-        <div className="text-[10px] text-slate-600 italic font-mono">Enable microphone for infrasound detection.</div>
+        <div className="text-[10px] text-slate-600 italic font-mono">
+          Enable microphone for infrasound detection.
+        </div>
       )}
     </div>
   );
@@ -174,21 +224,32 @@ function MotionPanel({ snap }: { snap: SensorSnapshot }) {
       {motion ? (
         <>
           <div className="grid grid-cols-3 gap-2 text-center">
-            {[['X', motion.accX], ['Y', motion.accY], ['Z', motion.accZ]].map(([ax, val]) => (
+            {[
+              ['X', motion.accX],
+              ['Y', motion.accY],
+              ['Z', motion.accZ],
+            ].map(([ax, val]) => (
               <div key={ax as string} className="bg-white/5 rounded-lg py-1.5">
                 <div className="text-[8px] text-slate-500 font-mono">{ax as string}</div>
                 <div className="text-xs font-mono text-emerald-300">{Number(val).toFixed(2)}</div>
               </div>
             ))}
           </div>
-          <Bar value={motion.vibration} color="bg-emerald-400" label={`Vibration ${(motion.vibration * 100).toFixed(0)}%`} />
+          <Bar
+            value={motion.vibration}
+            color="bg-emerald-400"
+            label={`Vibration ${(motion.vibration * 100).toFixed(0)}%`}
+          />
           <div className="text-[10px] font-mono text-slate-400">
-            Magnitude: <span className="text-emerald-300">{motion.accMagnitude.toFixed(2)} m/s²</span>
+            Magnitude:{' '}
+            <span className="text-emerald-300">{motion.accMagnitude.toFixed(2)} m/s²</span>
           </div>
         </>
       ) : (
         <div className="text-[10px] text-slate-600 italic font-mono">
-          {snap.permissions.motion === 'denied' ? 'Motion permission denied' : 'Waiting for device motion…'}
+          {snap.permissions.motion === 'denied'
+            ? 'Motion permission denied'
+            : 'Waiting for device motion…'}
         </div>
       )}
     </div>
@@ -206,12 +267,17 @@ function GpsPanel({ snap }: { snap: SensorSnapshot }) {
           <MapPin size={12} className={gps ? 'text-green-400' : 'text-slate-500'} />
           GPS Location
         </span>
-        <span className="text-[9px] font-mono text-slate-500">{permLabel(snap.permissions.gps)}</span>
+        <span className="text-[9px] font-mono text-slate-500">
+          {permLabel(snap.permissions.gps)}
+        </span>
       </div>
       {gps ? (
         <div className="space-y-1 text-[10px] font-mono">
-          <div className="text-emerald-300">{gps.lat.toFixed(5)}, {gps.lng.toFixed(5)}</div>
-          <div className="text-slate-500">±{gps.accuracy.toFixed(0)}m accuracy
+          <div className="text-emerald-300">
+            {gps.lat.toFixed(5)}, {gps.lng.toFixed(5)}
+          </div>
+          <div className="text-slate-500">
+            ±{gps.accuracy.toFixed(0)}m accuracy
             {gps.altitude != null && ` · ${gps.altitude.toFixed(0)}m alt`}
             {gps.heading != null && ` · ${gps.heading.toFixed(0)}° hdg`}
           </div>
@@ -230,15 +296,20 @@ function GpsPanel({ snap }: { snap: SensorSnapshot }) {
 function EnvironmentalPanel({ snap }: { snap: SensorSnapshot }) {
   const { geomagnetic, weather, battery, network } = snap;
   const kpColor = geomagnetic
-    ? geomagnetic.kpIndex >= 7 ? 'text-red-400'
-    : geomagnetic.kpIndex >= 5 ? 'text-amber-400'
-    : geomagnetic.kpIndex >= 3 ? 'text-yellow-400'
-    : 'text-emerald-400'
+    ? geomagnetic.kpIndex >= 7
+      ? 'text-red-400'
+      : geomagnetic.kpIndex >= 5
+        ? 'text-amber-400'
+        : geomagnetic.kpIndex >= 3
+          ? 'text-yellow-400'
+          : 'text-emerald-400'
     : 'text-slate-500';
 
   return (
     <div className="bg-[#08080C] border border-white/10 p-4 rounded-2xl space-y-3">
-      <span className="text-[10px] font-mono tracking-widest uppercase text-slate-400 block">Environmental</span>
+      <span className="text-[10px] font-mono tracking-widest uppercase text-slate-400 block">
+        Environmental
+      </span>
 
       <div className="grid grid-cols-2 gap-2">
         {/* Geomagnetic */}
@@ -248,7 +319,9 @@ function EnvironmentalPanel({ snap }: { snap: SensorSnapshot }) {
           </div>
           {geomagnetic ? (
             <>
-              <div className={`text-sm font-bold font-mono ${kpColor}`}>Kp {geomagnetic.kpIndex.toFixed(1)}</div>
+              <div className={`text-sm font-bold font-mono ${kpColor}`}>
+                Kp {geomagnetic.kpIndex.toFixed(1)}
+              </div>
               <div className="text-[9px] text-slate-400 uppercase">{geomagnetic.activity}</div>
             </>
           ) : (
@@ -263,8 +336,12 @@ function EnvironmentalPanel({ snap }: { snap: SensorSnapshot }) {
           </div>
           {weather ? (
             <>
-              <div className="text-sm font-bold font-mono text-blue-300">{weather.pressure.toFixed(0)} hPa</div>
-              <div className="text-[9px] text-slate-400">{weather.temperature.toFixed(1)}°C · {weather.humidity.toFixed(0)}% RH</div>
+              <div className="text-sm font-bold font-mono text-blue-300">
+                {weather.pressure.toFixed(0)} hPa
+              </div>
+              <div className="text-[9px] text-slate-400">
+                {weather.temperature.toFixed(1)}°C · {weather.humidity.toFixed(0)}% RH
+              </div>
             </>
           ) : (
             <div className="text-[9px] text-slate-600 italic">Needs GPS fix…</div>
@@ -278,10 +355,14 @@ function EnvironmentalPanel({ snap }: { snap: SensorSnapshot }) {
           </div>
           {battery ? (
             <>
-              <div className={`text-sm font-bold font-mono ${battery.level < 0.2 ? 'text-red-400' : 'text-cyan-300'}`}>
+              <div
+                className={`text-sm font-bold font-mono ${battery.level < 0.2 ? 'text-red-400' : 'text-cyan-300'}`}
+              >
                 {(battery.level * 100).toFixed(0)}%
               </div>
-              <div className="text-[9px] text-slate-400">{battery.charging ? 'Charging' : 'Discharging'}</div>
+              <div className="text-[9px] text-slate-400">
+                {battery.charging ? 'Charging' : 'Discharging'}
+              </div>
             </>
           ) : (
             <div className="text-[9px] text-slate-600 italic">Unavailable</div>
@@ -295,8 +376,12 @@ function EnvironmentalPanel({ snap }: { snap: SensorSnapshot }) {
           </div>
           {network ? (
             <>
-              <div className="text-sm font-bold font-mono text-indigo-300">{network.effectiveType.toUpperCase()}</div>
-              <div className="text-[9px] text-slate-400">{network.downlink} Mbps · {network.rtt}ms RTT</div>
+              <div className="text-sm font-bold font-mono text-indigo-300">
+                {network.effectiveType.toUpperCase()}
+              </div>
+              <div className="text-[9px] text-slate-400">
+                {network.downlink} Mbps · {network.rtt}ms RTT
+              </div>
             </>
           ) : (
             <div className="text-[9px] text-slate-600 italic">Unavailable</div>
@@ -341,8 +426,14 @@ function RadarCanvas({ snap, isScanning }: { snap: SensorSnapshot; isScanning: b
     }
     // Cross hairs
     ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-    ctx.beginPath(); ctx.moveTo(cx - r, cy); ctx.lineTo(cx + r, cy); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx, cy - r); ctx.lineTo(cx, cy + r); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx - r, cy);
+    ctx.lineTo(cx + r, cy);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r);
+    ctx.lineTo(cx, cy + r);
+    ctx.stroke();
 
     if (!isScanning) {
       ctx.fillStyle = 'rgba(34,211,238,0.2)';
@@ -355,12 +446,8 @@ function RadarCanvas({ snap, isScanning }: { snap: SensorSnapshot; isScanning: b
     const t = sweepRef.current;
 
     // Sweep line with glow
-    const sweepColor = isAnomaly
-      ? `rgba(255, 60, 60, 0.9)`
-      : `rgba(34, 211, 238, 0.9)`;
-    const gradient = ctx.createLinearGradient(cx, cy,
-      cx + Math.cos(t) * r, cy + Math.sin(t) * r
-    );
+    const sweepColor = isAnomaly ? `rgba(255, 60, 60, 0.9)` : `rgba(34, 211, 238, 0.9)`;
+    const gradient = ctx.createLinearGradient(cx, cy, cx + Math.cos(t) * r, cy + Math.sin(t) * r);
     gradient.addColorStop(0, sweepColor);
     gradient.addColorStop(1, 'transparent');
     ctx.beginPath();
@@ -386,10 +473,17 @@ function RadarCanvas({ snap, isScanning }: { snap: SensorSnapshot; isScanning: b
     // Plot sensor anomaly blips using golden ratio spiral placement
     const PHI = 1.618033988749895;
     const sensors: { score: number; label: string; color: string }[] = [];
-    if (snap.magnetometer) sensors.push({ score: Math.abs(snap.magnetometer.deviation), label: 'EMF', color: '#f59e0b' });
-    if (snap.audio) sensors.push({ score: snap.audio.anomalyScore, label: 'AUD', color: '#a78bfa' });
+    if (snap.magnetometer)
+      sensors.push({
+        score: Math.abs(snap.magnetometer.deviation),
+        label: 'EMF',
+        color: '#f59e0b',
+      });
+    if (snap.audio)
+      sensors.push({ score: snap.audio.anomalyScore, label: 'AUD', color: '#a78bfa' });
     if (snap.motion) sensors.push({ score: snap.motion.vibration, label: 'VIB', color: '#34d399' });
-    if (snap.geomagnetic) sensors.push({ score: snap.geomagnetic.kpIndex / 9, label: 'KP', color: '#60a5fa' });
+    if (snap.geomagnetic)
+      sensors.push({ score: snap.geomagnetic.kpIndex / 9, label: 'KP', color: '#60a5fa' });
 
     sensors.forEach((sensor, i) => {
       const angle = i * PHI * 2;
@@ -398,7 +492,7 @@ function RadarCanvas({ snap, isScanning }: { snap: SensorSnapshot; isScanning: b
       const by = cy + Math.sin(angle) * dist;
 
       // Sweep highlight
-      let distAngle = Math.abs(angle - ((t % (Math.PI * 2))));
+      let distAngle = Math.abs(angle - (t % (Math.PI * 2)));
       if (distAngle > Math.PI) distAngle = Math.PI * 2 - distAngle;
 
       const highlighted = distAngle < 0.25;
@@ -406,9 +500,7 @@ function RadarCanvas({ snap, isScanning }: { snap: SensorSnapshot; isScanning: b
 
       ctx.beginPath();
       ctx.arc(bx, by, dotR, 0, Math.PI * 2);
-      ctx.fillStyle = highlighted
-        ? sensor.color
-        : `${sensor.color}80`;
+      ctx.fillStyle = highlighted ? sensor.color : `${sensor.color}80`;
       ctx.fill();
 
       if (highlighted) {
@@ -451,14 +543,7 @@ function RadarCanvas({ snap, isScanning }: { snap: SensorSnapshot; isScanning: b
     return () => cancelAnimationFrame(rafRef.current);
   }, [draw, isScanning]);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      width={300}
-      height={300}
-      className="w-full h-full"
-    />
-  );
+  return <canvas ref={canvasRef} width={300} height={300} className="w-full h-full" />;
 }
 
 // ─── Spirit Box ────────────────────────────────────────────────────────────────
@@ -485,7 +570,7 @@ function SpiritBox({ snap, isScanning }: { snap: SensorSnapshot; isScanning: boo
 
         if (fragments.length > 0) {
           const pick = fragments[Math.floor(Math.random() * fragments.length)];
-          setOutput(prev => [pick, ...prev].slice(0, 8));
+          setOutput((prev) => [pick, ...prev].slice(0, 8));
         }
       }
     }, 800);
@@ -514,7 +599,8 @@ function SpiritBox({ snap, isScanning }: { snap: SensorSnapshot; isScanning: boo
               filter: `blur(${i * 0.3}px)`,
             }}
           >
-            <span className="opacity-30 mr-2">›</span>{fragment}
+            <span className="opacity-30 mr-2">›</span>
+            {fragment}
           </div>
         ))}
       </div>
@@ -537,9 +623,11 @@ function PermStrip({ snap }: { snap: SensorSnapshot }) {
         <span
           key={label}
           className={`text-[8px] font-bold uppercase font-mono px-1.5 py-0.5 rounded ${
-            val === 'granted' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' :
-            val === 'denied' ? 'bg-red-500/15 text-red-400 border border-red-500/20' :
-            'bg-white/5 text-slate-500 border border-white/5'
+            val === 'granted'
+              ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
+              : val === 'denied'
+                ? 'bg-red-500/15 text-red-400 border border-red-500/20'
+                : 'bg-white/5 text-slate-500 border border-white/5'
           }`}
         >
           {label} {permLabel(val)}
@@ -573,13 +661,23 @@ export const AnomaliesDesk: React.FC = () => {
       {/* Header */}
       <div className="p-4 md:p-6 border-b border-white/5 flex items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-3 md:gap-4">
-          <div className={`w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center border ${
-            isPhi ? 'bg-yellow-500/20 border-yellow-500/40' :
-            anomaly > 0.7 ? 'bg-red-900/40 border-red-500/30' :
-            anomaly > 0.3 ? 'bg-amber-900/40 border-amber-500/30' :
-            'bg-cyan-900/20 border-cyan-500/20'
-          }`}>
-            <Radio className={isPhi ? 'text-yellow-400' : anomaly > 0.4 ? 'text-red-400' : 'text-cyan-400'} size={18} />
+          <div
+            className={`w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center border ${
+              isPhi
+                ? 'bg-yellow-500/20 border-yellow-500/40'
+                : anomaly > 0.7
+                  ? 'bg-red-900/40 border-red-500/30'
+                  : anomaly > 0.3
+                    ? 'bg-amber-900/40 border-amber-500/30'
+                    : 'bg-cyan-900/20 border-cyan-500/20'
+            }`}
+          >
+            <Radio
+              className={
+                isPhi ? 'text-yellow-400' : anomaly > 0.4 ? 'text-red-400' : 'text-cyan-400'
+              }
+              size={18}
+            />
           </div>
           <div>
             <h2 className="text-base md:text-lg font-bold tracking-tight text-white flex items-center gap-2">
@@ -628,7 +726,6 @@ export const AnomaliesDesk: React.FC = () => {
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-2 gap-4 auto-rows-max">
-
         {/* Left column */}
         <div className="flex flex-col gap-4">
           <EmfPanel snap={snapshot} />
@@ -644,14 +741,23 @@ export const AnomaliesDesk: React.FC = () => {
           {/* Radar */}
           <div className="bg-[#08080C] border border-white/10 p-4 rounded-2xl flex flex-col items-center">
             <div className="flex items-center justify-between w-full mb-3">
-              <h3 className="text-[10px] text-slate-500 font-mono tracking-widest uppercase">Sensor Topology Radar</h3>
-              <Fingerprint size={12} className={isScanning ? 'text-cyan-400 animate-pulse' : 'text-slate-600'} />
+              <h3 className="text-[10px] text-slate-500 font-mono tracking-widest uppercase">
+                Sensor Topology Radar
+              </h3>
+              <Fingerprint
+                size={12}
+                className={isScanning ? 'text-cyan-400 animate-pulse' : 'text-slate-600'}
+              />
             </div>
-            <div className={`relative w-full aspect-square max-w-[280px] border rounded-full overflow-hidden bg-black ${
-              isPhi ? 'border-yellow-500/40 shadow-[0_0_30px_rgba(255,200,0,0.15)]' :
-              anomaly > 0.4 ? 'border-red-500/30 shadow-[0_0_30px_rgba(255,0,0,0.1)]' :
-              'border-cyan-500/20 shadow-[0_0_20px_rgba(34,211,238,0.05)]'
-            }`}>
+            <div
+              className={`relative w-full aspect-square max-w-[280px] border rounded-full overflow-hidden bg-black ${
+                isPhi
+                  ? 'border-yellow-500/40 shadow-[0_0_30px_rgba(255,200,0,0.15)]'
+                  : anomaly > 0.4
+                    ? 'border-red-500/30 shadow-[0_0_30px_rgba(255,0,0,0.1)]'
+                    : 'border-cyan-500/20 shadow-[0_0_20px_rgba(34,211,238,0.05)]'
+              }`}
+            >
               <RadarCanvas snap={snapshot} isScanning={isScanning} />
             </div>
           </div>
@@ -659,8 +765,13 @@ export const AnomaliesDesk: React.FC = () => {
           {/* Spirit Box */}
           <div className="bg-[#08080C] border border-white/10 p-4 rounded-2xl flex flex-col gap-3">
             <div className="flex justify-between items-center">
-              <h3 className="text-[10px] text-slate-500 font-mono tracking-widest uppercase">Synaptic Relay</h3>
-              <Wind size={12} className={isScanning ? 'text-cyan-400 animate-pulse' : 'text-slate-600'} />
+              <h3 className="text-[10px] text-slate-500 font-mono tracking-widest uppercase">
+                Synaptic Relay
+              </h3>
+              <Wind
+                size={12}
+                className={isScanning ? 'text-cyan-400 animate-pulse' : 'text-slate-600'}
+              />
             </div>
             <SpiritBox snap={snapshot} isScanning={isScanning} />
           </div>

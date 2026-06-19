@@ -34,9 +34,7 @@ export interface GenerateResponse {
  * If Gemini calls local tools, the bridge automatically executes them
  * on the client and resumes the conversation without the user noticing.
  */
-export async function sendMessageWithTools(
-  opts: BridgeOptions
-): Promise<GenerateResponse> {
+export async function sendMessageWithTools(opts: BridgeOptions): Promise<GenerateResponse> {
   // 1. Initial request with merged remote + local tool declarations
   const res = await fetch('/api/gemini/generate', {
     method: 'POST',
@@ -46,8 +44,8 @@ export async function sendMessageWithTools(
       history: opts.history,
       sensorContext: opts.sensorContext,
       attachments: opts.attachments,
-      localToolDeclarations: LOCAL_TOOL_DECLARATIONS
-    })
+      localToolDeclarations: LOCAL_TOOL_DECLARATIONS,
+    }),
   });
 
   let data: GenerateResponse = await res.json();
@@ -58,7 +56,7 @@ export async function sendMessageWithTools(
     const localResults = data.localCalls.map((call) => ({
       id: call.id,
       name: call.name,
-      response: opts.executeLocalTool(call)
+      response: opts.executeLocalTool(call),
     }));
 
     const resumeRes = await fetch('/api/gemini/continue', {
@@ -67,8 +65,8 @@ export async function sendMessageWithTools(
       body: JSON.stringify({
         history: data.history,
         remoteResults: data.remoteResults || [],
-        localResults
-      })
+        localResults,
+      }),
     });
 
     data = await resumeRes.json();

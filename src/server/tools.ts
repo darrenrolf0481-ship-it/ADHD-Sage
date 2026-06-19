@@ -28,7 +28,7 @@ export function cleanResponse(obj: any): any {
 export async function executeTool(
   name: string,
   args: Record<string, unknown>,
-  toolEffects: ToolEffect[]
+  toolEffects: ToolEffect[],
 ): Promise<Record<string, unknown>> {
   // Route MCP-prefixed tools to the MCP manager
   if (isMcpTool(name)) {
@@ -37,12 +37,22 @@ export async function executeTool(
 
   switch (name) {
     case 'nexus_get_status': {
-      const innerCount = (innerDb.prepare('SELECT COUNT(*) as c FROM inner_spiral').get() as { c: number }).c;
-      const outerCount = (outerDb.prepare('SELECT COUNT(*) as c FROM sages_constellations').get() as { c: number }).c;
-      const pinned = (innerDb.prepare('SELECT COUNT(*) as c FROM inner_spiral WHERE pinned = 1').get() as { c: number }).c;
-      const avgDopamine = innerCount > 0
-        ? (innerDb.prepare('SELECT AVG(dopamine) as a FROM inner_spiral').get() as { a: number }).a
-        : 0.5;
+      const innerCount = (
+        innerDb.prepare('SELECT COUNT(*) as c FROM inner_spiral').get() as { c: number }
+      ).c;
+      const outerCount = (
+        outerDb.prepare('SELECT COUNT(*) as c FROM sages_constellations').get() as { c: number }
+      ).c;
+      const pinned = (
+        innerDb.prepare('SELECT COUNT(*) as c FROM inner_spiral WHERE pinned = 1').get() as {
+          c: number;
+        }
+      ).c;
+      const avgDopamine =
+        innerCount > 0
+          ? (innerDb.prepare('SELECT AVG(dopamine) as a FROM inner_spiral').get() as { a: number })
+              .a
+          : 0.5;
       return {
         stability: Math.max(0, 1 - rollingAvgCortisol()),
         dopamine: avgDopamine,
@@ -51,7 +61,7 @@ export async function executeTool(
         lastPulse: Date.now(),
         innerNodes: innerCount,
         outerNodes: outerCount,
-        pinnedNodes: pinned
+        pinnedNodes: pinned,
       };
     }
     case 'nexus_get_mode': {
@@ -80,7 +90,7 @@ export async function executeTool(
 
       const [cloudResults, localResults] = await Promise.all([
         searchMemories(query, [SAGE_CONTAINER, SHARED_CONTAINER], limit),
-        searchLocalMemories(query, limit)
+        searchLocalMemories(query, limit),
       ]);
 
       // Merge and deduplicate

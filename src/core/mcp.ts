@@ -5,16 +5,16 @@
  * and exposes them as prefixed function declarations for Gemini.
  */
 
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 export interface McpServerConfig {
   id: string;
   name: string;
-  transport: "stdio" | "sse";
+  transport: 'stdio' | 'sse';
   command?: string;
   args?: string[];
   url?: string;
@@ -39,7 +39,7 @@ interface ConnectedServer {
   tools: McpToolDeclaration[];
 }
 
-const PREFIX_DELIMITER = "__";
+const PREFIX_DELIMITER = '__';
 
 let connectedServers: ConnectedServer[] = [];
 let isInitialized = false;
@@ -76,7 +76,7 @@ function deepSubstituteEnv<T>(obj: T): T {
 /** Load MCP server configuration from mcp-servers.json */
 function loadConfig(): McpConfig {
   try {
-    const raw = readFileSync("mcp-servers.json", "utf-8");
+    const raw = readFileSync('mcp-servers.json', 'utf-8');
     const parsed = JSON.parse(raw) as McpConfig;
     return deepSubstituteEnv(parsed);
   } catch {
@@ -115,12 +115,11 @@ function sanitizeSchema(obj: unknown, isRoot = false): unknown {
     // Gemini rejects the whole tool list if `required` names a property that
     // isn't declared in `properties`. Prune dangling required entries.
     if (Array.isArray(out.required)) {
-      const props = out.properties && typeof out.properties === 'object'
-        ? out.properties as Record<string, unknown>
-        : {};
-      out.required = (out.required as unknown[]).filter(
-        (k) => typeof k === 'string' && k in props
-      );
+      const props =
+        out.properties && typeof out.properties === 'object'
+          ? (out.properties as Record<string, unknown>)
+          : {};
+      out.required = (out.required as unknown[]).filter((k) => typeof k === 'string' && k in props);
     }
     return out;
   }
@@ -147,21 +146,18 @@ async function connectServer(config: McpServerConfig): Promise<ConnectedServer |
   if (!config.enabled) return null;
 
   try {
-    const client = new Client(
-      { name: "adhd-sage-mcp", version: "1.0.0" },
-      { capabilities: {} }
-    );
+    const client = new Client({ name: 'adhd-sage-mcp', version: '1.0.0' }, { capabilities: {} });
 
-    if (config.transport === "stdio" && config.command) {
+    if (config.transport === 'stdio' && config.command) {
       const transport = new StdioClientTransport({
         command: config.command,
         args: config.args ?? [],
-        env: config.env ? { ...process.env, ...config.env } as Record<string, string> : undefined,
+        env: config.env ? ({ ...process.env, ...config.env } as Record<string, string>) : undefined,
         cwd: config.cwd ? resolve(config.cwd) : undefined,
-        stderr: "pipe",
+        stderr: 'pipe',
       });
       await client.connect(transport);
-    } else if (config.transport === "sse" && config.url) {
+    } else if (config.transport === 'sse' && config.url) {
       await client.connect(new SSEClientTransport(new URL(config.url)));
     } else {
       console.error(`[mcp] Invalid transport config for "${config.name}"`);
@@ -195,13 +191,17 @@ export async function initMcpManager(): Promise<void> {
 
   const totalTools = connectedServers.reduce((sum, s) => sum + s.tools.length, 0);
   if (process.env.MCP_PORT_OVERRIDE === 'true') {
-    console.log(`[mcp] Port override active — using port ${process.env.MCP_PORT || '(not set)'} for \${PORT} placeholders`);
+    console.log(
+      `[mcp] Port override active — using port ${process.env.MCP_PORT || '(not set)'} for \${PORT} placeholders`,
+    );
   }
   console.log(`[mcp] Manager ready — ${connectedServers.length} server(s), ${totalTools} tool(s)`);
 
-  const disabled = config.servers.filter(s => !s.enabled);
+  const disabled = config.servers.filter((s) => !s.enabled);
   if (disabled.length > 0) {
-    console.log(`[mcp] ${disabled.length} server(s) available but disabled — edit mcp-servers.json to enable:`);
+    console.log(
+      `[mcp] ${disabled.length} server(s) available but disabled — edit mcp-servers.json to enable:`,
+    );
     for (const s of disabled) {
       console.log(`      • ${s.name} (${s.id})`);
     }
@@ -221,7 +221,7 @@ export function isMcpTool(name: string): boolean {
 /** Execute an MCP tool by its prefixed name */
 export async function executeMcpTool(
   name: string,
-  args: Record<string, unknown>
+  args: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
   const parsed = parsePrefixedName(name);
   if (!parsed) {
@@ -239,10 +239,10 @@ export async function executeMcpTool(
 
     // Extract text content from tool result
     const textParts = (result.content as Array<{ type: string; text?: string }>)
-      .filter((c) => c.type === "text")
-      .map((c) => c.text ?? "");
+      .filter((c) => c.type === 'text')
+      .map((c) => c.text ?? '');
 
-    const text = textParts.join("\n") || "(empty result)";
+    const text = textParts.join('\n') || '(empty result)';
 
     if (result.isError) {
       return { ok: false, error: text };
@@ -271,5 +271,5 @@ export async function closeMcpConnections(): Promise<void> {
   }
   connectedServers = [];
   isInitialized = false;
-  console.log("[mcp] All connections closed");
+  console.log('[mcp] All connections closed');
 }

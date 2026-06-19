@@ -53,7 +53,7 @@ export function getSupermemoryClient(): Supermemory | null {
 export async function addMemory(
   content: string,
   containerTag: string = DEFAULT_CONTAINER_TAG,
-  metadata?: Record<string, string>
+  metadata?: Record<string, string>,
 ): Promise<string | null> {
   const client = getSupermemoryClient();
   if (!client) return null;
@@ -80,7 +80,7 @@ export async function addMemory(
 export async function searchMemories(
   query: string,
   containerTags: string | string[] = SAGE_CONTAINER,
-  limit = 5
+  limit = 5,
 ): Promise<string[]> {
   const client = getSupermemoryClient();
   if (!client) return [];
@@ -93,7 +93,7 @@ export async function searchMemories(
     const docs = (res as { results?: { content?: string }[] }).results ?? [];
     return docs
       .slice(0, limit)
-      .map(d => d.content ?? '')
+      .map((d) => d.content ?? '')
       .filter(Boolean);
   } catch (err) {
     console.error('[SUPERMEMORY] searchMemories failed:', err);
@@ -105,7 +105,7 @@ export async function searchMemories(
  * Get the static + dynamic profile for a container tag.
  */
 export async function getProfile(
-  containerTag: string = DEFAULT_CONTAINER_TAG
+  containerTag: string = DEFAULT_CONTAINER_TAG,
 ): Promise<Record<string, unknown> | null> {
   const client = getSupermemoryClient();
   if (!client) return null;
