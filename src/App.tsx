@@ -1160,6 +1160,7 @@ const App: React.FC = () => {
             <button
               onClick={() => setIsSidebarOpen(true)}
               className="md:hidden p-2 -ml-2 text-slate-400 hover:text-white"
+              aria-label="Open sidebar"
             >
               <MoreVertical size={20} />
             </button>
@@ -1464,13 +1465,14 @@ const App: React.FC = () => {
                       className="bg-transparent border-none outline-none flex-1 text-sm text-white placeholder-slate-500 font-sans"
                     />
                     <label
-                      className="cursor-pointer p-2 text-slate-500 hover:text-cyan-400 transition-colors rounded-lg"
+                      className="cursor-pointer p-2 text-slate-500 hover:text-cyan-400 transition-colors rounded-lg focus-within:ring-2 focus-within:ring-cyan-500 focus-within:outline-none"
                       title="Attach file — images, audio, video, MHT, TXT, JSON, CSV, MD, HTML, XML, YAML, LOG…"
                     >
+                      <span className="sr-only">Attach file</span>
                       <Paperclip size={18} />
                       <input
                         type="file"
-                        className="hidden"
+                        className="sr-only"
                         multiple
                         accept="image/*,video/*,audio/*,.mht,.mhtml,.txt,.json,.csv,.md,.html,.htm,.xml,.yaml,.yml,.log,.tsv,.pdf,.doc,.docx"
                         onChange={handleChatFileAttach}
@@ -1479,7 +1481,8 @@ const App: React.FC = () => {
                     <button
                       onClick={handleSend}
                       disabled={isLoading || !input.trim()}
-                      className="p-2 text-cyan-400 disabled:text-slate-600 transition-colors"
+                      className="p-2 text-cyan-400 disabled:text-slate-600 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-lg focus-visible:outline-none"
+                      aria-label="Send message"
                     >
                       <Zap size={18} fill={input.trim() ? 'currentColor' : 'none'} />
                     </button>

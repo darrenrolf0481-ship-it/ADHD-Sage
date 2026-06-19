@@ -1,0 +1,3 @@
+## 2025-03-09 - Accessible File Inputs
+**Learning:** Replacing `hidden` class with `sr-only` on file input elements alongside applying `focus-within:ring-2` to the wrapping parent `<label>` element ensures the button correctly reflects focus for keyboard navigation while keeping the file input visually hidden, but accessible.
+**Action:** Always use `sr-only` on inner input file elements and `focus-within` styling on their parent semantic wrapper element in the future to improve accessibility for file inputs instead of `hidden`.
