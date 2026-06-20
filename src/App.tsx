@@ -1159,6 +1159,7 @@ const App: React.FC = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsSidebarOpen(true)}
+              aria-label="Toggle Sidebar"
               className="md:hidden p-2 -ml-2 text-slate-400 hover:text-white"
             >
               <MoreVertical size={20} />
@@ -1441,6 +1442,7 @@ const App: React.FC = () => {
                               if (removed) URL.revokeObjectURL(removed.url);
                               return prev.filter((_, idx) => idx !== i);
                             })}
+                            aria-label="Remove attachment"
                             className="ml-1 text-slate-400 hover:text-red-400"
                           >
                             &times;
@@ -1479,6 +1481,7 @@ const App: React.FC = () => {
                     <button
                       onClick={handleSend}
                       disabled={isLoading || !input.trim()}
+                      aria-label="Send message"
                       className="p-2 text-cyan-400 disabled:text-slate-600 transition-colors"
                     >
                       <Zap size={18} fill={input.trim() ? 'currentColor' : 'none'} />
@@ -1553,6 +1556,7 @@ const App: React.FC = () => {
                   </select>
                   <button
                     onClick={() => setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
+                    aria-label="Toggle sort order"
                     className="text-[9px] text-slate-500 hover:text-cyan-400 transition-colors"
                   >
                     <RefreshCw size={10} className={sortOrder === 'asc' ? '' : 'rotate-180'} />
