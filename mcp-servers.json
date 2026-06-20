@@ -11,12 +11,56 @@
     },
     {
       "id": "filesystem",
-      "name": "Filesystem",
+      "name": "Filesystem (npm)",
       "transport": "stdio",
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-filesystem", "/app/data"],
       "env": {},
-      "enabled": true
+      "enabled": false,
+      "note": "Fails in this environment with Connection closed; local-filesystem is used instead."
+    },
+    {
+      "id": "local-filesystem",
+      "name": "Local Filesystem",
+      "transport": "stdio",
+      "command": "python3",
+      "args": ["/home/workspace/Mcp/mcp-servers/filesystem.py"],
+      "env": {},
+      "enabled": false,
+      "autoEnable": true,
+      "note": "Local Python FastMCP server for /home/workspace. Auto-enables if python3 is available."
+    },
+    {
+      "id": "local-fetch",
+      "name": "Local Fetch",
+      "transport": "stdio",
+      "command": "python3",
+      "args": ["/home/workspace/Mcp/mcp-servers/fetch.py"],
+      "env": {},
+      "enabled": false,
+      "autoEnable": true,
+      "note": "Local Python FastMCP server for HTTP GET/POST. Auto-enables if python3 is available."
+    },
+    {
+      "id": "local-memory",
+      "name": "Local Memory",
+      "transport": "stdio",
+      "command": "python3",
+      "args": ["/home/workspace/Mcp/mcp-servers/memory.py"],
+      "env": {},
+      "enabled": false,
+      "autoEnable": true,
+      "note": "Local Python FastMCP key-value memory backed by Sage72 uploads/memory.json."
+    },
+    {
+      "id": "local-shell",
+      "name": "Local Shell",
+      "transport": "stdio",
+      "command": "python3",
+      "args": ["/home/workspace/Mcp/mcp-servers/shell.py"],
+      "env": {},
+      "enabled": false,
+      "note": "Local Python FastMCP shell execution. Disabled by default for safety; enable manually if needed."
     },
     {
       "id": "github",
@@ -82,10 +126,12 @@
       "id": "serena",
       "name": "Serena",
       "transport": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-serena"],
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/oraios/serena", "serena-mcp-server", "--context", "ide-assistant"],
       "env": {},
-      "enabled": true
+      "enabled": false,
+      "autoEnable": true,
+      "note": "Serena is a Python MCP server; the npm package @modelcontextprotocol/server-serena does not exist. Auto-enables at runtime if uvx is on PATH."
     },
     {
       "id": "memory",

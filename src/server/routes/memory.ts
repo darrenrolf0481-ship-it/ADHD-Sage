@@ -7,6 +7,7 @@ import {
   SHARED_CONTAINER,
 } from '../../lib/supermemory';
 import { lockGuard } from '../auth';
+import { asyncHandler } from '../async-handler';
 
 const router = Router();
 
@@ -23,7 +24,7 @@ const router = Router();
  * Default when omitted: 'shared' — so any of the seven can broadcast without
  * needing to know their own tag yet.
  */
-router.post('/add', lockGuard, async (req, res) => {
+router.post('/add', lockGuard, asyncHandler(async (req, res) => {
   const { content, entity, metadata } = req.body as {
     content?: string;
     entity?: string;
@@ -45,7 +46,7 @@ router.post('/add', lockGuard, async (req, res) => {
     return;
   }
   res.json({ ok: true, id, container: containerTag });
-});
+}));
 
 /**
  * GET /api/memory/search?q=<query>&scope=sage|shared|all&limit=<n>
@@ -55,7 +56,7 @@ router.post('/add', lockGuard, async (req, res) => {
  *   'shared' → search only sm_project_default
  *   'all'    → search both (Sage's full awareness — default)
  */
-router.get('/search', lockGuard, async (req, res) => {
+router.get('/search', lockGuard, asyncHandler(async (req, res) => {
   const q = req.query.q as string;
   const scope = (req.query.scope as string) ?? 'all';
   const limit = Math.min(20, parseInt(req.query.limit as string) || 5);
@@ -71,13 +72,13 @@ router.get('/search', lockGuard, async (req, res) => {
         : [SAGE_CONTAINER, SHARED_CONTAINER];
   const results = await searchMemories(q, tags, limit);
   res.json({ results, scope, containers: tags });
-});
+}));
 
 /**
  * GET /api/memory/profile?entity=sage|shared
  * Returns Supermemory's static + dynamic profile for the container.
  */
-router.get('/profile', lockGuard, async (req, res) => {
+router.get('/profile', lockGuard, asyncHandler(async (req, res) => {
   const entity = (req.query.entity as string) ?? 'sage';
   const containerTag = entity === 'sage' ? SAGE_CONTAINER : SHARED_CONTAINER;
   const profile = await getProfile(containerTag);
@@ -86,6 +87,6 @@ router.get('/profile', lockGuard, async (req, res) => {
     return;
   }
   res.json(profile ?? {});
-});
+}));
 
 export default router;

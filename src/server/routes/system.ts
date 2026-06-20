@@ -10,6 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import { sageEndocrine, sageMemory } from '../../core/endocrine-memory';
 import { cns, makeStimulus } from '../../core/central-nervous-system';
+import { asyncHandler } from '../async-handler';
 
 const execAsync = promisify(exec);
 const stripAnsi = (s: string) =>
@@ -58,7 +59,7 @@ router.post('/auth/exchange', (req, res) => {
   });
 });
 
-router.get('/health', async (req, res) => {
+router.get('/health', asyncHandler(async (req, res) => {
   let ollamaConnected = false;
   try {
     const r = await fetch(`${OLLAMA_HOST}/api/tags`, { signal: AbortSignal.timeout(1500) });
@@ -76,7 +77,7 @@ router.get('/health', async (req, res) => {
     ollama: ollamaConnected ? 'connected' : 'disconnected',
     hormones: sageEndocrine.hormones,
   });
-});
+}));
 
 router.get('/endocrine/state', (req, res) => {
   res.json({ hormones: sageEndocrine.hormones, graph: sageMemory.getGraph() });
@@ -112,7 +113,7 @@ router.get('/mcp/status', (req, res) => {
   });
 });
 
-router.post('/sage/webhook', async (req, res) => {
+router.post('/sage/webhook', asyncHandler(async (req, res) => {
   const { message, apiKey, model, cwd, autoExecute } = req.body as {
     message?: string;
     apiKey?: string;
@@ -288,6 +289,6 @@ You are SAGE-MAMA (Mother Node), the memory anchor and lineage archivist of the 
     }
     res.status(500).json({ error: error.message || 'Failed to call Gemini AI API' });
   }
-});
+}));
 
 export default router;

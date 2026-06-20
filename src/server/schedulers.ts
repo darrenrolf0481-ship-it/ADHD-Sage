@@ -1,6 +1,8 @@
 import { writeJournalEntry, type JournalConfig } from '../lib/journal-agent';
 import { runSelfImprovement, type SelfImproveConfig } from '../lib/self-improvement-agent';
 import { PORT } from './config';
+import { timed } from './performance';
+import { getWorkerPool } from './workers/pool';
 
 // ─── Daily Journal Scheduler ─────────────────────────────────────────────────
 // Fires once a day at JOURNAL_HOUR (default 06:00 local time).
@@ -36,9 +38,15 @@ export function scheduleDailyJournal() {
       lastFiredDate = today;
       console.log(`[JOURNAL] Daily wakeup — ${today}`);
       const entities = parseJournalEntities();
+      const pool = getWorkerPool();
       for (const cfg of entities) {
         try {
-          await writeJournalEntry(cfg);
+          await timed('scheduler:journalEntry', () => pool.runTask('agent:journal', {
+            entity: cfg.entity,
+            provider: cfg.provider as JournalConfig['provider'],
+            model: cfg.model,
+            apiBase: cfg.apiBase,
+          }), { entity: cfg.entity });
           // Stagger entries so they don't all hammer the LLM simultaneously
           await new Promise((r) => setTimeout(r, 15_000));
         } catch (err) {
@@ -79,9 +87,15 @@ export function scheduleWeeklySelfImprovement() {
         })
         .filter((c) => c.entity && c.provider);
 
+      const pool = getWorkerPool();
       for (const cfg of entities) {
         try {
-          await runSelfImprovement({ ...cfg, apiBase: `http://localhost:${PORT}` });
+          await timed('scheduler:selfImprovement', () => pool.runTask('agent:selfImprove', {
+            entity: cfg.entity,
+            provider: cfg.provider as SelfImproveConfig['provider'],
+            model: cfg.model,
+            apiBase: `http://localhost:${PORT}`,
+          }), { entity: cfg.entity });
           await new Promise((r) => setTimeout(r, 30_000)); // stagger — reflections take time
         } catch (err) {
           console.error(`[SELF-IMPROVE] Failed for ${cfg.entity}:`, err);

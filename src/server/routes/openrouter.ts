@@ -4,10 +4,11 @@ import { OPENROUTER_TIMEOUT_MS } from '../config';
 import { buildSystemPrompt } from '../prompt';
 import { searchMemories, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
 import { lockGuard } from '../auth';
+import { asyncHandler } from '../async-handler';
 
 const router = Router();
 
-router.post('/chat', lockGuard, async (req, res) => {
+router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
   try {
     const { model, messages, systemInstruction, containerTag } = req.body;
     if (!model) {
@@ -78,6 +79,6 @@ router.post('/chat', lockGuard, async (req, res) => {
     console.error('OpenRouter Error:', message);
     res.status(500).json({ error: message });
   }
-});
+}));
 
 export default router;

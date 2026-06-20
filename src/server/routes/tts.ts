@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { lockGuard } from '../auth';
+import { asyncHandler } from '../async-handler';
 
 const router = Router();
 
-router.post('/', lockGuard, async (req, res) => {
+router.post('/', lockGuard, asyncHandler(async (req, res) => {
   try {
     const { text, voiceId } = req.body;
     const apiKey = process.env.ELEVENLABS_API_KEY;
@@ -39,6 +40,6 @@ router.post('/', lockGuard, async (req, res) => {
     const msg = error instanceof Error ? error.message : 'TTS error';
     res.status(500).json({ error: msg });
   }
-});
+}));
 
 export default router;

@@ -21,8 +21,8 @@
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { searchMemories, addMemory, SAGE_CONTAINER, SHARED_CONTAINER } from './supermemory.js';
-import { saveInboxMessage } from './journal-agent.js';
+import { searchMemories, addMemory, SAGE_CONTAINER, SHARED_CONTAINER } from './supermemory.ts';
+import { saveInboxMessage } from './journal-agent.ts';
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 

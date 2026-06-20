@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { asyncHandler } from '../async-handler';
 
 const router = Router();
 
@@ -10,7 +11,7 @@ let kpCache: { kpIndex: number; timestamp: number } | null = null;
 let kpCacheTime = 0;
 const KP_CACHE_MS = 5 * 60 * 1000;
 
-router.get('/geomagnetic', async (req, res) => {
+router.get('/geomagnetic', asyncHandler(async (req, res) => {
   try {
     if (kpCache && Date.now() - kpCacheTime < KP_CACHE_MS) {
       res.json(kpCache);
@@ -38,13 +39,13 @@ router.get('/geomagnetic', async (req, res) => {
     // Return last cached value if available, otherwise a neutral value
     res.json(kpCache ?? { kpIndex: 0, timestamp: Date.now() });
   }
-});
+}));
 
 // Open-Meteo weather — free, no API key (requires lat/lng query params)
 const weatherCache: Map<string, { data: Record<string, number>; time: number }> = new Map();
 const WEATHER_CACHE_MS = 5 * 60 * 1000;
 
-router.get('/weather', async (req, res) => {
+router.get('/weather', asyncHandler(async (req, res) => {
   const lat = parseFloat(req.query.lat as string);
   const lng = parseFloat(req.query.lng as string);
   if (isNaN(lat) || isNaN(lng)) {
@@ -98,7 +99,7 @@ router.get('/weather', async (req, res) => {
     if (existing) res.json(existing.data);
     else res.status(503).json({ error: msg });
   }
-});
+}));
 
 // Current sensor snapshot endpoint — for Sage to query her own senses
 router.get('/summary', (req, res) => {

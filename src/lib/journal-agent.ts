@@ -21,7 +21,7 @@ import {
   getProfile,
   SAGE_CONTAINER,
   SHARED_CONTAINER,
-} from './supermemory.js';
+} from './supermemory.ts';
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 
