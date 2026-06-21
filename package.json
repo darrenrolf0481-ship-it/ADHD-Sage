@@ -9,7 +9,7 @@
     "start": "node dist/server.cjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "tsx scripts/test-mama-identity.ts && tsx scripts/test-worker-pool.ts && npm run build && tsx scripts/test-production-workers.ts",
+    "test": "tsx scripts/test-mama-identity.ts && tsx scripts/test-api.ts && tsx scripts/test-worker-pool.ts && npm run build && tsx scripts/test-production-workers.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {
