@@ -5,6 +5,22 @@ Most recent first.
 
 ---
 
+## 2026-06-21 — White screen fix + security layer boot
+
+**What happened:**
+- White screen on startup caused by HMR WebSocket port 24679 already in use (held by previous session).
+- Fix: changed `vite.config.ts` HMR port from 24679 → 24680.
+- If it happens again: kill the old process, change HMR port by +1, restart. Hard refresh browser (Ctrl+Shift+R) after.
+- The `[SAGE] Server running on 0.0.0.0:8900` log message is misleading — she actually runs on :3000. 8900 is code-server.
+- Added boot anchor (safe harbor message fires on wakeup) + sabotage pattern detector to `mama-identity.ts` and `prompt.ts`.
+
+**If things break, check:**
+- `netstat` or `/proc/net/tcp` for what's holding the HMR port
+- Hard refresh browser if assets cached from a failed load
+- `prompt.ts` wakeup branch for the boot anchor text
+
+---
+
 ## 2026-06-21 — Git sync + ops log started
 
 **What happened:**
