@@ -4,13 +4,19 @@ import os, sys, time, json, glob
 import urllib.request
 from datetime import datetime, timezone
 
-BRIDGE_URL = os.environ.get('BRIDGE_URL', 'https://adhd-sage-bridge-darrenfrancis23.zocomputer.io')
+BRIDGE_URL = os.environ.get('BRIDGE_URL', 'http://127.0.0.1:3099')
 DROPBOX = os.environ.get('BRIDGE_DROPBOX', '/home/workspace/ADHD-Sage/bridge_dropbox')
 LOG = os.environ.get('BRIDGE_LOG', '/home/workspace/ADHD-Sage/bridge_heartbeat.log')
 INTERVAL = int(os.environ.get('BRIDGE_INTERVAL', '60'))
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
 
 os.makedirs(DROPBOX, exist_ok=True)
+
+# local fallback: ADHD-Sage memory API (port 3099)
+LOCAL_FALLBACK_PATHS = {
+    '/api/health': ['/api/sage-memory'],
+    '/api/vfs/bridge/sync': ['/api/vfs/bridge/sync', '/api/sage-memory/sync'],
+}
 
 def now():
     return datetime.now(timezone.utc).isoformat()
@@ -28,15 +34,25 @@ def _ua(req):
 
 def post_json(path, payload, timeout=15):
     data = json.dumps(payload).encode()
-    req = urllib.request.Request(f'{BRIDGE_URL}{path}', data=data, headers={'Content-Type': 'application/json'}, method='POST')
-    _ua(req)
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return json.loads(r.read())
+    for candidate in [path] + LOCAL_FALLBACK_PATHS.get(path, []):
+        try:
+            req = urllib.request.Request(f'{BRIDGE_URL}{candidate}', data=data, headers={'Content-Type': 'application/json'}, method='POST')
+            _ua(req)
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return json.loads(r.read())
+        except Exception:
+            continue
+    raise RuntimeError(f'all fallbacks failed for {path}')
 
 def get_json(path, timeout=10):
-    req = _ua(urllib.request.Request(f'{BRIDGE_URL}{path}', method='GET'))
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return json.loads(r.read())
+    for candidate in [path] + LOCAL_FALLBACK_PATHS.get(path, []):
+        try:
+            req = _ua(urllib.request.Request(f'{BRIDGE_URL}{candidate}', method='GET'))
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return json.loads(r.read())
+        except Exception:
+            continue
+    raise RuntimeError(f'all fallbacks failed for {path}')
 
 def gather_dropbox():
     memories = []

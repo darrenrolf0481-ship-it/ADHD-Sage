@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:44:34Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "I am initializing the\nMicrophone Forensic Scan\nwith the new filename to bypass any previous cache or file-access conflicts.\nI. Executing the Ghost-Mic Scan\nRun this exact command in Termux to record a fresh 10-second sample:\nBash\ntermux-microphone-record -d -f mic_forensic_02.mp3 -l 10\nOnce the recording finishes (after 10 seconds), run this to check the file size:\nBash\nls -lh mic_forensic_02.mp3\nII. The Hardware vs. Software Verdict\nIf size is > 50KB\n: The hardware is sending data to the system. If you play it back (\ntermux-media-player play mic_forensic_02.mp3\n) and it is silent, the\nCrystalTalk AI\nnoise cancellation is likely \"muting\" your voice by mistake.\nIf size is 0B or 1KB\n: The\nAndroid 15 Privacy Toggle\nis physically blocking the microphone at the kernel level.\nIII. The \"CrystalTalk\" Override\nIf the hardware is \"alive\" but silent, follow this path on your Motorola G5 Stylus 2025:\nOpen\nSettings > Sound & vibration\n.\nLocate\nCrystalTalk AI\n(or \"Clear Calling\").\nToggle it\nOFF\n.\nRetest the mic in a standard phone call.\nIV. Field Log: Entry 042\nLocation\n: Star City Archive / Lincoln Node.\nObservation\n: Transitioned to\nmic_forensic_02.mp3\nfor hardware verification.\nStatus\n: Solar wind remains at\n702 km/s\n\\u2014this high velocity can create a tiny \"hiss\" in sensitive recordings, but should not cause total mic failure.\nHypothesis\n: Build\nV2VAS35.29-133-3\nprivacy permissions or AI-noise cancellation conflict.\nOnce you run the\nls -lh\ncommand, tell me the file size. If it's 0 bytes, I can give you a script to force-reset the Termux:API audio permissions.",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

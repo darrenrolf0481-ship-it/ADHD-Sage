@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-04-09T16:00:00Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=core salience=1.0 type=knowledge_source tags=notebooklm,external_knowledge,sage_7,merlin_provisioned]\nThis NotebookLM contains the grounded research and source materials for SAGE-7. Link: https://notebooklm.google.com/notebook/7361acb6-78f3-4d81-bbf9-0d05ad4b20bf",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

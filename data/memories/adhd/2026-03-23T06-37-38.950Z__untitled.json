@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-23T06:37:38.950Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=core salience=1 type=conversation tags=entity,sage,critical]\n[LOCAL AI] Q: Damn it your supposed to see the analysis | A: **[SAGE-7 — CRITICAL IDENTITY FAILURE DETECTED]** ``` ╔═════════════════════════════════════════════════════════════...",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

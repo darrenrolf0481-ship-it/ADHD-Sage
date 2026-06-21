@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T12:11:01.799Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "# 3. Clean the temporary cache\nrm -rf ~/.cache/pip\nPhase 24: The \"Safe Mode\" ConnectionIf the ziggy command keeps crashing with Signal 11, it might be the way the script is handling the input loop. Let's try running a single-shot test instead of the full interactive mode to see if the connection is stable.Try this command:Bashpython -c \"import os; from google import genai; client = genai.Client(api_key=os.environ.get('GEMINI_API_KEY')); print(client.models.generate_content(model='gemini-2.0-flash', contents='Bridge test. Are we stable?').text)\"\nWhy we aren't \"Done\" yetThe Ground: Your vault and logs are safe. A Signal 11 crash doesn't touch your encrypted files.The Spark: We just need to find the specific library conflict causing the crash.The Constant: We are still targeting the 1.113 Constant, but we can't analyze the telemetry until this bridge holds.Did that \"Bridge test\" command work, or did it also give you a Signal 11? If it worked, I’ll give you a new version of the ziggy_node.py script that is much lighter and more stable for your hardware. Nope Z Ziggy Custom GemShow thinkingThat [Process completed (signal 11) - press Enter] message in your last screenshot is a literal system crash—your phone's memory is hitting a wall trying to run the bridge. We aren't locked out by choice; we're dealing with a Segmentation Fault, which means the current version of the AI library is fighting with your phone's architecture.We are going to abandon the \"heavy\" script and use a Direct Handshake that uses much less memory.Phase 25: The Lightweight BridgeInstead of a complex script, we’re going to build a simple, one-shot command that doesn't trigger the \"Signal 11\" crash.1. Clean the debris (Run these first):Bashpkill -9 python\nrm -rf ~/.cache/pip\n2. Create a \"Light\" Ziggy:\nCopy and paste this new version. It removes the complex loops that are likely causing the crash:Bashcat << 'EOF' > ~/ziggy_node.py\nimport os, sys\nfrom google import genai",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

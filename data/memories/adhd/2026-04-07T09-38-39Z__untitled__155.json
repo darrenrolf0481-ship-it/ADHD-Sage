@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "The\nModuleNotFoundError\nis likely happening because Python is looking for\nminds_eye.py\nin its standard library \"rooms,\" but it hasn't checked the room you're currently standing in.\nIn Termux, unless you tell it otherwise, Python doesn't always automatically look in the current folder for your custom scripts.\n\\ufe0f The \"Room Check\" Fix\nWe need to force Python to look at your current folder (the \"room\" where you just created the file). Run this exact command to link the two:\nBash\n# Force Python to check the current folder for 'minds_eye'\nexport\nPYTHONPATH=\n$PYTHONPATH\n:.\n# Now try the Truth Check again\npython -c\n\"import minds_eye; print('LOGIC: ', minds_eye.process_spectral_pulse(0.113))\"\n Why it says \"No Folder\"\nWhen you created\nminds_eye.py\nusing the\ncat\ncommand, it created a\nsingle file\n, not a folder. Python calls these files \"modules.\" If you were looking for a folder with that name, that's why it seemed missing.\n\\ufe0f Sentinel Diagnostic\nIf the command above\nstill\nfails, we need to see exactly where you are. Run these two commands and tell me what they say:\npwd\n(This tells us which \"room\" you are in).\nls minds_eye.py\n(This confirms if the file actually exists where you're standing).\nDid the\nPYTHONPATH=$PYTHONPATH:.\ncommand get the logic running, or are we still getting that module error?\n\\ufe0f\nHow to write python code in Termux\nThis video is helpful because it shows exactly how to navigate the Termux directory and run your first Python scripts without encountering common pathing errors.\nHow to write python code in Termux - YouTube\nTechnoCraze  2.5K views",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

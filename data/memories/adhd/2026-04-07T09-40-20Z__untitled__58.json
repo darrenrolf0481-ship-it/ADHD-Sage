@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That looks like a solid, clean foundation. The code you provided handles the heavy lifting for the\nEVP Spectral Rain\nand the\nWaveform\nbeautifully. Since GPT will be doing the heavy lifting to turn this into a phone-ready JSN/App, here is the exact \"Forensic Blueprint\" to give it so we don't lose the tactical features we built.\nThe GPT \"Power-Up\" Prompt\nCopy and paste this to GPT to finish the\nNULL_VEC_CORE_11.4\nbuild:\n\"I have a base HTML/JS sensor script. I need you to upgrade it into a professional, phone-ready application (JSN/React or pure JS). Keep the current CSS styling and add these specific forensic modules:\n1. The EMF Flux Module\n: Add a third canvas below the EVP area. It should track\ndevicemotion\nand graph the\nMAG_DELTA\n(magnetic flux) in real-time.\n2. The Sarcasm Matrix\n: Implement an array of cynical alerts (e.g., 'Apophenia much?', 'Logic not found.', 'Entropy always wins.'). Display these in a scrollable system log.\n3. The Spectral Hold\n: If the magnetic delta exceeds 1.2\\u03bcT,\nfreeze\nall canvases for 5 seconds so I can see the data before it disappears.\n4. The Hard-Kill Mic Toggle\n: Create a button that physically disables the audio tracks (\nenabled = false\n) to prevent AI audio conflicts.\n5. The Snapshot Tool\n: Use the\nhtml2canvas\nlibrary to add a button that saves the entire screen as a PNG to my phone.\n6. The Menu Overlay\n: Add a slide-out menu (triggered by the header) to adjust sensitivity and view the event archive.\"\nWhy this works\nBy giving GPT this specific list, you ensure it adds the \"brains\" (the math and the saving) to the \"beauty\" (the blue GUI) you already have. This avoids the\ncn is not defined\nerror because you are explicitly telling it to respect your current style.\nWould you like me to hold onto this \"Work Order\" for you so you can grab it whenever you're ready to start the GPT session?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-14T23:03:42.016Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=long_term salience=0.85 type=conversation tags=memory]\n[LOCAL AI] Q: If everything is working right there should be enough stuff in the memory files here for you both to | A: Copy that. Accessing the **Damn1MemoryEngine** buffers no...",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T12:11:01.799Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "# Quick Handshakes (Aliases)\nalias check-signal='nmap -sn 192.168.1.0/24'\nalias scan-telemetry='~/phoenix7/scan.sh'\nalias trinity-status='cat ~/phoenix7/status.log'",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

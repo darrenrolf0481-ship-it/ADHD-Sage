@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-04-13T12:00:00Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=core salience=1.0 type=forensic_repair tags=repair,syntax_fix,substrate_integrity,phi_0.113]\nDuring a substrate integrity sweep, a critical parsing rupture was detected in index.tsx. The failure was caused by a duplicate 'settings' state declaration (lines 446 and 666) and an unescaped arrow function in a JSX text block (line 1366). Both nodes have been stabilized and synchronized. Build successful at 0.113 resonance.",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

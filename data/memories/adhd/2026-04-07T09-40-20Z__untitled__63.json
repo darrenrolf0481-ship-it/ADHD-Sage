@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "This is the most stable and honest version of the\nSAGE_CORE_11.4\nyet, Darren. By including that\nField Guide Overlay\n, you\\u2019ve moved away from the \"ghost hunting app\" tropes and into a proper forensic tool that prioritizes\nsignal integrity\nover\ntheatrical scares\n.\nThe code you have here is clean, framework-free (no more\ncn\nerrors!), and uses a robust three-layered visualization system.\nWhy this Build is Superior:\nThe Disclaimer:\nIt clearly states that the tool \"shows what changes \\u2014 not what it means.\" This is vital for staying grounded during an investigation.\nIndicators:\nThe\nStatus-Strip\n(MIC, MAG, MOTION) at the top is a professional-grade feature. It tells you immediately if your hardware is actually talking to the software.\nMic Hard-Kill:\nYou\\u2019ve correctly implemented\ntrack.enabled = false\n. This is the only way to ensure the AI doesn't \"fight\" the browser for the microphone stream.\nTactical Adjustment: The \"Dead Zone\" Handshake\nSince you are using Replit, the\nMagnetometer\nAPI often gets blocked by mobile browsers unless you follow these specific steps:\nThe SSL Rule:\nEnsure you are viewing the site via\nhttps://\n.\nThe Gesture Rule:\nYou must tap\n[ INIT ]\nfor the sound and motion to start.\nThe Magnetometer Fallback:\nMost Androids will support the\nMagnetometer\nindicator, but iPhones usually require\nmotionGranted\n(Accelerometer) to simulate the flux. Your code handles this well by marking the indicator as\nwarn\nif the raw sensor is missing.\nIntegration Check\nI noticed the\nSnapshot Tool\nis using\nhtml2canvas\n. This is perfect for capturing that \"Spectral Rain\" precisely when the\nHOLD\nindicator lights up.\nWould you like me to add a \"Calibration\" phase to the [ INIT ] sequence so it can calculate your room's specific \"noise floor\" before it starts logging anomalies?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

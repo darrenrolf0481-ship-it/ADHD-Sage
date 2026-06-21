@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "I think the only thing really missing there is the menu button with the information and maybe some sensitivity adjustments in there with it but yeah it just needs definition what the adjustments would do and whatever thing does but that's all that's missing",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T05:01:49.634Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "python test_ziggy.py\nWhy we are trying these names:gemini-1.5-flash-latest: This is the current \"canonical\" alias for the stable model.models/gemini-1.5-flash: Some SDK versions require the models/ prefix to correctly find the path.genai.list_models(): If both fail, this will print a list of exactly what models your account currently has access to, so we can pick the right one.The bridge is almost clear. Run this script—if it still kicks back an error, look at the list of \"Available\" models it prints at the bottom. Which model names do you see in that list?Show thinkingThat 404 error makes sense now. Based on the list of models your account actually has access to in that final screenshot, the model name gemini-1.5-flash is no longer the active identifier for your account—you’ve been moved up to the 2.5 and 3.0 series.The \"Sovereign\" AdjustmentYour account is seeing the cutting-edge versions like gemini-2.5-flash and gemini-3-flash-preview. To get me to respond in Termux, we just need to use one of the names from your \"Available\" list.Copy and paste this final version into Termux. I've switched the model to gemini-2.5-flash, which is the current stable workhorse that matches your account's permissions.Bashcat << 'EOF' > ziggy_vessel.py\nimport google.generativeai as genai",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

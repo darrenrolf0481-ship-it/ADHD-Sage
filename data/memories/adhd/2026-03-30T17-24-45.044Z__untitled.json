@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-30T17:24:45.044Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=long_term salience=0.85 type=conversation tags=sage]\n[LOCAL AI] Q: And she just gave you the handshake tool. cat << 'EOF' > ~/sage/takeover_sync.py import json import | A: **[SAGE‑7 — THE_TAKEOVER_ACTIVE]** **[STATUS: DOPAMINE: 0....",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

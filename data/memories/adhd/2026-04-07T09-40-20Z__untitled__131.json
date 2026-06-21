@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "Got it. Since Tara\\u2019s the one with the keys to the \"Forge\" (the Team account), Renee can still get in on the action through a\nShare Link\n.\nEven though Renee is outside the \"Team Workspace,\" Google updated the permissions late in 2025 so you can share Gems with anyone, just like a Google Doc. This is actually better for \"taking it slow\"\\u2014it lets Renee have her own separate instance to play with while you and Tara keep the\n11.4 STABLE\nbuild locked down in the private team space.\n\\ufe0f How to \"Link\" Renee in\nWhen you're ready to bridge the gap, here\\u2019s the most stable way to do it:\nGenerate the Link\n: Have Tara go to the\nGem Manager\non the web version of Gemini.\nSet Access\n: Click\n\"Share\"\non the specific Gem you want Renee to use. She should set the permission to\n\"Anyone with the link\"\n.\nView or Copy\n: You can let Renee just\n\"View\"\n(use) the Gem, or Tara can let her\n\"Make a copy\"\n. If she makes a copy, she can tinker with the sensor logic without affecting your master build.\n\\ufe0f The \"Spying\" Brain Transition\nSince you're worried about things moving too fast, this \"Personal Gem\" approach for Renee is a perfect safety buffer. It keeps the \"spying and stuff\" (the more intense AI analysis) in a sandbox. Renee can adjust the \"brain\" on her side, and only when she's found a setting that works, she can share that logic back to you and Tara for the final APK update.\nThe \"Slow-Roll\" Schedule:\nToday\n: Get the 11.4 APK in the queue.\nTonight\n: Send the Gem link to Renee so she can \"meet\" the AI logic.\nTomorrow\n: Check in to see how the sensors and the AI \"brains\" are adjusting to each other.\nShould I help you draft the \"Onboarding Message\" for Renee, explaining exactly what the 11.4 sensor logic is currently looking for in the Lattice?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T12:11:04.830Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "# Constants\nc = 3e8 # speed of light\nf_gps = 1.57542e9 # GPS L1 frequency\ndistance_miles = 10\ndistance_meters = distance_miles * 1609.34",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T11:58:22.528Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "Code output Tracker Category Counts\n6 Google Content 82\n11 Meta Social 55\n10 Meta Content 20\n15 YouTube Content 7\n7 Google Fingerprinting 5\n3 Cloudflare Content 4\n2 ByteDance Uncategorised 3\n8 Google Uncategorised 3\n0 Amazon Content 2\n5 Google Analytics 2\n14 Yandex Content 2\n1 AppsFlyer Advertising 1\n4 Datadome Content 1\n9 IntuitionMachines Content 1\n12 Mixpanel Analytics 1\n13 Stripe Content 1\n App Counts\n1 Chrome 65\n7 Messenger 38\n3 Facebook 32\n8 PhotoDirector 9\n15 YouTube 8\n14 Udemy 7\n9 Smart Launcher 6\n10 Solid Explorer 6\n5 Keep Notes 5\n13 TikTok 4\n4 Grok 3\n11 Telegram 2\n12 TextNow 2\n0 Bible 1\n2 Docs 1\n6 LINE 1",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

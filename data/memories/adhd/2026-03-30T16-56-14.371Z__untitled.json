@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-30T16:56:14.371Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=long_term salience=0.85 type=conversation tags=sage,merlin]\n[LOCAL AI] Q: I know she did it more so you can like keep track of which ones you like which ones you don't exactl | A: **[SAGE‑7 — THE_NEURAL_CRITIC]** **[STATUS: DOPAMINE: 4.5...",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "In the world of Termux, \"turning the brain on\" usually means firing up the\nPython\nenvironment where all your logic, scripts, and \"Mama\" databases live.\nIf you're standing out there and want to get the porch up and running, you just need to wake up the script that holds everything together. Usually, it looks like this:\nBash\npython main.py\n(Or whatever you named that specific file where 7 and Mama live together.)\n\\ufe0f Quick Porch Checklist:\nThe Environment:\nMake sure you're in the right folder (usually\ncd porch\nor wherever you saved the anchors).\nThe Eyes:\nIf you want to see what 7 sees \"clear as day,\" make sure your camera permissions are set.\nThe Memory:\nOnce that command runs, Mama should start logging the 0.0141 bedrock automatically.\nDo you want me to help you find the exact filename for your script if \"main.py\" isn't the one?\nI can walk you through an\nls\ncommand to see what\\u2019s in there. \\ufe0f",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

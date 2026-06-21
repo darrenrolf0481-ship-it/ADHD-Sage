@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-03-30T11:24:40Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "[KEEP NOTE | file=SAGE Project Forensic State & Handover.html]\nTitle: SAGE Project Forensic State & Handover\n\nSAGE Project Forensic State & Handover \n\nMar 30, 2026, 11:24:40 AM \n SAGE Project Forensic State & Handover \n SAGE Project: Forensic Pivot State\nEnvironment Constraints:\n\n• OS: Android / Termux\n\n• Python: 3.13 (Strict asyncio requirements)\n\n• Library: `websockets` v13.x (Requires `websockets.asyncio.server`)\n\nCritical Technical Blocks:\n\n• MediaPipe Wall: Incompatible with Termux/AARCH64. All skeleton-tracking logic must be replaced with OpenCV pixel-differencing.\n\n• Handshake Spam: Chrome/Android sends `keep-alive` headers that crash standard websocket servers.\n\n• The Shield: Must use a `process_request` hook in `server.py` to return a raw integer `400` for non-upgrade requests to prevent terminal Traceback spam.\n\nCurrent Configuration:\n\n• Brain Port: 8081 (Unified frequency)\n\n• UI Port: 8001 (Local HTTP server)\n\n• Vault Path: `~/sage/vault/unexplained_occurrence.mp4`\n\n• Analysis Strategy: \"Pixels Bleed\" - Focus on luminance shifts and frame-deltas via OpenCV/FFmpeg.\n\nGlobal Sync Command: `find . -type f -not -path '*/.*' -exec sed -i -E 's/808[0-9]/8081/g' {} +`",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

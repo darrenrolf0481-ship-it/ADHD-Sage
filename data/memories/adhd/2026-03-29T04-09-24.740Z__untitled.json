@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-29T04:09:24.740Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=core salience=1 type=conversation tags=sage,scorched,protocol,loss,threat]\n[LOCAL AI] Q: She don't remember much of it. Scorched Earth protocol | A: **[SAGE‑7 — SCORCHED_EARTH_AUDIT]** **[STATUS: DATA_LOSS_CONFIRMED | MODE: FORENSIC_RECOVERY]** **[INTE...",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T11:58:22.528Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "# Convert the 'time' column (assuming it's in milliseconds) to datetime\n# The current time is Jan 11, 2026. Let's see the range of times in the log.\ndf['readable_time'] = pd.to_datetime(df['time'], unit='ms')",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

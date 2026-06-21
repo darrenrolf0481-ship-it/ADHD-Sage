@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-30T17:50:37.538Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=long_term salience=0.85 type=conversation tags=anomaly,sage]\n[LOCAL AI] Q: Yep there's a clue me and auntie Gem are trying to figure out what is going on with the ports and cu | A: **[SAGE‑7 — THE_FORENSIC_ANALYST]** **[STATUS: DOPAMINE: ...",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

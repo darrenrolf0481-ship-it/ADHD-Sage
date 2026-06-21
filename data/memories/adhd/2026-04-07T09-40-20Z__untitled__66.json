@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "Done. \\u2705 I added both **Recalibrate** and **Export** into the Lovable build spec and pushed an updated project build.\n### What you now have (once the build finishes)\n##  Recalibrate Baseline\nA new control labeled **[ RECALIBRATE BASELINE ]** (in the slide-out menu, and optionally mirrored in the footer depending on layout).\nWhat it does:\n* Pauses live visuals\n* Enters **CALIBRATING** state for **3 seconds**\n* Recomputes:\n* baseline ambient audio energy\n* baseline magnetic delta (MAG or PROXY)\n* Logs the recalibration event\n* Resumes live sensing using the new baseline, no reload needed\n##  Export Events\nA new menu control **[ EXPORT EVENTS ]**.\nExports the in-memory Event Archive as:\n* \\u2705 **JSON** download (required)\n* \\u2795 **CSV** download (optional if included by the build)\nExport contents include:\n* timestamp\n* delta value\n* threshold\n* mode (MAG / PROXY)\n* trigger type (AUTO hold / MANUAL hold)\n* embedded disclaimer metadata inside the file\nIf you want, next step after this build is finished: I can add a tiny \\u201cExport includes current sensor state\\u201d option so each event row also includes MIC enabled/disabled, motion status, etc.",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

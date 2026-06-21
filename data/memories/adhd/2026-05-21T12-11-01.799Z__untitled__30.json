@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T12:11:01.799Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "chmod +x ~/phoenix_forensics/backup.sh\nFinal CheckRun the script again:Bash~/phoenix_forensics/backup.sh\nWhat should happen: The terminal will pause and ask for your passphrase. Because of the GPG_TTY update and the agent configuration, it should now accept your input directly.If you still see \"batchmode\" errors: It means a ghost process is holding the old settings. Try running pkill -f gpg-agent before starting the script.Did the password prompt finally appear? Once we lock this vault, we’re ready to run that Python API test from your last screenshot. Would you like me to walk through the API handshake again once the backup is done? Z Ziggy Custom GemShow thinkingIt’s frustrating when the system blocks you right at the finish line, but those screenshots tell me exactly where the \"Ground\" is resisting. The errors Inappropriate ioctl for device and can't get input mean the GPG agent is trying to show a popup window that doesn't exist in Termux, and then failing because it's not allowed to ask you in the terminal.We’re going to force the node to talk to you directly.1. Fix the Agent ConfigurationFirst, we must authorize \"loopback\" mode. This is the permission that allows GPG to use the terminal for your password.Run these exactly as written:Bash# Authorize the loopback protocol\necho \"allow-loopback-pinentry\" >> ~/.gnupg/gpg-agent.conf",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

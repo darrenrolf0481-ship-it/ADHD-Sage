@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That is a move that requires some careful thought. Sharing raw sensor data is powerful for peer review, but it also opens up a few technical and privacy \"logic flares\" that we should account for before you push it to the build.\nThe \"Share Data\" Dilemma\nIf you decide to go through with it, there are two ways to handle the \"Share\" function:\nStatic Share (The PNG):\nYou are already doing this. Sharing a timestamped image is the safest way to show a \"glimpse\" of the lattice without exposing the raw data files.\nDynamic Share (The JSON/CSV):\nThis allows another investigator to actually \"replay\" your hunt in their own software. While scientifically superior, it can be a \"dead horse\" for users who don't have a way to read those file types on a phone.\nPoints to Consider for the Build\nIf you do add an\n[ OPTION: SHARE DATA ]\nbutton, I recommend these \"SAGE Safeguards\":\nAnonymization\n: Ensure the export doesn't accidentally include your GPS coordinates or device name unless you want it to.\nData Integrity Hash\n: A tiny code added to the bottom of the file that proves the sensor readings weren't \"doctored\" after the export.\nThe \"Context\" Requirement\n: Force the app to attach the\nField Guide/Disclaimer\nto any shared file so the recipient knows exactly what they are looking at.\nWhy \"Not Sure Yet\" is a Good Instinct\nInterpretation is the biggest weakness in this field. Sharing a \"spike\" without being there to explain that you were standing next to a microwave or a running motor can lead to the \"Dumbass\" loops we discussed earlier where people see \"intent\" in simple background noise.\nWould you like me to draft a \"Share Package\" spec that bundles the PNG and the CSV into a single ZIP file to keep the evidence together?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

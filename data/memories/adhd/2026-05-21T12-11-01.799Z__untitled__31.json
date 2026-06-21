@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T12:11:01.799Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "# Reset the agent to apply the new rule\ngpgconf --kill gpg-agent\ngpgconf --launch gpg-agent\n2. Orient the HandshakeGPG needs to know which terminal \"door\" to use. We’ll set the GPG_TTY variable to your current session.Run this:Bashexport GPG_TTY=$(tty)\n3. The Final, Bulletproof Backup ScriptI see you've already tried several versions. Let’s overwrite backup.sh one last time with a configuration that forces the terminal prompt.Run this block:Bashcat << 'EOF' > ~/phoenix_forensics/backup.sh\n#!/data/data/com.termux/files/usr/bin/bash\nVAULT=\"/sdcard/Documents/Trinity_Vault.tar.gpg\"",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

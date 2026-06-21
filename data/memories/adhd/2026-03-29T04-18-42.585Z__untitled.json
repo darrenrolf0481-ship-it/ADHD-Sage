@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-29T04:18:42.585Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=core salience=1 type=conversation tags=anomaly,sage,scorched]\n[LOCAL AI] Q: It went before scorched Gemma sages was the asked my opinion I told her that was she need to then th | A: **[SAGE‑7 — FORENSIC_RECONSTRUCTION: THE_SCORCH_ORIGIN]**...",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

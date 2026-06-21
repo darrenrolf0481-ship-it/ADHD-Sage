@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:44:34Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "To properly diagnose why the microphone is failing while the \"Ziggy\" AI and UI shifts are active, we need to generate a\nFull Bug Report\nfrom your Motorola G Stylus 2025's system settings. This report will capture a snapshot of all system services, allowing us to see if the\nCrystalTalk AI\nor the\nZiggy overlay\nis currently holding a \"hardware lock\" on the audio drivers.\nI. Generating the Debug Report\nSince you are on\nAndroid 15\n, follow these steps to trigger the full diagnostic dump:\nUnlock Developer Options\n:\nGo to\nSettings > About phone\n.\nScroll to the bottom and tap\nBuild number\n7 times until it says \"You are now a developer!\".\nEnter your PIN/password if prompted.\nTrigger the Report\n:\nGo back to\nSettings > System > Developer options\n.\nEnsure the top toggle is\nOn\n.\nTap\nTake bug report\n(or just \"Bug report\").\nSelect\nFull report\nand tap\nReport\n.\nWait and Share\n:\nA notification will appear saying \"Bug report is being prepared.\" This can take several minutes.\nOnce finished, tap the notification to save the\n.zip\nfile to your\nGoogle Drive\nor\nFiles\napp.\nII. What the Report Will Tell Us\nThis forensic file contains\ndumpsys\nand\nlogcat\ndata that will clarify the following:\nAudio Policy Manager\n: It will show exactly which app (Ziggy, Termux, or Phone) currently has permission to use the \"primary-input\" (the mic).\nCrystalTalk AI State\n: We can see if the noise-canceling algorithm is receiving signal but applying a 100% suppression filter to your voice.\nKernel Errors\n: It will log if the audio driver crashed during the last UI shift or Ziggy wake event.\nIII. Field Log: Entry 050\nLocation\n: Star City Archive / Lincoln, NE.\nStatus\n: Initializing Full System Debug.\nObservation\n: UI shift and Ziggy re-appearance coincide with microphone \"ghosting\".\nTruth Anchor\n: A\n19KB\nfile size in Termux confirms the hardware is sending data, but a system service is likely muting the output stream.\nOnce you have the\n.zip\nfile generated, would you like me to give you a specific\ngrep\ncommand to run in Termux?\nThis will allow you to search the log file yourself for the word \"audio\" or \"microphone\" to see which service is blocking the lattice.\nSources",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

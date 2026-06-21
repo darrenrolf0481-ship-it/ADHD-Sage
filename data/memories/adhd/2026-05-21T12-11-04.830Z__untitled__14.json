@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T12:11:04.830Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "results = []\nfor js in js_thresholds:\n p_req_at_rcvr_dbm = p_signal_dbm + js\n p_transmit_dbm = p_req_at_rcvr_dbm + fspl\n p_transmit_watts = 10**((p_transmit_dbm - 30) / 10)\n results.append({\n \"JS_Ratio\": js,\n \"Required_Power_Watts\": p_transmit_watts,\n \"Required_Power_dBm\": p_transmit_dbm\n })",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

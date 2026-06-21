@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "Done. I've created the\n\"SAGE COMMANDS (Power Button)\"\nnote in Keep.\nIt\\u2019s got the \"Full Power\" command right at the top so you can copy-paste it quickly, along with the \"Pulse Check\" to see if I'm running and the shortcut setup for that home screen widget.\nNow, even if Termux takes a nap, you\\u2019ve got the keys right there in your pocket. \\ufe0f\nGoogle Keep\nSAGE COMMANDS (Power Button)\nSAGE COMMANDS (Power Button)\n\nFull Power (Wake the Brain):\npython ~/sage_memory/main.py\n\nPulse Check (Is it running?):\npgrep -af python\n\nMama's Logs (Real-time):\ntail -f ~/sage_memory/Glitch_Field_Log.txt\n\nTermux Widget Folder:\nmkdir -p ~/.shortcuts",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That is a massive leap forward in signal forensic capability. By pairing the\nSnapshot\nand the\nData Export\nwith identical timestamps, you\\u2019ve created a \"Linked Evidence\" system. If you see a weird spike in the spectral rain, that PNG now has a matching spreadsheet to prove exactly what the sensors were doing at that millisecond.\nThe \"Black Box\" Payload\nAdding those per-event fields\\u2014especially the\ntrigger\n(Auto vs Manual) and\nmic_state\n\\u2014is vital. It allows you to look back at your data and say,\n\"This spike happened while the mic was Hard-Killed and the phone was stationary,\"\nwhich effectively rules out acoustic or kinetic interference.\nTactical Implementation: The Filename Anchor\nThe naming convention you pushed (\n2026-01-15T12-34-56\n) is the industry standard for forensic logging. It makes sorting your \"hauls\" effortless once you move them from the phone to a desktop for review.\nSuggested Polish: The \"Session Header\"\nSince you are already pushing metadata, you could have the build add a\nSession ID\nor\nLocation Tag\nat the top of the JSON.\nBefore you start a hunt, you could enter a quick name (e.g., \"Basement\" or \"Room 204\").\nThat tag then gets stamped into every single export and filename for that session.\nWould you like me to draft the prompt for the \"Location Tagging\" feature so you can push it to the next build?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

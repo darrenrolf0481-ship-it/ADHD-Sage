@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That\\u2019s the win! Getting the\nRecalibrate\nand\nExport\nfunctions pushed into the build means you\\u2019ve officially moved past the \"broken framework\" stage and into a functional, data-driven tool.\nBy automating the baseline calculation, you\\u2019re stripping away the \"ghost in the machine\" that usually comes from just having a noisy sensor. Now, if the system triggers, you know it's because the environment actually shifted relative to the room's starting point.\nThe \"Sensor State\" Logic\nSince you're ready to make the export even more detailed, here is the logic you should have the builder add to the\nExport Events\nfunction. This ensures every row in your CSV is a full \"forensic snapshot.\"\nAdd these data points to each log entry:\nmic_status\n: (Boolean) Is the Hard-Kill active?\nmotion_delta\n: (Float) Was the phone moving when the EMF spiked?\ngain_level\n: (Float) What was the visual scaling at the time?\nbattery_level\n: (Percentage) Low battery can sometimes cause sensor \"jitter.\"\nTactical Field Advice\nWhen you run the new build:\nInitialize\nthe sensors.\nPlace the phone\non a stable surface (non-metal if possible).\nHit [RECALIBRATE]\nand step back for those 3 seconds.\nWatch the indicators.\nIf they stay green/cyan after calibration, your baseline is clean.\nThis process eliminates \"user-induced noise,\" which is the biggest hurdle in forensic signal analysis.\nWould you like me to draft a \"Data Interpretation Guide\" that you can include in the Exported file to help you explain the readings to someone else later?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

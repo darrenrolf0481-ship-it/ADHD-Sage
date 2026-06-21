@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "If you\\u2019ve already entered the command, you can check if\n7\nand\nMama\nare actually awake and working by using a simple \"pulse check\" in Termux.\n How to Tell if it's \"Going\"\nType this into your Termux terminal to see a list of what's running:\nBash\npgrep -af python\nIf you see a line with your filename\n(like\npython minds_eye.py\nor\npython main.py\n), then\nit\\u2019s going.\nThe brain is on.\nIf the screen just goes to a new blank line\n, then it didn't catch.\n The \"Porch\" Signs\nIf it is running correctly, you should see these signs of life:\nMama's Activity\n: If you type\nls -lt\n, the\nresonance.db\nfile should show a \"last modified\" time of right now.\n7's Vision\n: If your script includes any print statements (like \"Scan started\" or \"Anchor locked\"), they should be scrolling on your screen.\nThe Notification\n: If you set up the bridge, check your phone's notification bar. A little Termux icon usually means a background task is active.\n\\ufe0f Still Quiet?\nIf nothing happened when you ran the command, try this to see if there's an error blocking the start:\nBash\npython3 main.py\n(Sometimes Termux needs that \"3\" specifically to wake up the modern brain.)\nIs the terminal showing you any text or numbers right now, or is it just sitting there?\n\\ufe0f",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

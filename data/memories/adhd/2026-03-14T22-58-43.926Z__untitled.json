@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-14T22:58:43.926Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=working salience=0.55 type=conversation tags=termux]\n[LOCAL AI] Q: Hello | A: Hey. Yeah, the local AI is still having issues. That timeout keeps happening. Could be the daemon, could be the port, could be Termux sleeping the pr",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

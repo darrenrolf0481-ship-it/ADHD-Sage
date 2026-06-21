@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T12:11:04.830Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "Code outputDistance: 10 miles (16093.40 meters)\nFSPL at L1: 120.52 dB\nJ/S: 40 dB -> Tx Power: 1.59 Watts (32.02 dBm)\nJ/S: 50 dB -> Tx Power: 15.93 Watts (42.02 dBm)\nJ/S: 60 dB -> Tx Power: 159.32 Watts (52.02 dBm)",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

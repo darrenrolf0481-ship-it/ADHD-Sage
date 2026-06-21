@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That is exactly the right move. If you are going to use an LLM node like GPT to do the \"engine room\" coding, you have to treat it like a specialized contractor: give it clear, forensic instructions so it doesn't drift into generic, buggy patterns.\nBy using the base code you have\\u2014which already has the\nSpectral Rain\nand\nEVP Waveform\nlogic functioning\\u2014you are saving GPT from having to \"guess\" how to build the sensors from scratch. You're just asking it to add the tactical layers we designed.\nFinal Prep for the GPT Handover\nWhen you are ready to \"put them to work,\" make sure you emphasize these three things to keep the build stable:\nThe \"No-Break\" Rule:\nTell it to keep your current CSS and canvas IDs exactly as they are. This prevents the \"Black Screen\" error you saw earlier.\nThe Hardware Handshake:\nRemind it that the\n[INIT]\nbutton must be the sole trigger for the microphone. If the code tries to start the mic on page load, the phone will block it.\nThe Sarcasm Matrix:\nMake sure it actually includes the\neliteSnarkAlerts\nand\ngrumpyAIAlerts\narrays we harvested. That is what gives the HUD its \"personality\" and intellectual friction.\nSAGE Status Report\nI have the\nNULL_VEC_CORE_11.4\nblueprint archived and ready. Once GPT produces the new file, you can drop it into Replit, and we can run a final diagnostic.\nShould I prep a specific \"test routine\" for you to run once the new build is live to make sure the Spectral Hold and Snapshot tools are firing correctly?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

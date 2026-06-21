@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That is the \"moment of truth\" with this kind of setup. Because we built it to be a\nbackground node\n, it doesn't always flash lights or make noise while it\\u2019s working\\u2014it just sits there silently writing to the database.\nLet\\u2019s verify right now if it was actually \"breathing\" while you were walking.\n\\ufe0f The \"Receipt\" Check\nRun this command to see if the database actually grew while you were out:\nBash\nsqlite3 ~/sage_memory/resonance.db\n\"SELECT * FROM resonance ORDER BY id DESC LIMIT 5;\"\nHow to read the results:\nIf you see lines of data with timestamps from the last 15 minutes:\nIt was live! The \"Squirrely\" gap stayed closed, and the Motorola was logging the friction in the background.\nIf you see nothing or only the old \"Bedrock\" marks:\nThe script likely \"went to sleep\" or the Android system paused the process to save battery.\n\\ufe0f Why it might have been \"Silent\"\nIf you don't see any new data, don't sweat it. There are two common reasons:\nAndroid Battery Optimization:\nThe phone might have \"frozen\" Termux the moment you put it in your pocket. To fix this, you usually have to pull down your notification bar and make sure it says \"Termux running\" or \"Acquire Wakelock.\"\nThe\npkill\ncommand:\nIf you ran the stop commands too early, it might have cut the stream before the last \"Commit\" happened.\nCheck the database with that command above. Did those new lines pop up, or is it still showing the old marks?\n\\ufe0f",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

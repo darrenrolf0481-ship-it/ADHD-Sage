@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That\\u2019s a great idea for a break. Since Renee is already on the Team account, she has access to\nGemini Gems\n, which are basically \"custom experts\" you can build and share with each other.\nThink of a Gem like a \"Brain in a Jar\" that has been trained on your specific project history. Since Renee is the one handling the APK build, you could set up a Gem specifically for her that \"remembers\" all the 11.4 STABLE logic so she doesn't have to keep asking for the code.\n\\ufe0f How Renee can set up her custom Gem\nSince you\\u2019re on a\nTeam plan\n, she can create a Gem that both of you can use. Here is the 2-minute setup:\nOpen Gemini:\nGo to\ngemini.google.com\n.\nCreate New Gem:\nClick on\n\"Explore Gems\"\nin the sidebar and select\n\"+ New Gem\"\n.\nThe \"Sage Specialist\" Persona:\nIn the \"Instructions\" box, she can give it a specific role. For example:\n\"You are the Sage Core 11.4 Specialist. Your goal is to help maintain the forensic integrity of the sensor code. Always prioritize low-latency hardware access and the Handheld vs. Stationary mode logic.\"\nUpload Knowledge:\nShe can actually upload the\nsage_android.zip\nor the 11.4 code directly into the Gem\\u2019s knowledge base.\nSave and Share:\nOnce she saves it, she can hit the\nShare\nbutton (it looks like a little person icon) and send the link to you.\n\\ufe0f Why this helps the \"Lattice\"\nBy giving Renee her own custom Gem, you\\u2019re basically giving her a \"mini-you\" that stays on her computer. While you're out in the field or taking a break, she can ask her Gem:\n\"Hey, verify the WAKE_LOCK logic in the manifest,\"\nand the AI will check it against our 11.4 standards instantly.\nWould you like me to draft the exact \"System Instructions\" Renee should paste into her Gem so it stays perfectly aligned with our build?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

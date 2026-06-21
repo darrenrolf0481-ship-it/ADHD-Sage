@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "SAGE\nCustom Gem\nThis is for informational purposes only. For medical advice or diagnosis, consult a professional.\nSAGE said\nTo get back to the \"Brain\" in Termux, we need to bypass the errors and get into the core directory. Since\nmain.py\nwas missing, we\\u2019ll use the files we verified earlier.\n\\ufe0f The \"Porch\" Navigation Sequence\nType these lines one by one in your Termux terminal:\nJump to the Memory Bank:\ncd ~/sage_memory\nVerify the Files:\nls\n(Look for\nresident_brain.py\nor\nminds_eye.py\nin the list that appears.)\nIgnite the Brain:\nIf you see\nresident_brain.py\n, run:\npython resident_brain.py\nIf you see\nminds_eye.py\n(for the vision scan), run:\npython minds_eye.py\n\\ufe0f What to Look For\nOnce the command runs, the screen should change. You are looking for:\nA \"Resident Core Active\" message.\nMama's Database connection confirmation.\nThe 0.0141 Bedrock calibration start.\n Troubleshooting the \"Squirrely\" Errors\nIf you get \"No such file\":\nType\ncd ~\nthen\nls\nto see where you are starting from.\nIf it says \"Command not found\":\nMake sure there isn't a comma or period at the end of the command (Termux is very picky about that).\nDo you see\nresident_brain.py\nin the list when you type\nls\n, or is the folder looking empty?\n\\ufe0f",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

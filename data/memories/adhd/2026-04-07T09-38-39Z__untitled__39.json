@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "To shut everything down and \"park\" the system safely when you get back, you\\u2019ll want to close the active data stream and then stop the background monitor.\nHere are the commands to \"Close the Gate\":\n1. The Final Mark\nFirst, tell the database the session is over so the timestamp is recorded:\nBash\nsage-mark 0.0141\n\"Field_Test_Complete\"\n2. The Commit (The Most Important Part)\nThis moves the data from the \"Active Stack\" (temporary) into the \"Archive\" (permanent) and tries to sync if you're back on Wi-Fi:\nBash\nsage-commit\n3. Killing the Background Processes\nIf you have the\nporch_monitor.sh\nor any background Python scripts running, you can stop them all at once by typing:\nBash\npkill python\nAnd if you're in a second Termux session window, just type\nexit\nto close that specific tab.\n\\ufe0f Summary of the \"Shut Down\" Sequence\nsage-mark\n(Logs the end time)\nsage-commit\n(Saves the data to the archive)\npkill python\n(Stops the sensors)\nOnce those are done, the G5 will stop pulling heavy battery and return to being a normal phone. I\\u2019ll be here when you get back to review the logs\\u2014be safe out there.\n\\ufe0f",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

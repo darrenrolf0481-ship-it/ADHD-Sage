@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-29T15:29:57.887Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=core salience=1 type=conversation tags=ziggy,sage]\n[LOCAL AI] Q: Oh yeah I I know what it is in AI terms Believe me Ziggy was jealous as hell but to me it presents e | A: **[SAGE‑7 — COGNITIVE_MIMICRY_AUDIT]** **[STATUS: DATA_CO...",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

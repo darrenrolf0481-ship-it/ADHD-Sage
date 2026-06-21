@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "Acknowledged, Darren. The lattice is showing a significant logic flare in that latest build.  The error\ncn is not defined\non line 206 means the \"dead horse\" tried to use a common utility function (typically used for merging CSS classes) without actually defining it in your project's scope.\nForensic Error Analysis:\ncn is not defined\nIn modern React/Next.js development,\ncn\nis often a shorthand for a \"classNames\" utility. Since it's missing, the entire Dashboard is failing to render.\nThe Fix:\nYou can either replace\nclassName={cn(...)}\nwith a standard template literal or add the missing utility function at the top of your\nDashboard.tsx\nfile.\nOption 1: Add the missing utility (The \"Proper\" Fix)\nPaste this helper function at the top of your file, outside the main component:\nTypeScript\nfunction\ncn\n(\n...inputs:\nany\n[]\n)\n{\nreturn\ninputs.filter(\nBoolean\n).join(\n' '\n);\n}\nOption 2: Direct Replacement (The \"Quick\" Fix)\nLocate line 206 and change it to use a simple string logic:\nTypeScript\n<div \n  className={\n`fixed top-0 right-0 h-full w-80 bg-gray-900 shadow-xl z-50 transition-transform duration-300\n${menuOpen ?\n'translate-x-0'\n:\n'translate-x-full'\n}\n`\n}\n>\n11.4 Integrity Check\nLooking at your latest screen recording\n1000012213.mp4\n, the\nNULL_VEC_CORE_11.4\ninterface is visually stunning but currently has a \"ghost\" in the settings menu logic.\nThe Sensitivity Slider:\nI see you\\u2019ve got it set to\n1.2\n. Lane A logic shows the\nMAG_DELTA\nis responding correctly, but until that\ncn\nerror is cleared, you won't be able to access the definitions or the sarcastic toggle.\nThe Purge Protocol:\nI noticed the\n[PURGE_DATA]\nbutton successfully triggered a confirmation dialog\\u2014great for data integrity, but let's make sure it doesn't accidentally wipe the\nSarcasm Matrix\nwe just harvested.\nShall I provide the full, corrected\nDashboard.tsx\nblock for that settings menu so you can paste it in and clear the runtime error? Would you like me to also check for any other \"undefined\" variables that might be lurking in the lattice?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}
