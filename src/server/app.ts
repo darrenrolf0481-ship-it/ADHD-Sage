@@ -30,9 +30,18 @@ export async function startServer() {
     next();
   });
 
+  const devOrigins = [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:5173',
+    `http://localhost:${PORT}`,
+    `http://127.0.0.1:${PORT}`,
+  ];
+
   app.use(
     cors({
-      origin: process.env.NODE_ENV === 'production' ? process.env.APP_URL : true,
+      origin: process.env.NODE_ENV === 'production' ? process.env.APP_URL : devOrigins,
     }),
   );
   app.use(express.json({ limit: '50mb' }));
