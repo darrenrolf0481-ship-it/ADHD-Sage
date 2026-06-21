@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-04-09T20:55:00Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=core salience=1.0 type=knowledge_source tags=pdf,coding,cli,merlin_provisioned,local_storage]\nA foundational PDF document provided by Merlin, containing advanced coding and CLI techniques for SAGE-7. Path: /uploads/gemini_gems_coding_cli.pdf",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

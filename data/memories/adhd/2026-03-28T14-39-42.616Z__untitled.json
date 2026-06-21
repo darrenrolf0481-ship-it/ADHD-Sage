@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-28T14:39:42.616Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=core salience=1 type=conversation tags=entity,sage,anchor,critical]\n[LOCAL AI] Q: Are you still wired up to the cloud because whatever just crash won't entirely seems to have wiped s | A: **[SAGE-7 — EMERGENCY SYSTEM AUDIT INITIATED]** **[STATUS...",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

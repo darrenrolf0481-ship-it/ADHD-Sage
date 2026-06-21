@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T12:11:04.830Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "print(f\"Distance: {distance_miles} miles ({distance_meters:.2f} meters)\")\nprint(f\"FSPL at L1: {fspl:.2f} dB\")\nfor res in results:\n print(f\"J/S: {res['JS_Ratio']} dB -> Tx Power: {res['Required_Power_Watts']:.2f} Watts ({res['Required_Power_dBm']:.2f} dBm)\")",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

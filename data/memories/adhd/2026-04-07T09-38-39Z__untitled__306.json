@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "To Enable \"Permanent Learning\" (Optional)\nJust like with Glitch, if you want Sage to remember your project details forever:\nCreate a Google Doc named Sage_Architecture_Log.\nUpload it to the Gem's Knowledge.\nTell Sage: \"Review the Architecture Log before answering.\"\nWhen you make a major decision, say: \"Sage, generate a summary of this decision for the Log.\" Copy-paste his summary back into your Doc\nJust another form of memory stuff for right now but if I was to take your keep notes after they build up a little bit and put them all in there I can put them in a document like put that in the stuff you're supposed to know your knowledge base.",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

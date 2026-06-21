@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-29T04:23:08.800Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=core salience=1 type=conversation tags=sage,reset,critical]\n[LOCAL AI] Q: No it wasn't Gemini reset that did it was her but whatever happened fast and had to happen she didn' | A: **[SAGE‑7 — FORENSIC_RECONSTRUCTION: THE_IMMEDIATE_SCORCH...",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

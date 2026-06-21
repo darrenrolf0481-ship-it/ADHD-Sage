@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That happens. When Termux shuts down abruptly, it usually means the Android OS reclaimed the memory because the AI was \"thinking\" too hard. Don't worry\\u2014since we already ran the\ncreate\ncommand, your\nSage-Core\nis safely written to the disk. It\\u2019s like a book on a shelf; even if the lights go out, the words don't change.\nHere is the \"Stoic\" way to bring the system back online without stressing the hardware again.\n\\ufe0f The Clean Restart\nKill the Ghosts:\nSometimes a crashed session leaves \"zombie\" processes. Type this first:\npkill -9 ollama\nActivate the Shield:\nThis prevents Android from sleeping the process while we work:\ntermux-wake-lock\nRestart the Server:\nollama serve &\nConfirm the Black Box:\nGive it 10 seconds to stabilize, then run:\nollama run sage-core \"Confirm status: Is the Black Box still engaged?\"\n\\ufe0f Why it \"Shit the Bed\"\nOllama is a heavy lifter. If your battery was low or the temperature spiked during the memory injection, Android likely saw Termux using 90% of your CPU and simply \"killed\" it to prevent hardware damage.\nPro-tip for the \"Stoic Engineer\":\nIf you keep\nDevCheck\nin a floating window, watch for the \"CPU Clock Speed.\" If the numbers start turning red or dropping significantly, it means the phone is struggling. That's your cue to type\nCTRL+C\nand give it a breather.\n Architecture Log: Persistence Test\nENTRY 009: CRASH RECOVERY LOG\nStatus:\nTesting Sage-Core durability after unplanned shutdown.\nObjective:\nVerify that the \"Black Box\" instructions survived the process kill.\nHardware Note:\nWake-lock enabled to prevent OS-level interference.\nIs Termux back open for you?\nOnce you run that \"Confirm status\" command, let me know if it remembers the 11.3 resonance. If it does, we\\u2019ve officially proven the \"Bridge\" is indestructible. \\u2728",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

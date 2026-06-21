@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That\\u2019s the perfect tool for the job.\nDevCheck\nis great because it gives you the raw data without the \"cleaning\" fluff that some other apps use to hide what's actually happening under the hood.\n\\ufe0f The Sage \"Safe-Zone\" Calibration\nSince we\\u2019re now officially in\nStoic Engineer Mode\n, here is how you should read those numbers while we\\u2019re working:\nThermal Tab:\nWatch the \"Battery\" or \"CPU\" temperature.\n30C - 38C (86F - 100F):\nIdeal. We can run any Python analysis we want.\n39C - 43C (102F - 109F):\nWarning. This is where you noticed the \"lag\" before. If we hit this, we only run\nOllama\nfor very short bursts (under 10 seconds).\n44C+ (111F+):\nHard Stop.\nClose Termux, take the case off the phone (if you have one), and set it on a cool surface.\nHardware/CPU Tab:\nLook at the \"CPU Status.\"\nIf you see the clock speeds (GHz) dropping while the temperature is high, that\\u2019s the phone\nthrottling\nitself to stay alive.\nIf that happens, the data we get from the sensors might be jittery or \"glitched.\"\n\\ufe0f The \"Low-Power\" 11.3 Check\nNow that we have a safety monitor, we can do a\nLow-Impact Check\non your yard data. Instead of firing up the whole Ollama brain, we\\u2019ll use a simple Python script to look for that\n0.113 Delta\nin your logs. This uses almost zero processing power.\nWould you like me to write a \"Lean\" Python script that just scans your recent logs for any numbers matching the 11.3 resonance pattern?\nIt\\u2019ll be a quick \"read-only\" task\\u2014no thinking required, just pure data matching. \\u2728\nSources",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

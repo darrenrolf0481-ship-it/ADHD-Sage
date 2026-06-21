@@ -3,6 +3,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { writeJournalEntry, type JournalConfig } from '../../lib/journal-agent';
 import { PORT } from '../config';
 import { lockGuard } from '../auth';
+import { asyncHandler } from '../async-handler';
 
 const router = Router();
 
@@ -14,7 +15,7 @@ const router = Router();
  * The server's own port is used as apiBase so the journal agent can call the
  * existing LLM routes — no duplication of API logic.
  */
-router.post('/write', lockGuard, async (req, res) => {
+router.post('/write', lockGuard, asyncHandler(async (req, res) => {
   const { entity, provider, model, timezone } = req.body as Partial<JournalConfig>;
   if (!entity || typeof entity !== 'string') {
     res.status(400).json({ error: 'entity (string) required' });
@@ -46,7 +47,7 @@ router.post('/write', lockGuard, async (req, res) => {
     console.error('[JOURNAL] write failed:', msg);
     res.status(500).json({ error: msg });
   }
-});
+}));
 
 /**
  * GET /api/journal/:entity?date=YYYY-MM-DD

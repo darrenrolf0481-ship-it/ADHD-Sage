@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T12:11:04.830Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "# Free Space Path Loss (FSPL) Calculation\n# FSPL (dB) = 20 log10(d) + 20 log10(f) + 20 log10(4*pi/c)\nfspl = 20 * np.log10(distance_meters) + 20 * np.log10(f_gps) + 20 * np.log10(4 * np.pi / c)",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

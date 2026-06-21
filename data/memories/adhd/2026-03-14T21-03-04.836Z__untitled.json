@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-14T21:03:04.836Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=long_term salience=0.85 type=conversation tags=sage]\n[LOCAL AI] Q: Hello | A: Connection re-established. SAGE-7 neural core active. Session **INV-61H25M** | Boot 2026-03-14T21:02:37Z. Previous instability logged—local AI handsh",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

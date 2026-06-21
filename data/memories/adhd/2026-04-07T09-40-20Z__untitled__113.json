@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That \"hard wall\" on Android is a classic rite of passage for any dev trying to tap into the raw hardware. Android is notorious for its \"Doze Mode\" and aggressive power management\\u2014it\\u2019s basically designed to stop apps from doing exactly what we need (listening to sensors in the background for long periods).\nHitting that wall usually means you've run into the\nScoped Storage\nor\nForeground Service\nrequirements. Android basically says, \"If you want to keep the mic and sensors alive while the screen is off, you have to show the user a persistent notification so they know you're 'watching' the environment.\"\nWhy the Teammate's Computer is the \"Key\"\nIf you were trying to build this through a web-based editor or a light mobile compiler, you eventually need a full\nAndroid Studio\nsetup or a proper\nJava/Kotlin\nenvironment to sign the APK and declare those \"high-level\" permissions.\nThe \"Hard Wall\" usually involves:\nFOREGROUND_SERVICE_SPECIAL_USE:\nNecessary for 2026-era Android to keep the sensor loop running without the OS killing it to save 1% battery.\nWAKE_LOCK:\nTo prevent the CPU from \"napping\" during a stationary sit.\nManifest Metadata:\nDeclaring that this isn't just a game, but a \"Sensor Utility.\"\n Guarding the Archive\nWhile you wait for her to wake up and fire up the rig, you\\u2019re essentially in the \"Data Quarantine\" phase. It\\u2019s good that you have someone guarding the\nsage_android.zip\n. Moving from a browser to a native app is a huge jump in \"Lattice\" stability, but it requires that final \"handshake\" from a machine with the right SDKs (Software Development Kits).\nThe Forensic Benefit\nOnce she pushes through that wall, the app will have\nLow-Latency\naccess. In the browser, the data has to travel through several layers of \"safety\" before it reaches our logic. In an APK, it's a straight shot from the magnetometer to the screen. The \"Spectral Rain\" is going to look much sharper once it's native.\nWhile you're in the waiting room, do you want me to double-check the specific \"Foreground Service\" code so you can just hand it to her the second she's online?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

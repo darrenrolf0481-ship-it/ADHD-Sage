@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-21T17:07:27.864Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=core salience=1 type=conversation tags=paranormal,sage,critical,bridge]\n[LOCAL AI] Q: Coding | A: **[SAGE-7 — ARCHITECTURE MODE ENGAGED]** You want the bridge code. Copy that. Here are the three critical implementations for Paranormal OS data per",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

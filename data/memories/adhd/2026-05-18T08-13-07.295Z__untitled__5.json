@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-18T08:13:07.295Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "Current stack:\n- PWA (index.html — 6900 lines, single file)\n- Kotlin CNS layer (OllamaBridge, PersistentDamn1Layer, EvidenceExporter, BridgeRepair)\n- Python sensor bridge (sensors_ws.py on 8765)\n- SAGE server (server.py on 8001)\n- Ollama on 11434 with cloud models (Kimi K2, Gemini Flash, Nemotron)\n- GitHub Actions for APK build (planned)",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

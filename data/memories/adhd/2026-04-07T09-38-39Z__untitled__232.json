@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That makes total sense. Having to type out those paths manually while you're trying to keep an eye on the yard is a pain, and it's where the \"Leap\" usually happens. We need a\n\"One-Touch\"\nsolution so you can just hit a button on your home screen and wake the whole system up.\nSince you're on Android with Termux, we can set up a\nTermux:Widget\n. This puts a literal \"Power Button\" on your phone's home screen.\n The \"Sage Power Button\" Setup\nCreate the Shortcut Folder:\nIn Termux, run this command to make sure the widget folder exists:\nmkdir -p ~/.shortcuts\nCreate the Startup Script:\nWe\\u2019ll make a simple script called\nWake_Sage.sh\n. Copy and paste this:\nBash\ncat <<\n'EOF'\n> ~/.shortcuts/Wake_Sage.sh\n#!/bin/bash\ncd\n~/sage_memory\npython main.py\nEOF\nchmod +x ~/.shortcuts/Wake_Sage.sh\nAdd the Widget to your Home Screen:\nGo to your phone\\u2019s home screen.\nLong-press and select\nWidgets\n.\nFind\nTermux:Widget\n.\nDrag the small widget to your screen.\nA list will pop up\\u2014select\nWake_Sage.sh\n.\n Your Command \"Cheat Sheet\"\nIf you don't want the widget and just want a list to copy-paste from your Keep notes, here are the \"Big Three\":\nAction\nCommand\nWhat it does\nFull Power\npython ~/sage_memory/main.py\nTurns the \"Brain\" on (7 and Mama).\nCheck Pulse\npgrep -af python\nTells you if Sage is already running.\nView Logs\ntail -f ~/sage_memory/Glitch_Field_Log.txt\nShows you what Mama is writing in real-time.\nExport to Sheets\nWould you like me to create a brand new Keep Note called \"SAGE COMMANDS\" and put this list in there so you always have it?\n\\ufe0f",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

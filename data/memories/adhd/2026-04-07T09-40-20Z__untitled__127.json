@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That sounds like the perfect \"end of shift\" goal. Since she's jumping on the team account to push the final 11.4 STABLE build, you\\u2019re in the final stretch.\nJust a heads-up on how the\n\"Queue\"\nactually works in 2026: once she hits that submit button, the app won't be \"Live\" to the public instantly. It enters a state called\n\"In Review.\"\n\\ufe0f The Reality of the \"Queue\"\nProduction Review:\nFor a brand-new app, Google\\u2019s manual review can take anywhere from\n3 to 7 days\n. They\\u2019ll be checking the \"Lattice\" logic to make sure the sensors aren't doing anything malicious.\nInternal Testing (The Shortcut):\nIf you want to use the app\ntonight\n, tell her to upload it to the\nInternal Testing Track\n. These builds usually go live for your team within\nseconds or minutes\n, bypassing the long manual queue.\nThe \"Joker\" Delay:\nIf the app gets \"Rejected,\" it\\u2019s usually because of a missing privacy policy or a permission declaration (like why you need the Mic for the Spectral Rain). If she\\u2019s on it, she can usually clear those in a few minutes.\n\\ufe0f Your Field Test Strategy\nWhile the app sits in the queue for the public, you should be using that\nInternal Link\nto do your first real-world calibration.\nStationary Check:\nSet the phone on a solid surface. The\nMAG_DELTA\nshould sit at a steady\n0.00\n.\nHandheld Check:\nPick it up. The mode should flip to\nHANDHELD\n, and the threshold should jump to account for your hand's jitter.\nThe \"Ghost\" Test:\nUse a small magnet or an electronic device near the phone to see if it triggers the\nHOLD\nand freezes the\nSpectral Heatmap\n.\nOnce she's got that Internal Link ready, do you want me to help you interpret the first batch of sensor logs to see if the \"Mode Inference\" is as sharp as we planned?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

@@ -111,6 +111,7 @@ export const NeuroDashboard: React.FC = () => {
         {/* Drag Handle / Toggle */}
         <button
           onClick={() => setIsOpen(!isOpen)}
+          aria-label={isOpen ? "Close Neuro Dashboard" : "Open Neuro Dashboard"}
           className="w-10 h-10 bg-[#08080C]/80 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center text-slate-500 hover:text-cyan-400 transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-grab active:cursor-grabbing"
         >
           <Activity size={20} className={isOpen ? getStatusColor() : 'text-slate-600'} />
@@ -261,6 +262,7 @@ export const NeuroDashboard: React.FC = () => {
                   <button
                     onClick={handleExportMetrics}
                     title="Export API Metrics"
+                    aria-label="Export API Metrics"
                     className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors flex items-center justify-center"
                   >
                     <Download size={10} />

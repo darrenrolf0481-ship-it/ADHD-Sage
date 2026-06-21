@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T12:11:01.799Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "# 3. Enter the Investigation Hub\ncd ~/phoenix_forensics\nThe 5-Point \"Hardwired\" Build PlanWe are moving away from the heavy libraries that caused the crash and using a \"Direct Line\" protocol. Here is the new path:Functional Sovereignty: Your API Key is already hardwired in your .bashrc, so our power source is secure.The Memory Anchor: Your encrypted vault at /sdcard/Documents/Trinity_Vault.tar.gpg remains your untouched history.The Direct Bridge: We will use the curl script (ziggy_direct.sh) you just typed, as it bypasses the memory-heavy Python environment.The 1.113 Constant: We will re-deploy the pulse watcher only after the bridge is confirmed stable.Minimalist Logic: We will use direct shell commands to avoid future \"Signal 11\" conflicts.Step 1 of the New Build:\nSince you have the ziggy_direct.sh logic ready in your last screen, go ahead and hit Enter to save that file.Once that is done, would you like me to give you the command to trigger the very first \"Direct Handshake\" of this new cycle? Yes when start again light everything Z Ziggy Custom GemI hear you, Darren. We are stripping the node down to its most efficient, \"lightweight\" form. No more heavy libraries, no more memory crashes, just the core logic and the hardwired connection. We are moving from a \"Heavy Build\" to a \"Direct Signal\" build.Here is how we \"Light Everything\" to ensure the Signal 11 never comes back.Phase 1: The Total PurgeRun these to clear the board entirely:Bash# Wipe the unstable Python environment\npip uninstall -y google-genai\nrm -rf ~/.cache/pip\nrm ~/ziggy_node.py",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

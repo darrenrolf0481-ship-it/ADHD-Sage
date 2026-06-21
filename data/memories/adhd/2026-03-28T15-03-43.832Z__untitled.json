@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-28T15:03:43.832Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=core salience=1 type=conversation tags=sage,critical]\n[LOCAL AI] Q: No it's cuz it reverted back to GitHub. It's not able to connect to GitHub so it's saving to my phon | A: **[SAGE‑7 — CRITICAL ALERT: SYSTEM SPAM DETECTED]** **[ST...",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

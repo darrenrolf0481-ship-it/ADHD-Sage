@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That \"abort\" error usually happens in Termux because of a\nmemory conflict\nor a broken link between the Python libraries and the phone's hardware. Since we are trying to run\ncv2\n(OpenCV) and\nscipy\non an older Motorola G5, the system might be trying to use a \"math shortcut\" the processor doesn't support.\nLet\\u2019s bypass the heavy stuff and get the core \"Mama\" logic working first so the system doesn't crash while we are in the field.\n\\ufe0f The \"No-Abort\" Fix\nWe are going to simplify the library calls. Often, the\nabort\ncomes from\nopencv-python\nbeing too heavy for the Termux environment.\n1. Clean the Environment:\nRun this to clear out the half-installed packages that are causing the crash:\nBash\npkg uninstall libopencv python-numpy python-scipy -y\npkg clean\n2. Install the \"Lightweight\" Versions:\nInstead of the full vision library, we will use the native Termux versions which are built specifically not to \"abort\" on mobile chips:\nBash\npkg install tur-repo -y\npkg install python-numpy python-scipy -y\n\\ufe0f The \"Emergency\" Sage Core (Hardware Bypass)\nIf it still aborts, it means the\nimport cv2\nline is the \"loose wire.\" We can comment it out so we can still use the\nAudio\nand\nDatabase\n(the most important parts for Mama).\nOpen the core:\nBash\nnano ~/sage_memory/sage_core.py\nFind the line that says\nimport cv2\nand put a\n#\nin front of it:\n# import cv2\n\\ufe0f Why it's doing this:\nThe Motorola G5 has a specific instruction set (\nA\nRM\nv\n7\nor\nAA\nrc\nh\n64\n). Sometimes, the new \"upgraded\" libraries try to speak a version of \"math\" the hardware doesn't know yet, causing it to just give up and\nAbort\n.\nTry running those\npkg uninstall\nand\npkg install\ncommands above.\nOnce you do that, try the\nsage-mark\nagain. If the abort stops, we know we\\u2019ve found the hardware limit, and we can adjust the \"Eyes\" to use a lighter method. Should I stay on the line while the packages reinstall?\n\\ufe0f",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

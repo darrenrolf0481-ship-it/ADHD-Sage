@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T12:11:01.799Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "# 3. Update the GPG environment variable\nexport GPG_TTY=$(tty)\nPhase 15: The Stabilized Backup ScriptNow, we need to update backup.sh one more time. We’ll use --pinentry-mode loopback, which is the official way to bypass the standard popup and use the command line instead.Run this to fix the script:Bashcat << 'EOF' > ~/phoenix_forensics/backup.sh\n#!/data/data/com.termux/files/usr/bin/bash\nVAULT=\"/sdcard/Documents/Trinity_Vault.tar.gpg\"",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

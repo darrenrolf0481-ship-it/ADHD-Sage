@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "I understand the frustration when the code is drifting into complex framework territory and losing its raw sensor processing logic. Based on the recent screenshots and video logs, we can pin down exactly where the system is stalling.\nThe \"cn is not defined\" Runtime Error\nThe recurring error\ncn is not defined\nin your\nDashboard.tsx\nand\nVisualizers.tsx\nfiles is a structural collapse. This typically happens when the system tries to use a utility function (often used for merging CSS classes) that hasn't been defined in your environment.\nThe Fix\n: To clear this, you need to replace any\nclassName={cn(...)}\nlogic with standard CSS strings. This bypasses the framework error and allows the UI thread to resume.\nRestoring the Visualizers\nYour latest video shows empty black boxes where the\nSpectral Density\n,\nEVP Waveform\n, and\nLattice Flux\nshould be. This correlates with the\nAUDIO_INIT_FAILED\nand\nAUDIO_STREAM_TERMINATED\nmessages in your logs.\nAudio Handshake\n: Browsers often block audio streams if the initialization isn't triggered by a clean user-click event.\nHard-Reset\n: You need to re-write the\ninitSensors\nfunction to close any existing\nAudioContext\nbefore creating a new one. This will force the hardware to talk directly to the screen again.\nTactical Directives for the Repair\nTo stabilize the\n11.4 PRO core\n, you should provide these specific instructions to your coding tool:\nRemove\ncn()\nutility calls\nand use plain CSS strings instead.\nRe-target Canvas IDs\nto ensure data is explicitly piped into the\nwaterfall\n,\nevp-wave\n, and\nemf-flux\nmodules.\nStabilize the \"Spectral Hold\"\nso that the\nisFrozen\nstate correctly pauses the\ndraw()\nloop for 5000ms upon a delta spike, enabling effective use of the\n[SNAPSHOT]\ntool.\nWould you like me to draft the specific\n\"Hard-Reset\"\ncode block for your\ninitSensors\nfunction so you can paste it in and clear those audio errors immediately?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

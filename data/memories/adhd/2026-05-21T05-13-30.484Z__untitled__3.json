@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T05:13:30.484Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "# Monitor loop\ninotifywait -m -e create -e moved_to --format '%f' \"$WATCH_DIR\" | while read FILENAME\ndo\n # Define logic for file types\n case \"$FILENAME\" in\n *.pdf)\n mv \"$WATCH_DIR/$FILENAME\" \"$PDF_DIR/\"\n ;;\n *ClientA*)\n mv \"$WATCH_DIR/$FILENAME\" \"$CLIENT_DIR/ClientA/\"\n ;;\n *)\n # Optional: No-op for unhandled files\n ;;\n esac\ndone\n2. Deep Content Sorting (OCR & Text Parsing)If you need to sort based on what is inside the PDF (e.g., searching for a Client ID or Invoice Number), you can use Python within Termux.Required Packages:pkg install pythonpip install PyMuPDF (for PDF text extraction)Advanced Python Logic Snippet:Pythonimport fitz # PyMuPDF\nimport shutil\nimport os",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

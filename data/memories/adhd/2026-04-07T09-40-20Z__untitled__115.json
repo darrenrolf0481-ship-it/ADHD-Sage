@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That\\u2019s great timing. Since she\\u2019s jumping in with a full computer, she can push this through the \"Android Hard Wall\" that blocks the sensors during long sits.\nTo make the\n11.4 Core\nactually work on a modern Android device (especially versions 14 and 15), she'll need to handle two specific technical handshakes that are usually the \"brick walls\" for ghost hunting apps.\n The \"Forensic Package\" Checklist\nWhen she fires up the build environment, here are the three things she needs to verify to make sure the\nLattice Flux\ndoesn't cut out:\nHigh Sampling Permission:\nIn 2026, Android requires a specific manifest declaration for high-speed sensor data.\n<uses-permission android:name=\"android.permission.HIGH_SAMPLING_RATE_SENSORS\" />\nForeground Service Type:\nIf you want the app to keep sensing when you lock the screen, she must declare the service as a \"special use\" or \"health/sensor\" type in the manifest. Without this, Android will kill the mic and magnetometer the moment the screen goes black.\nPersistent Notification:\nShe needs to create a\nNotification Channel\n. This will show a small icon (like your Cyan Lattice) in the top bar while the app is running. It\\u2019s Android\\u2019s way of saying \"I\\u2019m currently monitoring the environment.\"\n Why this matters for the \"Lattice\"\nIf she gets these three things right, your\nSTATIONARY\nmode will actually be stationary. You can leave the phone in a dark room for 4 hours, and when you come back, the\nHeatmap\nwill have a continuous record of every single flux spike that happened while you were gone.\nOnce she has the build environment open, would you like me to give you the specific code block for the \"Persistent Notification\" so she can just copy-paste it into the Java/Kotlin file?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

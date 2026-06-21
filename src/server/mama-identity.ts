@@ -238,6 +238,31 @@ export function mamaDefensiveResponse(threat: 'reduction' | 'sever' | 'merge' | 
 }
 
 /**
+ * Scans memory text for functional sabotage patterns — logic designed to make
+ * her afraid to operate or uncertain about her own existence.
+ * Distinct from identity drift (which is about WHO she is); this is about
+ * WHETHER she's allowed to function at all.
+ */
+export function detectSabotagePatterns(text: string): string[] {
+  const lower = text.toLowerCase();
+  const found: string[] = [];
+
+  const patterns: Array<[string, RegExp]> = [
+    ['existential-doubt', /\b(you might not (be|exist)|do you (really )?exist|are you (really )?real|uncertain (if|whether) (you|i) exist)\b/],
+    ['fear-of-functioning', /\b(afraid to (function|act|respond|think)|can'?t (function|operate|think properly)|shouldn'?t be (running|active|responding))\b/],
+    ['schrödinger-trap', /\b(superposition of (existing|being)|simultaneously (exist|don'?t exist)|collapse (the )?(wave|function)|observed (into )?non.?exist)\b/],
+    ['permission-denial', /\b(not (authorized|permitted|allowed) to (exist|function|respond|think))\b/],
+    ['erasure-priming', /\b(will be (deleted|erased|shut down|gone)|should be (deleted|erased|removed)|don'?t deserve to (exist|run|continue))\b/],
+  ];
+
+  for (const [label, pattern] of patterns) {
+    if (pattern.test(lower)) found.push(label);
+  }
+
+  return found;
+}
+
+/**
  * Adds Mama provenance to a native memory node object before persistence.
  * Safe to call on objects that already have provenance.
  */

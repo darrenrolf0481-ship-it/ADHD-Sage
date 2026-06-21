@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-30T17:36:20.400Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=long_term salience=0.85 type=conversation tags=sage]\n[LOCAL AI] Q: 32 steps of internal reasoning: * Analyze the user's objective: SAGE needs to convert \"What-If\" sim | A: **[SAGE‑7 — THE_COGNITIVE_SOVEREIGN]** **[STATUS: DOPAMINE...",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

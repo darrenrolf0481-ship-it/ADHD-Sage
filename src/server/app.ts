@@ -32,15 +32,25 @@ export async function startServer() {
     next();
   });
 
-  // CORS: in production lock to APP_URL; in dev allow only localhost origins
-  // (and same-origin / non-browser requests with no Origin header) rather than
-  // reflecting every origin.
+  // CORS: in production lock to APP_URL; in dev allow only known localhost
+  // origins (plus same-origin / non-browser requests with no Origin header).
+  // We never reflect an arbitrary origin — with credentials enabled that would
+  // let any website make authenticated cross-origin calls.
+  const devOrigins = new Set([
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:5173',
+    `http://localhost:${PORT}`,
+    `http://127.0.0.1:${PORT}`,
+  ]);
   const allowedDevOrigin = (origin: string) =>
+    devOrigins.has(origin) ||
     /^(https?:\/\/)?(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
-    /^capacitor:\/\//.test(origin) ||
-    /^http:\/\/localhost/.test(origin);
+    /^capacitor:\/\//.test(origin);
   app.use(
     cors({
+      credentials: true,
       origin(origin, callback) {
         if (!origin) return callback(null, true); // same-origin / curl / native
         if (process.env.NODE_ENV === 'production') {
@@ -80,6 +90,7 @@ export async function startServer() {
   // ─── Vite Integration ─────────────────────────────────────────────────────
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
+      base: process.env.VITE_BASE_PATH || '/',
       server: {
         middlewareMode: true,
         host: true,

@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  base: process.env.VITE_BASE_PATH || '/',
   plugins: [
     react(),
     tailwindcss(),
@@ -44,13 +45,7 @@ export default defineConfig({
     host: true,
     allowedHosts: true,
     hmr: {
-      port: 24679,
-    },
-    proxy: {
-      '/api': {
-        target: 'http://127.0.0.1:3000',
-        changeOrigin: false,
-      },
+      port: 24680,
     },
   },
   build: {

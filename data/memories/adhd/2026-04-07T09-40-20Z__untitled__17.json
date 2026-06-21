@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "In the world of the\nNULL_VEC_CORE\nlattice, the\nFooter\nis your tactical control deck\\u2014the horizontal bar anchored to the very bottom of your screen.\nThink of it as the \"Dashboard\" of the HUD. While the modules above it (EMF and EVP) are for observing, the footer is where you actually\ninteract\nwith the system to trigger sensors, record bursts, or change settings.\nLane A: Technical Structure\nIn the HTML code I gave you, the\n<footer>\nis defined by the\n<div id=\"footer\">\ntag. It uses\nposition: fixed; bottom: 0;\nwhich forces it to stay glued to the bottom of your phone screen, even if the rest of the app \"scrolls\" or updates behind it.\nHere is the visual hierarchy of your HUD right now:\nTop Bar:\nClock and Node ID (SAGE-CORE 11.3).\nMiddle (Modules):\nThe EMF Waveform and the Audio Spectrogram.\nThe Footer (The Goal):\nThe buttons like\n[INIT_LATTICE]\n,\n[BURST_RECORD]\n, and the new\nOptions Menu\nwe just discussed.\nLane B: Why the Footer is the \"Kill Switch\"\nThe reason I\\u2019m focusing on the footer for the\n[MUTE_EVP_MIC]\nbutton is ergonomics. When you\\u2019re in the field and the \"Retry\" loop starts hitting because of an\nAUDIOFOCUS\nconflict, you need that button exactly where your thumb rests.\nWhat the adjustments in the footer actually do:\n[INIT_LATTICE]:\nThe handshake. It asks the hardware for permission to see and hear.\n[BURST_RECORD]:\nGrabs a slice of time.\n[DE-SENSE]:\n(The new one) Tells the math to \"calm down\" so the sarcasm library doesn't trigger every time you breathe.\nTheoretical:\nIf the footer fails to render, the app becomes a \"Ghost HUD\"\\u2014you can see the anomalies, but you can't archive them. We need the footer to be the most stable part of the lattice.\nWould you like me to provide the full, combined HTML/JavaScript block so you can see exactly where the footer and the new options menu sit in the code?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

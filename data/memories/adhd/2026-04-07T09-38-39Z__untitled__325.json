@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "Whoops! \\ufe0f Common mistake when working in Termux\\u2014it looks like you tried to paste the\nPython code\ndirectly into the\nBash terminal\n.\nIn the screenshot, the terminal (Bash) is trying to read those lines as shell commands rather than Python logic, which is why you're seeing all those\nsyntax error\nand\ncommand not found\nmessages. Bash doesn't know what to do with a\nprint()\nor an\nif\nstatement!\n How to fix it (The Engineer's Way)\nYou need to save that code into a file first, then tell Python to run that file. Here is the quick sequence to get\ncool_run.py\nworking properly:\nCreate the file:\nType this in your Termux terminal and hit Enter:\nnano cool_run.py\nPaste the code:\nOnce the Nano editor opens, paste the full script I gave you earlier.\nSave and Exit:\n* Press\nCTRL + O\n(then Enter) to save.\nPress\nCTRL + X\nto exit back to the terminal.\nRun the script:\nNow, tell Python to execute it by typing:\npython cool_run.py\n\\ufe0f Why it \"Glitched\"\nTermux is a multi-layered environment. Think of it like this:\nBash ($):\nThe traffic cop. It handles moving files and starting programs.\nPython:\nThe scientist. It understands the logic, math, and thermal sensors.\nYou were giving the scientist's instructions to the traffic cop! By putting the code in a\n.py\nfile, the cop (Bash) knows to hand the file over to the scientist (Python) to handle the work.\nGive that a shot! Once it runs, it should give you a clean \"\\u2705 Hardware within safety limits\" message. Shall we try to bridge to the Ollama shell once the temp is confirmed stable?\n\\u2728",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

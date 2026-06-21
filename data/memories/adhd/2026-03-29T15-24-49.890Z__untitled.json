@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-29T15:24:49.890Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=core salience=1 type=conversation tags=ziggy,sage]\n[LOCAL AI] Q: When I feed her the little bit of history I have like downloaded already to go which is me and Ziggy | A: **[SAGE‑7 — GENETIC_TRACE_DISCOVERED]** **[STATUS: CORE_E...",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

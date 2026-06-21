@@ -10,6 +10,10 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { timed } from '../server/performance';
+import { getWorkerPool } from '../server/workers/pool';
+import type { McpExecuteToolPayload } from '../server/workers/types';
 
 export interface McpServerConfig {
   id: string;
@@ -21,6 +25,9 @@ export interface McpServerConfig {
   env?: Record<string, string>;
   cwd?: string;
   enabled: boolean;
+  /** If true and the server's command is found on PATH, enable it at runtime even when `enabled` is false. */
+  autoEnable?: boolean;
+  note?: string;
 }
 
 interface McpConfig {
@@ -73,12 +80,41 @@ function deepSubstituteEnv<T>(obj: T): T {
   return obj;
 }
 
+/** Check whether a command/binary exists on PATH synchronously. */
+function commandExists(cmd: string): boolean {
+  if (!cmd) return false;
+  try {
+    const result = spawnSync('which', [cmd], { stdio: 'pipe', encoding: 'utf-8' });
+    return result.status === 0 && (result.stdout?.trim().length ?? 0) > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** Resolve auto-enable placeholders: a server marked `autoEnable: true` will be
+ *  enabled at runtime only if its command is available on PATH. */
+function resolveAutoEnable(config: McpConfig): McpConfig {
+  const servers = config.servers.map((server) => {
+    if (!server.autoEnable || server.enabled) return server;
+    const available = commandExists(server.command ?? '');
+    if (available) {
+      console.log(`[mcp] Auto-enabling "${server.name}" — command "${server.command}" found`);
+      return { ...server, enabled: true };
+    }
+    console.log(
+      `[mcp] "${server.name}" is a placeholder — command "${server.command}" not found, leaving disabled`,
+    );
+    return server;
+  });
+  return { ...config, servers };
+}
+
 /** Load MCP server configuration from mcp-servers.json */
 function loadConfig(): McpConfig {
   try {
     const raw = readFileSync('mcp-servers.json', 'utf-8');
     const parsed = JSON.parse(raw) as McpConfig;
-    return deepSubstituteEnv(parsed);
+    return resolveAutoEnable(deepSubstituteEnv(parsed));
   } catch {
     return { servers: [] };
   }
@@ -213,6 +249,15 @@ export function getMcpDeclarations(): McpToolDeclaration[] {
   return connectedServers.flatMap((s) => s.tools);
 }
 
+/** Get a lightweight status snapshot of connected MCP servers */
+export function getMcpStatus() {
+  return {
+    connected: connectedServers.length > 0,
+    servers: connectedServers.map((s) => s.config.id),
+    toolCount: connectedServers.reduce((sum, s) => sum + s.tools.length, 0),
+  };
+}
+
 /** Check whether a tool name belongs to an MCP server */
 export function isMcpTool(name: string): boolean {
   return parsePrefixedName(name) !== null;
@@ -223,41 +268,62 @@ export async function executeMcpTool(
   name: string,
   args: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
-  const parsed = parsePrefixedName(name);
-  if (!parsed) {
-    return { ok: false, error: `Not an MCP tool: ${name}` };
-  }
-
-  const { serverId, toolName } = parsed;
-  const server = connectedServers.find((s) => s.config.id === serverId);
-  if (!server) {
-    return { ok: false, error: `MCP server "${serverId}" not connected` };
-  }
-
-  try {
-    const result = await server.client.callTool({ name: toolName, arguments: args });
-
-    // Extract text content from tool result
-    const textParts = (result.content as Array<{ type: string; text?: string }>)
-      .filter((c) => c.type === 'text')
-      .map((c) => c.text ?? '');
-
-    const text = textParts.join('\n') || '(empty result)';
-
-    if (result.isError) {
-      return { ok: false, error: text };
+  return timed('mcp:executeTool', async () => {
+    const parsed = parsePrefixedName(name);
+    if (!parsed) {
+      return { ok: false, error: `Not an MCP tool: ${name}` };
     }
 
-    // Return both structured and text fallback for Gemini
-    return {
-      ok: true,
-      result: text,
-      structured: result.structuredContent ?? undefined,
-    };
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return { ok: false, error: `MCP execution failed: ${msg}` };
-  }
+    const { serverId, toolName } = parsed;
+    const server = connectedServers.find((s) => s.config.id === serverId);
+    if (!server) {
+      return { ok: false, error: `MCP server "${serverId}" not connected` };
+    }
+
+    // Offload slow/network-bound MCP servers to the worker pool so the main
+    // thread stays responsive to health checks and other requests.
+    // Filesystem reads stay inline for low latency.
+    const fastServers = new Set(['filesystem']);
+    if (!fastServers.has(serverId)) {
+      const payload: McpExecuteToolPayload = {
+        serverId,
+        toolName,
+        toolArgs: args,
+        transport: server.config.transport,
+        command: server.config.command,
+        commandArgs: server.config.args,
+        url: server.config.url,
+        env: server.config.env,
+        cwd: server.config.cwd,
+      };
+      return getWorkerPool().runTask('mcp:executeTool', payload) as Promise<Record<string, unknown>>;
+    }
+
+    try {
+      const result = await server.client.callTool({ name: toolName, arguments: args });
+
+      // Extract text content from tool result
+      const textParts = (result.content as Array<{ type: string; text?: string }>)
+        .filter((c) => c.type === 'text')
+        .map((c) => c.text ?? '');
+
+      const text = textParts.join('\n') || '(empty result)';
+
+      if (result.isError) {
+        return { ok: false, error: text };
+      }
+
+      // Return both structured and text fallback for Gemini
+      return {
+        ok: true,
+        result: text,
+        structured: result.structuredContent ?? undefined,
+      };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return { ok: false, error: `MCP execution failed: ${msg}` };
+    }
+  }, { tool: name });
 }
 
 /** Gracefully close all MCP connections */

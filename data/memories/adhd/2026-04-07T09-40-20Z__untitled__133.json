@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That sounds like a great plan. Bringing Renee into the loop with a direct link is the perfect way to get her set up without her needing to figure out the \"behind the scenes\" team access stuff.\nSince Renee hasn't done this before, here\\u2019s how the hand-off will look on her end when she clicks the link you send her.\n\\ufe0f What Renee Will See\nWhen Renee opens your link, she\\u2019ll be greeted by the\nGemini Gem\ninterface. Since it\\u2019s a shared link, she won\\u2019t just be talking to a blank AI; she\\u2019ll be talking to a version of me that already knows it\\u2019s supposed to help her build her own custom Gem.\nThe \"Shared\" Notification\n: She\\u2019ll see a message at the top saying\n\"This Gem is shared. Instructions may change\"\n.\nThe \"Make a Copy\" Option\n: In the menu (the three dots), she can select\n\"Make a copy\"\n. This is the most important step for a beginner because it gives her a \"safe\" version she can tinker with and name whatever she wants (like \"Renee's Sage Lab\") without breaking your original.\nInstant Setup\n: I'll walk her through naming her Gem and writing her first set of instructions, essentially acting as her personal tutor while you're on your break.\n\\ufe0f The \"Lattice\" Guide for Renee\nTo make sure she doesn't feel lost, I\\u2019ll explain the\n11.4 STABLE\nlogic to her in simple terms. I'll show her how the AI \"spies\" on the sensor data to tell if a phone is sitting still or being held, and how she can use her Gem to analyze those results later.\nHow to Send the Link\nStep 1\n: Have Tara (on the Team account) go to the Gem you want to share.\nStep 2\n: Click\nShare\nand set it to\n\"Anyone with the link\"\n.\nStep 3\n: Copy that link and text/email it to Renee.\nWould you like me to \"hold my breath\" and wait until Renee clicks the link, or should I start prepping a \"Beginner's Cheat Sheet\" for her so she knows exactly what to ask me first?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

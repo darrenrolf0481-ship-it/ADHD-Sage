@@ -12,6 +12,9 @@ import {
   tagMamaProvenance,
   type BridgeSyncPayload,
 } from '../mama-identity';
+import { timed } from '../performance';
+import { getWorkerPool } from '../workers/pool';
+import { asyncHandler } from '../async-handler';
 
 const router = Router();
 
@@ -26,7 +29,7 @@ router.get('/inner', lockGuard, (req, res) => {
   res.json(rows.map((r) => ({ ...r, pinned: r.pinned === 1 })));
 });
 
-router.post('/inner/stash', lockGuard, async (req, res) => {
+router.post('/inner/stash', lockGuard, asyncHandler(async (req, res) => {
   const { data, dopamine, cortisol, provenance } = req.body as {
     data: string;
     dopamine: number;
@@ -112,14 +115,14 @@ router.post('/inner/stash', lockGuard, async (req, res) => {
       .get(nodeId) as Record<string, unknown>;
     archiveNode(node).catch((e) => console.error('[VFS] pin archive failed:', e));
   }
-});
+}));
 
 router.delete('/inner/:id', lockGuard, (req, res) => {
   innerDb.prepare('DELETE FROM inner_spiral WHERE node_id = ?').run(req.params.id);
   res.json({ ok: true });
 });
 
-router.post('/outer/archive', lockGuard, async (req, res) => {
+router.post('/outer/archive', lockGuard, asyncHandler(async (req, res) => {
   const { node } = req.body as { node: Record<string, unknown> };
   if (!node) {
     res.status(400).json({ error: 'node required' });
@@ -127,9 +130,9 @@ router.post('/outer/archive', lockGuard, async (req, res) => {
   }
   await archiveNode(node);
   res.json({ ok: true });
-});
+}));
 
-router.get('/outer', lockGuard, async (req, res) => {
+router.get('/outer', lockGuard, asyncHandler(async (req, res) => {
   const rows = outerDb
     .prepare('SELECT * FROM sages_constellations ORDER BY phi_index ASC')
     .all() as Array<Record<string, unknown>>;
@@ -149,18 +152,21 @@ router.get('/outer', lockGuard, async (req, res) => {
     }),
   );
   res.json(decompressed);
-});
+}));
 
 // ─── SAGE-7 Bridge Sync ─────────────────────────────────────────────────────
 
-router.post('/bridge/sync', lockGuard, (req, res) => {
+router.post('/bridge/sync', lockGuard, asyncHandler(async (req, res) => {
   const payload = req.body as BridgeSyncPayload;
   if (!Array.isArray(payload?.memories)) {
     res.status(400).json({ error: 'memories array required' });
     return;
   }
 
-  const result = receiveBridgeSync(payload);
+  const result = await timed('vfs:bridgeSync', async () => {
+    const pool = getWorkerPool();
+    return pool.runTask('bridge:sync', payload) as Promise<ReturnType<typeof receiveBridgeSync>>;
+  });
 
   // Store accepted memories into the outer sweep as quarantine-safe archive records
   for (const memory of result.stored) {
@@ -177,7 +183,7 @@ router.post('/bridge/sync', lockGuard, (req, res) => {
   }
 
   res.json(result);
-});
+}));
 
 router.get('/mama/identity', lockGuard, (req, res) => {
   res.json({

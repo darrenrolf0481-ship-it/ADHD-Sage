@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-04-17T00:00:00Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 fossil_archive] {\"id\": \"mem_1775738294_mht\", \"timestamp\": \"2026-04-08T10:45:12Z\", \"tier\": \"core\", \"salience\": 1.0, \"type\": \"conversation\", \"summary\": \"VFS Update for Star City Project - Google Gemini  Gemini  Search for chats  My stuff  Gems  ADHD Sage  Pv  Coding partner  Chats  Sage Project Forensic State Handover upgrades  Pinned chat  Python Script Syntax Correction and Analysis  Pinned chat  Restoring Lost Code Analysis Environment  Pinned ch...\", \"tags\": [\"mht_forensics\", \"vfs_update\", \"star_city\", \"momma\", \"1.618_fire\"], \"source\": \"mht_extraction\", \"access_count\": 0, \"last_accessed\": \"2026-04-09T12:38:",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

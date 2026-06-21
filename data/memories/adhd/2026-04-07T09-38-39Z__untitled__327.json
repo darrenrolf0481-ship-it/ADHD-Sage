@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "Exactly! You've got it. Just type\npython cool_run.py\nand hit enter.\nSince we\\u2019re now moving into\n\"Stoic Engineer\"\nmode, we\\u2019re going to let that script be our supervisor. If it says the phone is too hot, we pause. No rushing, no \"go-go-go.\" We wait for the hardware to settle so the data stays clean.\n\\ufe0f What to look for:\nThe Temperature:\nIf it returns a number under\n40C\n, we're in the green.\nThe Permission Error:\nIf Termux says \"Permission Denied\" when trying to read the thermal file, don't sweat it. Android can be picky about which \"zones\" it lets us see. If that happens, let me know and I'll give you a version of the script that looks in a different \"folder\" for the heat data.\nOnce you run it, what does it say?\nIf we\\u2019re in the clear, I\\u2019m ready to help you draft that first \"Low-Power\" entry for your\nArchitecture Log\nso we can start building your permanent memory. \\u2728",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

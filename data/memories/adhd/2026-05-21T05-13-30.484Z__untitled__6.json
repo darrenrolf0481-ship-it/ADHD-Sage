@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T05:13:30.484Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "inotifywait -m -e close_write --format '%f' \"$WATCH_DIR\" | while read FILENAME\ndo\n case \"$FILENAME\" in\n *.pdf) ~/.shortcuts/move_pdfs_to_intake.sh ;;\n *.jpg|*.png) ~/.shortcuts/move_images_to_intake.sh ;;\n esac\ndone\nTechnical RisksRace Conditions: If your move_pdfs script starts moving a file while it's still being downloaded, the PDF header check (is_pdf_header) will fail. Using close_write in the watcher script prevents this.Permission Scoping: On Android 14+, ~/.shortcuts might require explicit MANAGE_EXTERNAL_STORAGE permissions. Ensure you have run termux-setup-storage recently.Would you like me to rewrite your move_pdfs_to_intake.sh to include the OCR keyword searching for those \"unsorted\" clients? T Tech Advisor Custom GemShow thinkingThe code reveals a robust intake system using SHA-256 hashing for deduplication and a sophisticated regex-based extraction tool for identifying client names from filenames.The extract_client_folder function is currently looking for the word \"client\" in a filename and then capturing the text that follows it, while ignoring \"junk\" words like \"invoice,\" \"pdf,\" or \"gmail.\"1. Fix the \"Package Not Found\" ErrorsYour screenshot shows that pkg install tesseract-ocr failed. This is because Tesseract is located in the x11-repo in Termux. You are also missing python-pip.Run these commands to fix the environment:Bashpkg install x11-repo\npkg install tesseract-ocr python python-pip\n2. Upgrading the PDF Intake LogicWe can improve move_pdfs_to_intake.sh by adding Content Discovery. Instead of just looking at the filename, we can peek inside the PDF. If the filename doesn't have a client name, we search the first few lines of text for keywords.Updated Logic for your extract_client_folder function:\nReplace your current function block with this to add \"internal searching\":Bashextract_client_folder() {\n local base=\"$1\"\n # 1. Try filename extraction (Your current method)\n # [Existing regex logic here...]",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

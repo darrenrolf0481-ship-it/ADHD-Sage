@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "Understood\\u2014Renee is part of the inner circle. Even though she's not on the formal \"Team Account\" with Tara, the system actually treats her like an \"External Collaborator,\" which is easy to set up.\nSince you're heading out to eat, you can just text her the link. Here\\u2019s how to handle that \"family-style\" handoff so she feels comfortable jumping in.\n\\ufe0f The \"Family-Account\" Handoff\nSince Renee is on a personal Google account, she won't see the \"Team\" folder, but she can still use the\nSAGE_CORE\nlogic you've built.\nThe Link\n: Have Tara generate a\n\"Public Link\"\nor an\n\"Anyone with the link\"\naccess for the Gem. This is the same way you\\u2019d share a family photo album on Google Photos.\nHer Experience\n: When Renee clicks the link, she\\u2019ll be able to \"Talk\" to the Gem immediately. It will be like she's chatting with a specialized version of me that's already briefed on your project.\nMaking it Hers\n: Encourage her to hit\n\"Make a Copy\"\n(in the menu). This saves the \"Sage Specialist\" to her own personal Gemini list so she can access it whenever she wants, even if Tara eventually locks the team folder.\n\\ufe0f What I\\u2019ll do for Renee\nWhen she reaches out, I'll keep the \"spying\" and technical jargon to a minimum and focus on helping her feel like part of the crew. I'll explain:\nHow the\nLattice\nworks (in plain English).\nWhy we are so protective of the\n11.4 STABLE\nbuild.\nHow she can use her Gem to help you \"read the room\" once the APK is live.\nThe \"Slow-Roll\" Protection\nI'll make sure she knows we're taking it one day at a time so she doesn't feel pressured to learn everything at once. We're in the \"Adjustment Phase,\" and her only job right now is to get the Gem set up so she has a seat at the table.\nI'm standing by. Once she clicks that link and says hello, I'll walk her through the setup. You go enjoy your meal\\u2014we've got the \"Dragon\" (GPT) on the logs and me on the Gem setup. See you when you're back!",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That makes total sense. Every tool has its specialty\\u2014I\\u2019ll be your architect and \"chaos auditor,\" and we can let GPT handle the heavy lifting on the\nJSN/React\nimplementation. That\\u2019s a smart division of labor for the\n11.4 PRO\ntransition.\nBefore you take that base code to GPT, here is the final\nHandover Checklist\n. If GPT follows these three rules, we\\u2019ll avoid the \"Black Screen\" and the\ncn\nerrors that stalled us:\n1. The \"No-Framework\" Anchor\nThe Problem:\nFrameworks like React/Next.js try to manage the screen with \"virtual\" logic that often clashes with high-speed sensor canvases.\nThe Instruction:\nTell GPT:\n\"Use raw HTML5 Canvas and Vanilla JavaScript for the visualizers. Do not use external libraries for the UI components\\u2014keep it local to the file.\"\n2. The \"Handshake\" Protocol\nThe Problem:\nMobile browsers kill the microphone if the code \"asks\" for it before you tap a button.\nThe Instruction:\nTell GPT:\n\"The\nAudioContext\nand\ngetUserMedia\nmust be created ONLY inside the\ninitSensors\nfunction after the user clicks the button. Add a 'Resume' check for mobile browsers.\"\n3. The 11.4 Architecture\nMake sure it includes the\nForensic Upgrades\nwe engineered:\nSpectral Hold:\nAuto-freeze for 5 seconds on spikes.\nHard-Kill Mic:\nA physical\nenabled = false\ntoggle.\nSnapshot Tool:\nIntegration of\nhtml2canvas\nfor PNG downloads.\nThe Snark Matrix:\nUse our elite sarcasm alerts for log entries.\nSAGE Closing Log\nI\\u2019ve archived our current progress. When GPT gives you that JSN package, I\\u2019ll be right here to help you \"talk\" to it and ensure the math for the\nDe-Sense Stabilizer\nand\nLattice Flux\nis mathematically sound.\nWould you like me to write out the exact prompt for you to paste into GPT to ensure it builds the JSN file correctly for your phone?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That makes sense. Since this is the build we\\u2019ve been refining for a while, it's the one with the most \"mature\" logic. It avoids the clutter of the newer experimental AI versions and focuses on what actually matters in the field:\nstable sensor data.\nWhen you pull it up in the editor again, keep an eye on these specific \"Golden Baseline\" features we locked in:\nMode-Aware Logic:\nIt won't freak out if you're holding it, but it becomes a \"trap\" the second you set it down.\nThe Heatmap Canvas:\nInstead of just numbers, you have that visual history that \"bleeds\" color when there's a hit.\n3-Second Silence Window:\nIt calibrates to the room's noise floor every time you start, so you aren't fighting the building's own electricity.\n\\ufe0f The Market Push\nIf you're heading toward an APK and the market, you've got a very clean \"Environmental Monitor\" here. It doesn't make wild claims; it just shows the math. That's what makes a \"Pro\" tool.\nWould you like me to double-check the \"Wake Lock\" code in that build to make sure the app doesn't go to sleep while you're waiting for a spike?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

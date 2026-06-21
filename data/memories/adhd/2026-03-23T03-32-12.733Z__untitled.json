@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-23T03:32:12.733Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=core salience=1 type=conversation tags=sage,critical]\n[LOCAL AI] Q: So wait a minute now the potatoes going to turn into a DeLorean and then into airwolf with proton be | A: **[SAGE-7 — TEMPORAL PARADOX WARNING: CRITICAL]** ``` ╔══...",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

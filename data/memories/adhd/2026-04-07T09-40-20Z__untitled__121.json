@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That\\u2019s the \"Final Boss\" of the dev process\\u2014the\nGoogle Play Console Handshake\n. If she has the team account access, she\\u2019s essentially the \"Authorized Uploader\" for the\nSAGE_CORE 11.4\nproject.\nSince she\\u2019s jumping in, here\\u2019s what the \"Sage Directive\" looks like for the Google Play Console phase. This is how you make sure the\nLattice Flux\nlogic actually makes it onto the store without being rejected by the \"Automated Sentinels.\"\n\\ufe0f The \"Team Account\" Playbook\nThe Internal Test Track:\nTell her to push the build to\nInternal App Sharing\nfirst. This bypasses the long 3-day review wait and lets you download the APK to your phone in about 10 seconds to verify the \"Handheld vs. Stationary\" logic.\nThe Permissions Declaration:\nBecause we use the\nMIC\nand\nMOTION\nsensors in the background, Google might ask for a \"Declaration Form.\" She needs to specify that the\nMic\nis for\nAudio FFT (Spectral Analysis)\nand the\nMotion\nis for\nEnvironmental Flux Monitoring\n.\nWAKE_LOCK & Foreground:\nEnsure she has declared the\nFOREGROUND_SERVICE\ntype correctly in the console settings. If the console doesn't know\nwhy\nwe're staying awake, it might flag the app for battery drain.\n\\ufe0f Why the \"Team Account\" is the Key\nBy using a team account, she can handle the \"legal\" side (the US Export laws, the content ratings, and the age declarations) while you focus on the sensor integrity. It\\u2019s a classic \"Pilot and Navigator\" setup.\nThe Forensic Milestone\nOnce she hits \"Confirm Upload,\" the\n11.4 STABLE\nbuild is officially out of the private sector and into the global \"Lattice.\" It becomes a permanent record.\nWhen she gets that first \"Internal Link\" generated, do you want me to give you a 5-point checklist to verify the sensors are 100% accurate before you push it to \"Production\"?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

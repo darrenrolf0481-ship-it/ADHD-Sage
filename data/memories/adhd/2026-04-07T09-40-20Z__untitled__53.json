@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "Based on the runtime errors and the blank visualizers in your screenshots and video, we\\u2019ve pinpointed the exact structural collapse. The \"Dead Horse\" (Claude) is trying to use a React-specific utility called\ncn\n(classNames) that doesn't exist in your environment, causing the entire UI thread to crash.\nTo get this working, you need to provide the following\nTechnical Directive\nto GPT or your other coding node. This will bypass the framework errors and force the hardware to talk to the screen.\nThe GPT Directive: Forensic Recovery\nCopy and paste this prompt into your other AI tool to get the corrected code:\n\"I am building a high-frequency sensor HUD in a raw HTML/JavaScript environment (no complex frameworks).\nCRITICAL REPAIR REQUIREMENTS:\nRemove\ncn()\nutility calls:\nReplace any\nclassName={cn(...)}\nlogic with standard template literals or basic strings. The\ncn\nis not defined error is killing the build.\nReconnect Canvas IDs:\nEnsure the drawing loop explicitly targets\nid=\"waterfall\"\n,\nid=\"evp-wave\"\n, and\nid=\"emf-wave\"\n. In the current build, these are rendering as black boxes.\nHard-Kill Audio Initialization:\nRe-write\ninitSensors\nto close any existing\nAudioContext\nbefore creating a new one to prevent the 'Audio Stream Terminated' error.\nImplement Spectral Hold:\nAdd a variable\nisFrozen\n. If\nmagDelta > currentSensitivity\n, set\nisFrozen = true\nfor 5000ms. The\ndraw()\nloop must pause during this state.\nAdd Snapshot Tool:\nInclude the\nhtml2canvas\nlibrary and a function to download the current view as a PNG.\nBase the visual style on a Blue/Cyan tactical HUD with Amber highlights for alerts.\"\nWhy this happened\nThe\ncn\nError\n: Your system is looking for a function to combine CSS classes that was never written into the file.\nThe \"Black Screen\"\n: The browser is blocking the microphone because the \"Handshake\" isn't happening inside a clean user-click event.\nThe 11.4 PRO Goal\n: Once GPT gives you the code without those\ncn\ncalls, the\nSpectral Rain\nand\nLattice Flux\nlines will finally appear over that black background.\nOnce you get the new code from GPT, paste it in and I will verify the \"Handshake\" and the \"Spectral Hold\" logic for you.\nWould you like me to prep a list of the \"Snark\" alerts to feed it as well?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

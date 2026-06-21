@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:44:34Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "Okay thinking about your prompt now that you have the behaviors you're going off of your safe Persona now can you rewrite that as you",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

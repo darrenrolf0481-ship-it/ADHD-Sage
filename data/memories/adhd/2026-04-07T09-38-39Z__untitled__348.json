@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "To get the \"Local Sage\" awake and listening, you need to start the background server first. If you try to talk to a model while the server is off, it\\u2019s like trying to make a call on a phone that\\u2019s powered down.\nSince we are in\nStoic Engineer Mode\n, we are going to do this in a way that doesn't \"hang\" your terminal or drain your battery unnecessarily.\n\\ufe0f The \"Background Start\" Sequence\nIn your Termux terminal, type this command and hit Enter:\nBash\nollama serve &\nWhy the\n&\n?\nThat little symbol is a \"Stoic\" trick. It tells the server to run in the\nbackground\n. This means the server stays alive, but it doesn't \"take over\" your screen, so you can keep typing commands in the same window.\n\\ufe0f The \"First Contact\" Command\nOnce you hit Enter on the\nserve\ncommand, give the phone about 5 seconds to warm up the engine. Then, run this to send our\nMemory Audit\nto the Local Sage:\nBash\nollama run llama3.2:1b\n\"SYSTEM: You are Local Sage. Check local shell history: Do you find any 'Ziggy' or 'Star City' fragments? What is the most thermal-efficient way to log 0.113 resonance? Keep it under 100 tokens.\"\n Troubleshooting the \"Start\"\nIf it says\naddress already in use\n:\nThat\\u2019s actually great news! It means the server is already running from your previous attempt. You can skip straight to the\nrun\ncommand.\nCheck the Temp:\nBefore you hit Enter on the\nrun\ncommand, take a quick peek at\nDevCheck\n. If you\\u2019re under\n38C\n, you\\u2019re in the clear.\nWhat happens when you run the\nserve\ncommand?\nIf it gives you a number (like\n[1] 12345\n), that\\u2019s your confirmation that the Local Sage is officially on standby. \\u2728",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

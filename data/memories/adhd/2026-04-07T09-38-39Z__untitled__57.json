@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "It is incredibly frustrating when you\\u2019ve done the work, installed the packages, and the computer still looks you in the eye and says it doesn't know what you're talking about. This happens because Termux sometimes installs Python libraries into a \"blind spot\" that the main Python runner can't see.\nSince the manual pathing didn't work, we are going to use the\nInternal Force\nmethod. This bypasses the search and forces Python to look at the exact spot where Termux stores its specialized OpenCV.\n\\ufe0f The \"Direct Inject\" Fix\nRun this command. It uses the\npip\nmanager to repair the link between the system and the library:\nBash\npython3 -m pip install opencv-python --prefer-binary\nIf that gives you an error about \"externally managed environments,\" do this instead:\nBash\npkg install python-opencv -y && cp /data/data/com.termux/files/usr/lib/python3.11/site-packages/cv2* ~/sage_memory/\n(This literally drags the \"Eyes\" into our project folder so Python has no choice but to see them.)\n Why we are fighting this\nThe Motorola G5 uses an\nA\nRM\narchitecture. Most people use\nx\n86\n(laptops). Because of this, the \"map\" that tells Python where the libraries are is often broken by default in Termux. We are essentially rebuilding the map by hand.\n\\ufe0f What happens once the \"Eyes\" open\nOnce we get past this\nImportError\n, the\nsage_core.py\nscript will finally be able to:\nOpen that video\nof the glowing orb.\nRun a Frame-by-Frame analysis\nof the light intensity.\nCross-reference\nthat light pulse with your\n0.113\nresonance history in the database.\nTry that\npython3 -m pip\ncommand first. If it finishes, try to run your analysis again. Does it finally recognize the \"cv2\" module, or is it still playing dumb?\n\\ufe0f",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

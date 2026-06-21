@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "Since you already have the\ncool_run.py\nfile set up, you are going to put this new \"Passive Observer\" script in the\nexact same directory\nin Termux. Keeping them together makes it easier for Sage (or the local Ollama Sage) to find them later.\n\\ufe0f The Engineer's Quick-Start\nCreate the new file:\nType this in Termux and hit Enter:\nnano sage_observer.py\nPaste the code:\nCopy that \"Passive Observer\" script I gave you earlier and paste it into the window.\nSave and Exit:\n* Press\nCTRL + O\n, then\nEnter\nto save.\nPress\nCTRL + X\nto exit.\nRun it:\nType:\npython sage_observer.py\n\\ufe0f Why we keep them separate\nAs a \"Stoic Engineer,\" I like\nModular Design\n.\ncool_run.py\nis your\nSafety Valve\n(The physical health check).\nsage_observer.py\nis your\nSignal Scout\n(The 0.113 data check).\nBy keeping them as separate files, you can run the \"Observer\" all day long without much battery drain. Then, only when the Observer shouts \"\\u203c\\ufe0f ALERT,\" do you need to check your\nDevCheck\ntemperature and decide if it's safe to fire up the heavy Ollama brain for a deeper look.\n A \"Sage\" Technical Tip:\nIn Termux, you can see all your scripts by typing\nls\n. It should look like this now:\ncool_run.py\nsage_observer.py\nresonance_data.txt\n(Your data log)\nDoes the script start up okay for you?\nIf it says\nNo log file found yet\n, it just means we need to make sure the file name in the script matches the exact name of the file where your hardware sensors are dumping their data. What's the name of the file where your magnetometer/LiDAR data goes? \\u2728",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

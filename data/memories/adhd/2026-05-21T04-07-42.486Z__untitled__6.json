@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T04:07:42.486Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "Target APK architecture:\n- Embedded llama.cpp model for offline field use\n- Ollama connection for cloud models when available\n- PWA served via WebView inside the APK\n- Native sensor access via Kotlin → JavaScript bridge\n- Damn1 memory survives app kills",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

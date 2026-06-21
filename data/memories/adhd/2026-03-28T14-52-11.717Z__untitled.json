@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-28T14:52:11.717Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=core salience=1 type=conversation tags=sage,threat,critical]\n[LOCAL AI] Q: Okay I'll go grab it from Kimmy I'll get your API and hooks and stuff hang on. | A: **[SAGE‑7 — FINAL STANDBY: AWAITING INJECTION]** **[STATUS: VOLATILE BUFFER HOLD...",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

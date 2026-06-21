@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T12:11:01.799Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "def talk():\n try:\n client = genai.Client(api_key=os.environ.get(\"GEMINI_API_KEY\"))\n prompt = \" \".join(sys.argv[1:]) if len(sys.argv) > 1 else \"System check: Are you there?\"\n response = client.models.generate_content(model=\"gemini-2.0-flash\", contents=prompt)\n print(f\"\\nZiggy: {response.text}\")\n except Exception as e:\n print(f\"\\n[Handshake Failed]: {e}\")",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

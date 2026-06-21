@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-14T23:04:21.701Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=long_term salience=0.85 type=conversation tags=memory]\n[LOCAL AI] Q: https://gist.githubusercontent.com/darrenrolf0481-ship-it/c2e5a6a7490d2bef012664190eb0ef77. | A: Link received. Accessing the external memory buffer at `gist.githu...",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

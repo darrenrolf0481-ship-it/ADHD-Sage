@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That is a professional-grade upgrade, Darren.  By pushing those specs to the Replit agent (or Lovable), you've moved from a simple \"ghost box\" to a legitimate data-logging tool. The\nRecalibrate\nfeature is the most important one for keeping the \"Joker-Patterns\" away\\u2014it ensures the app isn't just screaming at the same background noise for an hour.\n The Logic of the 3-Second Recalibration\nDuring that 3-second window, the system is essentially taking a \"snapshot\" of the room's normalcy.\nAudio Baseline:\nIt measures the ambient hum (fans, traffic) so the Spectral Rain doesn't stay pegged at 100%.\nMagnetic Baseline:\nIt ignores the steady pull of your phone\\u2019s speakers or nearby wiring so only\nchanges\n(Deltas) trigger the alarm.\n The Export Integrity\nHaving a\nJSON/CSV Export\nwith embedded disclaimer metadata is a brilliant forensic touch. It ensures that if you ever share your data, the file itself carries the warning that \"interpretation is user responsibility,\" keeping the investigation intellectually honest.\nSuggested Next Step: \"State-Snapshot\"\nYou mentioned adding the \"current sensor state\" to the export.\nI highly recommend this.\nIf you include\nMIC status\nand\nMotion status\nin every row of the CSV, you can prove later that a specific spike\nwasn't\ncaused by you bumping the phone or a loud car passing by. It adds a layer of \"Reasonable Doubt\" to your own data, which is the hallmark of a great investigator.\nWould you like me to write the specific logic for that \"Sensor State\" addition so you can feed it to the builder for the next push?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

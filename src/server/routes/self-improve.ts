@@ -4,6 +4,7 @@ import path from 'node:path';
 import { runSelfImprovement, type SelfImproveConfig } from '../../lib/self-improvement-agent';
 import { PORT } from '../config';
 import { lockGuard } from '../auth';
+import { asyncHandler } from '../async-handler';
 
 const router = Router();
 
@@ -16,7 +17,7 @@ const REFLECTIONS_DIR = path.resolve(process.cwd(), 'data', 'reflections');
  * Trigger a self-improvement loop for one entity immediately.
  * Body: { entity: string; provider: 'gemini'|'openrouter'|'ollama'; model?: string }
  */
-router.post('/run', lockGuard, async (req, res) => {
+router.post('/run', lockGuard, asyncHandler(async (req, res) => {
   const { entity, provider, model, timezone } = req.body as Partial<SelfImproveConfig>;
   if (!entity || typeof entity !== 'string') {
     res.status(400).json({ error: 'entity (string) required' });
@@ -48,7 +49,7 @@ router.post('/run', lockGuard, async (req, res) => {
     console.error('[SELF-IMPROVE] run failed:', msg);
     res.status(500).json({ error: msg });
   }
-});
+}));
 
 /**
  * GET /api/self-improve/report/:entity?date=YYYY-MM-DD

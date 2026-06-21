@@ -27,6 +27,7 @@ const defaultSnapshot: SensorSnapshot = {
     audio: 'pending',
     gps: 'pending',
     magnetometer: 'pending',
+    camera: 'pending',
   },
 };
 

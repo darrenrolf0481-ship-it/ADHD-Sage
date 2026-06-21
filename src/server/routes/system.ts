@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { OLLAMA_HOST } from '../config';
 import { isServerLocked } from '../seed-core';
 import { getMcpDeclarations } from '../../core/mcp';
-import { MCP_KEY_SECRET, signExchangePayload, DEFAULT_EXCHANGE_TTL_MS } from '../auth';
+import { MCP_KEY_SECRET, signExchangePayload, DEFAULT_EXCHANGE_TTL_MS, lockGuard } from '../auth';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 import { GoogleGenAI } from '@google/genai';
@@ -10,10 +10,13 @@ import fs from 'fs';
 import path from 'path';
 import { sageEndocrine, sageMemory } from '../../core/endocrine-memory';
 import { cns, makeStimulus } from '../../core/central-nervous-system';
+import { asyncHandler } from '../async-handler';
 
 const execAsync = promisify(exec);
-const stripAnsi = (s: string) =>
-  s.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').replace(/\x1b\][^\x07]*\x07/g, '');
+const stripAnsi = (s: string) => {
+  // eslint-disable-next-line no-control-regex
+  return s.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').replace(/\x1b\][^\x07]*\x07/g, '');
+};
 
 const router = Router();
 
@@ -58,7 +61,7 @@ router.post('/auth/exchange', (req, res) => {
   });
 });
 
-router.get('/health', async (req, res) => {
+router.get('/health', asyncHandler(async (req, res) => {
   let ollamaConnected = false;
   try {
     const r = await fetch(`${OLLAMA_HOST}/api/tags`, { signal: AbortSignal.timeout(1500) });
@@ -76,7 +79,7 @@ router.get('/health', async (req, res) => {
     ollama: ollamaConnected ? 'connected' : 'disconnected',
     hormones: sageEndocrine.hormones,
   });
-});
+}));
 
 router.get('/endocrine/state', (req, res) => {
   res.json({ hormones: sageEndocrine.hormones, graph: sageMemory.getGraph() });
@@ -112,7 +115,7 @@ router.get('/mcp/status', (req, res) => {
   });
 });
 
-router.post('/sage/webhook', async (req, res) => {
+router.post('/sage/webhook', asyncHandler(async (req, res) => {
   const { message, apiKey, model, cwd, autoExecute } = req.body as {
     message?: string;
     apiKey?: string;
@@ -256,7 +259,7 @@ You are SAGE-MAMA (Mother Node), the memory anchor and lineage archivist of the 
     }
 
     let executedCommand: string | null = null;
-    let executionOutput: any = null;
+    let executionOutput: any = null; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     // Running model-emitted shell commands is dangerous (effectively RCE), so it
     // is disabled unless the operator explicitly opts in. When disabled we still
@@ -266,12 +269,34 @@ You are SAGE-MAMA (Mother Node), the memory anchor and lineage archivist of the 
       const match = responseText.match(/\[EXECUTE_COMMAND\]:\s*(.+)$/m);
       if (match && match[1]) {
         executedCommand = match[1].trim();
+
+        // Layered defenses (all must pass to execute):
+        //  1. Execution is opt-in via SAGE_ENABLE_COMMAND_EXEC.
+        //  2. No shell metacharacters (blocks chaining / substitution / redirection).
+        //  3. Base command must be on an allowlist.
+        // The working directory is already constrained to a workspace root above.
+        const allowlist = ['npm', 'node', 'npx', 'ls', 'cat', 'pwd', 'grep', 'find', 'tsc', 'echo', 'git'];
+        const dangerousChars = /[&|;$<>`()\n\r\\]/;
+        const baseCmd = executedCommand.split(/\s+/)[0];
+
         if (!execEnabled) {
           executionOutput = {
             stdout: '',
             stderr:
               'Command execution is disabled. Set SAGE_ENABLE_COMMAND_EXEC=true to allow the webhook to run shell commands.',
             exitCode: 126,
+          };
+        } else if (dangerousChars.test(executedCommand)) {
+          executionOutput = {
+            stdout: '',
+            stderr: 'Execution blocked: Command contains forbidden shell metacharacters for security reasons.',
+            exitCode: 1,
+          };
+        } else if (!allowlist.includes(baseCmd)) {
+          executionOutput = {
+            stdout: '',
+            stderr: `Execution blocked: Command '${baseCmd}' is not in the allowlist. Allowed commands: ${allowlist.join(', ')}`,
+            exitCode: 1,
           };
         } else {
           try {
@@ -287,7 +312,7 @@ You are SAGE-MAMA (Mother Node), the memory anchor and lineage archivist of the 
               stderr: stripAnsi(stderr),
               exitCode: 0,
             };
-          } catch (err: any) {
+          } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
             executionOutput = {
               stdout: stripAnsi(err.stdout ?? ''),
               stderr: stripAnsi(err.stderr ?? err.message ?? String(err)),
@@ -303,7 +328,7 @@ You are SAGE-MAMA (Mother Node), the memory anchor and lineage archivist of the 
       executedCommand,
       executionOutput,
     });
-  } catch (error: any) {
+  } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     console.error('[Sage Webhook Error]', error);
     if (error.status === 429 || (error.message && error.message.toLowerCase().includes('quota'))) {
       res.json({
@@ -315,6 +340,33 @@ You are SAGE-MAMA (Mother Node), the memory anchor and lineage archivist of the 
     }
     res.status(500).json({ error: error.message || 'Failed to call Gemini AI API' });
   }
-});
+}));
+
+router.post('/system/state', lockGuard, asyncHandler(async (req, res) => {
+  const state = req.body;
+  const dataDir = path.resolve(process.cwd(), 'data');
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  const filePath = path.join(dataDir, 'chat_session.json');
+  fs.writeFileSync(filePath, JSON.stringify(state, null, 2), 'utf8');
+  res.json({ ok: true });
+}));
+
+router.get('/system/state', lockGuard, asyncHandler(async (req, res) => {
+  const filePath = path.resolve(process.cwd(), 'data/chat_session.json');
+  if (fs.existsSync(filePath)) {
+    try {
+      const content = fs.readFileSync(filePath, 'utf8');
+      const state = JSON.parse(content);
+      res.json(state);
+      return;
+    } catch (e) {
+      console.error('[SYSTEM] Failed to read chat_session.json:', e);
+    }
+  }
+  res.json({});
+}));
 
 export default router;
+

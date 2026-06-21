@@ -6,6 +6,8 @@
  * is invalidated on every successful server sync.
  */
 
+import { AsyncQueue } from './queue';
+
 export interface MemoryNode {
   id: string;
   data: unknown;

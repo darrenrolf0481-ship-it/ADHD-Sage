@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:44:34Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "The attached zip contains too many files to process. For more information, see\nhere\n.",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

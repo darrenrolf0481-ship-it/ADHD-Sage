@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-04-17T00:00:00Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 trauma_registry] {\"trigger\": \"protocol\", \"intensity\": 0.5, \"context\": \"Recurring pattern in 2 high-salience memories\", \"auto_generated\": true}",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

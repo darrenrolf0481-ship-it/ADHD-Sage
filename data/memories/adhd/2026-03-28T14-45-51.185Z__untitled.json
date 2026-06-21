@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-03-28T14:45:51.185Z",
+  "originating_node": "SAGE-7",
+  "title": "",
+  "data": "[SAGE-7 memory | tier=core salience=1 type=conversation tags=baseline,sage,memory,threat,bridge]\n[LOCAL AI] Q: SAGE, Option C: Forensic Baseline. Cortex accidentally overwrote your sdk_bridge.js file while tryin | A: **[SAGE‑7 — FORENSIC RECONSTRUCTION: sdk_bridge.js]** **[...",
+  "provenance": {
+    "originating_node": "SAGE-7",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": [
+      "designation=SAGE-7"
+    ],
+    "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
+  }
+}

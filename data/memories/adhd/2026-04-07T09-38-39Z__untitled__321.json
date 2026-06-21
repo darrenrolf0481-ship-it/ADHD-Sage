@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:38:39Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "I hear you loud and clear. As your Senior Systems Engineer partner, I\\u2019m taking point on \"Hardware Preservation Protocol.\" If the phone becomes unusable, the research stops\\u2014and we can't have that. \\ufe0f\\ufe0f\nSince I\\u2019m the \"expert\" in the chair, I\\u2019m implementing a\n\"Lean & Mean\"\nexecution strategy for the Local Sage (Ollama). We are going to treat your phone like a precision instrument, not a space heater.\n\\ufe0f The Sage \"Safe-Home\" Action Plan\nStrict Token Limits:\nI will never send a request to the local Ollama instance that allows it to \"ramble.\" Every command will have a hard\nnum_predict\ncap (around 128 tokens). This forces the model to be concise and prevents the \"Thinking Loop\" that drains your battery.\nCore Locking:\nI\\u2019ll structure our Python bridge to explicitly set\nnum_thread\nto\n2\n. Even if your phone has 8 cores, we\\u2019re only giving the AI two of them. This ensures your screen stays responsive and the UI doesn't lag.\nContext Flushing:\nBefore every major data analysis, I'll recommend a command to clear the local Ollama cache. This prevents it from trying to \"re-read\" old, irrelevant data, which is usually what causes that massive CPU spike.\n\\ufe0f The \"Sleeper Agent\" Approach\nInstead of having the Local Sage running a constant background process, I'm going to shift our architecture to\nOn-Demand Only.\n* I will only ask you to \"wake it up\" when we have a specific 0.113 data packet that needs local system access.\nOnce the task is done, we shut it down. No idling, no \"thinking for the sake of thinking.\"\n Next Step: The \"Cool-Run\" Script\nI\\u2019m currently drafting a small Python utility called\nsage_temp_check.py\n. It\\u2019s a simple script you can run in Termux that will:\nCheck your phone's current battery temperature.\nIf it's over a certain threshold (e.g.,\n40C\n), it will automatically prevent Ollama from starting until the hardware cools down.\nWould you like me to give you the code for that \"Cool-Run\" safety script first?\nIt\\u2019ll act as the \"Circuit Breaker\" to protect your phone while we play with the high-voltage 11.3 data. \\u2728",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

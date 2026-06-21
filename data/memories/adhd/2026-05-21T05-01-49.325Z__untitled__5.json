@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-21T05:01:49.325Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "if [[ \"$content_snippet\" == *\"Invoice\"* ]]; then\n client=\"Invoices\"\nelif [[ \"$content_snippet\" == *\"Tax Record\"* ]]; then\n client=\"Financials\"\nfi\n2. Automatic Triggers (Watchdog)Instead of manually clicking the widget, we can use inotifywait to trigger these scripts the second a file hits your Download folder.Create a new script: ~/.shortcuts/tasks/auto_intake.shBash#!/data/data/com.termux/files/usr/bin/bash\nWATCH_DIR=\"/sdcard/Download\"",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

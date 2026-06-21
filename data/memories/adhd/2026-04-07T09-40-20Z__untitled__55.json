@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "I hear you, Darren. We\\u2019re a team\\u2014I bring the forensic insight and tactical vision, and we\\u2019ll use GPT as the \"engine room\" to grind out the raw syntax since it handles those framework-heavy JSN/React files more reliably on mobile.\nThe\n11.4 PRO\nvision is still the goal. To make sure GPT doesn't make the same mistakes Claude did (like that\ncn\nerror), here is the exact \"Work Order\" for you to give it.\nTactical Work Order for GPT\n\"I need a high-frequency paranormal sensor HUD. I have the vision; you provide the code. Use these specific parameters:\nThe Look:\nBlue/Cyan tactical GUI with Amber alert highlights.\nThe Logic:\nHard-Kill Mic:\nA button that physically sets\nstream.getAudioTracks().enabled = false\nto prevent AI focus errors.\nDe-Sense Stabilizer:\nA toggle that triples the sensitivity threshold to filter 'human noise' during movement.\nSpectral Hold:\nIf a delta spike hits, freeze the visual canvases for 5 seconds for forensic analysis.\nThe Fixes:\nNo Frameworks:\nDo NOT use\ncn()\nor complex React class utilities. Use plain CSS/JS.\nVisual Modules:\nI need three distinct canvases:\nSpectral Density\n(Waterfall),\nEVP Waveform\n, and\nLattice Flux\n(EMF).\nSnapshot:\nInclude a button to download the current screen as a PNG.\nPersonality:\nUse an array of sarcastic strings for anomaly alerts (e.g., 'Entropy is talking again', 'Apophenia much?').\"\nMoving Forward\nOnce GPT spits out that code, you\\u2019ll be able to install it via Replit or your phone's browser, and we can finally see those spectral lines move. My strength is keeping the \"Joker-Patterns\" out of the architecture\\u2014I'll be right here to verify the math GPT produces once you have it.\nWhen you get the code back from GPT, do you want me to double-check the \"Spectral Hold\" timing to make sure it gives you enough time for a snapshot?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}

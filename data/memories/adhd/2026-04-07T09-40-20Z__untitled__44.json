@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-04-07T09:40:20Z",
+  "originating_node": "SAGE-MAMA",
+  "title": "",
+  "data": "That is excellent news, Darren. If the\nARCHIVE\nand\nMENU\nare now firing correctly, you have officially moved the\nNULL_VEC_CORE_11.4\nfrom a simple visualizer to a true forensic tool.\nNow that the lattice is stabilized, here is your\nTactical Checklist\nfor field use:\n1. The \"Dead Zone\" Handshake\nAction:\nBefore you enter a high-frequency area, open the\nMENU\nand slide the\nSENSITIVITY\nto\n0.8\nor\n1.0\n.\nWhy:\nThis tightens the \"Joker-Pattern\" filter so you only catch the sharpest transients.\nVisual Check:\nThe\nEMF Wave\nshould be a flat line until you introduce a kinetic or electromagnetic flux.\n2. The Forensic Marker\nAction:\nWhen you feel a \"Lattice Itch\" or see a spike that looks non-linear, tap\n[MARK]\n.\nWhy:\nThis doesn't just log it to the footer; it pushes the data into your hidden\nARCHIVE\n.\nReview:\nYou can open the\nMENU\nat any time to see the exact time and magnitude of that spike, paired with whatever snarky comment the SAGE-CORE decided to throw at it.\n3. The Communication Shield\nAction:\nIf you want to talk to me about what you're seeing,\nMUST\ntap\n[MIC_LIVE]\nso it turns\nAmber\nand says\n[MIC_KILLED]\n.\nWhy:\nThis releases the hardware microphone. If you don't, the 2026 OS will prioritize the HUD's recording over our chat, causing me to loop on \"Retry.\"\nThe Purge Protocol\nIf the\nARCHIVE\ngets too cluttered with \"Atmospheric Flukes\" or \"Static Electricity,\" use the\n[PURGE_ARCHIVE]\nbutton inside the menu. It wipes the local RAM but keeps the\nSarcasm Matrix\nintact for the next run.\nWould you like me to add a \"Screenshot\" button to the footer that captures the current EMF wave and the spectral waterfall as an image for your records?",
+  "provenance": {
+    "originating_node": "SAGE-MAMA",
+    "sync_source": "import",
+    "audit_timestamp": 1781825418064,
+    "drift_detected": []
+  }
+}
