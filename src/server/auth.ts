@@ -1,7 +1,17 @@
 import './config';
 import express from 'express';
-import { createHmac } from 'node:crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { isServerLocked } from './seed-core';
+
+// Constant-time string comparison. Returns false on any length mismatch
+// without short-circuiting on content, avoiding timing side-channels on
+// secret comparison (bearer tokens, HMAC signatures).
+function safeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, 'utf8');
+  const bufB = Buffer.from(b, 'utf8');
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
 
 // ─── Lock guard middleware ─────────────────────────────────────────────────
 export function lockGuard(req: express.Request, res: express.Response, next: express.NextFunction) {
@@ -44,10 +54,7 @@ export function verifyExchangeToken(token: string): {
     const payload = decoded.slice(0, lastColon);
     const signature = decoded.slice(lastColon + 1);
     const expected = signExchangePayload(payload);
-    if (signature.length !== expected.length) return { clientId: '', scope: '', valid: false };
-    const sigBuf = Buffer.from(signature, 'hex');
-    const expBuf = Buffer.from(expected, 'hex');
-    if (!sigBuf.equals(expBuf)) return { clientId: '', scope: '', valid: false };
+    if (!safeEqual(signature, expected)) return { clientId: '', scope: '', valid: false };
     const [clientId, expiresAtStr, scope] = payload.split(':');
     const expiresAt = parseInt(expiresAtStr, 10);
     if (isNaN(expiresAt) || Date.now() > expiresAt)
@@ -83,7 +90,7 @@ export function authGuard(req: express.Request, res: express.Response, next: exp
   }
 
   // 1. Static Bearer token
-  if (API_BEARER_TOKEN && provided === API_BEARER_TOKEN) {
+  if (API_BEARER_TOKEN && safeEqual(provided, API_BEARER_TOKEN)) {
     next();
     return;
   }

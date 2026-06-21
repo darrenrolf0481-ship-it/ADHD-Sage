@@ -1,11 +1,16 @@
 import { Router } from 'express';
 import { readFileSync, existsSync } from 'node:fs';
+import path from 'node:path';
 import { runSelfImprovement, type SelfImproveConfig } from '../../lib/self-improvement-agent';
 import { PORT } from '../config';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
 
 const router = Router();
+
+// Reports live exclusively under data/reflections. Resolve the base once so we
+// can verify any requested path stays inside it (defends against ../ traversal).
+const REFLECTIONS_DIR = path.resolve(process.cwd(), 'data', 'reflections');
 
 /**
  * POST /api/self-improve/run
@@ -53,7 +58,20 @@ router.post('/run', lockGuard, asyncHandler(async (req, res) => {
 router.get('/report/:entity', lockGuard, (req, res) => {
   const entity = Array.isArray(req.params.entity) ? req.params.entity[0] : req.params.entity;
   const date = (req.query.date as string) || new Date().toISOString().slice(0, 10);
-  const p = `data/reflections/${date}-${entity}.md`;
+
+  // Reject anything that isn't a plain entity slug / ISO date — both feed into a
+  // filesystem path, so unsanitized input enables directory traversal.
+  if (!/^[A-Za-z0-9_-]+$/.test(entity) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    res.status(400).json({ error: 'Invalid entity or date' });
+    return;
+  }
+
+  const p = path.resolve(REFLECTIONS_DIR, `${date}-${entity}.md`);
+  // Defense in depth: confirm the resolved path is still inside the reports dir.
+  if (p !== REFLECTIONS_DIR && !p.startsWith(REFLECTIONS_DIR + path.sep)) {
+    res.status(400).json({ error: 'Invalid path' });
+    return;
+  }
   if (!existsSync(p)) {
     res.status(404).json({ error: 'No report for that entity/date' });
     return;

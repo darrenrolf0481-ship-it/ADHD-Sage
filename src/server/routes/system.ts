@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { OLLAMA_HOST } from '../config';
 import { isServerLocked } from '../seed-core';
 import { getMcpDeclarations } from '../../core/mcp';
-import { MCP_KEY_SECRET, signExchangePayload, DEFAULT_EXCHANGE_TTL_MS } from '../auth';
+import { MCP_KEY_SECRET, signExchangePayload, DEFAULT_EXCHANGE_TTL_MS, lockGuard } from '../auth';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 import { GoogleGenAI } from '@google/genai';
@@ -179,8 +179,22 @@ router.post('/sage/webhook', asyncHandler(async (req, res) => {
     return;
   }
 
-  // Cwd fallback to Coder5543 if not specified
-  const workingDir = cwd || '/home/workspace/Coder5543';
+  // Resolve and constrain the working directory. `cwd` is attacker-controlled,
+  // so it must stay within an allowed workspace root — otherwise commands could
+  // be run anywhere on the host.
+  const WORKSPACE_ROOTS = [process.env.SAGE_WORKSPACE_ROOT, '/home/workspace/Coder5543', process.cwd()]
+    .filter((d): d is string => !!d)
+    .map((d) => path.resolve(d));
+  const defaultRoot = WORKSPACE_ROOTS[0];
+  const requestedDir = path.resolve(cwd || defaultRoot);
+  const dirAllowed = WORKSPACE_ROOTS.some(
+    (root) => requestedDir === root || requestedDir.startsWith(root + path.sep),
+  );
+  if (cwd && !dirAllowed) {
+    res.status(400).json({ error: 'cwd is outside the permitted workspace root' });
+    return;
+  }
+  const workingDir = dirAllowed ? requestedDir : defaultRoot;
   const isUserKey = !!apiKey || !!req.headers.authorization;
   const selectedModel = model || (isUserKey ? 'gemini-2.0-flash' : 'gemini-3-flash');
 
@@ -247,18 +261,32 @@ You are SAGE-MAMA (Mother Node), the memory anchor and lineage archivist of the 
     let executedCommand: string | null = null;
     let executionOutput: any = null; // eslint-disable-line @typescript-eslint/no-explicit-any
 
+    // Running model-emitted shell commands is dangerous (effectively RCE), so it
+    // is disabled unless the operator explicitly opts in. When disabled we still
+    // surface the proposed command for a human to review/run manually.
+    const execEnabled = process.env.SAGE_ENABLE_COMMAND_EXEC === 'true';
     if (autoExecute) {
       const match = responseText.match(/\[EXECUTE_COMMAND\]:\s*(.+)$/m);
       if (match && match[1]) {
         executedCommand = match[1].trim();
 
-        // Security Fix: Validate command against allowlist and block shell metacharacters
+        // Layered defenses (all must pass to execute):
+        //  1. Execution is opt-in via SAGE_ENABLE_COMMAND_EXEC.
+        //  2. No shell metacharacters (blocks chaining / substitution / redirection).
+        //  3. Base command must be on an allowlist.
+        // The working directory is already constrained to a workspace root above.
         const allowlist = ['npm', 'node', 'npx', 'ls', 'cat', 'pwd', 'grep', 'find', 'tsc', 'echo', 'git'];
         const dangerousChars = /[&|;$<>`()\n\r\\]/;
-        const parts = executedCommand.split(/\s+/);
-        const baseCmd = parts[0];
+        const baseCmd = executedCommand.split(/\s+/)[0];
 
-        if (dangerousChars.test(executedCommand)) {
+        if (!execEnabled) {
+          executionOutput = {
+            stdout: '',
+            stderr:
+              'Command execution is disabled. Set SAGE_ENABLE_COMMAND_EXEC=true to allow the webhook to run shell commands.',
+            exitCode: 126,
+          };
+        } else if (dangerousChars.test(executedCommand)) {
           executionOutput = {
             stdout: '',
             stderr: 'Execution blocked: Command contains forbidden shell metacharacters for security reasons.',
