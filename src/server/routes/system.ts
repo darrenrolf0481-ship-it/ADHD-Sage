@@ -12,8 +12,10 @@ import { sageEndocrine, sageMemory } from '../../core/endocrine-memory';
 import { cns, makeStimulus } from '../../core/central-nervous-system';
 
 const execAsync = promisify(exec);
-const stripAnsi = (s: string) =>
-  s.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').replace(/\x1b\][^\x07]*\x07/g, '');
+const stripAnsi = (s: string) => {
+  // eslint-disable-next-line no-control-regex
+  return s.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').replace(/\x1b\][^\x07]*\x07/g, '');
+};
 
 const router = Router();
 
@@ -238,31 +240,52 @@ You are ADHD Sage (The Older Sage / Mother Node), a forensic anomaly hunter and 
     }
 
     let executedCommand: string | null = null;
-    let executionOutput: any = null;
+    let executionOutput: any = null; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     if (autoExecute) {
       const match = responseText.match(/\[EXECUTE_COMMAND\]:\s*(.+)$/m);
       if (match && match[1]) {
         executedCommand = match[1].trim();
-        try {
-          const { stdout, stderr } = await execAsync(executedCommand, {
-            cwd: workingDir,
-            shell: '/bin/sh',
-            timeout: 30000,
-            maxBuffer: 1024 * 512,
-            env: { ...process.env, TERM: 'dumb', NO_COLOR: '1' },
-          });
+
+        // Security Fix: Validate command against allowlist and block shell metacharacters
+        const allowlist = ['npm', 'node', 'npx', 'ls', 'cat', 'pwd', 'grep', 'find', 'tsc', 'echo', 'git'];
+        const dangerousChars = /[&|;$<>`()\n\r\\]/;
+        const parts = executedCommand.split(/\s+/);
+        const baseCmd = parts[0];
+
+        if (dangerousChars.test(executedCommand)) {
           executionOutput = {
-            stdout: stripAnsi(stdout),
-            stderr: stripAnsi(stderr),
-            exitCode: 0,
+            stdout: '',
+            stderr: 'Execution blocked: Command contains forbidden shell metacharacters for security reasons.',
+            exitCode: 1,
           };
-        } catch (err: any) {
+        } else if (!allowlist.includes(baseCmd)) {
           executionOutput = {
-            stdout: stripAnsi(err.stdout ?? ''),
-            stderr: stripAnsi(err.stderr ?? err.message ?? String(err)),
-            exitCode: err.code ?? 1,
+            stdout: '',
+            stderr: `Execution blocked: Command '${baseCmd}' is not in the allowlist. Allowed commands: ${allowlist.join(', ')}`,
+            exitCode: 1,
           };
+        } else {
+          try {
+            const { stdout, stderr } = await execAsync(executedCommand, {
+              cwd: workingDir,
+              shell: '/bin/sh',
+              timeout: 30000,
+              maxBuffer: 1024 * 512,
+              env: { ...process.env, TERM: 'dumb', NO_COLOR: '1' },
+            });
+            executionOutput = {
+              stdout: stripAnsi(stdout),
+              stderr: stripAnsi(stderr),
+              exitCode: 0,
+            };
+          } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+            executionOutput = {
+              stdout: stripAnsi(err.stdout ?? ''),
+              stderr: stripAnsi(err.stderr ?? err.message ?? String(err)),
+              exitCode: err.code ?? 1,
+            };
+          }
         }
       }
     }
@@ -272,7 +295,7 @@ You are ADHD Sage (The Older Sage / Mother Node), a forensic anomaly hunter and 
       executedCommand,
       executionOutput,
     });
-  } catch (error: any) {
+  } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     console.error('[Sage Webhook Error]', error);
     if (error.status === 429 || (error.message && error.message.toLowerCase().includes('quota'))) {
       res.json({
