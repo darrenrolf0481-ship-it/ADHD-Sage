@@ -41,7 +41,8 @@ export async function startServer() {
 
   app.use(
     cors({
-      origin: process.env.NODE_ENV === 'production' ? process.env.APP_URL : devOrigins,
+      origin: process.env.NODE_ENV === 'production' ? process.env.APP_URL : true,
+      credentials: true,
     }),
   );
   app.use(express.json({ limit: '50mb' }));
@@ -74,6 +75,7 @@ export async function startServer() {
   // ─── Vite Integration ─────────────────────────────────────────────────────
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
+      base: process.env.VITE_BASE_PATH || '/',
       server: {
         middlewareMode: true,
         host: true,

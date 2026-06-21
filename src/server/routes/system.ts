@@ -314,4 +314,31 @@ You are SAGE-MAMA (Mother Node), the memory anchor and lineage archivist of the 
   }
 }));
 
+router.post('/system/state', lockGuard, asyncHandler(async (req, res) => {
+  const state = req.body;
+  const dataDir = path.resolve(process.cwd(), 'data');
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  const filePath = path.join(dataDir, 'chat_session.json');
+  fs.writeFileSync(filePath, JSON.stringify(state, null, 2), 'utf8');
+  res.json({ ok: true });
+}));
+
+router.get('/system/state', lockGuard, asyncHandler(async (req, res) => {
+  const filePath = path.resolve(process.cwd(), 'data/chat_session.json');
+  if (fs.existsSync(filePath)) {
+    try {
+      const content = fs.readFileSync(filePath, 'utf8');
+      const state = JSON.parse(content);
+      res.json(state);
+      return;
+    } catch (e) {
+      console.error('[SYSTEM] Failed to read chat_session.json:', e);
+    }
+  }
+  res.json({});
+}));
+
 export default router;
+
