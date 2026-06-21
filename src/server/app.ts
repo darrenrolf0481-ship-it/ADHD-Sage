@@ -24,15 +24,30 @@ import systemRouter from './routes/system';
 export async function startServer() {
   const app = express();
 
-  // Basic request logger for debugging
+  // Basic request logger for debugging. Redact a `token` query param so bearer
+  // tokens passed via ?token= (e.g. by EventSource) never land in logs.
   app.use((req, res, next) => {
-    console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
+    const safeUrl = req.url.replace(/([?&]token=)[^&]*/gi, '$1[REDACTED]');
+    console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${safeUrl}`);
     next();
   });
 
+  // CORS: in production lock to APP_URL; in dev allow only localhost origins
+  // (and same-origin / non-browser requests with no Origin header) rather than
+  // reflecting every origin.
+  const allowedDevOrigin = (origin: string) =>
+    /^(https?:\/\/)?(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
+    /^capacitor:\/\//.test(origin) ||
+    /^http:\/\/localhost/.test(origin);
   app.use(
     cors({
-      origin: process.env.NODE_ENV === 'production' ? process.env.APP_URL : true,
+      origin(origin, callback) {
+        if (!origin) return callback(null, true); // same-origin / curl / native
+        if (process.env.NODE_ENV === 'production') {
+          return callback(null, !!process.env.APP_URL && origin === process.env.APP_URL);
+        }
+        return callback(null, allowedDevOrigin(origin));
+      },
     }),
   );
   app.use(express.json({ limit: '50mb' }));
@@ -98,24 +113,38 @@ export async function startServer() {
   // Initialize MCP connections before accepting traffic
   await initMcpManager();
 
-  // Global error handler
+  // Global error handler. Log the real error server-side, but return a generic
+  // message so internal details (stack hints, paths) don't leak to clients.
   app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error('[API Error]', err);
     if (!res.headersSent) {
-      res.status(500).json({ error: err.message || 'Internal Server Error' });
+      res.status(500).json({ error: 'Internal Server Error' });
     }
   });
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[SAGE] Server running on http://0.0.0.0:${PORT}`);
-    if (API_BEARER_TOKEN || MCP_KEY_SECRET) {
+  // Bind to loopback by default. The API exposes powerful endpoints (and auth is
+  // optional), so listening on all interfaces must be an explicit opt-in via
+  // HOST=0.0.0.0. When auth is unconfigured we refuse to expose beyond loopback.
+  const authConfigured = !!(API_BEARER_TOKEN || MCP_KEY_SECRET);
+  let host = process.env.HOST || '127.0.0.1';
+  if (host !== '127.0.0.1' && host !== 'localhost' && !authConfigured) {
+    console.warn(
+      `[AUTH] HOST=${host} requested but no token is configured — refusing to ` +
+        'expose an unauthenticated API beyond loopback. Set API_BEARER_TOKEN to ' +
+        'bind a non-loopback interface.',
+    );
+    host = '127.0.0.1';
+  }
+  app.listen(PORT, host, () => {
+    console.log(`[SAGE] Server running on http://${host}:${PORT}`);
+    if (authConfigured) {
       const modes = [
         API_BEARER_TOKEN ? 'static Bearer' : '',
         MCP_KEY_SECRET ? 'MCP-Key-Exchange' : '',
       ].filter(Boolean);
       console.log(`[AUTH] Protection active — modes: ${modes.join(' + ')}`);
     } else {
-      console.log('[AUTH] No tokens configured — endpoints are open');
+      console.log('[AUTH] No tokens configured — endpoints are open (loopback only)');
     }
   });
 

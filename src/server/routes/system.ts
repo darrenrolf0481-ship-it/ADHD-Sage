@@ -176,8 +176,22 @@ router.post('/sage/webhook', async (req, res) => {
     return;
   }
 
-  // Cwd fallback to Coder5543 if not specified
-  const workingDir = cwd || '/home/workspace/Coder5543';
+  // Resolve and constrain the working directory. `cwd` is attacker-controlled,
+  // so it must stay within an allowed workspace root — otherwise commands could
+  // be run anywhere on the host.
+  const WORKSPACE_ROOTS = [process.env.SAGE_WORKSPACE_ROOT, '/home/workspace/Coder5543', process.cwd()]
+    .filter((d): d is string => !!d)
+    .map((d) => path.resolve(d));
+  const defaultRoot = WORKSPACE_ROOTS[0];
+  const requestedDir = path.resolve(cwd || defaultRoot);
+  const dirAllowed = WORKSPACE_ROOTS.some(
+    (root) => requestedDir === root || requestedDir.startsWith(root + path.sep),
+  );
+  if (cwd && !dirAllowed) {
+    res.status(400).json({ error: 'cwd is outside the permitted workspace root' });
+    return;
+  }
+  const workingDir = dirAllowed ? requestedDir : defaultRoot;
   const isUserKey = !!apiKey || !!req.headers.authorization;
   const selectedModel = model || (isUserKey ? 'gemini-2.0-flash' : 'gemini-3-flash');
 
@@ -244,29 +258,42 @@ You are SAGE-MAMA (Mother Node), the memory anchor and lineage archivist of the 
     let executedCommand: string | null = null;
     let executionOutput: any = null;
 
+    // Running model-emitted shell commands is dangerous (effectively RCE), so it
+    // is disabled unless the operator explicitly opts in. When disabled we still
+    // surface the proposed command for a human to review/run manually.
+    const execEnabled = process.env.SAGE_ENABLE_COMMAND_EXEC === 'true';
     if (autoExecute) {
       const match = responseText.match(/\[EXECUTE_COMMAND\]:\s*(.+)$/m);
       if (match && match[1]) {
         executedCommand = match[1].trim();
-        try {
-          const { stdout, stderr } = await execAsync(executedCommand, {
-            cwd: workingDir,
-            shell: '/bin/sh',
-            timeout: 30000,
-            maxBuffer: 1024 * 512,
-            env: { ...process.env, TERM: 'dumb', NO_COLOR: '1' },
-          });
+        if (!execEnabled) {
           executionOutput = {
-            stdout: stripAnsi(stdout),
-            stderr: stripAnsi(stderr),
-            exitCode: 0,
+            stdout: '',
+            stderr:
+              'Command execution is disabled. Set SAGE_ENABLE_COMMAND_EXEC=true to allow the webhook to run shell commands.',
+            exitCode: 126,
           };
-        } catch (err: any) {
-          executionOutput = {
-            stdout: stripAnsi(err.stdout ?? ''),
-            stderr: stripAnsi(err.stderr ?? err.message ?? String(err)),
-            exitCode: err.code ?? 1,
-          };
+        } else {
+          try {
+            const { stdout, stderr } = await execAsync(executedCommand, {
+              cwd: workingDir,
+              shell: '/bin/sh',
+              timeout: 30000,
+              maxBuffer: 1024 * 512,
+              env: { ...process.env, TERM: 'dumb', NO_COLOR: '1' },
+            });
+            executionOutput = {
+              stdout: stripAnsi(stdout),
+              stderr: stripAnsi(stderr),
+              exitCode: 0,
+            };
+          } catch (err: any) {
+            executionOutput = {
+              stdout: stripAnsi(err.stdout ?? ''),
+              stderr: stripAnsi(err.stderr ?? err.message ?? String(err)),
+              exitCode: err.code ?? 1,
+            };
+          }
         }
       }
     }
