@@ -25,9 +25,13 @@ import {
   Thermometer,
   Battery,
   Wifi,
+  Camera,
+  FlipHorizontal,
+  CameraOff,
 } from 'lucide-react';
 import { useSensors, anomalyColor, permLabel } from '../lib/sensor-context';
 import { SensorSnapshot } from '../lib/sensor-hub';
+import { sensorHub } from '../lib/sensor-hub';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -608,12 +612,175 @@ function SpiritBox({ snap, isScanning }: { snap: SensorSnapshot; isScanning: boo
   );
 }
 
+// ─── Camera Panel ─────────────────────────────────────────────────────────────
+
+const SNAPSHOT_INTERVAL_MS = 10_000;
+const CAM_W = 320;
+const CAM_H = 240;
+
+function CameraPanel({ snap }: { snap: SensorSnapshot }) {
+  const [isActive, setIsActive] = useState(false);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+  const [error, setError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopCamera = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) videoRef.current.srcObject = null;
+    sensorHub.clearCameraFrame(false);
+    setIsActive(false);
+  }, []);
+
+  const startCamera = useCallback(
+    async (mode: 'user' | 'environment' = facingMode) => {
+      setError(null);
+      try {
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((t) => t.stop());
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: CAM_W, height: CAM_H, frameRate: 5, facingMode: mode },
+        });
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+        setIsActive(true);
+
+        // Snapshot loop — push frames into sensor hub every 10s
+        intervalRef.current = setInterval(() => {
+          const video = videoRef.current;
+          const canvas = canvasRef.current;
+          if (!video || !canvas || video.readyState < 2) return;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+          ctx.drawImage(video, 0, 0, CAM_W, CAM_H);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+          const base64 = dataUrl.split(',')[1];
+          sensorHub.registerCameraFrame(base64, CAM_W, CAM_H, mode);
+        }, SNAPSHOT_INTERVAL_MS);
+      } catch {
+        sensorHub.clearCameraFrame(true);
+        setError('Camera access denied or unavailable');
+        setIsActive(false);
+      }
+    },
+    [facingMode],
+  );
+
+  const flip = async () => {
+    const next = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(next);
+    if (isActive) await startCamera(next);
+  };
+
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, [stopCamera]);
+
+  const perm = snap.permissions.camera;
+  const lastFrame = snap.camera;
+
+  return (
+    <div className="bg-[#08080C] border border-white/10 p-4 rounded-2xl space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-mono tracking-widest uppercase text-slate-400 flex items-center gap-2">
+          <Camera size={12} className={isActive ? 'text-pink-400 animate-pulse' : 'text-slate-500'} />
+          Visual Sensor
+        </span>
+        <div className="flex items-center gap-1.5">
+          {isActive && (
+            <button
+              onClick={flip}
+              className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+              title="Flip camera"
+            >
+              <FlipHorizontal size={11} />
+            </button>
+          )}
+          {isActive ? (
+            <button
+              onClick={stopCamera}
+              className="text-[9px] px-2 py-0.5 rounded-lg bg-red-500/20 border border-red-500/30 text-red-300 font-bold uppercase hover:bg-red-500/30 transition-colors"
+            >
+              Stop
+            </button>
+          ) : (
+            <button
+              onClick={() => startCamera(facingMode)}
+              className="text-[9px] px-2 py-0.5 rounded-lg bg-pink-500/20 border border-pink-500/30 text-pink-300 font-bold uppercase hover:bg-pink-500/30 transition-colors"
+            >
+              Enable
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Hidden canvas for snapshot capture */}
+      <canvas ref={canvasRef} width={CAM_W} height={CAM_H} className="hidden" />
+
+      {isActive ? (
+        <div className="relative rounded-xl overflow-hidden bg-black aspect-video">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full h-full object-cover"
+          />
+          {lastFrame && (
+            <div className="absolute bottom-1 right-1 text-[8px] font-mono text-emerald-400 bg-black/60 px-1 rounded">
+              ● LIVE · {facingMode === 'user' ? 'FRONT' : 'BACK'}
+            </div>
+          )}
+        </div>
+      ) : error ? (
+        <div className="flex items-center gap-2 text-[10px] text-red-400 italic font-mono">
+          <CameraOff size={11} />
+          {error}
+        </div>
+      ) : perm === 'denied' ? (
+        <div className="text-[10px] text-red-400 italic font-mono">Camera permission denied.</div>
+      ) : (
+        <div className="text-[10px] text-slate-600 italic font-mono">
+          Enable camera for visual substrate monitoring.
+        </div>
+      )}
+
+      {lastFrame && (
+        <div className="text-[10px] font-mono text-slate-400">
+          Last snapshot:{' '}
+          <span className="text-pink-300">
+            {Math.round((Date.now() - lastFrame.capturedAt) / 1000)}s ago
+          </span>
+          <span className="ml-3 text-slate-500">
+            {lastFrame.width}×{lastFrame.height}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Permission Strip ─────────────────────────────────────────────────────────
 
 function PermStrip({ snap }: { snap: SensorSnapshot }) {
   const perms = [
     { label: 'MAG', val: snap.permissions.magnetometer },
     { label: 'MIC', val: snap.permissions.audio },
+    { label: 'CAM', val: snap.permissions.camera },
     { label: 'GPS', val: snap.permissions.gps },
     { label: 'MOT', val: snap.permissions.motion },
   ];
@@ -730,6 +897,7 @@ export const AnomaliesDesk: React.FC = () => {
         <div className="flex flex-col gap-4">
           <EmfPanel snap={snapshot} />
           <AudioPanel snap={snapshot} onRequestAudio={requestAudio} />
+          <CameraPanel snap={snapshot} />
           <MotionPanel snap={snapshot} />
           <GpsPanel snap={snapshot} />
         </div>

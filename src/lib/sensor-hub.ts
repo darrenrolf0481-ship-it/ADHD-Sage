@@ -90,10 +90,19 @@ export interface SensorSnapshot {
   network?: NetworkReading;
   geomagnetic?: GeomagneticReading;
   weather?: WeatherReading;
+  camera?: CameraReading;
   anomalyScore: number; // 0-1 composite
   phiSynchronicity: boolean; // cross-modal Φ event
   activeCount: number; // number of active sensors
   permissions: SensorPermissions;
+}
+
+export interface CameraReading {
+  frameBase64: string; // latest JPEG snapshot, base64 (no data-URL prefix)
+  width: number;
+  height: number;
+  facingMode: 'user' | 'environment';
+  capturedAt: number; // epoch ms
 }
 
 export interface SensorPermissions {
@@ -101,6 +110,7 @@ export interface SensorPermissions {
   audio: 'granted' | 'denied' | 'pending' | 'unavailable';
   gps: 'granted' | 'denied' | 'pending' | 'unavailable';
   magnetometer: 'granted' | 'denied' | 'pending' | 'unavailable';
+  camera: 'granted' | 'denied' | 'pending' | 'unavailable';
 }
 
 type SensorEventType = 'snapshot' | 'synchronicity' | 'permission-change';
@@ -143,6 +153,7 @@ export class SensorHub {
   private _network?: NetworkReading;
   private _geomagnetic?: GeomagneticReading;
   private _weather?: WeatherReading;
+  private _camera?: CameraReading;
 
   // internal
   private _emfHistory: number[] = [];
@@ -156,6 +167,7 @@ export class SensorHub {
     audio: 'pending',
     gps: 'pending',
     magnetometer: 'pending',
+    camera: 'pending',
   };
 
   // lifecycle
@@ -200,6 +212,7 @@ export class SensorHub {
     if (this._battery) active++;
     if (this._geomagnetic) active++;
     if (this._weather) active++;
+    if (this._camera) active++;
 
     return {
       timestamp: Date.now(),
@@ -211,6 +224,7 @@ export class SensorHub {
       network: this._network,
       geomagnetic: this._geomagnetic,
       weather: this._weather,
+      camera: this._camera,
       anomalyScore: score,
       phiSynchronicity: phi,
       activeCount: active,
@@ -255,6 +269,23 @@ export class SensorHub {
 
   async startAudio(): Promise<boolean> {
     return this._startAudio();
+  }
+
+  /** Called by CameraPanel (React) to push each snapshot frame into the sensor stream. */
+  registerCameraFrame(
+    frameBase64: string,
+    width: number,
+    height: number,
+    facingMode: 'user' | 'environment',
+  ): void {
+    this._camera = { frameBase64, width, height, facingMode, capturedAt: Date.now() };
+    this._permissions.camera = 'granted';
+  }
+
+  /** Called by CameraPanel when camera is stopped or denied. */
+  clearCameraFrame(denied = false): void {
+    this._camera = undefined;
+    this._permissions.camera = denied ? 'denied' : 'pending';
   }
 
   stop(): void {
@@ -721,6 +752,13 @@ export class SensorHub {
       const { level, charging } = snap.battery;
       lines.push(
         `Battery: ${(level * 100).toFixed(0)}% ${charging ? '(charging)' : '(discharging)'}`,
+      );
+    }
+
+    if (snap.camera) {
+      const age = Math.round((Date.now() - snap.camera.capturedAt) / 1000);
+      lines.push(
+        `Camera: ${snap.camera.facingMode} lens active · ${snap.camera.width}×${snap.camera.height} · last frame ${age}s ago`,
       );
     }
 
