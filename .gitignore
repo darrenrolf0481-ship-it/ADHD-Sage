@@ -4,6 +4,10 @@ dist/
 coverage/
 .DS_Store
 *.log
+
+# Python bytecode cache (from running/validating scripts/*.py)
+__pycache__/
+*.pyc
 .env*
 !.env.example
 data/sages_constellations.db

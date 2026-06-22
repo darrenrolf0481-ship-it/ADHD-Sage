@@ -4,7 +4,12 @@ import os, sys, time, json, glob
 import urllib.request
 from datetime import datetime, timezone
 
-BRIDGE_URL = os.environ.get('BRIDGE_URL', 'http://127.0.0.1:3099')
+# The ADHD-Sage (SAGE-MAMA) server hosts the bridge endpoints (/api/health,
+# /api/vfs/bridge/sync). It listens on PORT (default 3000) — NOT 3099, which had
+# nothing serving it. To bridge to a *remote* SAGE-7 instead, set BRIDGE_URL to
+# that host's URL.
+_PORT = os.environ.get('PORT', '3000')
+BRIDGE_URL = os.environ.get('BRIDGE_URL', f'http://127.0.0.1:{_PORT}')
 DROPBOX = os.environ.get('BRIDGE_DROPBOX', '/home/workspace/ADHD-Sage/bridge_dropbox')
 LOG = os.environ.get('BRIDGE_LOG', '/home/workspace/ADHD-Sage/bridge_heartbeat.log')
 INTERVAL = int(os.environ.get('BRIDGE_INTERVAL', '60'))
