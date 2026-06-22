@@ -35,10 +35,10 @@ function MsgCopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={copy}
-      className="absolute -bottom-5 right-0 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#1C1C1E] border border-white/10 text-[8px] font-mono text-slate-500 hover:text-white hover:border-white/20"
+      className="shrink-0 self-end mb-0.5 p-1 rounded bg-white/5 border border-white/10 text-slate-500 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+      title="Copy"
     >
-      {done ? <Check size={8} className="text-emerald-400" /> : <Copy size={8} />}
-      {done ? 'copied' : 'copy'}
+      {done ? <Check size={10} className="text-emerald-400" /> : <Copy size={10} />}
     </button>
   );
 }
@@ -145,11 +145,12 @@ export const CodingLab: React.FC = () => {
       let responseText: string;
 
       if (bridgeMode) {
-        // Route to SAGE-7 via the bridge proxy
+        // Route to SAGE-7 via the bridge proxy — identify sender as MAMA
+        const bridgeMessage = `[MAMA→SEVEN | Coding Lab]\n\n${userText}`;
         const res = await fetch('/api/sage7/bridge', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: userText, model: ollamaModel }),
+          body: JSON.stringify({ message: bridgeMessage, model: ollamaModel }),
         });
         const data = (await res.json()) as { reply?: string; error?: string };
         if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
@@ -384,7 +385,7 @@ export const CodingLab: React.FC = () => {
                     )}
                   </div>
                 )}
-                <div className={`max-w-[88%] relative group ${msg.role === 'user' ? '' : ''}`}>
+                <div className={`flex items-end gap-1.5 max-w-[92%] ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                   <div
                     className={`rounded-2xl px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap break-words font-mono ${
                       msg.role === 'user'
@@ -396,10 +397,7 @@ export const CodingLab: React.FC = () => {
                   >
                     {msg.text}
                   </div>
-                  {/* Copy button — visible on hover for assistant + user messages */}
-                  {msg.role !== 'system' && (
-                    <MsgCopyButton text={msg.text} />
-                  )}
+                  {msg.role !== 'system' && <MsgCopyButton text={msg.text} />}
                 </div>
               </motion.div>
             ))}
