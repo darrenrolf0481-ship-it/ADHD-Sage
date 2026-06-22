@@ -13,4 +13,4 @@ export interface ChatMessage {
   attachments?: Attachment[];
 }
 
-export type AppView = 'chat' | 'lattice' | 'vault' | 'labyrinth' | 'anomalies' | 'surprise';
+export type AppView = 'chat' | 'lattice' | 'vault' | 'labyrinth' | 'anomalies' | 'surprise' | 'coding-lab';

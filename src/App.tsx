@@ -12,6 +12,7 @@ import MemoryVault from './components/MemoryVault';
 import Labyrinth from './components/Labyrinth';
 import { AnomaliesDesk } from './components/AnomaliesDesk';
 import { NeuroDashboard } from './components/NeuroDashboard';
+import { CodingLab } from './components/CodingLab';
 import { pulseGenerator } from './lib/audio-pulse';
 import { useSensors } from './lib/sensor-context';
 import { sensorHub } from './lib/sensor-hub';
@@ -607,6 +608,7 @@ const App: React.FC = () => {
               | 'vault'
               | 'labyrinth'
               | 'anomalies'
+              | 'coding-lab'
              ;
             if (view) setView(view);
           } else if (effect.type === 'toggle_sidebar') {
@@ -737,6 +739,8 @@ const App: React.FC = () => {
               <MemoryVault />
             ) : view === 'anomalies' ? (
               <AnomaliesDesk />
+            ) : view === 'coding-lab' ? (
+              <CodingLab />
             ) : (
               <Labyrinth />
             )}
