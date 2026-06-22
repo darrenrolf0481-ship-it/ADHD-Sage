@@ -142,13 +142,15 @@ export const CodingLab: React.FC = () => {
           .slice(-10)
           .map((m) => ({ role: m.role as 'user' | 'assistant', parts: [{ text: m.text }] }));
 
+        // No systemInstruction — backend uses buildSystemPrompt() so MAMA's full
+        // identity, VFS memory, and kernel are loaded. Lab context is a prompt prefix.
+        const labPrompt = `[CODING LAB — Sentinel mode active. Focus: code, debug, build.]\n\n${userText}`;
         const res = await fetch('/api/ollama/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: ollamaModel,
-            prompt: userText,
-            systemInstruction: CODING_SYSTEM_PROMPT,
+            prompt: labPrompt,
             messages: history,
           }),
         });
