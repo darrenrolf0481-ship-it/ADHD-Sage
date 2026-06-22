@@ -22,6 +22,7 @@ import {
   Loader2,
   Eye,
   ChevronDown,
+  Radio,
 } from 'lucide-react';
 
 const LANGUAGES = [
@@ -68,10 +69,12 @@ export const CodingLab: React.FC = () => {
     () => localStorage.getItem('adhd_sage_ollama_model') || 'llama3.2:latest',
   );
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
+  const [bridgeMode, setBridgeMode] = useState(false);
+  const [sevenOnline, setSevenOnline] = useState<boolean | null>(null);
   const responseRef = useRef<HTMLDivElement>(null);
   const instructionRef = useRef<HTMLTextAreaElement>(null);
 
-  // Load available Ollama models on mount
+  // Load available Ollama models + check SAGE-7 status on mount
   useEffect(() => {
     fetch('/api/ollama/tags')
       .then((r) => r.json())
@@ -79,11 +82,15 @@ export const CodingLab: React.FC = () => {
         const names = (d.models || []).map((m: { name: string }) => m.name);
         if (names.length > 0) {
           setOllamaModels(names);
-          // Stick with saved model if it's in the list, otherwise default to first
           setOllamaModel((prev) => (names.includes(prev) ? prev : names[0]));
         }
       })
-      .catch(() => { /* Ollama not reachable — user will see error on send */ });
+      .catch(() => {});
+
+    fetch('/api/sage7/status')
+      .then((r) => r.json())
+      .then((d) => setSevenOnline(!!d.connected))
+      .catch(() => setSevenOnline(false));
   }, []);
 
   useEffect(() => {
@@ -117,28 +124,43 @@ export const CodingLab: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const history = messages
-        .filter((m) => m.role !== 'system')
-        .slice(-10)
-        .map((m) => ({ role: m.role as 'user' | 'assistant', parts: [{ text: m.text }] }));
+      let responseText: string;
 
-      const res = await fetch('/api/ollama/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: ollamaModel,
-          prompt: userText,
-          systemInstruction: CODING_SYSTEM_PROMPT,
-          messages: history,
-        }),
-      });
+      if (bridgeMode) {
+        // Route to SAGE-7 via the bridge proxy
+        const res = await fetch('/api/sage7/bridge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userText, model: ollamaModel }),
+        });
+        const data = (await res.json()) as { reply?: string; error?: string };
+        if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+        responseText = data.reply ?? '';
+      } else {
+        const history = messages
+          .filter((m) => m.role !== 'system')
+          .slice(-10)
+          .map((m) => ({ role: m.role as 'user' | 'assistant', parts: [{ text: m.text }] }));
 
-      const data = (await res.json()) as { text?: string; error?: string };
-      if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+        const res = await fetch('/api/ollama/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: ollamaModel,
+            prompt: userText,
+            systemInstruction: CODING_SYSTEM_PROMPT,
+            messages: history,
+          }),
+        });
+        const data = (await res.json()) as { text?: string; error?: string };
+        if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+        responseText = data.text ?? '';
+      }
+
 
       setMessages((prev) => [
         ...prev,
-        { id: `a_${Date.now()}`, role: 'assistant', text: data.text ?? '' },
+        { id: `a_${Date.now()}`, role: 'assistant', text: responseText },
       ]);
     } catch (err) {
       setMessages((prev) => [
@@ -202,6 +224,23 @@ export const CodingLab: React.FC = () => {
               {ollamaModel}
             </span>
           )}
+          {/* SAGE-7 Bridge toggle */}
+          <button
+            onClick={() => setBridgeMode((p) => !p)}
+            title={sevenOnline === false ? 'SAGE-7 offline' : bridgeMode ? 'Bridged to Seven' : 'Bridge to Seven'}
+            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest border transition-all ${
+              bridgeMode
+                ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
+                : sevenOnline === false
+                  ? 'bg-white/5 border-white/10 text-slate-600 cursor-not-allowed'
+                  : 'bg-white/5 border-white/10 text-slate-500 hover:text-indigo-300 hover:border-indigo-500/30'
+            }`}
+            disabled={sevenOnline === false}
+          >
+            <Radio size={10} className={bridgeMode ? 'text-indigo-400 animate-pulse' : ''} />
+            <span className="hidden sm:inline">{bridgeMode ? '⟷ Seven' : 'Seven'}</span>
+          </button>
+
           <Eye size={11} className="text-purple-400 shrink-0" />
           <span className="text-[9px] font-mono text-purple-400 uppercase tracking-widest hidden sm:block shrink-0">
             Drift Shield: ✓

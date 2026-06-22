@@ -38,8 +38,8 @@ interface SidebarProps {
   };
   mhtNodeLimit: number;
   setMhtNodeLimit: (n: number) => void;
-  provider: 'gemini' | 'ollama' | 'openrouter';
-  setProvider: (p: 'gemini' | 'ollama' | 'openrouter') => void;
+  provider: 'ollama' | 'openrouter';
+  setProvider: (p: 'ollama' | 'openrouter') => void;
   orModel: string;
   setOrModel: (m: string) => void;
   ollamaModel: string;
@@ -406,8 +406,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <div className="flex gap-1 p-1 rounded-xl bg-[#1C1C1E] border border-white/10">
                     {(
                       [
-                        { id: 'gemini', label: '✦ Gemini' },
-                        { id: 'openrouter', label: '⟁ OR' },
+                        { id: 'openrouter', label: '⟁ OpenRouter' },
                         { id: 'ollama', label: '⬡ Ollama' },
                       ] as { id: typeof provider; label: string }[]
                     ).map((p) => (

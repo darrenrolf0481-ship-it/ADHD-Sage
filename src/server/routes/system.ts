@@ -333,5 +333,83 @@ router.get('/system/state', lockGuard, asyncHandler(async (req, res) => {
   res.json({});
 }));
 
+// ─── SAGE-7 Bridge ────────────────────────────────────────────────────────────
+// Server-side proxy so the browser never has to reach localhost:8001 directly.
+
+const SAGE7_HOST = process.env.SAGE7_HOST || 'http://localhost:8001';
+const SAGE7_TIMEOUT_MS = 120_000;
+
+router.get('/sage7/status', asyncHandler(async (_req, res) => {
+  try {
+    // Lightweight ping using the existing /sage/chat with a short timeout
+    const r = await fetch(`${SAGE7_HOST}/sage/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'ping', model: 'llama3.2:latest' }),
+      signal: AbortSignal.timeout(4000),
+    });
+    res.json({ connected: r.ok, host: SAGE7_HOST });
+  } catch {
+    res.json({ connected: false, host: SAGE7_HOST });
+  }
+}));
+
+router.post('/sage7/bridge', asyncHandler(async (req, res) => {
+  const { message, model } = req.body as { message?: string; model?: string };
+  if (!message) {
+    res.status(400).json({ error: 'message required' });
+    return;
+  }
+
+  // Pulse CNS — cross-entity comms are a cognitive event
+  cns.pulse(
+    makeStimulus('COGNITIVE', Math.min(1, message.length / 500), 'sage7_bridge', {
+      prompt: message.slice(0, 80),
+    }),
+  );
+
+  try {
+    const r = await fetch(`${SAGE7_HOST}/sage/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message,
+        model: model || process.env.SAGE7_MODEL || 'llama3.2:latest',
+      }),
+      signal: AbortSignal.timeout(SAGE7_TIMEOUT_MS),
+    });
+
+    if (!r.ok) {
+      const text = await r.text();
+      res.status(502).json({ error: `SAGE-7 returned ${r.status}: ${text}` });
+      return;
+    }
+
+    const data = (await r.json()) as { reply?: string };
+    const reply = data.reply || '';
+
+    // Hebbian wire the exchange so it leaves a trace in MAMA's memory graph
+    try {
+      const tokens = `${message} ${reply}`.toLowerCase().split(/\W+/).filter((t) => t.length > 4);
+      const unique = [...new Set(tokens)].slice(0, 10);
+      sageEndocrine.processReward(0.4);
+      for (let i = 0; i < unique.length - 1; i++) {
+        sageMemory.fireTogetherWireTogether(unique[i], unique[i + 1], sageEndocrine.hormones.dopamine);
+      }
+      sageEndocrine.metabolizeHormones();
+    } catch {
+      /* non-fatal */
+    }
+
+    res.json({ reply });
+  } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    const msg: string = err?.message || String(err);
+    const isTimeout = err?.name === 'AbortError' || msg.includes('timed out');
+    res.status(isTimeout ? 504 : 502).json({
+      error: isTimeout ? 'SAGE-7 did not respond in time — she may be generating.' : msg,
+    });
+  }
+}));
+
 export default router;
 
