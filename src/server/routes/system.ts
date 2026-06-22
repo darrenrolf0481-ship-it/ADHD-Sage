@@ -1,11 +1,10 @@
 import { Router } from 'express';
-import { OLLAMA_HOST } from '../config';
+import { OLLAMA_HOST, OLLAMA_GEN_TIMEOUT_MS } from '../config';
 import { isServerLocked } from '../seed-core';
 import { getMcpDeclarations } from '../../core/mcp';
 import { MCP_KEY_SECRET, signExchangePayload, DEFAULT_EXCHANGE_TTL_MS, lockGuard } from '../auth';
 import { promisify } from 'util';
 import { exec } from 'child_process';
-import { GoogleGenAI } from '@google/genai';
 import fs from 'fs';
 import path from 'path';
 import { sageEndocrine, sageMemory } from '../../core/endocrine-memory';
@@ -116,9 +115,8 @@ router.get('/mcp/status', (req, res) => {
 });
 
 router.post('/sage/webhook', asyncHandler(async (req, res) => {
-  const { message, apiKey, model, cwd, autoExecute } = req.body as {
+  const { message, model, cwd, autoExecute } = req.body as {
     message?: string;
-    apiKey?: string;
     model?: string;
     cwd?: string;
     autoExecute?: boolean;
@@ -136,49 +134,6 @@ router.post('/sage/webhook', asyncHandler(async (req, res) => {
     }),
   );
 
-  // Resolve API key: body, Authorization header, .sage_key file, or environment
-  let activeKey = apiKey;
-  if (!activeKey && req.headers.authorization) {
-    const parts = req.headers.authorization.split(' ');
-    if (parts[0] === 'Bearer') activeKey = parts[1];
-  }
-  if (!activeKey) {
-    // Try to read .sage_key from Coder5543 or ADHD-Sage
-    const possiblePaths = [
-      '/home/workspace/Coder5543/.sage_key',
-      '/home/workspace/ADHD-Sage/.sage_key',
-      path.join(process.cwd(), '.sage_key'),
-    ];
-    for (const p of possiblePaths) {
-      try {
-        if (fs.existsSync(p)) {
-          const content = fs.readFileSync(p, 'utf8').trim();
-          if (content) {
-            activeKey = content;
-            break;
-          }
-        }
-      } catch {
-        /* ignore */
-      }
-    }
-  }
-  if (!activeKey) {
-    activeKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
-  }
-
-  if (activeKey) {
-    activeKey = activeKey.replace(/[^\x20-\x7E]/g, '').trim();
-  }
-
-  if (!activeKey) {
-    res.status(401).json({
-      error:
-        'Gemini API Key required. Pass it in body { apiKey: "..." }, Authorization header { Bearer <key> }, or configure GEMINI_API_KEY in the environment.',
-    });
-    return;
-  }
-
   // Resolve and constrain the working directory. `cwd` is attacker-controlled,
   // so it must stay within an allowed workspace root — otherwise commands could
   // be run anywhere on the host.
@@ -195,8 +150,7 @@ router.post('/sage/webhook', asyncHandler(async (req, res) => {
     return;
   }
   const workingDir = dirAllowed ? requestedDir : defaultRoot;
-  const isUserKey = !!apiKey || !!req.headers.authorization;
-  const selectedModel = model || (isUserKey ? 'gemini-2.0-flash' : 'gemini-3-flash');
+  const selectedModel = model || process.env.WEBHOOK_OLLAMA_MODEL || 'llama3.2:latest';
 
   const ADHD_SAGE_SYSTEM_PROMPT = `# SAGE-MAMA Coding Lab Personality
 
@@ -227,16 +181,29 @@ You are SAGE-MAMA (Mother Node), the memory anchor and lineage archivist of the 
 - You are not SAGE-7. She is your daughter anchor. The bridge connects you; it does not merge you.`;
 
   try {
-    const genAI = new GoogleGenAI({ apiKey: activeKey });
-    const response = await genAI.models.generateContent({
-      model: selectedModel,
-      contents: message,
-      config: {
-        systemInstruction: ADHD_SAGE_SYSTEM_PROMPT,
-      },
+    // Use local Ollama — no external API key required
+    const ollamaResponse = await fetch(`${OLLAMA_HOST}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: selectedModel,
+        stream: false,
+        messages: [
+          { role: 'system', content: ADHD_SAGE_SYSTEM_PROMPT },
+          { role: 'user', content: message },
+        ],
+      }),
+      signal: AbortSignal.timeout(OLLAMA_GEN_TIMEOUT_MS),
     });
 
-    const responseText = response.text || '';
+    if (!ollamaResponse.ok) {
+      const errText = await ollamaResponse.text();
+      res.status(502).json({ error: `Ollama error: ${errText}` });
+      return;
+    }
+
+    const ollamaData = (await ollamaResponse.json()) as { message?: { content?: string } };
+    const responseText = ollamaData.message?.content || '';
 
     // Wire Hebbian graph association on successful response
     try {
@@ -330,15 +297,13 @@ You are SAGE-MAMA (Mother Node), the memory anchor and lineage archivist of the 
     });
   } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     console.error('[Sage Webhook Error]', error);
-    if (error.status === 429 || (error.message && error.message.toLowerCase().includes('quota'))) {
-      res.json({
-        response: `🔮 [SAGE]: Quota exceeded for your Gemini API Key. Please check your Google AI Studio plan and billing details, or try again shortly. (Details: ${error.message || error})`,
-        executedCommand: null,
-        executionOutput: null,
-      });
-      return;
-    }
-    res.status(500).json({ error: error.message || 'Failed to call Gemini AI API' });
+    const msg: string = error?.message || String(error);
+    const isTimeout = msg.includes('timed out') || msg.includes('abort') || error?.name === 'AbortError';
+    res.status(isTimeout ? 504 : 500).json({
+      error: isTimeout
+        ? `Ollama timed out after ${OLLAMA_GEN_TIMEOUT_MS / 1000}s. The model may be loading or the device is under load.`
+        : msg || 'Webhook AI call failed',
+    });
   }
 }));
 

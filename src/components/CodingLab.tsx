@@ -64,14 +64,38 @@ export const CodingLab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [ollamaModel, setOllamaModel] = useState(
+    () => localStorage.getItem('adhd_sage_ollama_model') || 'llama3.2:latest',
+  );
+  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
   const responseRef = useRef<HTMLDivElement>(null);
   const instructionRef = useRef<HTMLTextAreaElement>(null);
+
+  // Load available Ollama models on mount
+  useEffect(() => {
+    fetch('/api/ollama/tags')
+      .then((r) => r.json())
+      .then((d) => {
+        const names = (d.models || []).map((m: { name: string }) => m.name);
+        if (names.length > 0) {
+          setOllamaModels(names);
+          // Stick with saved model if it's in the list, otherwise default to first
+          setOllamaModel((prev) => (names.includes(prev) ? prev : names[0]));
+        }
+      })
+      .catch(() => { /* Ollama not reachable — user will see error on send */ });
+  }, []);
 
   useEffect(() => {
     if (responseRef.current) {
       responseRef.current.scrollTop = responseRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Persist model choice
+  useEffect(() => {
+    localStorage.setItem('adhd_sage_ollama_model', ollamaModel);
+  }, [ollamaModel]);
 
   const handleSend = useCallback(async () => {
     if (isLoading) return;
@@ -93,16 +117,19 @@ export const CodingLab: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const res = await fetch('/api/gemini/generate', {
+      const history = messages
+        .filter((m) => m.role !== 'system')
+        .slice(-10)
+        .map((m) => ({ role: m.role as 'user' | 'assistant', parts: [{ text: m.text }] }));
+
+      const res = await fetch('/api/ollama/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          model: ollamaModel,
           prompt: userText,
           systemInstruction: CODING_SYSTEM_PROMPT,
-          history: messages
-            .filter((m) => m.role !== 'system')
-            .slice(-10)
-            .map((m) => ({ role: m.role, parts: [{ text: m.text }] })),
+          messages: history,
         }),
       });
 
@@ -125,7 +152,7 @@ export const CodingLab: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [code, instruction, language, isLoading, messages]);
+  }, [code, instruction, language, isLoading, messages, ollamaModel]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -148,20 +175,36 @@ export const CodingLab: React.FC = () => {
   return (
     <div className="flex flex-col h-full gap-3">
       {/* Header */}
-      <div className="flex items-center justify-between px-1 shrink-0">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between px-1 shrink-0 gap-3">
+        <div className="flex items-center gap-2 shrink-0">
           <Code2 size={16} className="text-cyan-400" />
           <span className="text-xs font-mono font-bold uppercase tracking-widest text-cyan-400">
             Coding Lab
           </span>
-          <span className="text-[9px] font-mono text-slate-600 uppercase tracking-widest">
+          <span className="text-[9px] font-mono text-slate-600 uppercase tracking-widest hidden sm:block">
             // ADHD SENTINEL
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Eye size={11} className="text-purple-400" />
-          <span className="text-[9px] font-mono text-purple-400 uppercase tracking-widest">
-            Drift Shield: Seven Tracked
+          {/* Ollama model picker */}
+          {ollamaModels.length > 0 ? (
+            <select
+              value={ollamaModel}
+              onChange={(e) => setOllamaModel(e.target.value)}
+              className="bg-[#1C1C1E] border border-white/10 rounded-lg px-2 py-1 text-[9px] text-slate-300 outline-none focus:border-cyan-500/50 max-w-[160px]"
+            >
+              {ollamaModels.map((m) => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+            </select>
+          ) : (
+            <span className="text-[9px] font-mono text-slate-500 border border-white/10 rounded-lg px-2 py-1">
+              {ollamaModel}
+            </span>
+          )}
+          <Eye size={11} className="text-purple-400 shrink-0" />
+          <span className="text-[9px] font-mono text-purple-400 uppercase tracking-widest hidden sm:block shrink-0">
+            Drift Shield: ✓
           </span>
         </div>
       </div>
