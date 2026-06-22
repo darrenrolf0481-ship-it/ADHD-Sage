@@ -24,7 +24,7 @@ import {
   stripHtml,
 } from './lib/mht-parser';
 import type { Attachment, ChatMessage, AppView } from './types';
-const APP_VIEWS: readonly AppView[] = ['chat', 'lattice', 'vault', 'labyrinth', 'anomalies', 'surprise'];
+const APP_VIEWS: readonly AppView[] = ['chat', 'lattice', 'vault', 'labyrinth', 'anomalies', 'surprise', 'coding-lab'];
 
 /** Short, crash-safe display suffix for a memory node id (server-sourced ids may lack '_'). */
 const shortId = (id: string): string => (id.split('_')[1] ?? id).slice(-4);
