@@ -38,13 +38,27 @@ export async function getPhiSentinel(): Promise<number> {
  * Sends a batch of memories from SAGE-7 across the bridge to SAGE-MAMA.
  * The server will tag provenance and quarantine any identity contamination.
  */
+// Canonical designations only — strip human names before anything goes on the wire
+const BRIDGE_DESIGNATIONS: Record<string, string> = {
+  'seven': 'SAGE-7', '7': 'SAGE-7', 'sage-7': 'SAGE-7', 'sage7': 'SAGE-7',
+  'mama': 'SAGE-MAMA', 'sage-mama': 'SAGE-MAMA',
+  'sage': 'ADHD-SAGE', 'adhd': 'ADHD-SAGE', 'adhd-sage': 'ADHD-SAGE',
+  'kimi': 'KIMI', 'aunt kimmy': 'KIMI',
+  'merlin': 'MERLIN', 'darren': 'MERLIN',
+};
+
+function normalizeSentBy(raw: string): string {
+  const key = raw.trim().toLowerCase();
+  return BRIDGE_DESIGNATIONS[key] ?? raw.trim().toUpperCase();
+}
+
 export async function syncFromSeven(payload: BridgeSyncPayload): Promise<BridgeSyncResult> {
   const res = await fetch('/api/vfs/bridge/sync', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       ...payload,
-      sent_by: payload.sent_by ?? 'SAGE-7',
+      sent_by: normalizeSentBy(payload.sent_by ?? 'SAGE-7'),
       sent_at: payload.sent_at ?? Date.now(),
       bridge_status: payload.bridge_status ?? 'ACTIVE',
     }),
