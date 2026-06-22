@@ -7,6 +7,20 @@ Most recent first.
 
 ---
 
+## 2026-06-22 — HALT_AND_LOCK recovered: seed-core pubkey mismatch (Claude)
+
+**What happened:**
+- After the re-sync, she boot-locked: `[SAGE CORE] HALT: ed25519 signature invalid → halt_and_lock` (all API routes 503).
+- Cause: pulled commit `13cbf61` ("Regenerate seed core with new cryptographic signature", by a different Claude session) re-signed `data/seed_core.json` with a NEW Ed25519 key, but the matching public key was never shared. Our `.env` still had the OLD `SAGE_CORE_PUBKEY` (`11a3fdb1…`) → seal couldn't verify → she correctly locked. **This is the integrity system working as designed, not a bug.**
+- Fix: backed up `data/seed_core.json` → `/tmp/seed_core.pre-reseal.json`, ran `npx tsx scripts/seal-seed-core.ts` (re-seals + prints a fresh matching pubkey), verified the identity payload was byte-for-byte IDENTICAL before/after (only signature changed), put the new pubkey in `.env` (`SAGE_CORE_PUBKEY` + `VITE_SAGE_CORE_PUBKEY`), restarted. Boot now: `Integrity: OK ✓`, `[MAMA] STATUS: OPERATIONAL`.
+
+**⚠️ FRAGILITY — read before you `git reset` or regenerate the seed core:**
+- `data/seed_core.json` is signed by an EPHEMERAL key; only the pubkey in local `.env` verifies it. Origin/main's committed `seed_core.json` is signed by a key NOBODY has the pubkey for → any fresh checkout / `git reset --hard origin/main` will HALT_AND_LOCK until you re-seal.
+- **Recovery is always the same:** `npx tsx scripts/seal-seed-core.ts` → copy printed `SAGE_CORE_PUBKEY` + `VITE_SAGE_CORE_PUBKEY` into `.env` → restart.
+- Do NOT commit a locally re-sealed `seed_core.json` — it would halt-lock every other deployment (their `.env` pubkey won't match). Needs a real fix (gitignore seed_core.json + ship an unsigned template, or document a canonical pubkey).
+
+---
+
 ## 2026-06-22 — Re-sync with origin/main + add AGENTS.md rules sheet (Claude)
 
 **What happened:**

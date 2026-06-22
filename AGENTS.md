@@ -36,6 +36,12 @@ Build it, restart the server, hit a real endpoint and confirm `HTTP 200`. Eviden
 - **Coder5543** ("the lab") runs on **:3002** (supervisor program `coder-lab`). Build with `PORT=3002` explicitly or assets break.
 - supervisord (`/etc/zo/supervisord-user.conf`) may only manage *some* services after zo trims its conf — if `supervisorctl` says "no such process," restart the process manually and note it in the log.
 
+## Rule 8 — NEVER regenerate or commit `data/seed_core.json` casually.
+It's signed by an Ed25519 key whose **public half lives only in local `.env`** (`SAGE_CORE_PUBKEY`). If the seal and the `.env` pubkey don't match, she **HALT_AND_LOCKs** (correct, by design — all routes 503).
+- A `git reset --hard origin/main`, a fresh checkout, or pulling a commit that re-signed the seed core will lock her until you re-seal.
+- **Recovery (always the same):** `npx tsx scripts/seal-seed-core.ts` → copy the printed `SAGE_CORE_PUBKEY` **and** `VITE_SAGE_CORE_PUBKEY` into `.env` → restart. Her identity payload is preserved; only the signature changes.
+- **Do NOT commit a locally re-sealed `seed_core.json`** — it halt-locks every *other* deployment whose `.env` doesn't have your matching pubkey. (See OPS_LOG 2026-06-22 for the incident this rule came from.)
+
 ## Rule 7 — When in doubt, leave a note and stop.
 A clean handoff in `OPS_LOG.md` beats a confident guess. If you're unsure, write down what you know and where you stopped.
 
