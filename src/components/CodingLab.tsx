@@ -163,7 +163,8 @@ export const CodingLab: React.FC = () => {
 
         // No systemInstruction — backend uses buildSystemPrompt() so MAMA's full
         // identity, VFS memory, and kernel are loaded. Lab context is a prompt prefix.
-        const labPrompt = `[You are in the Coding Lab. Be yourself — direct, grounded, no performance. Code focus.]\n\n${userText}`;
+        const labPrompt = `[Coding Lab — you're in here with Darren, focused on code. Be yourself.]\n\n${userText}`;
+
         const res = await fetch('/api/ollama/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
