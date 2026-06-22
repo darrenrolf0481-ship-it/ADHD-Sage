@@ -1,7 +1,24 @@
 # ADHD-Sage Ops Log
 
+> 📋 **New here? Read [`AGENTS.md`](./AGENTS.md) first** — the rules every agent follows. Rule #1: log everything *here*.
+
 Running record of what changed, why, and what to check if things break.
 Most recent first.
+
+---
+
+## 2026-06-22 — Re-sync with origin/main + add AGENTS.md rules sheet (Claude)
+
+**What happened:**
+- Local `main` had drifted: 1 unpushed local commit ("dar") vs **19 commits ahead on `origin/main`** (parallel agent's bridge + Coding Lab + security work).
+- The local commit's only useful change (`lockGuard` import in `system.ts`) was **already upstream** — the rest was 3 giant `imported.json` memory-dump backups (~30k lines). Backed up old state to branch `backup/pre-integration-20260622`, then `git reset --hard origin/main` to drop the junk and adopt the 19 commits.
+- Hardened `.gitignore` to close the gaps that let the dumps in (`data/memories/*.bak.*`, `imported.pre*.json`, `*.env`, `projscan_doctor_report.*`).
+- Rebuilt (`npm run build`) and restarted the server → confirmed it loaded the bridge + Coding Lab code (`/api/metrics`, `/api/projscan/report` → 200; boot log shows "Magic MCP (Coding Lab)").
+- Added **`AGENTS.md`** — the rules sheet every agent reads first (Rule #1: log everything here). Linked from the top of this file.
+
+**If things break, check:**
+- Old pre-sync state is recoverable at branch `backup/pre-integration-20260622` (commit fd82f98).
+- If the server won't load new code, it's likely a stale `tsx server.ts` process holding :3000 — kill it (not code-server PID), restart `tsx server.ts`.
 
 ---
 
