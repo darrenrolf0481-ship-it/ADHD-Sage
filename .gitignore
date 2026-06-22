@@ -22,4 +22,14 @@ agentkits-memory/
 
 # memory pipeline backups / intermediate snapshots (kept locally, not in git)
 data/memories/*.bak
+data/memories/*.bak.*
 data/memories/imported.post-*.json
+data/memories/imported.pre*.json
+
+# env files ending in .env (the .env* rule above only catches the prefix form)
+*.env
+nano.env
+.env.save
+
+# projscan doctor reports
+projscan_doctor_report.*
