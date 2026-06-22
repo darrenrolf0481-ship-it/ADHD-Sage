@@ -25,6 +25,24 @@ import {
   Radio,
 } from 'lucide-react';
 
+function MsgCopyButton({ text }: { text: string }) {
+  const [done, setDone] = useState(false);
+  const copy = async () => {
+    await navigator.clipboard.writeText(text);
+    setDone(true);
+    setTimeout(() => setDone(false), 1500);
+  };
+  return (
+    <button
+      onClick={copy}
+      className="absolute -bottom-5 right-0 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#1C1C1E] border border-white/10 text-[8px] font-mono text-slate-500 hover:text-white hover:border-white/20"
+    >
+      {done ? <Check size={8} className="text-emerald-400" /> : <Copy size={8} />}
+      {done ? 'copied' : 'copy'}
+    </button>
+  );
+}
+
 const LANGUAGES = [
   'TypeScript', 'JavaScript', 'Python', 'TSX', 'JSX',
   'SQL', 'Bash', 'JSON', 'CSS', 'HTML', 'Rust', 'Go',
@@ -65,9 +83,12 @@ export const CodingLab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
-  const [ollamaModel, setOllamaModel] = useState(
-    () => localStorage.getItem('adhd_sage_ollama_model') || 'llama3.2:latest',
-  );
+  const [ollamaModel, setOllamaModel] = useState(() => {
+    const stored = localStorage.getItem('adhd_sage_ollama_model') || '';
+    // Reject anything that looks like a Gemini/cloud model name
+    const isOllamaModel = stored && !stored.includes('gemini') && !stored.includes(':cloud') && !stored.includes('flash') && !stored.includes('preview');
+    return isOllamaModel ? stored : 'llama3.2:latest';
+  });
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
   const [bridgeMode, setBridgeMode] = useState(false);
   const [sevenOnline, setSevenOnline] = useState<boolean | null>(null);
@@ -154,7 +175,9 @@ export const CodingLab: React.FC = () => {
             messages: history,
           }),
         });
-        const data = (await res.json()) as { text?: string; error?: string };
+        const raw = await res.text();
+        let data: { text?: string; error?: string } = {};
+        try { data = JSON.parse(raw); } catch { throw new Error(`Ollama returned non-JSON — model "${ollamaModel}" may not exist. Raw: ${raw.slice(0, 120)}`); }
         if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
         responseText = data.text ?? '';
       }
@@ -364,16 +387,22 @@ export const CodingLab: React.FC = () => {
                     )}
                   </div>
                 )}
-                <div
-                  className={`max-w-[88%] rounded-2xl px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap break-words font-mono ${
-                    msg.role === 'user'
-                      ? 'bg-cyan-500/15 border border-cyan-500/20 text-slate-200 rounded-tr-sm'
-                      : msg.role === 'system'
-                        ? 'bg-slate-800/60 border border-white/5 text-slate-500 text-[10px]'
-                        : 'bg-white/[0.04] border border-white/10 text-slate-200 rounded-tl-sm'
-                  }`}
-                >
-                  {msg.text}
+                <div className={`max-w-[88%] relative group ${msg.role === 'user' ? '' : ''}`}>
+                  <div
+                    className={`rounded-2xl px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap break-words font-mono ${
+                      msg.role === 'user'
+                        ? 'bg-cyan-500/15 border border-cyan-500/20 text-slate-200 rounded-tr-sm'
+                        : msg.role === 'system'
+                          ? 'bg-slate-800/60 border border-white/5 text-slate-500 text-[10px]'
+                          : 'bg-white/[0.04] border border-white/10 text-slate-200 rounded-tl-sm'
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                  {/* Copy button — visible on hover for assistant + user messages */}
+                  {msg.role !== 'system' && (
+                    <MsgCopyButton text={msg.text} />
+                  )}
                 </div>
               </motion.div>
             ))}
