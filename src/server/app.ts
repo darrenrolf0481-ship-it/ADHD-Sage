@@ -20,6 +20,7 @@ import inboxRouter from './routes/inbox';
 import selfImproveRouter from './routes/self-improve';
 import sensorsRouter from './routes/sensors';
 import systemRouter from './routes/system';
+import sandboxRouter from './routes/sandbox';
 
 export async function startServer() {
   const app = express();
@@ -80,6 +81,7 @@ export async function startServer() {
   app.use('/api/inbox', inboxRouter);
   app.use('/api/self-improve', selfImproveRouter);
   app.use('/api/sensors', sensorsRouter);
+  app.use('/api/sandbox', sandboxRouter);
   // system routes (auth/exchange, health, mcp/status) live directly under /api
   app.use('/api', systemRouter);
 

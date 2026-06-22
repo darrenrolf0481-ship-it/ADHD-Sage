@@ -6,6 +6,19 @@ import { startServer } from './src/server/app';
 import { assertMamaIdentity } from './src/server/mama-identity';
 import { initWorkerPool, shutdownWorkerPool } from './src/server/workers/pool';
 
+// ─── Last-resort crash guards ───────────────────────────────────────────────
+// A stray throw or rejected promise on the main thread would otherwise kill the
+// whole server. During testing that meant one bad snippet took everything down.
+// Log loudly and keep running. (Test code should go through /api/sandbox, which
+// runs in a separate process — these guards just stop in-process glitches from
+// being fatal.)
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL-GUARD] uncaughtException — server kept alive:', err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[FATAL-GUARD] unhandledRejection — server kept alive:', reason);
+});
+
 // ─── Startup sequence ───────────────────────────────────────────────────────
 validateEnv();
 initSeedCore();
