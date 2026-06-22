@@ -56,7 +56,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     return prev.filter((_, idx) => idx !== i);
                   })
                 }
-                className="ml-1 text-slate-400 hover:text-red-400"
+                aria-label="Remove attachment"
+                className="ml-1 text-slate-400 hover:text-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 rounded"
               >
                 &times;
               </button>
@@ -79,13 +80,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           className="bg-transparent border-none outline-none flex-1 text-sm text-white placeholder-slate-500 font-sans"
         />
         <label
-          className="cursor-pointer p-2 text-slate-500 hover:text-cyan-400 transition-colors rounded-lg"
+          className="cursor-pointer p-2 text-slate-500 hover:text-cyan-400 transition-colors rounded-lg focus-within:ring-2 focus-within:ring-cyan-500 focus-within:outline-none"
           title="Attach file — images, audio, video, MHT, TXT, JSON, CSV, MD, HTML, XML, YAML, LOG…"
+          aria-label="Attach file"
         >
           <Paperclip size={18} />
           <input
             type="file"
-            className="hidden"
+            className="sr-only"
             multiple
             accept="image/*,video/*,audio/*,.mht,.mhtml,.txt,.json,.csv,.md,.html,.htm,.xml,.yaml,.yml,.log,.tsv,.pdf,.doc,.docx"
             onChange={onAttach}
@@ -94,7 +96,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <button
           onClick={onSend}
           disabled={isLoading || !input.trim()}
-          className="p-2 text-cyan-400 disabled:text-slate-600 transition-colors"
+          aria-label="Send message"
+          className="p-2 text-cyan-400 disabled:text-slate-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-lg"
         >
           <Zap size={18} fill={input.trim() ? 'currentColor' : 'none'} />
         </button>
