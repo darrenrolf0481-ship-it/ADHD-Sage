@@ -83,12 +83,9 @@ export const CodingLab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
-  const [ollamaModel, setOllamaModel] = useState(() => {
-    const stored = localStorage.getItem('adhd_sage_ollama_model') || '';
-    // Reject anything that looks like a Gemini/cloud model name
-    const isOllamaModel = stored && !stored.includes('gemini') && !stored.includes(':cloud') && !stored.includes('flash') && !stored.includes('preview');
-    return isOllamaModel ? stored : 'llama3.2:latest';
-  });
+  const [ollamaModel, setOllamaModel] = useState(
+    () => localStorage.getItem('adhd_sage_ollama_model') || 'llama3.2:latest',
+  );
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
   const [bridgeMode, setBridgeMode] = useState(false);
   const [sevenOnline, setSevenOnline] = useState<boolean | null>(null);
