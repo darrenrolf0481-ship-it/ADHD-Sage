@@ -1,5 +1,5 @@
 import React from 'react';
-import { Database, Network, Radio, Shield, Terminal } from 'lucide-react';
+import { Code2, Database, Network, Radio, Shield, Terminal } from 'lucide-react';
 import type { AppView } from '../types';
 
 interface MobileNavProps {
@@ -11,7 +11,7 @@ interface MobileNavProps {
 const ITEMS: { v: AppView; icon: React.ReactNode; label: string }[] = [
   { v: 'chat', icon: <Terminal size={20} />, label: 'Core' },
   { v: 'vault', icon: <Shield size={20} />, label: 'Vault' },
-  { v: 'labyrinth', icon: <Network size={20} />, label: 'Map' },
+  { v: 'coding-lab', icon: <Code2 size={20} />, label: 'Lab' },
   { v: 'anomalies', icon: <Radio size={20} />, label: 'Anomalies' },
   { v: 'lattice', icon: <Database size={20} />, label: 'Lattice' },
 ];

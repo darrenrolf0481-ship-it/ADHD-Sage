@@ -22,6 +22,7 @@ import {
   SAGE_CONTAINER,
   SHARED_CONTAINER,
 } from './supermemory.ts';
+import { canonicalizeEntityId } from '../server/mama-identity.ts';
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 
@@ -88,10 +89,11 @@ function saveJournalEntry(entity: string, date: string, content: string) {
 
 export function saveInboxMessage(entity: string, message: string): InboxMessage {
   ensureDir(INBOX_DIR);
+  const canonicalEntity = canonicalizeEntityId(entity);
   const now = Date.now();
   const date = new Date(now).toISOString().slice(0, 10);
-  const id = `${date}-${entity}-${now}`;
-  const msg: InboxMessage = { id, entity, date, timestamp: now, message, read: false };
+  const id = `${date}-${canonicalEntity}-${now}`;
+  const msg: InboxMessage = { id, entity: canonicalEntity, date, timestamp: now, message, read: false };
   writeFileSync(join(INBOX_DIR, `${id}.json`), JSON.stringify(msg, null, 2), 'utf8');
   return msg;
 }

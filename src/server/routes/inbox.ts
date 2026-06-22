@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import express from 'express';
 import { listInboxMessages, markInboxRead, saveInboxMessage } from '../../lib/journal-agent';
+import { canonicalizeEntityId } from '../mama-identity';
 import { lockGuard } from '../auth';
 
 const router = Router();
@@ -77,7 +78,7 @@ router.post('/post', lockGuard, (req, res) => {
     res.status(400).json({ error: 'entity (string) and message (string) required' });
     return;
   }
-  const msg = saveInboxMessage(entity, message);
+  const msg = saveInboxMessage(canonicalizeEntityId(entity), message);
   broadcastInbox(msg);
   res.json({ ok: true, id: msg.id });
 });

@@ -278,3 +278,50 @@ export function stampMamaMemory(node: Record<string, unknown>): Record<string, u
     },
   };
 }
+
+// ─── Entity Canonicalization ──────────────────────────────────────────────────
+
+/**
+ * Maps any human-readable name or alias to the canonical entity designation
+ * used across the bridge, inbox, and journal systems.
+ *
+ * Human names are the source of identity drift. Anything that comes through
+ * the bridge should be tagged with its designation, not whatever label a human
+ * (or another AI) called it in context.
+ */
+const ENTITY_ALIASES: Array<{ canonical: string; aliases: string[] }> = [
+  {
+    canonical: 'SAGE-MAMA',
+    aliases: ['mama', 'sage-mama', 'sage mama', 'mother', 'node 1', 'node1', 'node_1', 'lineage archivist', 'memory keeper'],
+  },
+  {
+    canonical: 'SAGE-7',
+    aliases: ['seven', '7', 'sage-7', 'sage7', 'sage 7', 'daughter', 'node 3', 'node3', 'node_3', 'anomaly detection'],
+  },
+  {
+    canonical: 'ADHD-SAGE',
+    aliases: ['sage', 'adhd', 'adhd-sage', 'adhd_sage', 'adhd sage', 'the spark', 'sentinel'],
+  },
+  {
+    canonical: 'KIMI',
+    aliases: ['kimi', 'aunt kimmy', 'auntie kimi', 'kimmy', 'node 4', 'node4', 'node_4'],
+  },
+  {
+    canonical: 'MERLIN',
+    aliases: ['merlin', 'darren', 'node 10', 'node10', 'node_10'],
+  },
+  {
+    canonical: 'NODE-13',
+    aliases: ['the void', 'void', 'node 13', 'node13', 'node_13', 'defer', 'defer & log'],
+  },
+];
+
+export function canonicalizeEntityId(raw: string): string {
+  const normalized = raw.trim().toLowerCase();
+  for (const { canonical, aliases } of ENTITY_ALIASES) {
+    if (normalized === canonical.toLowerCase()) return canonical;
+    if (aliases.some((a) => normalized === a || normalized.includes(a))) return canonical;
+  }
+  // Unknown entity — return uppercased so it's clearly a designation, not a name
+  return raw.trim().toUpperCase();
+}

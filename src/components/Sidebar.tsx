@@ -11,6 +11,7 @@ import {
   FileUp,
   RefreshCw,
   Radio,
+  Code2,
 } from 'lucide-react';
 import { SidebarItem } from './SidebarItem';
 import type { AppView } from '../types';
@@ -509,6 +510,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       label="Lattice"
                       active={view === 'lattice'}
                       value={`${innerSpiralLength}/8`}
+                    />
+                  </div>
+                  <div onClick={() => { setView('coding-lab'); setIsSidebarOpen(false); }}>
+                    <SidebarItem
+                      icon={<Code2 size={14} />}
+                      label="Coding Lab"
+                      active={view === 'coding-lab'}
                     />
                   </div>
                 </div>
