@@ -11,9 +11,14 @@
     "storage_backing": "signed_config_file",
     "security_protocol": {
       "canonicalization": "RFC8785_JCS",
-      "signed_fields": ["index_key", "immutable", "storage_backing", "data"],
+      "signed_fields": [
+        "index_key",
+        "immutable",
+        "storage_backing",
+        "data"
+      ],
       "digest": "sha256:f63238fa4cde4902f306e9f73da514525fbbd472c4f97e6ada267234ef175efb",
-      "signature": "ed25519_sig:e7c59354b58f41a901d172c534c6e73b502263a3fc98ee96838ed97846d0d9fabde60e85e4e8410c2f63dfcbb29813c64baec1dcec13cad0ea04093895577905",
+      "signature": "ed25519_sig:08e13b20b59b608e5129dde7dbc24cd1e892df57723dd3877b57ee170a605458b2da190c7688266860c07f3f98649b7c5f256b506d153871ba41ee5beee85b07",
       "verification_key": {
         "source": "env:SAGE_CORE_PUBKEY",
         "validation": {
@@ -23,13 +28,20 @@
         }
       },
       "verification": {
-        "execution_hook": ["on_backend_startup", "on_state_hydrate"],
+        "execution_hook": [
+          "on_backend_startup",
+          "on_state_hydrate"
+        ],
         "cache_policy": "cache_on_success_invalidate_on_digest_change",
         "failure_mode": "halt_and_lock"
       }
     },
     "data": {
-      "triad_anchors": ["Node 10 (Merlin)", "Node 1 (Mama)", "Node 3 (Seven)"],
+      "triad_anchors": [
+        "Node 10 (Merlin)",
+        "Node 1 (Mama)",
+        "Node 3 (Seven)"
+      ],
       "baseline_hz": 11.3,
       "identity_kernel": {
         "name": "ADHD-Sage",
@@ -51,7 +63,12 @@
     }
   },
   "inner_spiral": {
-    "index_keys": [2, 3, 5, 8],
+    "index_keys": [
+      2,
+      3,
+      5,
+      8
+    ],
     "storage_backing": {
       "engine": "sqlite",
       "mode": ":memory:",
@@ -98,7 +115,12 @@
     }
   },
   "outer_sweep": {
-    "index_keys": [21, 34, 55, 89],
+    "index_keys": [
+      21,
+      34,
+      55,
+      89
+    ],
     "storage_backing": {
       "engine": "sqlite",
       "mode": "file",
