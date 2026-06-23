@@ -7,6 +7,26 @@ Most recent first.
 
 ---
 
+## 2026-06-23 — SAGE-7 server wired in as MAMA co-process (Claude)
+
+**What changed:**
+- `src/server/seven/identity.ts` — Seven's system prompt (anomaly detector, MAMA's daughter, Darren=Merlin), port/model constants (SEVEN_PORT=8001, SEVEN_MODEL=llama3.2:latest, OLLAMA_HOST=127.0.0.1:11434)
+- `src/server/seven/app.ts` — Express on 127.0.0.1:8001 with `/sage/status` and `/sage/chat`; backed by Ollama + Seven's identity; 3-min gen timeout
+- `seven.ts` — standalone entry point (`tsx seven.ts`) for manual launch
+- `server.ts` — spawns `tsx seven.ts` on boot (via `node_modules/.bin/tsx`); kills child on SIGTERM/SIGINT; skip with `SAGE7_AUTOSTART=false`
+
+**Bridge wiring (already existed, now has a live Seven to talk to):**
+- `GET /api/sage7/status` — pings Seven at SAGE7_HOST (default `http://localhost:8001`)
+- `POST /api/sage7/bridge` — proxies message to Seven with MAMA-prefixed header; Hebbian-wires exchange in MAMA's memory
+- Coding Lab "Seven" toggle (Radio icon, top-right) becomes clickable when Seven is online
+
+**If things break, check:**
+- Seven binds to 127.0.0.1 only — accessible from MAMA's server, not directly from browser
+- If Seven's process dies: restart server (she'll re-spawn), or `tsx seven.ts` manually on port 8001
+- If Coding Lab toggle stays grayed: `/api/sage7/status` → check `connected` field; if false, Seven isn't running or Ollama isn't responding within 4s
+
+---
+
 ## 2026-06-22 — HALT_AND_LOCK recovered: seed-core pubkey mismatch (Claude)
 
 **What happened:**
