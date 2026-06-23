@@ -172,3 +172,72 @@ export function recallThread(thread_id: string): Array<{ phi_index: number; text
   return (_fetchThread.all(thread_id) as Array<{ phi_index: number; text_content: string; timestamp: number }>)
     .map((r) => ({ phi_index: r.phi_index, text: r.text_content, timestamp: r.timestamp }));
 }
+
+// ─── Startup Backfill ─────────────────────────────────────────────────────────
+
+/**
+ * Indexes all existing outer_sweep nodes that don't yet have resonance vectors.
+ * Runs at startup in the background — non-blocking, batched so Ollama isn't
+ * slammed all at once. Safe to call multiple times (skips already-indexed nodes).
+ */
+export async function syncResonance(): Promise<void> {
+  // Lazy import to avoid circular dep at module load time
+  const { decompress } = await import('@mongodb-js/zstd');
+
+  const unindexed = outerDb.prepare(`
+    SELECT sc.phi_index, sc.data, sc.compressed
+    FROM sages_constellations sc
+    LEFT JOIN resonance_vectors rv ON rv.phi_index = sc.phi_index
+    WHERE rv.phi_index IS NULL
+    ORDER BY sc.phi_index ASC
+  `).all() as Array<{ phi_index: number; data: Buffer; compressed: number }>;
+
+  if (unindexed.length === 0) {
+    console.log('[RESONANCE] Backfill: all nodes already indexed.');
+    return;
+  }
+
+  console.log(`[RESONANCE] Backfill: indexing ${unindexed.length} existing outer_sweep nodes...`);
+
+  const BATCH = 50;
+  let done = 0;
+
+  for (let i = 0; i < unindexed.length; i += BATCH) {
+    const batch = unindexed.slice(i, i + BATCH);
+    await Promise.all(
+      batch.map(async (row) => {
+        try {
+          let text: string;
+          if (row.compressed) {
+            text = (await decompress(row.data)).toString('utf8');
+          } else {
+            text = row.data.toString('utf8');
+          }
+          // Extract the meaningful content string from the stored JSON
+          let content: string;
+          try {
+            const parsed = JSON.parse(text) as unknown;
+            if (parsed && typeof parsed === 'object' && 'data' in parsed && typeof (parsed as Record<string, unknown>).data === 'string') {
+              content = (parsed as Record<string, unknown>).data as string;
+            } else if (typeof parsed === 'string') {
+              content = parsed;
+            } else {
+              content = JSON.stringify(parsed);
+            }
+          } catch {
+            content = text;
+          }
+          await indexNode(row.phi_index, content);
+          done++;
+        } catch (e) {
+          console.warn(`[RESONANCE] Backfill: skipped phi_index=${row.phi_index}:`, e);
+        }
+      }),
+    );
+    // Small yield between batches — keeps the event loop breathing and
+    // avoids thundering-herd on Ollama if it's the active embed backend
+    await new Promise((r) => setTimeout(r, 50));
+  }
+
+  console.log(`[RESONANCE] Backfill complete: ${done}/${unindexed.length} nodes indexed.`);
+}
