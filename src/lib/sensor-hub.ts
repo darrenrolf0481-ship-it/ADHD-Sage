@@ -271,6 +271,12 @@ export class SensorHub {
     return this._startAudio();
   }
 
+  /** Returns a snapshot of the current FFT frequency bin data for visualisation. */
+  getFreqData(): Uint8Array | null {
+    if (!this._audioBuffer) return null;
+    return new Uint8Array(this._audioBuffer);
+  }
+
   /** Called by CameraPanel (React) to push each snapshot frame into the sensor stream. */
   registerCameraFrame(
     frameBase64: string,

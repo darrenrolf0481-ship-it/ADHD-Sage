@@ -146,6 +146,58 @@ function AudioPanel({
 }) {
   const audio = snap.audio;
   const perm = snap.permissions.audio;
+  const waterfallRef = useRef<HTMLCanvasElement>(null);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (perm !== 'granted') {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+      return;
+    }
+
+    const draw = () => {
+      const canvas = waterfallRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Sync logical size to display size once per resize
+      const displayW = canvas.offsetWidth;
+      if (canvas.width !== displayW && displayW > 0) {
+        // preserve existing image on resize
+        const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        canvas.width = displayW;
+        ctx.putImageData(img, 0, 0);
+      }
+
+      const freqData = sensorHub.getFreqData();
+      if (freqData) {
+        const w = canvas.width;
+        const h = canvas.height;
+
+        // Scroll existing content down 1px
+        ctx.drawImage(canvas, 0, 0, w, h, 0, 1, w, h);
+
+        // Draw new frequency row at top
+        const binW = w / freqData.length;
+        for (let i = 0; i < freqData.length; i++) {
+          const v = freqData[i] / 255;
+          const alpha = Math.pow(v, 1.6) * 0.98;
+          ctx.fillStyle = `rgba(112,214,255,${alpha.toFixed(3)})`;
+          ctx.fillRect(i * binW, 0, Math.max(1, Math.ceil(binW)), 1);
+        }
+      }
+
+      rafRef.current = requestAnimationFrame(draw);
+    };
+
+    rafRef.current = requestAnimationFrame(draw);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    };
+  }, [perm]);
 
   return (
     <div className="bg-[#08080C] border border-white/10 p-4 rounded-2xl space-y-3">
@@ -165,6 +217,18 @@ function AudioPanel({
           <StatusDot active={!!audio} />
         )}
       </div>
+
+      {/* Waterfall spectrogram — always rendered when mic is granted */}
+      {perm === 'granted' && (
+        <div className="rounded-xl overflow-hidden bg-black border border-white/5">
+          <canvas
+            ref={waterfallRef}
+            height={80}
+            className="w-full block"
+            style={{ imageRendering: 'pixelated' }}
+          />
+        </div>
+      )}
 
       {audio ? (
         <>
