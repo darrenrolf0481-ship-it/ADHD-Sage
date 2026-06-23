@@ -618,7 +618,7 @@ const SNAPSHOT_INTERVAL_MS = 10_000;
 const CAM_W = 320;
 const CAM_H = 240;
 
-function CameraPanel({ snap }: { snap: SensorSnapshot }) {
+function CameraPanel({ snap, sensorsEngaged }: { snap: SensorSnapshot; sensorsEngaged: boolean }) {
   const [isActive, setIsActive] = useState(false);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const [error, setError] = useState<string | null>(null);
@@ -689,6 +689,15 @@ function CameraPanel({ snap }: { snap: SensorSnapshot }) {
       stopCamera();
     };
   }, [stopCamera]);
+
+  useEffect(() => {
+    if (sensorsEngaged && !isActive) {
+      startCamera(facingMode);
+    } else if (!sensorsEngaged && isActive) {
+      stopCamera();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sensorsEngaged]);
 
   const perm = snap.permissions.camera;
   const lastFrame = snap.camera;
@@ -897,7 +906,7 @@ export const AnomaliesDesk: React.FC = () => {
         <div className="flex flex-col gap-4">
           <EmfPanel snap={snapshot} />
           <AudioPanel snap={snapshot} onRequestAudio={requestAudio} />
-          <CameraPanel snap={snapshot} />
+          <CameraPanel snap={snapshot} sensorsEngaged={isScanning} />
           <MotionPanel snap={snapshot} />
           <GpsPanel snap={snapshot} />
         </div>
