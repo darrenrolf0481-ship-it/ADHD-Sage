@@ -31,5 +31,9 @@ data/memories/imported.pre*.json
 nano.env
 .env.save
 
+# seed_core is sealed locally — the repo version is signed with a dead key.
+# Never commit this. Run scripts/seal-seed-core.ts on fresh deployments.
+data/seed_core.json
+
 # projscan doctor reports
 projscan_doctor_report.*
