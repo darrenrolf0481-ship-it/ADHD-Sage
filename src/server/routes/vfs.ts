@@ -15,6 +15,7 @@ import {
 import { timed } from '../performance';
 import { getWorkerPool } from '../workers/pool';
 import { asyncHandler } from '../async-handler';
+import { recall, recallThread, indexNode } from '../resonance-index';
 
 const router = Router();
 
@@ -241,5 +242,55 @@ router.get('/inner/context', lockGuard, (req, res) => {
   const rows = innerDb.prepare('SELECT * FROM context_buffer ORDER BY id DESC LIMIT 100').all();
   res.json(rows);
 });
+
+// ─── Resonance Index ─────────────────────────────────────────────────────────
+
+/**
+ * POST /api/vfs/resonance/recall
+ * Semantic recall: find the most resonant memories for a query.
+ * Body: { query: string, top_k?: number, thread_id?: string }
+ */
+router.post('/resonance/recall', lockGuard, asyncHandler(async (req, res) => {
+  const { query, top_k, thread_id } = req.body as {
+    query?: string;
+    top_k?: number;
+    thread_id?: string;
+  };
+  if (!query || typeof query !== 'string') {
+    res.status(400).json({ error: 'query (string) required' });
+    return;
+  }
+  const hits = await recall(query, top_k ?? 5, thread_id);
+  res.json({ hits });
+}));
+
+/**
+ * GET /api/vfs/resonance/thread/:thread_id
+ * Replay an entire thread in chronological order.
+ */
+router.get('/resonance/thread/:thread_id', lockGuard, (req, res) => {
+  const { thread_id } = req.params;
+  res.json({ thread: recallThread(thread_id) });
+});
+
+/**
+ * POST /api/vfs/resonance/index
+ * Manually index a memory node by phi_index + text.
+ * Body: { phi_index: number, text: string, thread_id?: string, task?: string }
+ */
+router.post('/resonance/index', lockGuard, asyncHandler(async (req, res) => {
+  const { phi_index, text, thread_id, task } = req.body as {
+    phi_index?: number;
+    text?: string;
+    thread_id?: string;
+    task?: string;
+  };
+  if (typeof phi_index !== 'number' || typeof text !== 'string') {
+    res.status(400).json({ error: 'phi_index (number) and text (string) required' });
+    return;
+  }
+  await indexNode(phi_index, text, thread_id, task);
+  res.json({ ok: true, phi_index });
+}));
 
 export default router;
