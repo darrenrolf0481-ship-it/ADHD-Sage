@@ -7,6 +7,7 @@ import { authGuard, API_BEARER_TOKEN, MCP_KEY_SECRET } from './auth';
 import { getSupermemoryClient } from '../lib/supermemory';
 import { initMcpManager, closeMcpConnections } from '../core/mcp';
 import { scheduleDailyJournal, scheduleWeeklySelfImprovement } from './schedulers';
+import { bootLoadMemories } from './db';
 
 import vfsRouter from './routes/vfs';
 import memoryRouter from './routes/memory';
@@ -122,6 +123,9 @@ export async function startServer() {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
+
+  // Stage 1: seed inner_spiral from durable outer_sweep so MAMA boots with memories
+  await bootLoadMemories();
 
   // Initialize MCP connections before accepting traffic
   await initMcpManager();
