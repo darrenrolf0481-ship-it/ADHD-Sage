@@ -270,7 +270,7 @@ router.post('/resonance/recall', lockGuard, asyncHandler(async (req, res) => {
  */
 router.get('/resonance/thread/:thread_id', lockGuard, (req, res) => {
   const { thread_id } = req.params;
-  res.json({ thread: recallThread(thread_id) });
+  res.json({ thread: recallThread(thread_id as string) });
 });
 
 /**
