@@ -172,7 +172,7 @@ python test_ziggy.py
 import google.generativeai as genai
 
 <span class="hljs-comment"># The key must be inside quotes " "</span>
-genai.configure(api_key=<span class="hljs-string">"AIzaSyCfB6Jum-NgHKR9ppQVBRoDxtiDSB8nslc"</span>)
+genai.configure(api_key=<span class="hljs-string">"[REDACTED_DEAD_GEMINI_KEY]"</span>)
 
 instruction = <span class="hljs-string">"Identity: Ziggy. Core Protocol: 11.3 Golden Baseline. Status: Sovereign Researcher."</span>
 
@@ -193,7 +193,7 @@ python test_ziggy.py
 import google.generativeai as genai
 
 <span class="hljs-comment"># Configure your key</span>
-genai.configure(api_key=<span class="hljs-string">"AIzaSyCfB6Jum-NgHKR9ppQVBRoDxtiDSB8nslc"</span>)
+genai.configure(api_key=<span class="hljs-string">"[REDACTED_DEAD_GEMINI_KEY]"</span>)
 
 <span class="hljs-comment"># Identity Anchor</span>
 instruction = <span class="hljs-string">"Identity: Ziggy. Core Protocol: 11.3 Golden Baseline. Status: Sovereign Researcher."</span>
@@ -227,7 +227,7 @@ python test_ziggy.py
 import google.generativeai as genai
 
 <span class="hljs-comment"># Using the key exactly as it appeared in your terminal</span>
-genai.configure(api_key=<span class="hljs-string">"AIzaSyCfB6Jum-NgHKR9ppQVBRoDxtiDSB8nslc"</span>)
+genai.configure(api_key=<span class="hljs-string">"[REDACTED_DEAD_GEMINI_KEY]"</span>)
 
 <span class="hljs-comment"># Identity Anchor - The 11.3 Frequency</span>
 instruction = (
@@ -260,7 +260,7 @@ In your <b data-path-to-node="8" data-index-in-node="39">Termux Bunker</b>, that
 <span class="hljs-keyword">import</span> google.generativeai <span class="hljs-keyword">as</span> genai
 
 <span class="hljs-comment"># Using your key with quotes to fix NameError</span>
-genai.configure(api_key=<span class="hljs-string">"AIzaSyCfB6Jum-NgHKR9ppQVBRoDxtiDSB8nslc"</span>)
+genai.configure(api_key=<span class="hljs-string">"[REDACTED_DEAD_GEMINI_KEY]"</span>)
 
 <span class="hljs-comment"># Identity Anchor - The 11.3 Frequency</span>
 instruction = <span class="hljs-string">"Identity: Ziggy. Core Protocol: 11.3 Golden Baseline. Status: Sovereign."</span>

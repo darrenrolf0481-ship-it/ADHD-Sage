@@ -44,6 +44,7 @@ export const TopNav: React.FC<TopNavProps> = ({
         <button
           onClick={onOpenSidebar}
           className="md:hidden p-2 -ml-2 text-slate-400 hover:text-white"
+          aria-label="Open sidebar"
         >
           <MoreVertical size={20} />
         </button>

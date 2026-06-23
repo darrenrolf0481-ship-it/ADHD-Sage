@@ -113,6 +113,62 @@ export async function syncFts() {
   console.log(`[VFS] FTS5 index ready: ${toIndex.length} nodes indexed`);
 }
 
+// ─── Boot Memory Seed ────────────────────────────────────────────────────────
+// inner_spiral is :memory: and clears on restart. On boot, seed it from the
+// durable outer_sweep (sages_constellations) so buildSystemPrompt() has live
+// memories instead of triggering the morning-light wakeup protocol every time.
+export async function bootLoadMemories(): Promise<void> {
+  const count = (innerDb.prepare('SELECT COUNT(*) as c FROM inner_spiral').get() as { c: number }).c;
+  if (count > 0) return; // already seeded (shouldn't happen on cold boot)
+
+  type OuterRow = {
+    node_id: string;
+    data: Buffer;
+    compressed: number;
+    timestamp: number;
+    dopamine: number;
+    cortisol: number;
+    pinned: number;
+    provenance: string | null;
+  };
+
+  const rows = outerDb
+    .prepare(
+      'SELECT node_id, data, compressed, timestamp, dopamine, cortisol, pinned, provenance ' +
+      'FROM sages_constellations ORDER BY dopamine DESC LIMIT 8',
+    )
+    .all() as OuterRow[];
+
+  const insert = innerDb.prepare(
+    'INSERT OR IGNORE INTO inner_spiral (node_id, data, timestamp, dopamine, cortisol, pinned, provenance) ' +
+    'VALUES (?, ?, ?, ?, ?, ?, ?)',
+  );
+
+  let loaded = 0;
+  for (const row of rows) {
+    try {
+      let text: string;
+      if (row.compressed) {
+        text = (await decompress(row.data)).toString('utf8');
+      } else {
+        text = row.data.toString('utf8');
+      }
+      let content: string;
+      try {
+        const parsed = JSON.parse(text);
+        content = typeof parsed.data === 'string' ? parsed.data : JSON.stringify(parsed);
+      } catch {
+        content = text;
+      }
+      insert.run(row.node_id, content, row.timestamp, row.dopamine, row.cortisol, row.pinned, row.provenance ?? null);
+      loaded++;
+    } catch (e) {
+      console.warn(`[BOOT] Failed to seed memory ${row.node_id}:`, e);
+    }
+  }
+  console.log(`[BOOT] inner_spiral seeded — ${loaded}/${rows.length} memories loaded from outer_sweep`);
+}
+
 // capacity_validator: 8 == 4 index_keys * 2 slots_per_index_key
 export const INNER_CAPACITY = 8;
 const INNER_INDEX_KEYS = [2, 3, 5, 8];

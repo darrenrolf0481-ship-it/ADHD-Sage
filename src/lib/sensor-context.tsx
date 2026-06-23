@@ -51,6 +51,7 @@ export const SensorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const startSensors = useCallback(async () => {
     await sensorHub.start();
+    await sensorHub.startAudio();
     setIsActive(true);
   }, []);
 

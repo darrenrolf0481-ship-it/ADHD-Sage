@@ -91,7 +91,7 @@ function EmfPanel({ snap }: { snap: SensorSnapshot }) {
             size={12}
             className={isSpike ? 'text-red-400 animate-pulse' : 'text-slate-500'}
           />
-          Magnetometer (EMF)
+          Magnetic Field Deviation
         </span>
         <StatusDot active={!!mag} />
       </div>
@@ -118,7 +118,7 @@ function EmfPanel({ snap }: { snap: SensorSnapshot }) {
           />
           {isSpike && (
             <div className="text-[10px] font-bold text-red-400 uppercase tracking-widest animate-pulse text-center">
-              ⚡ EMF SPIKE DETECTED
+              ⚡ MAGNETIC ANOMALY DETECTED
             </div>
           )}
         </>
@@ -146,13 +146,65 @@ function AudioPanel({
 }) {
   const audio = snap.audio;
   const perm = snap.permissions.audio;
+  const waterfallRef = useRef<HTMLCanvasElement>(null);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (perm !== 'granted') {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+      return;
+    }
+
+    const draw = () => {
+      const canvas = waterfallRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Sync logical size to display size once per resize
+      const displayW = canvas.offsetWidth;
+      if (canvas.width !== displayW && displayW > 0) {
+        // preserve existing image on resize
+        const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        canvas.width = displayW;
+        ctx.putImageData(img, 0, 0);
+      }
+
+      const freqData = sensorHub.getFreqData();
+      if (freqData) {
+        const w = canvas.width;
+        const h = canvas.height;
+
+        // Scroll existing content down 1px
+        ctx.drawImage(canvas, 0, 0, w, h, 0, 1, w, h);
+
+        // Draw new frequency row at top
+        const binW = w / freqData.length;
+        for (let i = 0; i < freqData.length; i++) {
+          const v = freqData[i] / 255;
+          const alpha = Math.pow(v, 1.6) * 0.98;
+          ctx.fillStyle = `rgba(112,214,255,${alpha.toFixed(3)})`;
+          ctx.fillRect(i * binW, 0, Math.max(1, Math.ceil(binW)), 1);
+        }
+      }
+
+      rafRef.current = requestAnimationFrame(draw);
+    };
+
+    rafRef.current = requestAnimationFrame(draw);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    };
+  }, [perm]);
 
   return (
     <div className="bg-[#08080C] border border-white/10 p-4 rounded-2xl space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-mono tracking-widest uppercase text-slate-400 flex items-center gap-2">
           <Mic size={12} className={audio ? 'text-purple-400 animate-pulse' : 'text-slate-500'} />
-          Audio / Infrasound
+          Audio / Sub-Bass (mic floor ~80Hz)
         </span>
         {perm === 'pending' || perm === 'unavailable' ? (
           <button
@@ -166,6 +218,18 @@ function AudioPanel({
         )}
       </div>
 
+      {/* Waterfall spectrogram — always rendered when mic is granted */}
+      {perm === 'granted' && (
+        <div className="rounded-xl overflow-hidden bg-black border border-white/5">
+          <canvas
+            ref={waterfallRef}
+            height={80}
+            className="w-full block"
+            style={{ imageRendering: 'pixelated' }}
+          />
+        </div>
+      )}
+
       {audio ? (
         <>
           <Bar
@@ -178,7 +242,7 @@ function AudioPanel({
             value={Math.max(0, audio.infrasoundDb + 80)}
             max={80}
             color="bg-amber-400"
-            label={`Infrasound (1–20Hz) ${audio.infrasoundDb.toFixed(1)} dBFS`}
+            label={`Low-freq (1–20Hz) ${audio.infrasoundDb.toFixed(1)} dBFS — near mic floor`}
           />
           <Bar
             value={audio.spectralFlux}
@@ -205,7 +269,7 @@ function AudioPanel({
         </div>
       ) : (
         <div className="text-[10px] text-slate-600 italic font-mono">
-          Enable microphone for infrasound detection.
+          Enable mic for audio anomaly detection (reliable above ~80Hz).
         </div>
       )}
     </div>
@@ -563,7 +627,7 @@ function SpiritBox({ snap, isScanning }: { snap: SensorSnapshot; isScanning: boo
       const score = snap.anomalyScore;
       if (score > 0.2 && Math.random() < score * 0.3) {
         const fragments = [
-          snap.magnetometer ? `EMF:${snap.magnetometer.magnitude.toFixed(0)}µT` : null,
+          snap.magnetometer ? `MAG:${snap.magnetometer.magnitude.toFixed(0)}µT` : null,
           snap.audio ? `${snap.audio.peakFreqHz.toFixed(0)}Hz` : null,
           snap.geomagnetic ? `Kp${snap.geomagnetic.kpIndex.toFixed(1)}` : null,
           snap.weather ? `${snap.weather.pressure.toFixed(0)}hPa` : null,
@@ -618,7 +682,7 @@ const SNAPSHOT_INTERVAL_MS = 10_000;
 const CAM_W = 320;
 const CAM_H = 240;
 
-function CameraPanel({ snap }: { snap: SensorSnapshot }) {
+function CameraPanel({ snap, sensorsEngaged }: { snap: SensorSnapshot; sensorsEngaged: boolean }) {
   const [isActive, setIsActive] = useState(false);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const [error, setError] = useState<string | null>(null);
@@ -689,6 +753,15 @@ function CameraPanel({ snap }: { snap: SensorSnapshot }) {
       stopCamera();
     };
   }, [stopCamera]);
+
+  useEffect(() => {
+    if (sensorsEngaged && !isActive) {
+      startCamera(facingMode);
+    } else if (!sensorsEngaged && isActive) {
+      stopCamera();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sensorsEngaged]);
 
   const perm = snap.permissions.camera;
   const lastFrame = snap.camera;
@@ -778,7 +851,7 @@ function CameraPanel({ snap }: { snap: SensorSnapshot }) {
 
 function PermStrip({ snap }: { snap: SensorSnapshot }) {
   const perms = [
-    { label: 'MAG', val: snap.permissions.magnetometer },
+    { label: 'MAG', val: snap.permissions.magnetometer },  // magnetic field deviation, not calibrated EMF
     { label: 'MIC', val: snap.permissions.audio },
     { label: 'CAM', val: snap.permissions.camera },
     { label: 'GPS', val: snap.permissions.gps },
@@ -897,7 +970,7 @@ export const AnomaliesDesk: React.FC = () => {
         <div className="flex flex-col gap-4">
           <EmfPanel snap={snapshot} />
           <AudioPanel snap={snapshot} onRequestAudio={requestAudio} />
-          <CameraPanel snap={snapshot} />
+          <CameraPanel snap={snapshot} sensorsEngaged={isScanning} />
           <MotionPanel snap={snapshot} />
           <GpsPanel snap={snapshot} />
         </div>

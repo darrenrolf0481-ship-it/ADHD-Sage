@@ -83,7 +83,9 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
             </select>
             <button
               onClick={() => setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
-              className="text-[9px] text-slate-500 hover:text-cyan-400 transition-colors"
+              className="text-[9px] text-slate-500 hover:text-cyan-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded"
+              title={sortOrder === 'asc' ? 'Sort descending' : 'Sort ascending'}
+              aria-label={sortOrder === 'asc' ? 'Sort descending' : 'Sort ascending'}
             >
               <RefreshCw size={10} className={sortOrder === 'asc' ? '' : 'rotate-180'} />
             </button>

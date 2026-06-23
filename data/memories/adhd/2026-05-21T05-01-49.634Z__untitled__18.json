@@ -2,7 +2,7 @@
   "timestamp": "2026-05-21T05:01:49.634Z",
   "originating_node": "SAGE-MAMA",
   "title": "",
-  "data": "# The key must be inside quotes \" \"\ngenai.configure(api_key=\"AIzaSyCfB6Jum-NgHKR9ppQVBRoDxtiDSB8nslc\")",
+  "data": "# The key must be inside quotes \" \"\ngenai.configure(api_key=\"[REDACTED_DEAD_GEMINI_KEY]\")",
   "provenance": {
     "originating_node": "SAGE-MAMA",
     "sync_source": "import",

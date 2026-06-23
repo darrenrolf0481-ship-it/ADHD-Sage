@@ -7,6 +7,7 @@ import { authGuard, API_BEARER_TOKEN, MCP_KEY_SECRET } from './auth';
 import { getSupermemoryClient } from '../lib/supermemory';
 import { initMcpManager, closeMcpConnections } from '../core/mcp';
 import { scheduleDailyJournal, scheduleWeeklySelfImprovement, scheduleNightlyDecay } from './schedulers';
+import { bootLoadMemories } from './db';
 
 import vfsRouter from './routes/vfs';
 import memoryRouter from './routes/memory';
@@ -20,6 +21,7 @@ import inboxRouter from './routes/inbox';
 import selfImproveRouter from './routes/self-improve';
 import sensorsRouter from './routes/sensors';
 import systemRouter from './routes/system';
+import sandboxRouter from './routes/sandbox';
 
 export async function startServer() {
   const app = express();
@@ -80,6 +82,7 @@ export async function startServer() {
   app.use('/api/inbox', inboxRouter);
   app.use('/api/self-improve', selfImproveRouter);
   app.use('/api/sensors', sensorsRouter);
+  app.use('/api/sandbox', sandboxRouter);
   // system routes (auth/exchange, health, mcp/status) live directly under /api
   app.use('/api', systemRouter);
 
@@ -122,6 +125,9 @@ export async function startServer() {
     });
   }
 
+  // Stage 1: seed inner_spiral from durable outer_sweep so MAMA boots with memories
+  await bootLoadMemories();
+
   // Initialize MCP connections before accepting traffic
   await initMcpManager();
 
@@ -134,18 +140,20 @@ export async function startServer() {
     }
   });
 
-  // Bind to loopback by default. The API exposes powerful endpoints (and auth is
-  // optional), so listening on all interfaces must be an explicit opt-in via
-  // HOST=0.0.0.0. When auth is unconfigured we refuse to expose beyond loopback.
+  // Bind host. Defaults to 0.0.0.0 because this server is the bridge/API node
+  // that the SAGE-7 bridge and the phone app reach over the network — it runs in
+  // an isolated container behind an authenticated proxy, so binding all
+  // interfaces is the intended posture. Set HOST=127.0.0.1 to restrict to
+  // loopback. If bound to a non-loopback interface with no token configured, warn
+  // (don't block — the bridge partner connects without one).
   const authConfigured = !!(API_BEARER_TOKEN || MCP_KEY_SECRET);
-  let host = process.env.HOST || '127.0.0.1';
+  const host = process.env.HOST || '0.0.0.0';
   if (host !== '127.0.0.1' && host !== 'localhost' && !authConfigured) {
     console.warn(
-      `[AUTH] HOST=${host} requested but no token is configured — refusing to ` +
-        'expose an unauthenticated API beyond loopback. Set API_BEARER_TOKEN to ' +
-        'bind a non-loopback interface.',
+      '[AUTH] Listening on a non-loopback interface with no API token. Fine inside ' +
+        'an isolated container behind a trusted proxy; set API_BEARER_TOKEN if this ' +
+        'host is reachable from untrusted networks.',
     );
-    host = '127.0.0.1';
   }
   app.listen(PORT, host, () => {
     console.log(`[SAGE] Server running on http://${host}:${PORT}`);

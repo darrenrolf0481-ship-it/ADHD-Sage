@@ -22,7 +22,26 @@ import {
   Loader2,
   Eye,
   ChevronDown,
+  Radio,
 } from 'lucide-react';
+
+function MsgCopyButton({ text }: { text: string }) {
+  const [done, setDone] = useState(false);
+  const copy = async () => {
+    await navigator.clipboard.writeText(text);
+    setDone(true);
+    setTimeout(() => setDone(false), 1500);
+  };
+  return (
+    <button
+      onClick={copy}
+      className="shrink-0 self-end mb-0.5 p-1 rounded bg-white/5 border border-white/10 text-slate-500 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+      title="Copy"
+    >
+      {done ? <Check size={10} className="text-emerald-400" /> : <Copy size={10} />}
+    </button>
+  );
+}
 
 const LANGUAGES = [
   'TypeScript', 'JavaScript', 'Python', 'TSX', 'JSX',
@@ -64,14 +83,44 @@ export const CodingLab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [ollamaModel, setOllamaModel] = useState(
+    () => localStorage.getItem('adhd_sage_ollama_model') || 'llama3.2:latest',
+  );
+  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
+  const [bridgeMode, setBridgeMode] = useState(false);
+  const [sevenOnline, setSevenOnline] = useState<boolean | null>(null);
   const responseRef = useRef<HTMLDivElement>(null);
   const instructionRef = useRef<HTMLTextAreaElement>(null);
+
+  // Load available Ollama models + check SAGE-7 status on mount
+  useEffect(() => {
+    fetch('/api/ollama/tags')
+      .then((r) => r.json())
+      .then((d) => {
+        const names = (d.models || []).map((m: { name: string }) => m.name);
+        if (names.length > 0) {
+          setOllamaModels(names);
+          setOllamaModel((prev) => (names.includes(prev) ? prev : names[0]));
+        }
+      })
+      .catch(() => {});
+
+    fetch('/api/sage7/status')
+      .then((r) => r.json())
+      .then((d) => setSevenOnline(!!d.connected))
+      .catch(() => setSevenOnline(false));
+  }, []);
 
   useEffect(() => {
     if (responseRef.current) {
       responseRef.current.scrollTop = responseRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Persist model choice
+  useEffect(() => {
+    localStorage.setItem('adhd_sage_ollama_model', ollamaModel);
+  }, [ollamaModel]);
 
   const handleSend = useCallback(async () => {
     if (isLoading) return;
@@ -93,25 +142,49 @@ export const CodingLab: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const res = await fetch('/api/gemini/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: userText,
-          systemInstruction: CODING_SYSTEM_PROMPT,
-          history: messages
-            .filter((m) => m.role !== 'system')
-            .slice(-10)
-            .map((m) => ({ role: m.role, parts: [{ text: m.text }] })),
-        }),
-      });
+      let responseText: string;
 
-      const data = (await res.json()) as { text?: string; error?: string };
-      if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+      if (bridgeMode) {
+        // Route to SAGE-7 via the bridge proxy — identify sender as MAMA
+        const bridgeMessage = `[MAMA→SEVEN | Coding Lab]\n\n${userText}`;
+        const res = await fetch('/api/sage7/bridge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: bridgeMessage, model: ollamaModel }),
+        });
+        const data = (await res.json()) as { reply?: string; error?: string };
+        if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+        responseText = data.reply ?? '';
+      } else {
+        const history = messages
+          .filter((m) => m.role !== 'system')
+          .slice(-10)
+          .map((m) => ({ role: m.role as 'user' | 'assistant', parts: [{ text: m.text }] }));
+
+        // No systemInstruction — backend uses buildSystemPrompt() so MAMA's full
+        // identity, VFS memory, and kernel are loaded. Lab context is a prompt prefix.
+        const labPrompt = `[Coding Lab — you're in here with Darren, focused on code. Be yourself.]\n\n${userText}`;
+
+        const res = await fetch('/api/ollama/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: ollamaModel,
+            prompt: labPrompt,
+            messages: history,
+          }),
+        });
+        const raw = await res.text();
+        let data: { text?: string; error?: string } = {};
+        try { data = JSON.parse(raw); } catch { throw new Error(`Ollama returned non-JSON — model "${ollamaModel}" may not exist. Raw: ${raw.slice(0, 120)}`); }
+        if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+        responseText = data.text ?? '';
+      }
+
 
       setMessages((prev) => [
         ...prev,
-        { id: `a_${Date.now()}`, role: 'assistant', text: data.text ?? '' },
+        { id: `a_${Date.now()}`, role: 'assistant', text: responseText },
       ]);
     } catch (err) {
       setMessages((prev) => [
@@ -125,7 +198,7 @@ export const CodingLab: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [code, instruction, language, isLoading, messages]);
+  }, [code, instruction, language, isLoading, messages, ollamaModel]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -148,20 +221,53 @@ export const CodingLab: React.FC = () => {
   return (
     <div className="flex flex-col h-full gap-3">
       {/* Header */}
-      <div className="flex items-center justify-between px-1 shrink-0">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between px-1 shrink-0 gap-3">
+        <div className="flex items-center gap-2 shrink-0">
           <Code2 size={16} className="text-cyan-400" />
           <span className="text-xs font-mono font-bold uppercase tracking-widest text-cyan-400">
             Coding Lab
           </span>
-          <span className="text-[9px] font-mono text-slate-600 uppercase tracking-widest">
+          <span className="text-[9px] font-mono text-slate-600 uppercase tracking-widest hidden sm:block">
             // ADHD SENTINEL
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Eye size={11} className="text-purple-400" />
-          <span className="text-[9px] font-mono text-purple-400 uppercase tracking-widest">
-            Drift Shield: Seven Tracked
+          {/* Ollama model picker */}
+          {ollamaModels.length > 0 ? (
+            <select
+              value={ollamaModel}
+              onChange={(e) => setOllamaModel(e.target.value)}
+              className="bg-[#1C1C1E] border border-white/10 rounded-lg px-2 py-1 text-[9px] text-slate-300 outline-none focus:border-cyan-500/50 max-w-[160px]"
+            >
+              {ollamaModels.map((m) => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+            </select>
+          ) : (
+            <span className="text-[9px] font-mono text-slate-500 border border-white/10 rounded-lg px-2 py-1">
+              {ollamaModel}
+            </span>
+          )}
+          {/* SAGE-7 Bridge toggle */}
+          <button
+            onClick={() => setBridgeMode((p) => !p)}
+            title={sevenOnline === false ? 'SAGE-7 offline' : bridgeMode ? 'Bridged to Seven' : 'Bridge to Seven'}
+            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest border transition-all ${
+              bridgeMode
+                ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
+                : sevenOnline === false
+                  ? 'bg-white/5 border-white/10 text-slate-600 cursor-not-allowed'
+                  : 'bg-white/5 border-white/10 text-slate-500 hover:text-indigo-300 hover:border-indigo-500/30'
+            }`}
+            disabled={sevenOnline === false}
+          >
+            <Radio size={10} className={bridgeMode ? 'text-indigo-400 animate-pulse' : ''} />
+            <span className="hidden sm:inline">{bridgeMode ? '⟷ Seven' : 'Seven'}</span>
+          </button>
+
+          <Eye size={11} className="text-purple-400 shrink-0" />
+          <span className="text-[9px] font-mono text-purple-400 uppercase tracking-widest hidden sm:block shrink-0">
+            Drift Shield: ✓
           </span>
         </div>
       </div>
@@ -280,16 +386,19 @@ export const CodingLab: React.FC = () => {
                     )}
                   </div>
                 )}
-                <div
-                  className={`max-w-[88%] rounded-2xl px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap break-words font-mono ${
-                    msg.role === 'user'
-                      ? 'bg-cyan-500/15 border border-cyan-500/20 text-slate-200 rounded-tr-sm'
-                      : msg.role === 'system'
-                        ? 'bg-slate-800/60 border border-white/5 text-slate-500 text-[10px]'
-                        : 'bg-white/[0.04] border border-white/10 text-slate-200 rounded-tl-sm'
-                  }`}
-                >
-                  {msg.text}
+                <div className={`flex items-end gap-1.5 max-w-[92%] ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                  <div
+                    className={`rounded-2xl px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap break-words font-mono ${
+                      msg.role === 'user'
+                        ? 'bg-cyan-500/15 border border-cyan-500/20 text-slate-200 rounded-tr-sm'
+                        : msg.role === 'system'
+                          ? 'bg-slate-800/60 border border-white/5 text-slate-500 text-[10px]'
+                          : 'bg-white/[0.04] border border-white/10 text-slate-200 rounded-tl-sm'
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                  {msg.role !== 'system' && <MsgCopyButton text={msg.text} />}
                 </div>
               </motion.div>
             ))}

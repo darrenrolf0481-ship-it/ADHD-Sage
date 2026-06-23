@@ -67,10 +67,12 @@ const App: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pulseActive, setPulseActive] = useState(false);
   const [inboxUnread, setInboxUnread] = useState(0);
-  const [provider, setProvider] = useState<'gemini' | 'ollama' | 'openrouter'>(
-    () =>
-      (localStorage.getItem('adhd_sage_provider') as 'gemini' | 'ollama' | 'openrouter') ||
-      'ollama',
+  const [provider, setProvider] = useState<'ollama' | 'openrouter'>(
+    () => {
+      const stored = localStorage.getItem('adhd_sage_provider');
+      // 'gemini' was the old default before we removed Gemini support — fall back to ollama
+      return (stored === 'ollama' || stored === 'openrouter') ? stored : 'ollama';
+    },
   );
   const [ollamaModel, setOllamaModel] = useState(
     () => localStorage.getItem('adhd_sage_ollama_model') || 'gemma2:latest',
@@ -500,7 +502,7 @@ const App: React.FC = () => {
         text?: string;
         error?: string;
         toolEffects?: Array<{ type: string; payload: Record<string, unknown> }>;
-      };
+      } = {};
 
       // Build live sensor telemetry string to inject into system context
       const liveSensorContext =
@@ -568,22 +570,6 @@ const App: React.FC = () => {
           }),
         });
         data = await orRes.json();
-      } else {
-        // Sage (Gemini) — reads both darren-sage AND the shared channel.
-        // containerTag is omitted here; server defaults to [darren-sage, shared].
-        data = await sendMessageWithTools({
-          prompt: fullPrompt,
-          history: messages
-            .slice(-15)
-            .filter((m) => m.role !== 'system')
-            .map((m) => ({
-              role: m.role === 'user' ? 'user' : 'model',
-              parts: [{ text: m.text }],
-            })),
-          sensorContext: liveSensorContext || undefined,
-          attachments: imageParts,
-          executeLocalTool,
-        });
       }
 
       if (data.error) throw new Error(data.error);
