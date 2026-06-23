@@ -15,9 +15,10 @@
  */
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-export const MEMORIES_ROOT = resolve(import.meta.dir, '../../data/memories');
+export const MEMORIES_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../data/memories');
 export const INDEX_PATH = join(MEMORIES_ROOT, 'imported.json');
 export const SEVEN_DIR = join(MEMORIES_ROOT, 'seven');
 export const ADHD_DIR = join(MEMORIES_ROOT, 'adhd');
