@@ -3,6 +3,7 @@ import { compress } from '@mongodb-js/zstd';
 import { stampMamaMemory, type MemoryProvenance } from './mama-identity';
 import { timed } from './performance';
 import { getWorkerPool } from './workers/pool';
+import { indexNode } from './resonance-index';
 
 export function archiveNodeSync(node: Record<string, unknown>) {
   console.log(
@@ -18,7 +19,7 @@ export function archiveNodeSync(node: Record<string, unknown>) {
   const stamped = stampMamaMemory(node);
   const blob = Buffer.from(JSON.stringify(stamped.data), 'utf8');
   const provenance = JSON.stringify(stamped.provenance as MemoryProvenance);
-  outerDb.prepare(
+  const result = outerDb.prepare(
     'INSERT OR IGNORE INTO sages_constellations (node_id, data, compressed, timestamp, dopamine, cortisol, pinned, provenance) VALUES (?, ?, 0, ?, ?, ?, ?, ?)'
   ).run(stamped.node_id, blob, stamped.timestamp, stamped.dopamine, stamped.cortisol, stamped.pinned ? 1 : 0, provenance);
 
@@ -28,10 +29,16 @@ export function archiveNodeSync(node: Record<string, unknown>) {
     outerDb
       .prepare('INSERT OR IGNORE INTO sages_constellations_fts (node_id, content) VALUES (?, ?)')
       .run(node.node_id, content);
+
+    // Sync to resonance index (fire-and-forget — don't block the sync path)
+    if (result.lastInsertRowid) {
+      indexNode(Number(result.lastInsertRowid), content).catch((e) =>
+        console.warn('[RESONANCE] archiveNodeSync index failed:', e),
+      );
+    }
   } catch (e) {
     console.warn('[VFS] archiveNodeSync FTS insert failed:', e);
   }
-  // Note: sync variant is intentionally not timed to avoid synchronous perf.now overhead on hot path.
 }
 
 export async function archiveNode(node: Record<string, unknown>) {
@@ -48,18 +55,22 @@ export async function archiveNode(node: Record<string, unknown>) {
     }) as { type: 'base64'; data: string };
     const blob = Buffer.from(compressed.data, 'base64');
     const provenance = JSON.stringify(stamped.provenance as MemoryProvenance);
-    outerDb.prepare(
+    const result = outerDb.prepare(
       'INSERT OR IGNORE INTO sages_constellations (node_id, data, compressed, timestamp, dopamine, cortisol, pinned, provenance) VALUES (?, ?, 1, ?, ?, ?, ?, ?)'
     ).run(stamped.node_id, blob, stamped.timestamp, stamped.dopamine, stamped.cortisol, stamped.pinned ? 1 : 0, provenance);
 
-    // Sync to FTS
+    // Sync to FTS + resonance index
     try {
       const content = typeof node.data === 'string' ? node.data : JSON.stringify(node.data);
       outerDb
         .prepare('INSERT OR IGNORE INTO sages_constellations_fts (node_id, content) VALUES (?, ?)')
         .run(node.node_id, content);
+
+      if (result.lastInsertRowid) {
+        await indexNode(Number(result.lastInsertRowid), content);
+      }
     } catch (e) {
-      console.warn('[VFS] archiveNode FTS insert failed:', e);
+      console.warn('[VFS] archiveNode FTS/resonance insert failed:', e);
     }
   });
 }

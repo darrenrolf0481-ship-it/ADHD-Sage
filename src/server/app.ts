@@ -6,7 +6,7 @@ import { PORT } from './config';
 import { authGuard, API_BEARER_TOKEN, MCP_KEY_SECRET } from './auth';
 import { getSupermemoryClient } from '../lib/supermemory';
 import { initMcpManager, closeMcpConnections } from '../core/mcp';
-import { scheduleDailyJournal, scheduleWeeklySelfImprovement } from './schedulers';
+import { scheduleDailyJournal, scheduleWeeklySelfImprovement, scheduleNightlyDecay } from './schedulers';
 import { bootLoadMemories } from './db';
 
 import vfsRouter from './routes/vfs';
@@ -89,6 +89,7 @@ export async function startServer() {
   // ─── Schedulers ─────────────────────────────────────────────────────────────
   scheduleDailyJournal();
   scheduleWeeklySelfImprovement();
+  scheduleNightlyDecay();
 
   // ─── Vite Integration ─────────────────────────────────────────────────────
   if (process.env.NODE_ENV !== 'production') {

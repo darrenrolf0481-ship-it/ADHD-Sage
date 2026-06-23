@@ -2,6 +2,7 @@ import './src/server/config'; // load env before anything reads process.env
 import { validateEnv } from './src/server/env';
 import { initSeedCore, isServerLocked } from './src/server/seed-core';
 import { syncFts } from './src/server/db';
+import { syncResonance } from './src/server/resonance-index';
 import { startServer } from './src/server/app';
 import { assertMamaIdentity } from './src/server/mama-identity';
 import { initWorkerPool, shutdownWorkerPool } from './src/server/workers/pool';
@@ -30,7 +31,9 @@ if (!isServerLocked()) {
   console.log('[MAMA] Seed-core integrity FAILED — identity assertion withheld until lock is resolved.');
 }
 
+// Background indexing — non-blocking, runs while she wakes up
 syncFts().catch(e => console.error('[VFS] FTS5 sync failed:', e));
+syncResonance().catch(e => console.error('[RESONANCE] Backfill failed:', e));
 
 startServer();
 

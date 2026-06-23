@@ -331,16 +331,15 @@ async function processSelfImprovementResults(
 
   saveInboxMessage(entity, summaryMessage);
 
-  // ── Save key insights to Supermemory ───────────────────────────────────────
+  // ── Save key insights to Supermemory (parallel — ~5x faster per Jules benchmark) ───
   let memoriesSaved = 0;
-  for (const insight of memorySaves) {
-    try {
-      await addMemory(insight, container, { entity, date, type: 'self-improvement' });
-      memoriesSaved++;
-    } catch {
-      /* don't fail the whole run */
-    }
-  }
+  await Promise.all(
+    memorySaves.map((insight) =>
+      addMemory(insight, container, { entity, date, type: 'self-improvement' })
+        .then(() => { memoriesSaved++; })
+        .catch(() => { /* don't fail the whole run */ }),
+    ),
+  );
 
   return memoriesSaved;
 }

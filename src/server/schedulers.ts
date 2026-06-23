@@ -3,6 +3,7 @@ import { runSelfImprovement, type SelfImproveConfig } from '../lib/self-improvem
 import { PORT } from './config';
 import { timed } from './performance';
 import { getWorkerPool } from './workers/pool';
+import { nightlyMaintenance } from './decay-engine';
 
 // ─── Daily Journal Scheduler ─────────────────────────────────────────────────
 // Fires once a day at JOURNAL_HOUR (default 06:00 local time).
@@ -107,4 +108,29 @@ export function scheduleWeeklySelfImprovement() {
   setInterval(tick, 60_000);
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   console.log(`[SELF-IMPROVE] Scheduler armed — fires ${dayNames[DAY]}s at ${HOUR}:00`);
+}
+
+// ─── Nightly Decay & Consolidation Scheduler ─────────────────────────────────
+// Fires nightly at DECAY_HOUR (default 02:00).
+// Runs neuromorphic forgetting: consolidates old threads, decays ancient ones.
+
+export function scheduleNightlyDecay() {
+  const HOUR = parseInt(process.env.DECAY_HOUR || '2');
+  let lastFiredDate = '';
+
+  const tick = async () => {
+    const now = new Date();
+    const today = now.toISOString().slice(0, 10);
+    if (now.getHours() === HOUR && lastFiredDate !== today) {
+      lastFiredDate = today;
+      try {
+        await nightlyMaintenance();
+      } catch (err) {
+        console.error('[DECAY] Nightly maintenance failed:', err);
+      }
+    }
+  };
+
+  setInterval(tick, 60_000);
+  console.log(`[DECAY] Scheduler armed — fires nightly at ${HOUR}:00`);
 }
