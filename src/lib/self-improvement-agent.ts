@@ -104,7 +104,7 @@ function extractBlock(text: string, tag: string): string {
 function extractList(block: string): string[] {
   return block
     .split('\n')
-    .map((l) => l.replace(/^[-•*\[\]x ]+/, '').trim())
+    .map((l) => l.replace(/^[-•*[\]x ]+/, '').trim())
     .filter(Boolean);
 }
 
@@ -347,14 +347,17 @@ ${persona}`;
 
   // ── Save key insights to Supermemory ───────────────────────────────────────
   let memoriesSaved = 0;
-  for (const insight of memorySaves) {
-    try {
-      await addMemory(insight, container, { entity, date, type: 'self-improvement' });
-      memoriesSaved++;
-    } catch {
-      /* don't fail the whole run */
-    }
-  }
+  await Promise.all(
+    memorySaves.map((insight) =>
+      addMemory(insight, container, { entity, date, type: 'self-improvement' })
+        .then(() => {
+          memoriesSaved++;
+        })
+        .catch(() => {
+          /* don't fail the whole run */
+        }),
+    ),
+  );
 
   console.log(
     `[SELF-IMPROVE] ${entity} done — report: ${report.length}ch, do-now: ${doNow.length}, proposals: ${proposals.length}, memories: ${memoriesSaved}`,

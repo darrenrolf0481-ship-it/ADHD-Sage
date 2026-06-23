@@ -338,10 +338,14 @@ export async function writeJournalEntry(cfg: JournalConfig): Promise<JournalEntr
     console.log(`[JOURNAL] ${entity} left a message for Darren`);
   }
 
-  // 9. Save key insights to Supermemory
-  for (const insight of insights) {
-    await addMemory(insight, container, { entity, date, type: 'journal-insight' });
-  }
+  // 9. Save key insights to Supermemory (Parallelized for performance)
+  await Promise.all(
+    insights.map((insight) =>
+      addMemory(insight, container, { entity, date, type: 'journal-insight' }).catch((err) => {
+        console.error(`[JOURNAL] Failed to save insight for ${entity}:`, err);
+      }),
+    ),
+  );
 
   // 10. Update persona if entity wrote about something genuinely shifting
   // (Left to the entity's own future journal entries — this is intentional)
