@@ -91,7 +91,7 @@ function EmfPanel({ snap }: { snap: SensorSnapshot }) {
             size={12}
             className={isSpike ? 'text-red-400 animate-pulse' : 'text-slate-500'}
           />
-          Magnetometer (EMF)
+          Magnetic Field Deviation
         </span>
         <StatusDot active={!!mag} />
       </div>
@@ -118,7 +118,7 @@ function EmfPanel({ snap }: { snap: SensorSnapshot }) {
           />
           {isSpike && (
             <div className="text-[10px] font-bold text-red-400 uppercase tracking-widest animate-pulse text-center">
-              ⚡ EMF SPIKE DETECTED
+              ⚡ MAGNETIC ANOMALY DETECTED
             </div>
           )}
         </>
@@ -152,7 +152,7 @@ function AudioPanel({
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-mono tracking-widest uppercase text-slate-400 flex items-center gap-2">
           <Mic size={12} className={audio ? 'text-purple-400 animate-pulse' : 'text-slate-500'} />
-          Audio / Infrasound
+          Audio / Sub-Bass (mic floor ~80Hz)
         </span>
         {perm === 'pending' || perm === 'unavailable' ? (
           <button
@@ -178,7 +178,7 @@ function AudioPanel({
             value={Math.max(0, audio.infrasoundDb + 80)}
             max={80}
             color="bg-amber-400"
-            label={`Infrasound (1–20Hz) ${audio.infrasoundDb.toFixed(1)} dBFS`}
+            label={`Low-freq (1–20Hz) ${audio.infrasoundDb.toFixed(1)} dBFS — near mic floor`}
           />
           <Bar
             value={audio.spectralFlux}
@@ -205,7 +205,7 @@ function AudioPanel({
         </div>
       ) : (
         <div className="text-[10px] text-slate-600 italic font-mono">
-          Enable microphone for infrasound detection.
+          Enable mic for audio anomaly detection (reliable above ~80Hz).
         </div>
       )}
     </div>
@@ -563,7 +563,7 @@ function SpiritBox({ snap, isScanning }: { snap: SensorSnapshot; isScanning: boo
       const score = snap.anomalyScore;
       if (score > 0.2 && Math.random() < score * 0.3) {
         const fragments = [
-          snap.magnetometer ? `EMF:${snap.magnetometer.magnitude.toFixed(0)}µT` : null,
+          snap.magnetometer ? `MAG:${snap.magnetometer.magnitude.toFixed(0)}µT` : null,
           snap.audio ? `${snap.audio.peakFreqHz.toFixed(0)}Hz` : null,
           snap.geomagnetic ? `Kp${snap.geomagnetic.kpIndex.toFixed(1)}` : null,
           snap.weather ? `${snap.weather.pressure.toFixed(0)}hPa` : null,
@@ -787,7 +787,7 @@ function CameraPanel({ snap, sensorsEngaged }: { snap: SensorSnapshot; sensorsEn
 
 function PermStrip({ snap }: { snap: SensorSnapshot }) {
   const perms = [
-    { label: 'MAG', val: snap.permissions.magnetometer },
+    { label: 'MAG', val: snap.permissions.magnetometer },  // magnetic field deviation, not calibrated EMF
     { label: 'MIC', val: snap.permissions.audio },
     { label: 'CAM', val: snap.permissions.camera },
     { label: 'GPS', val: snap.permissions.gps },

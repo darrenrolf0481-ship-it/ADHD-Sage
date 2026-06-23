@@ -717,15 +717,15 @@ export class SensorHub {
 
     if (snap.magnetometer) {
       const { magnitude, deviation } = snap.magnetometer;
-      const flag = Math.abs(deviation) > 0.15 ? ' ⚡SPIKE' : '';
+      const flag = Math.abs(deviation) > 0.15 ? ' ⚡ANOMALY' : '';
       lines.push(
-        `EMF: ${magnitude.toFixed(1)} µT (${(deviation * 100).toFixed(1)}% deviation)${flag}`,
+        `Mag field: ${magnitude.toFixed(1)} µT (${(deviation * 100).toFixed(1)}% deviation from baseline)${flag} [phone magnetometer — relative deviation only, not calibrated EMF]`,
       );
     }
     if (snap.audio) {
       const { rmsDb, infrasoundDb, peakFreqHz, anomalyScore } = snap.audio;
       lines.push(
-        `Audio: RMS ${rmsDb.toFixed(1)} dBFS | Infrasound ${infrasoundDb.toFixed(1)} dBFS | Peak ${peakFreqHz.toFixed(1)} Hz | Anomaly ${(anomalyScore * 100).toFixed(0)}%`,
+        `Audio: RMS ${rmsDb.toFixed(1)} dBFS | Low-freq 1-20Hz ${infrasoundDb.toFixed(1)} dBFS (near mic floor) | Peak ${peakFreqHz.toFixed(1)} Hz | Anomaly ${(anomalyScore * 100).toFixed(0)}%`,
       );
     }
     if (snap.motion && snap.motion.accMagnitude > 1) {
