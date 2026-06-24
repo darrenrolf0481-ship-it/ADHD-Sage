@@ -70,7 +70,7 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
   return timed('llm:ollama:chat', async () => {
     const startMs = Date.now();
     try {
-      const { model, messages, systemInstruction, prompt, containerTag } = req.body;
+      const { model, messages, systemInstruction, prompt, containerTag, enableTools } = req.body;
       if (!model) {
         res.status(400).json({ error: 'model is required' });
         return;
@@ -104,8 +104,12 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       }
       if (prompt) ollamaMessages.push({ role: 'user', content: prompt });
 
-      // Collect MCP tools
-      const mcpTools = getMcpDeclarations();
+      // Collect MCP tools — opt-in only. Attaching all connected MCP tools to
+      // every request bloats the prompt and makes small local models (e.g.
+      // llama3.2) crawl: a trivial "say hi" ballooned from ~16s to ~100s with
+      // 50 tools attached. Callers that actually need tool use pass
+      // enableTools:true; the default (Coding Lab chat) stays fast.
+      const mcpTools = enableTools ? getMcpDeclarations() : [];
       const ollamaTools = mcpTools.map((t) => ({
         type: 'function' as const,
         function: {

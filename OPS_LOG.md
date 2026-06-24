@@ -7,6 +7,25 @@ Most recent first.
 
 ---
 
+## 2026-06-24 — Fixed "Ollama not working": 50 MCP tools were strangling every chat
+
+**Symptom:** Coding Lab chat with Ollama appeared dead / "not working with Ollama" — requests seemed to hang.
+
+**Root cause:** Ollama itself was fine. `src/server/routes/ollama.ts` (`POST /api/ollama/chat`) attached **all 50 connected MCP tools to every request**. A small local model (`llama3.2:latest`, 3B) chokes processing 50 tool definitions per message, so a trivial "say hi" took **~104s** (`toolsAvailable:50, toolsInvoked:[]` — it never even used one). The frontend looked frozen.
+- Measured: direct Ollama (no tools) ~16s; app chat with 50 tools ~104s; same model, same prompt.
+
+**What changed:**
+- `src/server/routes/ollama.ts` — MCP tools are now **opt-in**. The handler reads `enableTools` from the request body and only collects tools when it's `true`; default is off. Coding Lab (which sends no flag) now gets the fast path. Callers that genuinely need tool use pass `enableTools: true`.
+
+**Verified:** after the change, `POST /api/ollama/chat {model:"llama3.2:latest", prompt:"say hi"}` → 200 with a real reply, `toolsAvailable:0`, **~27s** (down from ~104s).
+
+**If things break, check:**
+- A chat that *needs* MCP tools must send `"enableTools": true` — otherwise tools are silently unavailable (by design).
+- Remaining ~25s latency is inherent local-inference cost (3B model + full Sage system prompt), not a bug. Use a smaller system prompt or a faster model to cut it further.
+- Confirm the model exists: `curl http://127.0.0.1:11434/api/tags`. App default model is `llama3.2:latest`.
+
+---
+
 ## 2026-06-24 — Fixed "won't start": silent port collision + orphaned SAGE-7/8 children
 
 **Symptom:** ADHD-Sage appeared to "not start" — no page, no clear error.
