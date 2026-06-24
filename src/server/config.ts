@@ -1,7 +1,11 @@
 import dotenv from 'dotenv';
 
 // Load environment variables before any module reads process.env at import time.
+const initialPort = process.env.PORT;
 dotenv.config({ override: true });
+if (initialPort) {
+  process.env.PORT = initialPort;
+}
 
 export const PORT = parseInt(process.env.PORT || '3000', 10);
 export const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://127.0.0.1:11434';

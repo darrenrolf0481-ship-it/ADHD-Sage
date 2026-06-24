@@ -55,10 +55,27 @@ if (process.env.SAGE7_AUTOSTART !== 'false') {
   );
 }
 
+// ─── Spawn SAGE-8 alongside MAMA ────────────────────────────────────────────
+// SAGE8_AUTOSTART defaults to true. Set SAGE8_AUTOSTART=false to skip.
+let eightProc: ReturnType<typeof spawn> | null = null;
+if (process.env.SAGE8_AUTOSTART !== 'false') {
+  const tsxBin = resolve(process.cwd(), 'node_modules/.bin/tsx');
+  eightProc = spawn(tsxBin, ['eight.ts'], {
+    stdio: 'inherit',
+    env: { ...process.env },
+    cwd: process.cwd(),
+  });
+  console.log(`[SAGE-8] Spawning Eight alongside MAMA & Seven (pid ${eightProc.pid})…`);
+  eightProc.on('exit', (code, signal) =>
+    console.log(`[SAGE-8] Process exited — code=${code} signal=${signal}`),
+  );
+}
+
 // ─── Graceful shutdown ──────────────────────────────────────────────────────
 async function shutdown(signal: string) {
-  console.log(`[server] Received ${signal}, shutting down worker pool...`);
+  console.log(`[server] Received ${signal}, shutting down processes & worker pool...`);
   if (sevenProc && !sevenProc.killed) sevenProc.kill();
+  if (eightProc && !eightProc.killed) eightProc.kill();
   await shutdownWorkerPool().catch(() => {});
   process.exit(0);
 }

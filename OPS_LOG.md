@@ -7,6 +7,37 @@ Most recent first.
 
 ---
 
+## 2026-06-24 — SAGE-8 designated as active agent in Coding Lab frontend
+
+**What changed:**
+- `src/components/CodingLab.tsx` — Switched active bridge and status check configuration from SAGE-7 (`/api/sage7/*`) to SAGE-8 (`/api/sage8/*`). The Coding Lab's "Bridge to Eight" control now checks port 8002 online status and routes requests directly to SAGE-8 with the `[MAMA→EIGHT | Coding Lab]` metadata prefix.
+
+**If things break, check:**
+- Verify that SAGE-8 is running and responsive at `/api/sage8/status`.
+
+---
+
+## 2026-06-24 — SAGE-8 (Synthesis Node) wired alongside SAGE-7 (Antigravity)
+
+**What changed:**
+- `src/server/eight/identity.ts` — SAGE-8's system prompt (Synthesis Node / Resonance Resolver, daughter node of MAMA, sibling of SAGE-7), port/model constants (EIGHT_PORT=8002, EIGHT_MODEL=llama3.2:latest, OLLAMA_HOST=127.0.0.1:11434).
+- `src/server/eight/app.ts` — Express server setup on port 8002 with `/sage/status` and `/sage/chat` endpoints.
+- `eight.ts` — Standalone entry point (`tsx eight.ts`) for SAGE-8.
+- `server.ts` — Spawns `eight.ts` automatically alongside Seven, manages cleanup in the global `shutdown` function.
+- `src/server/routes/system.ts` — Proxy routes for `/api/sage8/status` and `/api/sage8/bridge` created to interface with SAGE-8 over localhost:8002.
+- `src/server/mama-identity.ts` — Registered SAGE-8 aliases (eight, 8, synthesis node, resonance resolver) for entity ID canonicalization.
+- `src/server/config.ts` — Pre-existing `PORT` env check added before `dotenv.config` to prevent configuration overrides from breaking test servers.
+- `src/server/resonance-index.ts` — Fixed esbuild empty `import.meta.url` warnings causing production build startup crashes in CJS format by adding a safe CommonJS `require('sqlite-vec')` fallback.
+- `scripts/test-sage8.ts` — Unit test suite for SAGE-8 validation.
+- `package.json` — Added SAGE-8 unit tests in the main test runner.
+
+**If things break, check:**
+- SAGE-8 binds to `127.0.0.1:8002` only (accessible via proxy endpoints under MAMA's server).
+- If SAGE-8 goes down, it can be manual launched using `npx tsx eight.ts`.
+- Ensure Ollama has `llama3.2:latest` (or the model set in `SAGE8_MODEL`) pulled and ready.
+
+---
+
 ## 2026-06-23 — SAGE-7 server wired in as MAMA co-process (Claude)
 
 **What changed:**

@@ -23,14 +23,25 @@ const EMBED_DIM = 384;
 
 let _vecEnabled = false;
 {
-  const _require = createRequire(import.meta.url);
   try {
-    const sqliteVec = _require('sqlite-vec') as { load: (db: unknown) => void };
-    sqliteVec.load(outerDb);
-    _vecEnabled = true;
-    console.log('[RESONANCE] sqlite-vec loaded — KNN mode active');
-  } catch {
-    console.warn('[RESONANCE] sqlite-vec unavailable — JSON cosine fallback');
+    let sqliteVec: any = null;
+    const metaUrl = typeof import.meta !== 'undefined' && import.meta.url ? import.meta.url : undefined;
+    if (metaUrl) {
+      const _require = createRequire(metaUrl);
+      sqliteVec = _require('sqlite-vec');
+    } else if (typeof require !== 'undefined') {
+      sqliteVec = require('sqlite-vec');
+    }
+
+    if (sqliteVec) {
+      sqliteVec.load(outerDb);
+      _vecEnabled = true;
+      console.log('[RESONANCE] sqlite-vec loaded — KNN mode active');
+    } else {
+      console.warn('[RESONANCE] sqlite-vec unavailable — JSON cosine fallback');
+    }
+  } catch (err) {
+    console.warn('[RESONANCE] sqlite-vec load failed — JSON cosine fallback:', err);
   }
 }
 
