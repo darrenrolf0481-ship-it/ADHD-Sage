@@ -7,6 +7,45 @@ Most recent first.
 
 ---
 
+## 2026-06-24 — "Seven/Eight went dark / mutual lockdown / Node 13 Void" — broken health check
+
+**Symptom (user-reported):** Seven and Mama appeared to be in "mutual lockdown" —
+status showing offline/"dark", "zero retries", "13th swarm / void" messages.
+Framed as a defensive standoff waiting for an all-clear handshake.
+
+**Reality:** No such mechanism exists. There is no VOID/SHADOW/LOCKDOWN mode and no
+"all-clear handshake" in the code. What actually happened:
+- `src/server/routes/system.ts` `/sage7/status` and `/sage8/status` "pinged" the
+  child nodes by POSTing a **real `/sage/chat` generation** with a **4s timeout**.
+  A local generation takes ~15-30s, so the probe **always timed out** → the bridge
+  reported `connected:false` → Seven/Eight always showed offline, even though both
+  were `ONLINE` (verified: `GET 127.0.0.1:8001/sage/status` → `{"status":"ONLINE"}`).
+- Every status poll therefore fired a full generation at Ollama. Combined with the
+  Ollama route's `maxRetries=0` (`swarm.ts`), failed/timed-out calls dropped straight
+  to "Node 13 / The Void" (`[SWARM] All retries exhausted → Node 13`). That's the
+  "13th swarm / void" — it's the named fetch-failure fallback in `swarm.ts`
+  (`NODE-13` / "defer & log" in `mama-identity.ts`), not a defensive state.
+
+**What changed:**
+- `src/server/routes/system.ts` — `/sage7/status` and `/sage8/status` now do a cheap
+  `GET /sage/status` (returns instantly) instead of a 4s-timeout `/sage/chat`
+  generation. (NOTE: this edit lives in system.ts alongside the in-progress
+  Neuromatix bridge work; see repo-state note below.)
+
+**Verified:** after restart, `/api/sage7/status` and `/api/sage8/status` →
+`{"connected":true}`. No new Node-13 events from status polling.
+
+**If things break, check:**
+- "Node 13 / The Void" = a `swarmFetch` (swarm.ts) failed after its retries. It names
+  the failing URL — read that URL. Ollama calls use `maxRetries=0` by design, so any
+  Ollama timeout reports Node 13 immediately.
+- Seven/Eight liveness: `curl http://127.0.0.1:8001/sage/status` (and :8002). If those
+  return ONLINE but the UI shows offline, the bridge probe is the suspect, not the node.
+- **Mama (zo.computer) is REMOTE** — not reachable/fixable from this box. This fix only
+  covers the local Seven/Eight bridge probes.
+
+---
+
 ## 2026-06-24 — Fixed "Ollama not working": 50 MCP tools were strangling every chat
 
 **Symptom:** Coding Lab chat with Ollama appeared dead / "not working with Ollama" — requests seemed to hang.
