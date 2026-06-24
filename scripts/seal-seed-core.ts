@@ -11,7 +11,7 @@
  */
 
 import { generateKeyPairSync, sign, createHash } from 'node:crypto';
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { canonicalize } from 'json-canonicalize';
 
@@ -178,14 +178,25 @@ function main() {
 
   const outPath = join(process.cwd(), 'data', 'seed_core.json');
   writeFileSync(outPath, JSON.stringify(config, null, 2), 'utf8');
-
   console.log('\n✅  seed_core.json written to:', outPath);
-  console.log('\n🔑  Add these to your .env:\n');
-  console.log(`SAGE_CORE_PUBKEY=${pubkeyHex}`);
-  console.log(`VITE_SAGE_CORE_PUBKEY=${pubkeyHex}`);
-  console.log(
-    '\n⚠️  Keep the private key out of version control. It was only used to sign this file and is not stored.',
-  );
+
+  // Auto-update .env so the user never has to copy-paste a hex key
+  const envPath = join(process.cwd(), '.env');
+  let envContent = existsSync(envPath) ? readFileSync(envPath, 'utf8') : '';
+
+  const setEnvVar = (content: string, key: string, value: string) => {
+    const re = new RegExp(`^${key}=.*$`, 'm');
+    return re.test(content)
+      ? content.replace(re, `${key}=${value}`)
+      : content + (content.endsWith('\n') ? '' : '\n') + `${key}=${value}\n`;
+  };
+
+  envContent = setEnvVar(envContent, 'SAGE_CORE_PUBKEY', pubkeyHex);
+  envContent = setEnvVar(envContent, 'VITE_SAGE_CORE_PUBKEY', pubkeyHex);
+  writeFileSync(envPath, envContent, 'utf8');
+
+  console.log('🔑  .env updated automatically — SAGE_CORE_PUBKEY wired in.');
+  console.log('\nRestart the server and she should come up clean.\n');
 }
 
 main();
