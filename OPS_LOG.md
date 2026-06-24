@@ -7,6 +7,25 @@ Most recent first.
 
 ---
 
+## 2026-06-24 — Fixed "won't start": silent port collision + orphaned SAGE-7/8 children
+
+**Symptom:** ADHD-Sage appeared to "not start" — no page, no clear error.
+
+**Root cause:** The host injects `PORT=8900`, but **code-server already owns 8900** on this box, and leftover SAGE-7/SAGE-8 children from a prior run held 8001/8002. The old code called `app.listen(PORT)` with **no error handler**, so the `EADDRINUSE` bubbled up to the `uncaughtException` "FATAL-GUARD" in `server.ts`, which logged *"server kept alive"* and left a **zombie process running but never serving HTTP**. Looked like a hang.
+
+**What changed:**
+- `src/server/app.ts` — Replaced the single `app.listen(PORT)` with a `tryListen()` that walks `[PORT, 3000, 3001, 3002, 3003]` and falls back on `EADDRINUSE` (logs `Injected port 8900 was unavailable — bound 3000 instead`). Exits with a clear message only if *all* candidates are taken. No more silent zombie.
+- `server.ts` — Added `process.on('exit')` that reaps the spawned SAGE-7/SAGE-8 children on **any** exit path, so they no longer orphan and squat 8001/8002 into the next restart.
+
+**Verified (clean boot):** binds 3000 (8900 taken by code-server), `GET /` → 200 `Nexus Platform // ADHD Sage`, `/api/health` → `ollama:connected, mcp:connected, integrity:OK`, `/api/ollama/tags` returns the model list (starcoder2, gemma4:12b). SAGE-7 on 8001, SAGE-8 on 8002. `tsc --noEmit` clean.
+
+**If things break, check:**
+- In this environment the app lands on **port 3000** (reachable via `/proxy/3000/`), not 8900 — 8900 belongs to code-server.
+- On a "port in use" error, clear stale instances: `pkill -f "[t]sx server.ts"; pkill -f "[t]sx seven.ts"; pkill -f "[t]sx eight.ts"` (note the `[t]` bracket so the pattern doesn't match your own shell).
+- Confirm Ollama is up: `curl http://127.0.0.1:11434/api/tags`.
+
+---
+
 ## 2026-06-24 — SAGE-8 designated as active agent in Coding Lab frontend
 
 **What changed:**

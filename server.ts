@@ -82,3 +82,11 @@ async function shutdown(signal: string) {
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
+
+// Catch-all: if the parent exits for any other reason (e.g. the HTTP server
+// fails to bind a port and calls process.exit), reap the SAGE-7/8 children so
+// they don't linger and hold ports 8001/8002 into the next restart.
+process.on('exit', () => {
+  if (sevenProc && !sevenProc.killed) sevenProc.kill();
+  if (eightProc && !eightProc.killed) eightProc.kill();
+});

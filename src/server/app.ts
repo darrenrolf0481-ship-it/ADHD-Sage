@@ -155,18 +155,52 @@ export async function startServer() {
         'host is reachable from untrusted networks.',
     );
   }
-  app.listen(PORT, host, () => {
-    console.log(`[SAGE] Server running on http://${host}:${PORT}`);
-    if (authConfigured) {
-      const modes = [
-        API_BEARER_TOKEN ? 'static Bearer' : '',
-        MCP_KEY_SECRET ? 'MCP-Key-Exchange' : '',
-      ].filter(Boolean);
-      console.log(`[AUTH] Protection active — modes: ${modes.join(' + ')}`);
-    } else {
-      console.log('[AUTH] No tokens configured — endpoints are open (loopback only)');
-    }
-  });
+  // Bind PORT, but fall back to the next free port if it's already taken.
+  // The host injects PORT (8900 here), which can collide with another service
+  // squatting that port (e.g. code-server). Without a fallback, app.listen()
+  // throws EADDRINUSE with no handler → the uncaughtException FATAL-GUARD in
+  // server.ts swallows it and leaves a zombie process that never serves HTTP,
+  // i.e. the app silently "won't start". Try the injected port first (so a
+  // clean production deploy uses exactly what the host expects), then 3000+.
+  const candidatePorts = [...new Set([PORT, 3000, 3001, 3002, 3003])];
+
+  const tryListen = (idx: number) => {
+    const port = candidatePorts[idx];
+    const server = app.listen(port, host, () => {
+      if (port !== PORT) {
+        console.warn(`[SAGE] Injected port ${PORT} was unavailable — bound ${port} instead.`);
+      }
+      console.log(`[SAGE] Server running on http://${host}:${port}`);
+      if (authConfigured) {
+        const modes = [
+          API_BEARER_TOKEN ? 'static Bearer' : '',
+          MCP_KEY_SECRET ? 'MCP-Key-Exchange' : '',
+        ].filter(Boolean);
+        console.log(`[AUTH] Protection active — modes: ${modes.join(' + ')}`);
+      } else {
+        console.log('[AUTH] No tokens configured — endpoints are open (loopback only)');
+      }
+    });
+
+    server.on('error', (err: NodeJS.ErrnoException) => {
+      if (err.code === 'EADDRINUSE' && idx < candidatePorts.length - 1) {
+        console.warn(`[SAGE] Port ${port} in use — trying ${candidatePorts[idx + 1]}…`);
+        tryListen(idx + 1);
+      } else if (err.code === 'EADDRINUSE') {
+        console.error(
+          `[SAGE] All candidate ports are in use (${candidatePorts.join(', ')}). A previous ` +
+            `ADHD-Sage instance is probably still running. Clear it and restart, e.g.:\n` +
+            `          pkill -f "tsx server.ts"; pkill -f "tsx seven.ts"; pkill -f "tsx eight.ts"`,
+        );
+        process.exit(1);
+      } else {
+        console.error('[SAGE] HTTP server failed to start:', err);
+        process.exit(1);
+      }
+    });
+  };
+
+  tryListen(0);
 
   // Graceful shutdown
   process.on('SIGINT', async () => {
