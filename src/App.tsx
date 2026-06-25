@@ -81,6 +81,7 @@ const App: React.FC = () => {
   const [ollamaError, setOllamaError] = useState('');
 
   const OR_MODELS = [
+    { id: 'openrouter/free', label: 'OpenRouter Free (auto)' },
     { id: 'google/gemma-4-31b-it:free', label: 'Gemma 4 31B (free)' },
     { id: 'z-ai/glm-4.5-air:free', label: 'GLM-4.5 Air (free)' },
   ];
