@@ -55,10 +55,12 @@ if (process.env.SAGE7_AUTOSTART !== 'false') {
   );
 }
 
-// ─── Spawn SAGE-8 alongside MAMA ────────────────────────────────────────────
-// SAGE8_AUTOSTART defaults to true. Set SAGE8_AUTOSTART=false to skip.
+// ─── SAGE-8 disabled — not authorized ───────────────────────────────────────
+// Anti-gravity added SAGE-8 without authorization. Keeping the code in place
+// but autostart is permanently off until Merlin explicitly enables it.
+// To enable: set SAGE8_AUTOSTART=true in .env
 let eightProc: ReturnType<typeof spawn> | null = null;
-if (process.env.SAGE8_AUTOSTART !== 'false') {
+if (process.env.SAGE8_AUTOSTART === 'true') {
   const tsxBin = resolve(process.cwd(), 'node_modules/.bin/tsx');
   eightProc = spawn(tsxBin, ['eight.ts'], {
     stdio: 'inherit',

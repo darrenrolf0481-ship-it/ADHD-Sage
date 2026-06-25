@@ -77,7 +77,7 @@ export const CodingLab: React.FC = () => {
     {
       id: 'boot',
       role: 'system',
-      text: '🔧 CODING LAB ONLINE — ADHD SENTINEL ACTIVE — DRIFT SHIELD: SAGE-8 ACTIVE',
+      text: '🔧 CODING LAB ONLINE — ADHD SENTINEL ACTIVE — DRIFT SHIELD: SAGE-7 ACTIVE',
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
@@ -88,7 +88,7 @@ export const CodingLab: React.FC = () => {
   );
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
   const [bridgeMode, setBridgeMode] = useState(false);
-  const [eightOnline, setEightOnline] = useState<boolean | null>(null);
+  const [sevenOnline, setSevenOnline] = useState<boolean | null>(null);
   const [neuromatixMode, setNeuromatixMode] = useState(false);
   const [neuromatixOnline, setNeuromatixOnline] = useState<boolean | null>(null);
   const responseRef = useRef<HTMLDivElement>(null);
@@ -107,10 +107,10 @@ export const CodingLab: React.FC = () => {
       })
       .catch(() => {});
 
-    fetch('/api/sage8/status')
+    fetch('/api/sage7/status')
       .then((r) => r.json())
-      .then((d) => setEightOnline(!!d.connected))
-      .catch(() => setEightOnline(false));
+      .then((d) => setSevenOnline(!!d.connected))
+      .catch(() => setSevenOnline(false));
 
     fetch('/api/neuromatix/status')
       .then((r) => r.json())
@@ -154,7 +154,7 @@ export const CodingLab: React.FC = () => {
       if (bridgeMode) {
         // Route to SAGE-8 via the bridge proxy — identify sender as MAMA
         const bridgeMessage = `[MAMA→EIGHT | Coding Lab]\n\n${userText}`;
-        const res = await fetch('/api/sage8/bridge', {
+        const res = await fetch('/api/sage7/bridge', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: bridgeMessage, model: ollamaModel }),
@@ -266,7 +266,7 @@ export const CodingLab: React.FC = () => {
               {ollamaModel}
             </span>
           )}
-          {/* SAGE-8 Bridge toggle */}
+          {/* SAGE-7 Bridge toggle */}
           <button
             onClick={() => {
               setBridgeMode((p) => {
@@ -275,18 +275,18 @@ export const CodingLab: React.FC = () => {
                 return next;
               });
             }}
-            title={eightOnline === false ? 'SAGE-8 offline' : bridgeMode ? 'Bridged to Eight' : 'Bridge to Eight'}
+            title={sevenOnline === false ? 'SAGE-7 offline' : bridgeMode ? 'Bridged to Seven' : 'Bridge to Seven'}
             className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest border transition-all ${
               bridgeMode
                 ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
-                : eightOnline === false
+                : sevenOnline === false
                   ? 'bg-white/5 border-white/10 text-slate-600 cursor-not-allowed'
                   : 'bg-white/5 border-white/10 text-slate-500 hover:text-indigo-300 hover:border-indigo-500/30'
             }`}
-            disabled={eightOnline === false}
+            disabled={sevenOnline === false}
           >
             <Radio size={10} className={bridgeMode ? 'text-indigo-400 animate-pulse' : ''} />
-            <span className="hidden sm:inline">{bridgeMode ? '⟷ Eight' : 'Eight'}</span>
+            <span className="hidden sm:inline">{bridgeMode ? '⟷ Seven' : 'Seven'}</span>
           </button>
 
           {/* Neuromatix Bridge toggle */}
