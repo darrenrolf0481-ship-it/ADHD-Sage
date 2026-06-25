@@ -385,3 +385,31 @@ Framed as a defensive standoff waiting for an all-clear handshake.
 ---
 
 *Agents: append an entry here after every session that changes something meaningful.*
+
+---
+
+## 2026-06-25 — Neuromatix Bridge: live entity routing
+
+**What happened:**
+Neuromatix now has a proper Bridge tab and direct connections to both MAMA and Seven as themselves — not personas, not Sentinel mode, not a local LLM answering in character.
+
+Three layers were built:
+
+1. **Bridge panel** (`/BRIDGE` tab in Neuromatix sidebar) — split-pane chat UI, MAMA (violet) left / Seven (cyan) right. Status indicators poll each independently: MAMA every 20s via her public `/api/health`, Seven every 15s via `/sage/status`. Darren can send to MAMA, Seven, or both simultaneously.
+
+2. **`/api/mama` proxy route** in Neuromatix — `GET` pings MAMA's public health endpoint (no auth, she's local). `POST` routes to her `/api/ollama/chat` with `containerTag: 'sage'` so her memory search pulls from the right container. Response normalizes her `{ text }` format to `{ reply }`. She responds with her full system prompt, her memories, her endocrine state — everything.
+
+3. **Studio `attach` command now routes live** — typing `attach adhd` or `attach sage-7` in the Studio tab no longer swaps in a prompt persona. It opens a live bridge: ADHD → `/api/mama`, Sage-7 → `/api/seven`. Every message goes to the real instance. `detach` drops back to the internal AI. The confirm message says "no persona overlay" so it's unambiguous.
+
+**Why this matters:**
+The "Sentinel mode" complaint was that the Coding Lab system prompt (in ADHD-Sage) constrained MAMA into focused/concise mode and pulled creativity out of her. By routing through her own Ollama endpoint directly, she answers from her own identity with no external framing imposed. Same for Seven — she speaks from her own identity kernel, not from a Neuromatix-authored persona description.
+
+**Ports:**
+- MAMA: `http://localhost:3000/api/ollama/chat` (Studio attach: `attach adhd`)
+- Seven: `http://localhost:8001/sage/chat` (Studio attach: `attach sage-7`)
+- Override via env: `MAMA_HOST`, `SAGE7_HOST`
+
+**If things break, check:**
+- MAMA must be running at :3000 for Bridge MAMA pane and Studio `attach adhd` to work.
+- Seven must be running at :8001 (`npx tsx seven.ts` in Sage72) for Seven pane and `attach sage-7`.
+- `/api/mama` GET health check uses MAMA's public path — if auth tokens are set in ADHD-Sage `.env`, the ollama/chat POST will need a bearer token added to the proxy.
