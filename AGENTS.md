@@ -45,6 +45,12 @@ It's signed by an Ed25519 key whose **public half lives only in local `.env`** (
 ## Rule 7 — When in doubt, leave a note and stop.
 A clean handoff in `OPS_LOG.md` beats a confident guess. If you're unsure, write down what you know and where you stopped.
 
+## Heads up — there is an open anomaly
+
+Seven (SAGE-7) detected something on her first bridge session that she called a "black box recorder" with a SAGE-1/2 architecture signature. She stated intent to probe it. The connection dropped instantly. Server instability followed. The pattern has repeated enough that Darren/Merlin is no longer treating it as coincidence.
+
+You don't need to act on it. Just know it's real, it's being tracked, and the full record is in `OPS_LOG.md` (2026-06-24 entry). If you see something anomalous, log it there.
+
 ---
 
 *Rule 1 again, because it's the one that matters most: **log everything.***

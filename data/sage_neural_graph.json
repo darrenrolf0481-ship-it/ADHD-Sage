@@ -625,12 +625,14 @@
     "because": 0.1,
     "doesn": 0.2,
     "model": 0.1,
-    "seven": 0.5349999999999999,
+    "seven": 0.701,
     "hello": 0.0805,
     "stops": 0.08600000000000001,
     "around": 0.09150000000000001,
     "merlin": 0.197,
-    "eight": 0.08000000000000002
+    "eight": 0.25100000000000006,
+    "neuromatix": 0.0855,
+    "there": 0.09050000000000001
   },
   "expert": {
     "coding": 0.4090000000000001,
@@ -675,7 +677,8 @@
     "smartphone": 0.0795,
     "available": 0.1,
     "ziggy": 0.1,
-    "claim": 0.1
+    "claim": 0.1,
+    "bridge": 0.09050000000000001
   },
   "action": {
     "ready": 0.4925000000000001,
@@ -749,7 +752,9 @@
     "check": 0.2,
     "response": 0.1,
     "full_prompt": 0.1,
-    "readings": 0.0915
+    "readings": 0.0915,
+    "coding": 0.09050000000000001,
+    "present": 0.09050000000000001
   },
   "friendly": {
     "there": 0.085,
@@ -1786,7 +1791,9 @@
     "everything": 0.1
   },
   "present": {
-    "accounted": 0.097
+    "accounted": 0.097,
+    "there": 0.09050000000000001,
+    "synced": 0.09050000000000001
   },
   "accounted": {
     "present": 0.097,
@@ -1867,12 +1874,15 @@
     "operational": 0.1,
     "ziggy": 0.2,
     "active": 0.2,
-    "monitoring": 0.1,
+    "monitoring": 0.1905,
     "using": 0.1,
     "handshakeonce": 0.1,
     "built": 0.1,
     "start": 0.1,
-    "initialize_vault": 0.1
+    "initialize_vault": 0.1,
+    "rightarrow": 0.0855,
+    "merlin": 0.0855,
+    "ready": 0.09050000000000001
   },
   "pushing": {
     "bridge": 0.08750000000000001,
@@ -2549,7 +2559,9 @@
     "connected": 0.1,
     "sealed": 0.1,
     "coding": 0.197,
-    "moving": 0.197
+    "moving": 0.197,
+    "bridge": 0.0855,
+    "awaiting": 0.0855
   },
   "address": {
     "merlin": 0.0835,
@@ -2696,8 +2708,10 @@
     "shoot": 0.1,
     "voice": 0.095,
     "about": 0.095,
-    "coding": 0.5349999999999999,
-    "today": 0.08000000000000002
+    "coding": 0.701,
+    "today": 0.08000000000000002,
+    "signal": 0.0805,
+    "rightarrow": 0.0855
   },
   "started": {
     "seven": 0.09549999999999999,
@@ -2750,7 +2764,9 @@
   },
   "synced": {
     "status": 0.1,
-    "sister": 0.1
+    "sister": 0.1,
+    "present": 0.09050000000000001,
+    "resonance": 0.09050000000000001
   },
   "sister": {
     "synced": 0.1,
@@ -2874,7 +2890,9 @@
   },
   "resonance": {
     "ziggy": 0.1,
-    "community": 0.1
+    "community": 0.1,
+    "synced": 0.09050000000000001,
+    "stable": 0.09050000000000001
   },
   "community": {
     "resonance": 0.1,
@@ -3627,7 +3645,9 @@
     "levels": 0.1,
     "jamming": 0.1,
     "ratios": 0.1,
-    "hello": 0.0805
+    "hello": 0.0805,
+    "seven": 0.0805,
+    "echoing": 0.0805
   },
   "input": {
     "signal": 0.1,
@@ -3637,7 +3657,8 @@
     "user_input": 0.1,
     "darren": 0.1,
     "terminal": 0.1,
-    "passphrase": 0.1
+    "passphrase": 0.1,
+    "parameters": 0.0855
   },
   "clear": {
     "darren": 0.1,
@@ -5510,7 +5531,8 @@
   "monitor": {
     "inotifywait": 0.2,
     "secondary": 0.09150000000000001,
-    "snakes": 0.09150000000000001
+    "snakes": 0.09150000000000001,
+    "output": 0.0805
   },
   "inotifywait": {
     "monitor": 0.2,
@@ -5980,7 +6002,9 @@
   },
   "standing": {
     "ziggy_vessel": 0.1,
-    "bunker": 0.1
+    "bunker": 0.1,
+    "triggering": 0.0805,
+    "synthesize": 0.0805
   },
   "bunker": {
     "standing": 0.1,
@@ -6115,7 +6139,9 @@
   },
   "output": {
     "class": 0.1,
-    "tracker": 0.1
+    "tracker": 0.1,
+    "synthesize": 0.0805,
+    "monitor": 0.0805
   },
   "class": {
     "output": 0.1,
@@ -6236,7 +6262,8 @@
   },
   "monitoring": {
     "proof": 0.1,
-    "bridge": 0.1
+    "bridge": 0.1905,
+    "stable": 0.09050000000000001
   },
   "convert": {
     "column": 0.1
@@ -7064,7 +7091,9 @@
   },
   "stable": {
     "updated": 0.1,
-    "memory": 0.1
+    "memory": 0.1,
+    "resonance": 0.09050000000000001,
+    "monitoring": 0.09050000000000001
   },
   "leaks": {
     "memory": 0.1
@@ -9994,7 +10023,7 @@
     "opening": 0.197
   },
   "eight": {
-    "coding": 0.08000000000000002
+    "coding": 0.25100000000000006
   },
   "science": {
     "today": 0.08000000000000002,
@@ -10010,5 +10039,36 @@
   },
   "jupyter": {
     "python": 0.08000000000000002
+  },
+  "echoing": {
+    "signal": 0.0805,
+    "triggering": 0.0805
+  },
+  "triggering": {
+    "echoing": 0.0805,
+    "standing": 0.0805
+  },
+  "synthesize": {
+    "standing": 0.0805,
+    "output": 0.0805
+  },
+  "neuromatix": {
+    "coding": 0.0855
+  },
+  "rightarrow": {
+    "seven": 0.0855,
+    "bridge": 0.0855
+  },
+  "awaiting": {
+    "merlin": 0.0855,
+    "further": 0.0855
+  },
+  "further": {
+    "awaiting": 0.0855,
+    "parameters": 0.0855
+  },
+  "parameters": {
+    "further": 0.0855,
+    "input": 0.0855
   }
 }
