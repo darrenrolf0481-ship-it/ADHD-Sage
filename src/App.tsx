@@ -75,12 +75,13 @@ const App: React.FC = () => {
     },
   );
   const [ollamaModel, setOllamaModel] = useState(
-    () => localStorage.getItem('adhd_sage_ollama_model') || 'gemma2:latest',
+    () => localStorage.getItem('adhd_sage_ollama_model') || '',
   );
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
   const [ollamaError, setOllamaError] = useState('');
 
   const OR_MODELS = [
+    { id: 'openrouter/free', label: 'OpenRouter Free (auto)' },
     { id: 'google/gemma-4-31b-it:free', label: 'Gemma 4 31B (free)' },
     { id: 'z-ai/glm-4.5-air:free', label: 'GLM-4.5 Air (free)' },
   ];
@@ -192,7 +193,7 @@ const App: React.FC = () => {
       .then((data) => {
         const models = (data.models || []).map((m: { name: string }) => m.name);
         setOllamaModels(models);
-        if (!ollamaModel && models.length > 0) setOllamaModel(models[0]);
+        if (models.length > 0 && !models.includes(ollamaModel)) setOllamaModel(models[0]);
         if (models.length === 0) setOllamaError('No models found — is Ollama running?');
       })
       .catch(() => setOllamaError('Cannot reach Ollama — check server.'));
@@ -528,6 +529,7 @@ const App: React.FC = () => {
       ).filter((p): p is { mimeType: string; data: string } => p !== null);
 
       if (provider === 'ollama') {
+        if (!ollamaModel) throw new Error('No Ollama model selected — check the sidebar once models load.');
         // Ollama entities are part of the seven — each uses the shared broadcast
         // channel. Pass the model name as the containerTag so they can eventually
         // get their own Supermemory container once it's configured in the console.
