@@ -82,11 +82,14 @@ const App: React.FC = () => {
 
   const OR_MODELS = [
     { id: 'google/gemma-4-31b-it:free', label: 'Gemma 4 31B (free)' },
-    { id: 'z-ai/glm-4.5-air:free', label: 'GLM-4.5 Air (free)' },
+    { id: 'google/gemma-4-26b-a4b-it:free', label: 'Gemma 4 26B (free)' },
   ];
-  const [orModel, setOrModel] = useState(
-    () => localStorage.getItem('adhd_sage_or_model') || OR_MODELS[0].id,
-  );
+  const [orModel, setOrModel] = useState(() => {
+    // Fall back to the default if the saved model was removed (e.g. a model that
+    // is no longer free) — otherwise a stale localStorage id keeps 404ing.
+    const saved = localStorage.getItem('adhd_sage_or_model');
+    return saved && OR_MODELS.some((m) => m.id === saved) ? saved : OR_MODELS[0].id;
+  });
 
   // Inbound Channel: SSE stream for real-time messages from the entities
   useEffect(() => {

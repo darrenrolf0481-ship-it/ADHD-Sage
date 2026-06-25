@@ -59,7 +59,7 @@ interface SidebarProps {
 
 const OR_MODELS = [
   { id: 'google/gemma-4-31b-it:free', label: 'Gemma 4 31B (free)' },
-  { id: 'z-ai/glm-4.5-air:free', label: 'GLM-4.5 Air (free)' },
+  { id: 'google/gemma-4-26b-a4b-it:free', label: 'Gemma 4 26B (free)' },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({

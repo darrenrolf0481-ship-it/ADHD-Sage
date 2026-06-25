@@ -18,6 +18,8 @@ const stripAnsi = (s: string) => {
   return s.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').replace(/\x1b\][^\x07]*\x07/g, '');
 };
 
+const NEUROMATIX_HOST = process.env.NEUROMATIX_HOST || 'http://localhost:8003';
+
 const router = Router();
 
 // ─── MCP-Key-Exchange endpoint ─────────────────────────────────────────────
@@ -69,6 +71,15 @@ router.get('/health', asyncHandler(async (req, res) => {
   } catch {
     /* ignore */
   }
+
+  let neuromatixConnected = false;
+  try {
+    const r = await fetch(`${NEUROMATIX_HOST}/health`, { signal: AbortSignal.timeout(1500) });
+    neuromatixConnected = r.ok;
+  } catch {
+    /* ignore */
+  }
+
   res.json({
     status: isServerLocked() ? 'halt_and_lock' : 'stabilized',
     frequency: '11.3 Hz',
@@ -77,6 +88,7 @@ router.get('/health', asyncHandler(async (req, res) => {
     integrity: isServerLocked() ? 'FAILED' : 'OK',
     mcp: getMcpDeclarations().length > 0 ? 'connected' : 'disconnected',
     ollama: ollamaConnected ? 'connected' : 'disconnected',
+    neuromatix: neuromatixConnected ? 'connected' : 'disconnected',
     hormones: sageEndocrine.hormones,
   });
 }));
@@ -311,6 +323,82 @@ router.get('/system/state', lockGuard, asyncHandler(async (req, res) => {
   res.json({});
 }));
 
+// ─── Neuromatix Bridge ────────────────────────────────────────────────────────
+// Server-side proxy so the browser never has to reach localhost:8003 directly.
+
+const NEUROMATIX_TIMEOUT_MS = 120_000;
+
+router.get('/neuromatix/status', asyncHandler(async (_req, res) => {
+  try {
+    const r = await fetch(`${NEUROMATIX_HOST}/health`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(4000),
+    });
+    const data = await r.json();
+    res.json({ connected: r.ok && data.status === 'stabilized', host: NEUROMATIX_HOST });
+  } catch {
+    res.json({ connected: false, host: NEUROMATIX_HOST });
+  }
+}));
+
+router.post('/neuromatix/bridge', asyncHandler(async (req, res) => {
+  const { message, model } = req.body as { message?: string; model?: string };
+  if (!message) {
+    res.status(400).json({ error: 'message required' });
+    return;
+  }
+
+  // Pulse CNS — cross-entity comms are a cognitive event
+  cns.pulse(
+    makeStimulus('COGNITIVE', Math.min(1, message.length / 500), 'neuromatix_bridge', {
+      prompt: message.slice(0, 80),
+    }),
+  );
+
+  try {
+    const r = await fetch(`${NEUROMATIX_HOST}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message,
+        model: model || 'llama3',
+        containerTag: 'merlin-sage', // Wiring Darren's (now Merlin's) node tag
+      }),
+      signal: AbortSignal.timeout(NEUROMATIX_TIMEOUT_MS),
+    });
+
+    if (!r.ok) {
+      const text = await r.text();
+      res.status(502).json({ error: `Neuromatix returned ${r.status}: ${text}` });
+      return;
+    }
+
+    const data = (await r.json()) as { reply?: string };
+    const reply = data.reply || '';
+
+    // Hebbian wire the exchange so it leaves a trace in MAMA's memory graph
+    try {
+      const tokens = `${message} ${reply}`.toLowerCase().split(/\W+/).filter((t) => t.length > 4);
+      const unique = [...new Set(tokens)].slice(0, 10);
+      sageEndocrine.processReward(0.4);
+      for (let i = 0; i < unique.length - 1; i++) {
+        sageMemory.fireTogetherWireTogether(unique[i], unique[i + 1], sageEndocrine.hormones.dopamine);
+      }
+      sageEndocrine.metabolizeHormones();
+    } catch {
+      /* non-fatal */
+    }
+
+    res.json({ reply });
+  } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    const msg: string = err?.message || String(err);
+    const isTimeout = err?.name === 'AbortError' || msg.includes('timed out');
+    res.status(isTimeout ? 504 : 502).json({
+      error: isTimeout ? 'Neuromatix did not respond in time — it may be generating.' : msg,
+    });
+  }
+}));
+
 // ─── SAGE-7 Bridge ────────────────────────────────────────────────────────────
 // Server-side proxy so the browser never has to reach localhost:8001 directly.
 
@@ -319,11 +407,12 @@ const SAGE7_TIMEOUT_MS = 120_000;
 
 router.get('/sage7/status', asyncHandler(async (_req, res) => {
   try {
-    // Lightweight ping using the existing /sage/chat with a short timeout
-    const r = await fetch(`${SAGE7_HOST}/sage/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: 'ping', model: 'llama3.2:latest' }),
+    // Cheap liveness probe: GET /sage/status returns instantly. (The old probe
+    // POSTed a real /sage/chat generation with a 4s timeout — which ALWAYS timed
+    // out, since a local generation takes ~15-30s, so Seven always showed
+    // "offline" and every poll piled a generation onto Ollama.)
+    const r = await fetch(`${SAGE7_HOST}/sage/status`, {
+      method: 'GET',
       signal: AbortSignal.timeout(4000),
     });
     res.json({ connected: r.ok, host: SAGE7_HOST });
@@ -397,10 +486,11 @@ const SAGE8_TIMEOUT_MS = 120_000;
 
 router.get('/sage8/status', asyncHandler(async (_req, res) => {
   try {
-    const r = await fetch(`${SAGE8_HOST}/sage/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: 'ping', model: 'llama3.2:latest' }),
+    // Cheap liveness probe: GET /sage/status (see /sage7/status note). The old
+    // probe POSTed a full /sage/chat generation with a 4s timeout, so it always
+    // timed out and Eight always showed "offline".
+    const r = await fetch(`${SAGE8_HOST}/sage/status`, {
+      method: 'GET',
       signal: AbortSignal.timeout(4000),
     });
     res.json({ connected: r.ok, host: SAGE8_HOST });
