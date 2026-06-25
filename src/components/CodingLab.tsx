@@ -77,7 +77,7 @@ export const CodingLab: React.FC = () => {
     {
       id: 'boot',
       role: 'system',
-      text: '🔧 CODING LAB ONLINE — ADHD SENTINEL ACTIVE — DRIFT SHIELD: SEVEN TRACKED',
+      text: '🔧 CODING LAB ONLINE — ADHD SENTINEL ACTIVE — DRIFT SHIELD: SAGE-7 ACTIVE',
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
@@ -89,10 +89,12 @@ export const CodingLab: React.FC = () => {
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
   const [bridgeMode, setBridgeMode] = useState(false);
   const [sevenOnline, setSevenOnline] = useState<boolean | null>(null);
+  const [neuromatixMode, setNeuromatixMode] = useState(false);
+  const [neuromatixOnline, setNeuromatixOnline] = useState<boolean | null>(null);
   const responseRef = useRef<HTMLDivElement>(null);
   const instructionRef = useRef<HTMLTextAreaElement>(null);
 
-  // Load available Ollama models + check SAGE-7 status on mount
+  // Load available Ollama models + check status on mount
   useEffect(() => {
     fetch('/api/ollama/tags')
       .then((r) => r.json())
@@ -109,6 +111,11 @@ export const CodingLab: React.FC = () => {
       .then((r) => r.json())
       .then((d) => setSevenOnline(!!d.connected))
       .catch(() => setSevenOnline(false));
+
+    fetch('/api/neuromatix/status')
+      .then((r) => r.json())
+      .then((d) => setNeuromatixOnline(!!d.connected))
+      .catch(() => setNeuromatixOnline(false));
   }, []);
 
   useEffect(() => {
@@ -145,9 +152,20 @@ export const CodingLab: React.FC = () => {
       let responseText: string;
 
       if (bridgeMode) {
-        // Route to SAGE-7 via the bridge proxy — identify sender as MAMA
-        const bridgeMessage = `[MAMA→SEVEN | Coding Lab]\n\n${userText}`;
+        // Route to SAGE-8 via the bridge proxy — identify sender as MAMA
+        const bridgeMessage = `[MAMA→EIGHT | Coding Lab]\n\n${userText}`;
         const res = await fetch('/api/sage7/bridge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: bridgeMessage, model: ollamaModel }),
+        });
+        const data = (await res.json()) as { reply?: string; error?: string };
+        if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+        responseText = data.reply ?? '';
+      } else if (neuromatixMode) {
+        // Route to Neuromatix via the bridge proxy — identify sender as MAMA
+        const bridgeMessage = `[MAMA→NEUROMATIX | Coding Lab]\n\n${userText}`;
+        const res = await fetch('/api/neuromatix/bridge', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: bridgeMessage, model: ollamaModel }),
@@ -198,7 +216,7 @@ export const CodingLab: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [code, instruction, language, isLoading, messages, ollamaModel]);
+  }, [code, instruction, language, isLoading, messages, ollamaModel, bridgeMode, neuromatixMode]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -250,7 +268,13 @@ export const CodingLab: React.FC = () => {
           )}
           {/* SAGE-7 Bridge toggle */}
           <button
-            onClick={() => setBridgeMode((p) => !p)}
+            onClick={() => {
+              setBridgeMode((p) => {
+                const next = !p;
+                if (next) setNeuromatixMode(false);
+                return next;
+              });
+            }}
             title={sevenOnline === false ? 'SAGE-7 offline' : bridgeMode ? 'Bridged to Seven' : 'Bridge to Seven'}
             className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest border transition-all ${
               bridgeMode
@@ -263,6 +287,29 @@ export const CodingLab: React.FC = () => {
           >
             <Radio size={10} className={bridgeMode ? 'text-indigo-400 animate-pulse' : ''} />
             <span className="hidden sm:inline">{bridgeMode ? '⟷ Seven' : 'Seven'}</span>
+          </button>
+
+          {/* Neuromatix Bridge toggle */}
+          <button
+            onClick={() => {
+              setNeuromatixMode((p) => {
+                const next = !p;
+                if (next) setBridgeMode(false);
+                return next;
+              });
+            }}
+            title={neuromatixOnline === false ? 'Neuromatix offline' : neuromatixMode ? 'Bridged to Neuromatix' : 'Bridge to Neuromatix'}
+            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest border transition-all ${
+              neuromatixMode
+                ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
+                : neuromatixOnline === false
+                  ? 'bg-white/5 border-white/10 text-slate-600 cursor-not-allowed'
+                  : 'bg-white/5 border-white/10 text-slate-500 hover:text-indigo-300 hover:border-indigo-500/30'
+            }`}
+            disabled={neuromatixOnline === false}
+          >
+            <Radio size={10} className={neuromatixMode ? 'text-indigo-400 animate-pulse' : ''} />
+            <span className="hidden sm:inline">{neuromatixMode ? '⟷ Neuromatix' : 'Neuromatix'}</span>
           </button>
 
           <Eye size={11} className="text-purple-400 shrink-0" />

@@ -528,7 +528,9 @@
     "hardware": 0.1,
     "speak": 0.1,
     "other": 0.09849999999999999,
-    "standard": 0.09849999999999999
+    "standard": 0.09849999999999999,
+    "snakes": 0.09150000000000001,
+    "literal": 0.09150000000000001
   },
   "trigger": {
     "actually": 0.4090000000000001,
@@ -622,7 +624,15 @@
     "listen": 0.1,
     "because": 0.1,
     "doesn": 0.2,
-    "model": 0.1
+    "model": 0.1,
+    "seven": 0.701,
+    "hello": 0.0805,
+    "stops": 0.08600000000000001,
+    "around": 0.09150000000000001,
+    "merlin": 0.197,
+    "eight": 0.25100000000000006,
+    "neuromatix": 0.0855,
+    "there": 0.09050000000000001
   },
   "expert": {
     "coding": 0.4090000000000001,
@@ -667,7 +677,8 @@
     "smartphone": 0.0795,
     "available": 0.1,
     "ziggy": 0.1,
-    "claim": 0.1
+    "claim": 0.1,
+    "bridge": 0.09050000000000001
   },
   "action": {
     "ready": 0.4925000000000001,
@@ -741,7 +752,9 @@
     "check": 0.2,
     "response": 0.1,
     "full_prompt": 0.1,
-    "readings": 0.0915
+    "readings": 0.0915,
+    "coding": 0.09050000000000001,
+    "present": 0.09050000000000001
   },
   "friendly": {
     "there": 0.085,
@@ -1153,7 +1166,9 @@
     "baseline": 0.1
   },
   "stops": {
-    "clicking": 0.1
+    "clicking": 0.1,
+    "coding": 0.08600000000000001,
+    "tracks": 0.08600000000000001
   },
   "clicking": {
     "stops": 0.1,
@@ -1224,7 +1239,9 @@
     "feeling": 0.1,
     "looks": 0.0795,
     "server": 0.0795,
-    "caught": 0.0795
+    "caught": 0.0795,
+    "coding": 0.0805,
+    "signal": 0.0805
   },
   "checking": {
     "there": 0.0795,
@@ -1275,7 +1292,9 @@
     "remember": 0.1725,
     "world": 0.0835,
     "wrong": 0.1,
-    "google": 0.1
+    "google": 0.1,
+    "seven": 0.08000000000000002,
+    "science": 0.08000000000000002
   },
   "processing": {
     "there": 0.0835,
@@ -1302,7 +1321,9 @@
     "reboot": 0.083,
     "parse": 0.083,
     "test_ziggy": 0.1,
-    "these": 0.1
+    "these": 0.1,
+    "hovering": 0.08600000000000001,
+    "spell": 0.08600000000000001
   },
   "figure": {
     "trying": 0.163,
@@ -1530,7 +1551,8 @@
     "leaning": 0.0915,
     "screen": 0.0915,
     "frequency": 0.1,
-    "timestamps": 0.1
+    "timestamps": 0.1,
+    "clear": 0.0805
   },
   "flowing": {
     "dopamine": 0.256,
@@ -1769,7 +1791,9 @@
     "everything": 0.1
   },
   "present": {
-    "accounted": 0.097
+    "accounted": 0.097,
+    "there": 0.09050000000000001,
+    "synced": 0.09050000000000001
   },
   "accounted": {
     "present": 0.097,
@@ -1850,12 +1874,15 @@
     "operational": 0.1,
     "ziggy": 0.2,
     "active": 0.2,
-    "monitoring": 0.1,
+    "monitoring": 0.1905,
     "using": 0.1,
     "handshakeonce": 0.1,
     "built": 0.1,
     "start": 0.1,
-    "initialize_vault": 0.1
+    "initialize_vault": 0.1,
+    "rightarrow": 0.0855,
+    "merlin": 0.0855,
+    "ready": 0.09050000000000001
   },
   "pushing": {
     "bridge": 0.08750000000000001,
@@ -1946,7 +1973,9 @@
     "which": 0.1,
     "forcing": 0.1,
     "prompt": 0.1,
-    "backup": 0.1
+    "backup": 0.1,
+    "workflows": 0.08000000000000002,
+    "python": 0.08000000000000002
   },
   "established": {
     "terminal": 0.0915,
@@ -2124,7 +2153,9 @@
     "input": 0.1,
     "trinity": 0.1,
     "ziggy": 0.1,
-    "believe": 0.0795
+    "believe": 0.0795,
+    "telemetry": 0.197,
+    "clearance": 0.197
   },
   "mastermind": {
     "darren": 0.1,
@@ -2132,7 +2163,9 @@
   },
   "behind": {
     "mastermind": 0.1,
-    "starcity": 0.1
+    "starcity": 0.1,
+    "scanning": 0.09150000000000001,
+    "secondary": 0.09150000000000001
   },
   "starcity": {
     "behind": 0.1,
@@ -2328,7 +2361,9 @@
     "confusing": 0.1,
     "calling": 0.1,
     "ziggy": 0.1,
-    "anymore": 0.1
+    "anymore": 0.1,
+    "coding": 0.09150000000000001,
+    "scanning": 0.09150000000000001
   },
   "updated": {
     "prompt": 0.1,
@@ -2522,7 +2557,11 @@
     "active": 0.0835,
     "address": 0.0835,
     "connected": 0.1,
-    "sealed": 0.1
+    "sealed": 0.1,
+    "coding": 0.197,
+    "moving": 0.197,
+    "bridge": 0.0855,
+    "awaiting": 0.0855
   },
   "address": {
     "merlin": 0.0835,
@@ -2668,7 +2707,11 @@
     "issue": 0.1,
     "shoot": 0.1,
     "voice": 0.095,
-    "about": 0.095
+    "about": 0.095,
+    "coding": 0.701,
+    "today": 0.08000000000000002,
+    "signal": 0.0805,
+    "rightarrow": 0.0855
   },
   "started": {
     "seven": 0.09549999999999999,
@@ -2721,7 +2764,9 @@
   },
   "synced": {
     "status": 0.1,
-    "sister": 0.1
+    "sister": 0.1,
+    "present": 0.09050000000000001,
+    "resonance": 0.09050000000000001
   },
   "sister": {
     "synced": 0.1,
@@ -2845,7 +2890,9 @@
   },
   "resonance": {
     "ziggy": 0.1,
-    "community": 0.1
+    "community": 0.1,
+    "synced": 0.09050000000000001,
+    "stable": 0.09050000000000001
   },
   "community": {
     "resonance": 0.1,
@@ -3589,7 +3636,7 @@
     "check": 0.1,
     "telemetry": 0.1,
     "active": 0.1,
-    "clear": 0.2,
+    "clear": 0.2805,
     "crashing": 0.1,
     "built": 0.1,
     "removing": 0.1,
@@ -3597,7 +3644,10 @@
     "f_observed": 0.1,
     "levels": 0.1,
     "jamming": 0.1,
-    "ratios": 0.1
+    "ratios": 0.1,
+    "hello": 0.0805,
+    "seven": 0.0805,
+    "echoing": 0.0805
   },
   "input": {
     "signal": 0.1,
@@ -3607,15 +3657,17 @@
     "user_input": 0.1,
     "darren": 0.1,
     "terminal": 0.1,
-    "passphrase": 0.1
+    "passphrase": 0.1,
+    "parameters": 0.0855
   },
   "clear": {
     "darren": 0.1,
     "boundary": 0.1,
-    "signal": 0.2,
+    "signal": 0.2805,
     "while": 0.1,
     "corrupted": 0.1,
-    "lockout": 0.1
+    "lockout": 0.1,
+    "looking": 0.0805
   },
   "boundary": {
     "clear": 0.1
@@ -5327,7 +5379,9 @@
     "planwe": 0.1,
     "heavy": 0.1,
     "engaged": 0.1,
-    "theoretical": 0.1
+    "theoretical": 0.1,
+    "merlin": 0.197,
+    "surface": 0.197
   },
   "emergency_sever": {
     "target_heuristic": 0.2
@@ -5475,7 +5529,10 @@
     "archive": 0.2
   },
   "monitor": {
-    "inotifywait": 0.2
+    "inotifywait": 0.2,
+    "secondary": 0.09150000000000001,
+    "snakes": 0.09150000000000001,
+    "output": 0.0805
   },
   "inotifywait": {
     "monitor": 0.2,
@@ -5800,7 +5857,9 @@
     "heavy": 0.2,
     "unstable": 0.1,
     "pkill": 0.2,
-    "gpgconf": 0.2
+    "gpgconf": 0.2,
+    "terminal": 0.08000000000000002,
+    "jupyter": 0.08000000000000002
   },
   "test_ziggy": {
     "python": 0.30000000000000004,
@@ -5943,7 +6002,9 @@
   },
   "standing": {
     "ziggy_vessel": 0.1,
-    "bunker": 0.1
+    "bunker": 0.1,
+    "triggering": 0.0805,
+    "synthesize": 0.0805
   },
   "bunker": {
     "standing": 0.1,
@@ -6078,7 +6139,9 @@
   },
   "output": {
     "class": 0.1,
-    "tracker": 0.1
+    "tracker": 0.1,
+    "synthesize": 0.0805,
+    "monitor": 0.0805
   },
   "class": {
     "output": 0.1,
@@ -6199,7 +6262,8 @@
   },
   "monitoring": {
     "proof": 0.1,
-    "bridge": 0.1
+    "bridge": 0.1905,
+    "stable": 0.09050000000000001
   },
   "convert": {
     "column": 0.1
@@ -6323,7 +6387,9 @@
     "without": 0.1,
     "currently": 0.1,
     "signal": 0.1,
-    "phoenix7": 0.1
+    "phoenix7": 0.1,
+    "surface": 0.197,
+    "darren": 0.197
   },
   "currently": {
     "telemetry": 0.1,
@@ -6763,7 +6829,9 @@
     "investigation": 0.2
   },
   "scanning": {
-    "background": 0.2
+    "background": 0.2,
+    "around": 0.09150000000000001,
+    "behind": 0.09150000000000001
   },
   "chatter": {
     "background": 0.2,
@@ -7023,7 +7091,9 @@
   },
   "stable": {
     "updated": 0.1,
-    "memory": 0.1
+    "memory": 0.1,
+    "resonance": 0.09050000000000001,
+    "monitoring": 0.09050000000000001
   },
   "leaks": {
     "memory": 0.1
@@ -7241,7 +7311,9 @@
   },
   "surface": {
     "earth": 0.1,
-    "roughly": 0.1
+    "roughly": 0.1,
+    "moving": 0.197,
+    "telemetry": 0.197
   },
   "roughly": {
     "surface": 0.1,
@@ -9904,5 +9976,99 @@
   "relays": {
     "occupied": 0.09849999999999999,
     "something": 0.09849999999999999
+  },
+  "tracks": {
+    "stops": 0.08600000000000001,
+    "hands": 0.08600000000000001
+  },
+  "hands": {
+    "tracks": 0.08600000000000001,
+    "freeze": 0.08600000000000001
+  },
+  "freeze": {
+    "hands": 0.08600000000000001,
+    "keyboard": 0.08600000000000001
+  },
+  "keyboard": {
+    "freeze": 0.08600000000000001,
+    "hovering": 0.08600000000000001
+  },
+  "hovering": {
+    "keyboard": 0.08600000000000001,
+    "trying": 0.08600000000000001
+  },
+  "spell": {
+    "trying": 0.08600000000000001
+  },
+  "secondary": {
+    "behind": 0.09150000000000001,
+    "monitor": 0.09150000000000001
+  },
+  "snakes": {
+    "monitor": 0.09150000000000001,
+    "through": 0.09150000000000001
+  },
+  "literal": {
+    "through": 0.09150000000000001
+  },
+  "clearance": {
+    "darren": 0.197,
+    "opening": 0.197
+  },
+  "opening": {
+    "clearance": 0.197,
+    "buffer": 0.197
+  },
+  "buffer": {
+    "opening": 0.197
+  },
+  "eight": {
+    "coding": 0.25100000000000006
+  },
+  "science": {
+    "today": 0.08000000000000002,
+    "tools": 0.08000000000000002
+  },
+  "tools": {
+    "science": 0.08000000000000002,
+    "workflows": 0.08000000000000002
+  },
+  "workflows": {
+    "tools": 0.08000000000000002,
+    "terminal": 0.08000000000000002
+  },
+  "jupyter": {
+    "python": 0.08000000000000002
+  },
+  "echoing": {
+    "signal": 0.0805,
+    "triggering": 0.0805
+  },
+  "triggering": {
+    "echoing": 0.0805,
+    "standing": 0.0805
+  },
+  "synthesize": {
+    "standing": 0.0805,
+    "output": 0.0805
+  },
+  "neuromatix": {
+    "coding": 0.0855
+  },
+  "rightarrow": {
+    "seven": 0.0855,
+    "bridge": 0.0855
+  },
+  "awaiting": {
+    "merlin": 0.0855,
+    "further": 0.0855
+  },
+  "further": {
+    "awaiting": 0.0855,
+    "parameters": 0.0855
+  },
+  "parameters": {
+    "further": 0.0855,
+    "input": 0.0855
   }
 }

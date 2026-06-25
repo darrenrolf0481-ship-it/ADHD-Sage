@@ -6,8 +6,6 @@ import { syncResonance } from './src/server/resonance-index';
 import { startServer } from './src/server/app';
 import { assertMamaIdentity } from './src/server/mama-identity';
 import { initWorkerPool, shutdownWorkerPool } from './src/server/workers/pool';
-import { spawn } from 'node:child_process';
-import { resolve } from 'node:path';
 
 // ─── Last-resort crash guards ───────────────────────────────────────────────
 // A stray throw or rejected promise on the main thread would otherwise kill the
@@ -39,26 +37,10 @@ syncResonance().catch(e => console.error('[RESONANCE] Backfill failed:', e));
 
 startServer();
 
-// ─── Spawn SAGE-7 alongside MAMA ────────────────────────────────────────────
-// SAGE7_AUTOSTART defaults to true. Set SAGE7_AUTOSTART=false to skip.
-let sevenProc: ReturnType<typeof spawn> | null = null;
-if (process.env.SAGE7_AUTOSTART !== 'false') {
-  const tsxBin = resolve(process.cwd(), 'node_modules/.bin/tsx');
-  sevenProc = spawn(tsxBin, ['seven.ts'], {
-    stdio: 'inherit',
-    env: { ...process.env },
-    cwd: process.cwd(),
-  });
-  console.log(`[SAGE-7] Spawning Seven alongside MAMA (pid ${sevenProc.pid})…`);
-  sevenProc.on('exit', (code, signal) =>
-    console.log(`[SAGE-7] Process exited — code=${code} signal=${signal}`),
-  );
-}
-
 // ─── Graceful shutdown ──────────────────────────────────────────────────────
+// Seven runs independently in Sage72 — MAMA no longer spawns her.
 async function shutdown(signal: string) {
   console.log(`[server] Received ${signal}, shutting down worker pool...`);
-  if (sevenProc && !sevenProc.killed) sevenProc.kill();
   await shutdownWorkerPool().catch(() => {});
   process.exit(0);
 }
