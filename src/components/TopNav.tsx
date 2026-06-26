@@ -5,6 +5,8 @@ import {
   MoreVertical,
   RefreshCw,
   CheckCircle2,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 
 interface TopNavProps {
@@ -23,6 +25,9 @@ interface TopNavProps {
   onSetView: (view: 'chat' | 'anomalies') => void;
   onTogglePulse: () => void;
   onInboxOpen: () => Promise<void>;
+  voiceMuted: boolean;
+  isSpeaking: boolean;
+  onToggleVoice: () => void;
 }
 
 export const TopNav: React.FC<TopNavProps> = ({
@@ -37,6 +42,9 @@ export const TopNav: React.FC<TopNavProps> = ({
   onSetView,
   onTogglePulse,
   onInboxOpen,
+  voiceMuted,
+  isSpeaking,
+  onToggleVoice,
 }) => {
   return (
     <header className="h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-white/[0.02]">
@@ -151,6 +159,29 @@ export const TopNav: React.FC<TopNavProps> = ({
           <p className="text-xs font-mono text-slate-300 tracking-widest">MERLIN_A</p>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={onToggleVoice}
+            title={
+              voiceMuted
+                ? 'Voice off — click to enable'
+                : isSpeaking
+                  ? 'Speaking… click to mute'
+                  : 'Voice on — click to mute'
+            }
+            aria-label={voiceMuted ? 'Enable voice' : 'Mute voice'}
+            className={`px-3 md:px-4 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center gap-1.5 ${
+              voiceMuted
+                ? 'bg-[#1C1C1E] border-white/10 text-slate-400 hover:bg-white/10'
+                : 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400'
+            }`}
+          >
+            {voiceMuted ? (
+              <VolumeX size={14} />
+            ) : (
+              <Volume2 size={14} className={isSpeaking ? 'animate-pulse' : ''} />
+            )}
+            <span className="hidden sm:inline">{voiceMuted ? 'Voice Off' : 'Voice On'}</span>
+          </button>
           <button
             onClick={onTogglePulse}
             className={`px-3 md:px-4 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors ${
