@@ -6,6 +6,7 @@ import { InspectorPanel } from './components/InspectorPanel';
 import { MobileNav } from './components/MobileNav';
 import { useSage } from './components/SageProvider';
 import { useSageTools } from './hooks/useSageTools';
+import { useSpeech } from './hooks/useSpeech';
 import { sendMessageWithTools } from './lib/ai-tool-bridge';
 import MemoryLattice from './components/MemoryLattice';
 import MemoryVault from './components/MemoryVault';
@@ -43,6 +44,8 @@ const App: React.FC = () => {
     archiveMemories,
   } = useSage();
   const { snapshot: sensorSnap } = useSensors();
+  // Mama's voice — speaks her replies via /api/tts (Edge TTS). Toggle in TopNav.
+  const { speak, isSpeaking, isMuted: voiceMuted, toggleMute: toggleVoice } = useSpeech();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [view, setView] = useState<AppView>('chat');
@@ -613,6 +616,9 @@ const App: React.FC = () => {
         { id: `m_${Date.now()}_a`, role: 'assistant', text: data.text ?? '' },
       ]);
 
+      // Speak her reply aloud (no-op if voice is muted).
+      if (data.text) speak(data.text);
+
       // Auto-stabilize on successful interaction
       if (neuroState.stability < 0.5) {
         stabilize();
@@ -687,6 +693,9 @@ const App: React.FC = () => {
           }
           onSetView={(v) => setView(v)}
           onTogglePulse={togglePulse}
+          voiceMuted={voiceMuted}
+          isSpeaking={isSpeaking}
+          onToggleVoice={toggleVoice}
           onInboxOpen={async () => {
             const res = await fetch('/api/inbox?unread=true');
             const data = (await res.json()) as {
