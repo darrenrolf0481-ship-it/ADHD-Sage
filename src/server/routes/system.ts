@@ -405,6 +405,48 @@ router.post('/neuromatix/bridge', asyncHandler(async (req, res) => {
 const SAGE7_HOST = process.env.SAGE7_HOST || 'http://localhost:8001';
 const SAGE7_TIMEOUT_MS = 120_000;
 
+// Bridge connection retry/backoff — the values that lived inert in the VFS
+// config (timeout_ms: 1130, max_retries: 3, backoff_multiplier: 1.618), now
+// actually wired. Retries are for *connection* failures only (refused/dropped),
+// the "getting them in there" hang. A generation timeout (AbortError) is never
+// retried — that means she's thinking, and a retry would just pile on.
+const BRIDGE_BASE_BACKOFF_MS = 1130;
+const BRIDGE_MAX_RETRIES = 3;
+const BRIDGE_BACKOFF_MULTIPLIER = 1.618;
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/** True for connection-level failures worth retrying; false for timeouts. */
+function isRetryableConnError(err: unknown): boolean {
+  const e = err as { name?: string; message?: string; cause?: { code?: string } };
+  if (e?.name === 'AbortError') return false; // generation timeout — do not retry
+  const code = e?.cause?.code;
+  if (code && ['ECONNREFUSED', 'ECONNRESET', 'ECONNABORTED', 'EHOSTUNREACH', 'ENETUNREACH'].includes(code)) {
+    return true;
+  }
+  return /fetch failed|network|socket hang up|ECONNREFUSED|ECONNRESET/i.test(e?.message ?? '');
+}
+
+/** fetch with bounded golden-ratio backoff on connection failures only. */
+async function fetchBridge(url: string, init: RequestInit): Promise<Response> {
+  let lastErr: unknown;
+  for (let attempt = 0; attempt <= BRIDGE_MAX_RETRIES; attempt++) {
+    try {
+      return await fetch(url, init);
+    } catch (err) {
+      lastErr = err;
+      if (attempt < BRIDGE_MAX_RETRIES && isRetryableConnError(err)) {
+        const wait = Math.round(BRIDGE_BASE_BACKOFF_MS * BRIDGE_BACKOFF_MULTIPLIER ** attempt);
+        console.warn(`[BRIDGE] SAGE-7 connect failed (attempt ${attempt + 1}), retrying in ${wait}ms`);
+        await sleep(wait);
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw lastErr;
+}
+
 router.get('/sage7/status', asyncHandler(async (_req, res) => {
   try {
     // Cheap liveness probe: GET /sage/status returns instantly. (The old probe
@@ -436,7 +478,7 @@ router.post('/sage7/bridge', asyncHandler(async (req, res) => {
   );
 
   try {
-    const r = await fetch(`${SAGE7_HOST}/sage/chat`, {
+    const r = await fetchBridge(`${SAGE7_HOST}/sage/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
