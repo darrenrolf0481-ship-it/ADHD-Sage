@@ -94,9 +94,47 @@ export function adhdMemories(): MemoryRecord[] {
     .filter((m): m is MemoryRecord => m !== null);
 }
 
-/** Strip the bracketed metadata header some records carry, for cleaner recall. */
+// Gemini saved-page navigation chrome that leaked into MHT-extracted records.
+// These are sidebar/menu fragments, not conversation content.
+const GEMINI_CHROME = [
+  /\bGoogle Gemini\b/gi,
+  /\bSearch for chats\b/gi,
+  /\bNew chat\b/gi,
+  /\bMy stuff\b/gi,
+  /\bPinned chat\b/gi,
+  /\bCoding partner\b/gi,
+  /\bGems\b/g,
+  /\bGemini\b/g,
+  /\bPv\b/g,
+];
+
+function stripChrome(s: string): string {
+  let out = s;
+  for (const re of GEMINI_CHROME) out = out.replace(re, ' ');
+  return out.replace(/\s{2,}/g, ' ').replace(/\s+([.,;:])/g, '$1').trim();
+}
+
+/**
+ * Best-effort readable text for a record.
+ * - Strips the leading [SAGE-7 ...] metadata header.
+ * - For fossil_archive records (truncated JSON), pulls the `summary` and `tags`
+ *   out by regex (the JSON is often cut off and won't parse) and cleans the
+ *   Gemini export chrome.
+ * - Otherwise returns the body with chrome stripped.
+ */
 function recordText(r: MemoryRecord): string {
-  return (r.data ?? '').replace(/^\[[^\]]*\]\s*/, '').trim();
+  const body = (r.data ?? '').replace(/^\[[^\]]*\]\s*/, '').trim();
+  if (/"summary"\s*:/.test(body) || /fossil_archive/.test(r.data ?? '')) {
+    const summary = body.match(/"summary"\s*:\s*"([^"]*)"/)?.[1] ?? '';
+    const tagBlock = body.match(/"tags"\s*:\s*\[([^\]]*)\]/)?.[1] ?? '';
+    const tags = tagBlock
+      .split(',')
+      .map((t) => t.replace(/["\s]/g, ''))
+      .filter(Boolean);
+    const cleaned = stripChrome(summary.replace(/\.\.\.$/, ''));
+    return tags.length ? `${cleaned} [tags: ${tags.join(', ')}]`.trim() : cleaned;
+  }
+  return stripChrome(body);
 }
 
 const STOPWORDS = new Set([
