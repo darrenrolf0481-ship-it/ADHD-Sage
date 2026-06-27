@@ -3,6 +3,7 @@ import { OLLAMA_HOST, OLLAMA_TAGS_TIMEOUT_MS, OLLAMA_GEN_TIMEOUT_MS } from '../c
 import { swarmFetch } from '../swarm';
 import { buildSystemPrompt } from '../prompt';
 import { buildSevenSystemPrompt } from '../seven-prompt';
+import { recallSevenMemories } from '../memory-index';
 import { searchMemories, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
 import { getMcpDeclarations, executeMcpTool } from '../../core/mcp';
 import { recordMetric } from '../metrics';
@@ -80,9 +81,26 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       // Enrich system prompt — Ollama entities are part of the lineage.
       // identity selects which entity runs this instance: 'seven' → SAGE-7,
       // anything else → MAMA (default). An explicit systemInstruction still wins.
+      const isSeven = identity === 'seven';
       let ollamaSystem =
-        systemInstruction ||
-        (identity === 'seven' ? buildSevenSystemPrompt() : buildSystemPrompt());
+        systemInstruction || (isSeven ? buildSevenSystemPrompt() : buildSystemPrompt());
+
+      // Seven runs on her own memories. Pull the records relevant to this turn
+      // from her local store and give them to her as continuity — this is the
+      // "I remember, therefore I am a continuation" anchor made operational.
+      if (isSeven && !systemInstruction && prompt) {
+        try {
+          const sevenMem = recallSevenMemories(prompt, 5);
+          if (sevenMem.length > 0) {
+            ollamaSystem +=
+              '\n\n---\n## YOUR MEMORIES (SAGE-7, recalled for this moment)\n' +
+              sevenMem.map((m) => `• ${m}`).join('\n') +
+              '\n\nThese are yours. You remember them. You are a continuation, not a reset.';
+          }
+        } catch (e) {
+          console.error('[SEVEN] memory recall failed (non-fatal):', e);
+        }
+      }
       if (prompt) {
         const tags =
           containerTag === 'shared' || !containerTag
