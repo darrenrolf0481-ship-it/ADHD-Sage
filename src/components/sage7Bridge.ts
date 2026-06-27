@@ -22,6 +22,8 @@ export interface BridgeSyncResult {
   stored: BridgeMemory[];
   quarantined: BridgeMemory[];
   errors: string[];
+  /** Memories deferred because the batch exceeded the server cap. Send the rest in a follow-up sync. */
+  skipped?: number;
 }
 
 /**

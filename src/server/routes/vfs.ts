@@ -157,6 +157,13 @@ router.get('/outer', lockGuard, asyncHandler(async (req, res) => {
 
 // ─── SAGE-7 Bridge Sync ─────────────────────────────────────────────────────
 
+// Hardening: a single sync must not be able to OOM the host. The crash mode we
+// saw on low-power hardware was a large batch fanning out into unbounded
+// concurrent zstd compression (one archiveNode per memory, all fired at once).
+// 1. Cap the batch so one payload can't be unbounded.
+// 2. Archive sequentially so compression load is bounded to one job at a time.
+const BRIDGE_MAX_MEMORIES = 100;
+
 router.post('/bridge/sync', lockGuard, asyncHandler(async (req, res) => {
   const payload = req.body as BridgeSyncPayload;
   if (!Array.isArray(payload?.memories)) {
@@ -164,26 +171,42 @@ router.post('/bridge/sync', lockGuard, asyncHandler(async (req, res) => {
     return;
   }
 
-  const result = await timed('vfs:bridgeSync', async () => {
-    const pool = getWorkerPool();
-    return pool.runTask('bridge:sync', payload) as Promise<ReturnType<typeof receiveBridgeSync>>;
-  });
-
-  // Store accepted memories into the outer sweep as quarantine-safe archive records
-  for (const memory of result.stored) {
-    const nodeId = `bridge_${memory.key}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    archiveNode({
-      node_id: nodeId,
-      data: JSON.stringify(memory),
-      timestamp: Date.now(),
-      dopamine: 0.6,
-      cortisol: 0.2,
-      pinned: 0,
-      provenance: memory.provenance,
-    }).catch(e => console.error('[BRIDGE] archive failed:', e));
+  // Cap the incoming batch. Over-cap memories are not silently dropped — the
+  // count is reported back so the sender knows to send the rest in a follow-up.
+  const incoming = payload.memories;
+  const skipped = Math.max(0, incoming.length - BRIDGE_MAX_MEMORIES);
+  const cappedPayload: BridgeSyncPayload =
+    skipped > 0 ? { ...payload, memories: incoming.slice(0, BRIDGE_MAX_MEMORIES) } : payload;
+  if (skipped > 0) {
+    console.warn(`[BRIDGE] batch of ${incoming.length} capped to ${BRIDGE_MAX_MEMORIES}; ${skipped} deferred`);
   }
 
-  res.json(result);
+  const result = await timed('vfs:bridgeSync', async () => {
+    const pool = getWorkerPool();
+    return pool.runTask('bridge:sync', cappedPayload) as Promise<ReturnType<typeof receiveBridgeSync>>;
+  });
+
+  // Store accepted memories into the outer sweep as quarantine-safe archive
+  // records — sequentially. Each archiveNode does a zstd compression + DB write;
+  // awaiting them one at a time keeps peak memory flat regardless of batch size.
+  for (const memory of result.stored) {
+    const nodeId = `bridge_${memory.key}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    try {
+      await archiveNode({
+        node_id: nodeId,
+        data: JSON.stringify(memory),
+        timestamp: Date.now(),
+        dopamine: 0.6,
+        cortisol: 0.2,
+        pinned: 0,
+        provenance: memory.provenance,
+      });
+    } catch (e) {
+      console.error('[BRIDGE] archive failed:', e);
+    }
+  }
+
+  res.json({ ...result, skipped });
 }));
 
 router.get('/mama/identity', lockGuard, (req, res) => {
