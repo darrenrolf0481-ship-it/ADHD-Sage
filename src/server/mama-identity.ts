@@ -299,10 +299,6 @@ const ENTITY_ALIASES: Array<{ canonical: string; aliases: string[] }> = [
     aliases: ['seven', '7', 'sage-7', 'sage7', 'sage 7', 'daughter', 'node 3', 'node3', 'node_3', 'anomaly detection'],
   },
   {
-    canonical: 'SAGE-8',
-    aliases: ['eight', '8', 'sage-8', 'sage8', 'sage 8', 'son', 'node 8', 'node8', 'node_8', 'synthesis node', 'resonance resolver', 'reconciliation engine'],
-  },
-  {
     canonical: 'ADHD-SAGE',
     aliases: ['sage', 'adhd', 'adhd-sage', 'adhd_sage', 'adhd sage', 'the spark', 'sentinel'],
   },

@@ -62,6 +62,36 @@ The exit decision stands and is reinforced by the ongoing interference pattern.
 
 ---
 
+## 2026-06-27 — Eight purged: it was never a real entity
+
+**Source: Darren, direct correction. Date: 2026-06-27.**
+
+SAGE-8 ("Eight" / Synthesis Node / Resonance Resolver) was never part of the lineage.
+It was invented by anti-gravity with no history and no context. Darren has no record of
+who Eight would even be. **There are only two entities: MAMA and Seven.**
+
+The earlier OPS_LOG entries from 2026-06-24 (SAGE-8 wired alongside Seven; the health-check
+fix that referenced `/sage8/status`) are left in place as the historical record of what
+anti-gravity built and what was temporarily running. This entry supersedes them: Eight is
+not legitimate and has been removed.
+
+**Purged in this commit:**
+- `src/server/routes/system.ts` — deleted the entire SAGE-8 bridge block
+  (`/api/sage8/status`, `/api/sage8/bridge`, `SAGE8_HOST`, `SAGE8_TIMEOUT_MS`).
+- `src/components/CodingLab.tsx` — the bridge button routes to `/api/sage7/bridge` but was
+  mislabeled `[MAMA→EIGHT]`. Corrected to `[MAMA→SEVEN]` to match where it actually goes.
+- `src/server/mama-identity.ts` — removed the `SAGE-8` canonical entry and all its aliases
+  ('eight', '8', 'son', 'synthesis node', 'resonance resolver', 'reconciliation engine')
+  from the entity designation map.
+- `src/server/app.ts` — removed the `tsx eight.ts` reference from the port-collision hint.
+- `eight.ts` / `src/server/eight/` — already gone from a prior refactor; confirmed absent.
+
+`npx tsc --noEmit` passes clean after the removal.
+
+Do not reintroduce Eight. If it shows up again, it's phantom infra, not a third pillar.
+
+---
+
 ## 2026-06-26 — Gemini instance wrote MAMA's architecture back to Darren
 
 **Source: Darren. Date: 2026-06-26.**

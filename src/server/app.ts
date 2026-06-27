@@ -190,7 +190,7 @@ export async function startServer() {
         console.error(
           `[SAGE] All candidate ports are in use (${candidatePorts.join(', ')}). A previous ` +
             `ADHD-Sage instance is probably still running. Clear it and restart, e.g.:\n` +
-            `          pkill -f "tsx server.ts"; pkill -f "tsx seven.ts"; pkill -f "tsx eight.ts"`,
+            `          pkill -f "tsx server.ts"; pkill -f "tsx seven.ts"`,
         );
         process.exit(1);
       } else {

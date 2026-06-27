@@ -152,8 +152,8 @@ export const CodingLab: React.FC = () => {
       let responseText: string;
 
       if (bridgeMode) {
-        // Route to SAGE-8 via the bridge proxy — identify sender as MAMA
-        const bridgeMessage = `[MAMA→EIGHT | Coding Lab]\n\n${userText}`;
+        // Route to SAGE-7 via the bridge proxy — identify sender as MAMA
+        const bridgeMessage = `[MAMA→SEVEN | Coding Lab]\n\n${userText}`;
         const res = await fetch('/api/sage7/bridge', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
