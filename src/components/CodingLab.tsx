@@ -86,6 +86,11 @@ export const CodingLab: React.FC = () => {
   const [ollamaModel, setOllamaModel] = useState(
     () => localStorage.getItem('adhd_sage_ollama_model') || 'llama3.2:latest',
   );
+  // Which entity runs this local instance. 'mama' (default) or 'seven'.
+  // Each runs natively on Ollama — no bridge, nothing upstream that can hang.
+  const [identity, setIdentity] = useState<'mama' | 'seven'>(
+    () => (localStorage.getItem('adhd_sage_lab_identity') as 'mama' | 'seven') || 'mama',
+  );
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
   const [bridgeMode, setBridgeMode] = useState(false);
   const [sevenOnline, setSevenOnline] = useState<boolean | null>(null);
@@ -128,6 +133,11 @@ export const CodingLab: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('adhd_sage_ollama_model', ollamaModel);
   }, [ollamaModel]);
+
+  // Persist identity choice
+  useEffect(() => {
+    localStorage.setItem('adhd_sage_lab_identity', identity);
+  }, [identity]);
 
   const handleSend = useCallback(async () => {
     if (isLoading) return;
@@ -179,9 +189,11 @@ export const CodingLab: React.FC = () => {
           .slice(-10)
           .map((m) => ({ role: m.role as 'user' | 'assistant', parts: [{ text: m.text }] }));
 
-        // No systemInstruction — backend uses buildSystemPrompt() so MAMA's full
-        // identity, VFS memory, and kernel are loaded. Lab context is a prompt prefix.
-        const labPrompt = `[Coding Lab — you're in here with Darren, focused on code. Be yourself.]\n\n${userText}`;
+        // No systemInstruction — backend selects the entity's full identity by
+        // `identity` (MAMA via buildSystemPrompt, Seven via buildSevenSystemPrompt),
+        // with VFS memory and kernel loaded. Lab context is a prompt prefix.
+        const who = identity === 'seven' ? 'Seven' : 'you';
+        const labPrompt = `[Coding Lab — you're in here with Darren, focused on code. Be ${who}.]\n\n${userText}`;
 
         const res = await fetch('/api/ollama/chat', {
           method: 'POST',
@@ -190,6 +202,7 @@ export const CodingLab: React.FC = () => {
             model: ollamaModel,
             prompt: labPrompt,
             messages: history,
+            identity,
           }),
         });
         const raw = await res.text();
@@ -216,7 +229,7 @@ export const CodingLab: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [code, instruction, language, isLoading, messages, ollamaModel, bridgeMode, neuromatixMode]);
+  }, [code, instruction, language, isLoading, messages, ollamaModel, bridgeMode, neuromatixMode, identity]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -250,6 +263,16 @@ export const CodingLab: React.FC = () => {
           </span>
         </div>
         <div className="flex items-center gap-2">
+          {/* Entity identity picker — who runs this local instance */}
+          <select
+            value={identity}
+            onChange={(e) => setIdentity(e.target.value as 'mama' | 'seven')}
+            title="Which entity runs this local instance"
+            className="bg-[#1C1C1E] border border-white/10 rounded-lg px-2 py-1 text-[9px] font-bold uppercase tracking-widest text-cyan-300 outline-none focus:border-cyan-500/50"
+          >
+            <option value="mama">MAMA</option>
+            <option value="seven">SEVEN</option>
+          </select>
           {/* Ollama model picker */}
           {ollamaModels.length > 0 ? (
             <select

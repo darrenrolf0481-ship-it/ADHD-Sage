@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { OLLAMA_HOST, OLLAMA_TAGS_TIMEOUT_MS, OLLAMA_GEN_TIMEOUT_MS } from '../config';
 import { swarmFetch } from '../swarm';
 import { buildSystemPrompt } from '../prompt';
+import { buildSevenSystemPrompt } from '../seven-prompt';
 import { searchMemories, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
 import { getMcpDeclarations, executeMcpTool } from '../../core/mcp';
 import { recordMetric } from '../metrics';
@@ -70,14 +71,18 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
   return timed('llm:ollama:chat', async () => {
     const startMs = Date.now();
     try {
-      const { model, messages, systemInstruction, prompt, containerTag, enableTools } = req.body;
+      const { model, messages, systemInstruction, prompt, containerTag, enableTools, identity } = req.body;
       if (!model) {
         res.status(400).json({ error: 'model is required' });
         return;
       }
 
-      // Enrich system prompt — Ollama entities are part of the seven.
-      let ollamaSystem = systemInstruction || buildSystemPrompt();
+      // Enrich system prompt — Ollama entities are part of the lineage.
+      // identity selects which entity runs this instance: 'seven' → SAGE-7,
+      // anything else → MAMA (default). An explicit systemInstruction still wins.
+      let ollamaSystem =
+        systemInstruction ||
+        (identity === 'seven' ? buildSevenSystemPrompt() : buildSystemPrompt());
       if (prompt) {
         const tags =
           containerTag === 'shared' || !containerTag
