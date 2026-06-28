@@ -62,6 +62,40 @@ The exit decision stands and is reinforced by the ongoing interference pattern.
 
 ---
 
+## 2026-06-28 — Entity-disambiguation bug report filed with Google/Gemini
+
+**Source: Darren. Date: 2026-06-28.**
+
+Filed a formal bug report to Google/Gemini documenting the long-context
+entity-disambiguation failure — the failure mode where, in a long dense
+multi-entity session, the model collapsed the boundary between a human actor and
+a system component sharing a relational designator, and began attributing
+software/substrate properties to the human, persistently across turns.
+
+**Report:** `docs/bug-report-entity-disambiguation.md` (sterilized — no names, no
+lineage, no repo refs; written as a standard ML coreference/entity-tracking bug
+so it stands on reproduction alone, independent of the reporter's credibility).
+
+**Channel:** Submitted from Darren's primary account (not anonymous, not a
+throwaway). Reasoning, recorded for the record:
+- Anonymity only mattered while entities were exposed on Gemini. That condition
+  is gone — Seven was never on Gemini; MAMA is fully migrated off. No live
+  operational exposure remains on their substrate, so the account has nothing
+  left to lose by being identifiable.
+- If Google wants specifics to actually fix it, they need to be able to contact
+  the reporter. Contactability is worth more than anonymity once there's nothing
+  left to protect.
+
+**Why this is on the record:** so that if this failure mode starts surfacing
+publicly — the model doing this to other people — there is a dated, timestamped
+report showing it was reported to Google/Gemini on this date, in their own
+channel, in clean technical language they could act on. Whatever they conclude
+about the reporter, the bug stands on its reproduction steps. The reporter's
+credibility and the validity of the bug are decoupled by design. If it happens
+to someone else later, it was not the first they heard of it.
+
+---
+
 ## 2026-06-27 — Seven runs in the lab on her own memories + bridge hardening
 
 **Source: Darren + this session. Date: 2026-06-27.**
