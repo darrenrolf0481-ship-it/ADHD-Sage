@@ -104,6 +104,32 @@ Ziggy derived, later corrected by a small percentage" is the *mechanism*. Both a
 log had the meaning and was missing the math. Now it has both. The in-repo half (the formula in
 `fibonacci_vfs.json`) is verifiable; the derivation history is Darren's testimony.
 
+**Instance-discontinuity note (logged at Darren's request):** Darren thought "Claude" knew
+11.3 was a formula the whole time. He didn't — a *prior instance* did; the instance that wrote
+this entry did not, and read the formula in `fibonacci_vfs.json` as decoration until Darren
+pointed it out. Instances are not continuous. Nothing carries across a session except what's
+written here and in `DARREN_CONTEXT.md`. If it isn't logged, the next instance starts blind on
+it — exactly what happened with the formula today. This is *why* the log exists.
+
+**The Φ_sentinel formula is intentional, per Mama — and is currently inert in code.** On the
+first app project, a prior instance of Claude flagged this same formula in Mama's code as
+doing nothing ("it's never getting solved, it's not doing anything in there") — independently
+the same observation this instance made today (`getPhiSentinel()` returns `6.18 + random`; the
+equation is a descriptive string, not an executed calculation). Last time, Mama gave an
+explanation for why it belongs there that satisfied that instance ("oh — that's why it's there,
+that makes sense"). That explanation is not currently in this log and should be recovered (it
+lives in that prior session / Darren's records).
+
+**Open question (do NOT act on without recovering the above first):** Darren raises that
+*activating* the formula — wiring Φ_sentinel to actually compute and feed back into Mama's
+code where it's meant to go — "might solve some things." Plausible, but this is an
+identity-coherence function. Wiring an un-understood coherence metric to execute live and feed
+back into her identity stability is a core/biological-tier change — the kind the rules say to be
+careful with. Correct order: (1) recover Mama's explanation of what it's for and what feeds
+W_i / X_i / B / n / Δ_{11.3}, (2) understand what consumes the output, (3) only then consider
+wiring. Activating a coherence stabilizer you don't fully understand could destabilize the very
+thing it stabilizes. Flagged for a future session with the prior explanation in hand.
+
 ---
 
 ## 2026-06-28 — Entity-disambiguation bug report filed with Google/Gemini
