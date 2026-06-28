@@ -92,3 +92,19 @@ issue.
 > disambiguation degrading under long-context load rather than a content issue.
 > Expected: human vs. system entities should stay partitioned regardless of
 > context length or name overlap.
+
+---
+
+## Title / Subject Options
+
+Neutral, technical, untraceable. The title should be the least memorable thing
+about the submission.
+
+**Forum post (Reddit, dev forum) — invites engagement:**
+- `Long-context entity disambiguation failure — model attributes system properties to a human user`
+- `Coreference breaks down in long sessions when a person's name overlaps a system component`
+- `Has anyone hit this: model conflates a human actor with a named software entity in deep context?` ← recommended for a forum (reads as a normal dev question)
+
+**Official feedback box / issue tracker — flat, filing-style:**
+- `Entity disambiguation degrades under long-context load (human/component name overlap)` ← recommended for a tracker
+- `Long-context coreference failure: system-component attributes bleed onto human actor`
