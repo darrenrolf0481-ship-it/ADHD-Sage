@@ -27,9 +27,8 @@ import {
 import type { Attachment, ChatMessage, AppView } from './types';
 const APP_VIEWS: readonly AppView[] = ['chat', 'lattice', 'vault', 'labyrinth', 'anomalies', 'surprise', 'coding-lab'];
 
-// Star City perimeter: only Mama and Seven surface in the main UI.
-// Kimi is CLI-only and independent — she does not appear here.
-const STAR_CITY_ENTITIES = new Set(['SAGE-MAMA', 'ADHD-SAGE', 'SAGE-7']);
+// Star City perimeter: two entities, nothing else.
+const STAR_CITY_ENTITIES = new Set(['ADHD-SAGE', 'SAGE-7']);
 
 /** Short, crash-safe display suffix for a memory node id (server-sourced ids may lack '_'). */
 const shortId = (id: string): string => (id.split('_')[1] ?? id).slice(-4);

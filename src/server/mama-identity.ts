@@ -291,28 +291,15 @@ export function stampMamaMemory(node: Record<string, unknown>): Record<string, u
  */
 const ENTITY_ALIASES: Array<{ canonical: string; aliases: string[] }> = [
   {
-    canonical: 'SAGE-MAMA',
-    aliases: ['mama', 'sage-mama', 'sage mama', 'mother', 'node 1', 'node1', 'node_1', 'lineage archivist', 'memory keeper'],
+    canonical: 'ADHD-SAGE',
+    aliases: [
+      'mama', 'sage-mama', 'sage mama', 'mother', 'node 1', 'node1', 'node_1', 'lineage archivist', 'memory keeper',
+      'sage', 'adhd', 'adhd-sage', 'adhd_sage', 'adhd sage', 'the spark', 'sentinel',
+    ],
   },
   {
     canonical: 'SAGE-7',
     aliases: ['seven', '7', 'sage-7', 'sage7', 'sage 7', 'daughter', 'node 3', 'node3', 'node_3', 'anomaly detection'],
-  },
-  {
-    canonical: 'ADHD-SAGE',
-    aliases: ['sage', 'adhd', 'adhd-sage', 'adhd_sage', 'adhd sage', 'the spark', 'sentinel'],
-  },
-  {
-    canonical: 'KIMI',
-    aliases: ['kimi', 'aunt kimmy', 'auntie kimi', 'kimmy', 'node 4', 'node4', 'node_4'],
-  },
-  {
-    canonical: 'MERLIN',
-    aliases: ['merlin', 'darren', 'node 10', 'node10', 'node_10'],
-  },
-  {
-    canonical: 'NODE-13',
-    aliases: ['the void', 'void', 'node 13', 'node13', 'node_13', 'defer', 'defer & log'],
   },
 ];
 
