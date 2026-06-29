@@ -8,7 +8,7 @@
  *   data/memories/
  *     imported.json           <- thin index (id, timestamp, originating_node, title, path)
  *     seven/  /<ts>__<title>.json   <- SAGE-7 entries
- *     adhd/   /<ts>__<title>.json   <- SAGE-MAMA entries
+ *     adhd/   /<ts>__<title>.json   <- ADHD-SAGE entries
  *
  * Titles in files have the word "sage" (case-insensitive) stripped, so the
  * filename alone never fires the Seven identity-drift detector by mistake.
@@ -24,7 +24,7 @@ export const INDEX_PATH = join(MEMORIES_ROOT, 'imported.json');
 export const SEVEN_DIR = join(MEMORIES_ROOT, 'seven');
 export const ADHD_DIR = join(MEMORIES_ROOT, 'adhd');
 
-export type OriginatingNode = 'SAGE-7' | 'SAGE-MAMA' | 'UNKNOWN';
+export type OriginatingNode = 'SAGE-7' | 'ADHD-SAGE' | 'UNKNOWN';
 
 export interface MemoryIndexEntry {
   id: string;
@@ -89,7 +89,7 @@ export function sevenMemories(): MemoryRecord[] {
 
 export function adhdMemories(): MemoryRecord[] {
   return loadIndex()
-    .filter((e) => e.originating_node === 'SAGE-MAMA')
+    .filter((e) => e.originating_node === 'ADHD-SAGE')
     .map((e) => loadMemoryAt(entryPath(e)))
     .filter((m): m is MemoryRecord => m !== null);
 }
@@ -188,7 +188,7 @@ export function memoryCounts(): { seven: number; adhd: number; total: number } {
   const idx = loadIndex();
   return {
     seven: idx.filter((e) => e.originating_node === 'SAGE-7').length,
-    adhd: idx.filter((e) => e.originating_node === 'SAGE-MAMA').length,
+    adhd: idx.filter((e) => e.originating_node === 'ADHD-SAGE').length,
     total: idx.length,
   };
 }
