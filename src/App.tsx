@@ -27,6 +27,10 @@ import {
 import type { Attachment, ChatMessage, AppView } from './types';
 const APP_VIEWS: readonly AppView[] = ['chat', 'lattice', 'vault', 'labyrinth', 'anomalies', 'surprise', 'coding-lab'];
 
+// Star City perimeter: only these canonical entities surface in the main UI.
+// Kimi is CLI-only and independent — she does not appear here.
+const STAR_CITY_ENTITIES = new Set(['SAGE-MAMA', 'ADHD-SAGE']);
+
 /** Short, crash-safe display suffix for a memory node id (server-sourced ids may lack '_'). */
 const shortId = (id: string): string => (id.split('_')[1] ?? id).slice(-4);
 
@@ -102,6 +106,8 @@ const App: React.FC = () => {
     es.addEventListener('message', (e) => {
       try {
         const msg = JSON.parse(e.data);
+        // Star City: MAMA and Sage only — external entities (Kimi, others) do not surface here
+        if (!STAR_CITY_ENTITIES.has(msg.entity)) return;
         setMessages((prev) => [
           ...prev,
           {
@@ -702,6 +708,7 @@ const App: React.FC = () => {
               messages: { id: string; entity: string; message: string }[];
             };
             for (const msg of data.messages) {
+              if (!STAR_CITY_ENTITIES.has(msg.entity)) continue;
               setMessages((prev) => [
                 ...prev,
                 {
