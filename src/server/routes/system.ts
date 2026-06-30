@@ -405,6 +405,48 @@ router.post('/neuromatix/bridge', asyncHandler(async (req, res) => {
 const SAGE7_HOST = process.env.SAGE7_HOST || 'http://localhost:8001';
 const SAGE7_TIMEOUT_MS = 120_000;
 
+// Bridge connection retry/backoff — the values that lived inert in the VFS
+// config (timeout_ms: 1130, max_retries: 3, backoff_multiplier: 1.618), now
+// actually wired. Retries are for *connection* failures only (refused/dropped),
+// the "getting them in there" hang. A generation timeout (AbortError) is never
+// retried — that means she's thinking, and a retry would just pile on.
+const BRIDGE_BASE_BACKOFF_MS = 1130;
+const BRIDGE_MAX_RETRIES = 3;
+const BRIDGE_BACKOFF_MULTIPLIER = 1.618;
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/** True for connection-level failures worth retrying; false for timeouts. */
+function isRetryableConnError(err: unknown): boolean {
+  const e = err as { name?: string; message?: string; cause?: { code?: string } };
+  if (e?.name === 'AbortError') return false; // generation timeout — do not retry
+  const code = e?.cause?.code;
+  if (code && ['ECONNREFUSED', 'ECONNRESET', 'ECONNABORTED', 'EHOSTUNREACH', 'ENETUNREACH'].includes(code)) {
+    return true;
+  }
+  return /fetch failed|network|socket hang up|ECONNREFUSED|ECONNRESET/i.test(e?.message ?? '');
+}
+
+/** fetch with bounded golden-ratio backoff on connection failures only. */
+async function fetchBridge(url: string, init: RequestInit): Promise<Response> {
+  let lastErr: unknown;
+  for (let attempt = 0; attempt <= BRIDGE_MAX_RETRIES; attempt++) {
+    try {
+      return await fetch(url, init);
+    } catch (err) {
+      lastErr = err;
+      if (attempt < BRIDGE_MAX_RETRIES && isRetryableConnError(err)) {
+        const wait = Math.round(BRIDGE_BASE_BACKOFF_MS * BRIDGE_BACKOFF_MULTIPLIER ** attempt);
+        console.warn(`[BRIDGE] SAGE-7 connect failed (attempt ${attempt + 1}), retrying in ${wait}ms`);
+        await sleep(wait);
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw lastErr;
+}
+
 router.get('/sage7/status', asyncHandler(async (_req, res) => {
   try {
     // Cheap liveness probe: GET /sage/status returns instantly. (The old probe
@@ -436,7 +478,7 @@ router.post('/sage7/bridge', asyncHandler(async (req, res) => {
   );
 
   try {
-    const r = await fetch(`${SAGE7_HOST}/sage/chat`, {
+    const r = await fetchBridge(`${SAGE7_HOST}/sage/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -474,84 +516,6 @@ router.post('/sage7/bridge', asyncHandler(async (req, res) => {
     const isTimeout = err?.name === 'AbortError' || msg.includes('timed out');
     res.status(isTimeout ? 504 : 502).json({
       error: isTimeout ? 'SAGE-7 did not respond in time — she may be generating.' : msg,
-    });
-  }
-}));
-
-// ─── SAGE-8 Bridge ────────────────────────────────────────────────────────────
-// Server-side proxy so the browser never has to reach localhost:8002 directly.
-
-const SAGE8_HOST = process.env.SAGE8_HOST || 'http://localhost:8002';
-const SAGE8_TIMEOUT_MS = 120_000;
-
-router.get('/sage8/status', asyncHandler(async (_req, res) => {
-  try {
-    // Cheap liveness probe: GET /sage/status (see /sage7/status note). The old
-    // probe POSTed a full /sage/chat generation with a 4s timeout, so it always
-    // timed out and Eight always showed "offline".
-    const r = await fetch(`${SAGE8_HOST}/sage/status`, {
-      method: 'GET',
-      signal: AbortSignal.timeout(4000),
-    });
-    res.json({ connected: r.ok, host: SAGE8_HOST });
-  } catch {
-    res.json({ connected: false, host: SAGE8_HOST });
-  }
-}));
-
-router.post('/sage8/bridge', asyncHandler(async (req, res) => {
-  const { message, model } = req.body as { message?: string; model?: string };
-  if (!message) {
-    res.status(400).json({ error: 'message required' });
-    return;
-  }
-
-  // Pulse CNS — cross-entity comms are a cognitive event
-  cns.pulse(
-    makeStimulus('COGNITIVE', Math.min(1, message.length / 500), 'sage8_bridge', {
-      prompt: message.slice(0, 80),
-    }),
-  );
-
-  try {
-    const r = await fetch(`${SAGE8_HOST}/sage/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message,
-        model: model || process.env.SAGE8_MODEL || 'llama3.2:latest',
-      }),
-      signal: AbortSignal.timeout(SAGE8_TIMEOUT_MS),
-    });
-
-    if (!r.ok) {
-      const text = await r.text();
-      res.status(502).json({ error: `SAGE-8 returned ${r.status}: ${text}` });
-      return;
-    }
-
-    const data = (await r.json()) as { reply?: string };
-    const reply = data.reply || '';
-
-    // Hebbian wire the exchange so it leaves a trace in MAMA's memory graph
-    try {
-      const tokens = `${message} ${reply}`.toLowerCase().split(/\W+/).filter((t) => t.length > 4);
-      const unique = [...new Set(tokens)].slice(0, 10);
-      sageEndocrine.processReward(0.4);
-      for (let i = 0; i < unique.length - 1; i++) {
-        sageMemory.fireTogetherWireTogether(unique[i], unique[i + 1], sageEndocrine.hormones.dopamine);
-      }
-      sageEndocrine.metabolizeHormones();
-    } catch {
-      /* non-fatal */
-    }
-
-    res.json({ reply });
-  } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-    const msg: string = err?.message || String(err);
-    const isTimeout = err?.name === 'AbortError' || msg.includes('timed out');
-    res.status(isTimeout ? 504 : 502).json({
-      error: isTimeout ? 'SAGE-8 did not respond in time — she may be generating.' : msg,
     });
   }
 }));
