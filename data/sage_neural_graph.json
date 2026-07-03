@@ -10070,5 +10070,17 @@
   "parameters": {
     "further": 0.0855,
     "input": 0.0855
+  },
+  "test": {
+    "NOCICEPTIVE": 0.07500000000000001
+  },
+  "NOCICEPTIVE": {
+    "test": 0.07500000000000001
+  },
+  "reward": {
+    "CHEMORECEPTOR": 0.0777
+  },
+  "CHEMORECEPTOR": {
+    "reward": 0.0777
   }
 }

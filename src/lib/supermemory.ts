@@ -90,10 +90,14 @@ export async function searchMemories(
       q: query,
       containerTags: tags,
     });
-    const docs = (res as { results?: { content?: string }[] }).results ?? [];
+    const docs = (res as { results?: { content?: string; chunks?: { content?: string }[] }[] }).results ?? [];
     return docs
       .slice(0, limit)
-      .map((d) => d.content ?? '')
+      .map((d) => {
+        // v3 API nests content inside chunks[]
+        if (d.content) return d.content;
+        return (d.chunks ?? []).map((c) => c.content ?? '').filter(Boolean).join(' ');
+      })
       .filter(Boolean);
   } catch (err) {
     console.error('[SUPERMEMORY] searchMemories failed:', err);

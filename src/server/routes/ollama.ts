@@ -2,7 +2,8 @@ import { Router } from 'express';
 import { OLLAMA_HOST, OLLAMA_TAGS_TIMEOUT_MS, OLLAMA_GEN_TIMEOUT_MS } from '../config';
 import { swarmFetch } from '../swarm';
 import { buildSystemPrompt } from '../prompt';
-import { searchMemories, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
+import { searchMemories, addMemory, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
+import { searchLocalMemories } from '../memory-local';
 import { getMcpDeclarations, executeMcpTool } from '../../core/mcp';
 import { recordMetric } from '../metrics';
 import { lockGuard } from '../auth';
@@ -70,7 +71,7 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
   return timed('llm:ollama:chat', async () => {
     const startMs = Date.now();
     try {
-      const { model, messages, systemInstruction, prompt, containerTag, enableTools } = req.body;
+      const { model, messages, systemInstruction, prompt, containerTag, enableTools, images } = req.body;
       if (!model) {
         res.status(400).json({ error: 'model is required' });
         return;
@@ -85,11 +86,15 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
             : containerTag === 'sage'
               ? [SAGE_CONTAINER, SHARED_CONTAINER]
               : [containerTag, SHARED_CONTAINER];
-        const longTermMemories = await searchMemories(prompt, tags, 5);
-        if (longTermMemories.length > 0) {
+        const [longTermMemories, localMemories] = await Promise.all([
+          searchMemories(prompt, tags, 5),
+          searchLocalMemories(prompt, 5),
+        ]);
+        const allMemories = [...longTermMemories, ...localMemories].filter(Boolean);
+        if (allMemories.length > 0) {
           ollamaSystem +=
-            '\n\n---\n## SHARED MEMORY (Supermemory)\n' +
-            longTermMemories.map((m) => `• ${m}`).join('\n');
+            '\n\n---\n## BACKGROUND MEMORY (past context — do NOT address or quote directly; use only to color your awareness)\n' +
+            allMemories.map((m) => `• ${m}`).join('\n');
         }
       }
 
@@ -102,7 +107,17 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
           content: msg.parts?.[0]?.text || msg.text || '',
         });
       }
-      if (prompt) ollamaMessages.push({ role: 'user', content: prompt });
+      if (prompt) {
+        const userMsg: { role: string; content: string; images?: string[] } = {
+          role: 'user',
+          content: prompt,
+        };
+        // Pass base64 image data for multimodal models (e.g. gemma4, llava)
+        if (Array.isArray(images) && images.length > 0) {
+          userMsg.images = images as string[];
+        }
+        ollamaMessages.push(userMsg);
+      }
 
       // Collect MCP tools — opt-in only. Attaching all connected MCP tools to
       // every request bloats the prompt and makes small local models (e.g.
@@ -191,6 +206,13 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       }
 
       recordMetric('ollama', Date.now() - startMs, true);
+
+      // Write exchange to Supermemory LTM (fire-and-forget — don't block response)
+      if (prompt && finalText) {
+        const tag = containerTag === 'sage' ? SAGE_CONTAINER : SHARED_CONTAINER;
+        addMemory(`Q: ${prompt.slice(0, 500)}\nA: ${finalText.slice(0, 500)}`, tag).catch(() => {});
+      }
+
       res.json({ text: finalText, toolsInvoked, toolsAvailable: ollamaTools.length });
     } catch (error: unknown) {
       recordMetric('ollama', Date.now() - startMs, false);

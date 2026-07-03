@@ -326,6 +326,15 @@ export class CentralNervousSystem {
     sageEndocrine.processStressEvent(raw.magnitude);
     console.warn(`[CNS REFLEX] ${raw.source} — magnitude ${raw.magnitude.toFixed(2)}`);
 
+    // Metabolize hormones so cortisol doesn't accumulate without decay across
+    // repeated reflex events. The normal processStimulus path does this at the
+    // end of every cycle; the reflex fast-path was skipping it.
+    sageEndocrine.metabolizeHormones();
+
+    // Notify listeners unconditionally — transitionMode only notifies on mode
+    // change, so a second reflex while already in PANIC would silently pass.
+    this.notify();
+
     return {
       decision: 'WITHDRAW',
       confidence: 0.99,
@@ -336,15 +345,20 @@ export class CentralNervousSystem {
   }
 
   private buildEmotionalContext(raw: RawStimulus): EmotionalContext {
-    const h = this.currentProfile();
-    const valence = h.dopamine - h.cortisol;
-    const arousal = Math.min(1, raw.magnitude + h.cortisol * 0.5);
+    const preHormones = this.currentProfile();
+    const arousal = Math.min(1, raw.magnitude + preHormones.cortisol * 0.5);
 
     // Stress events boost cortisol, reward events boost dopamine
     if (raw.isPainful) sageEndocrine.processStressEvent(raw.magnitude * 0.5);
     if (raw.type === 'CHEMORECEPTOR') sageEndocrine.processReward(raw.magnitude * 0.3);
 
-    return { valence, arousal, hormonalProfile: this.currentProfile() };
+    // Compute valence from POST-stimulus hormones so the emotional context
+    // is internally consistent — the valence reflects the state AFTER the
+    // stimulus has been processed, not before.
+    const postHormones = this.currentProfile();
+    const valence = postHormones.dopamine - postHormones.cortisol;
+
+    return { valence, arousal, hormonalProfile: postHormones };
   }
 
   private buildPerception(raw: RawStimulus): SensoryPerception {

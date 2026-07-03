@@ -71,20 +71,26 @@ router.post('/generate', lockGuard, asyncHandler(async (req, res) => {
       ];
 
       // Clean history to ensure compatibility with SDK
-      const cleanHistory = (history || []).map((h: any) => ({
-        role: h.role,
-        parts: (h.parts || [])
-          .map((p: any) => {
-            if (typeof p === 'string') return { text: p };
-            const part: any = {};
-            if (p.text !== undefined) part.text = p.text;
-            if (p.inlineData) part.inlineData = p.inlineData;
-            if (p.functionCall) part.functionCall = p.functionCall;
-            if (p.functionResponse) part.functionResponse = p.functionResponse;
-            return part;
-          })
-          .filter((p: any) => Object.keys(p).length > 0),
-      }));
+      const cleanHistory = (history || []).map((h: any) => {
+        let parts = h.parts;
+        if (!parts && h.text) {
+          parts = [{ text: h.text }];
+        }
+        return {
+          role: h.role,
+          parts: (parts || [])
+            .map((p: any) => {
+              if (typeof p === 'string') return { text: p };
+              const part: any = {};
+              if (p.text !== undefined) part.text = p.text;
+              if (p.inlineData) part.inlineData = p.inlineData;
+              if (p.functionCall) part.functionCall = p.functionCall;
+              if (p.functionResponse) part.functionResponse = p.functionResponse;
+              return part;
+            })
+            .filter((p: any) => Object.keys(p).length > 0),
+        };
+      });
 
       const chat = getGenAI().chats.create({
         model: 'gemini-2.0-flash',
@@ -184,20 +190,26 @@ router.post('/continue', lockGuard, asyncHandler(async (req, res) => {
     const { history, remoteResults, localResults } = req.body;
 
     // Clean history to ensure compatibility with SDK
-    const cleanHistory = (history || []).map((h: any) => ({
-      role: h.role,
-      parts: (h.parts || [])
-        .map((p: any) => {
-          if (typeof p === 'string') return { text: p };
-          const part: any = {};
-          if (p.text !== undefined) part.text = p.text;
-          if (p.inlineData) part.inlineData = p.inlineData;
-          if (p.functionCall) part.functionCall = p.functionCall;
-          if (p.functionResponse) part.functionResponse = p.functionResponse;
-          return part;
-        })
-        .filter((p: any) => Object.keys(p).length > 0),
-    }));
+    const cleanHistory = (history || []).map((h: any) => {
+      let parts = h.parts;
+      if (!parts && h.text) {
+        parts = [{ text: h.text }];
+      }
+      return {
+        role: h.role,
+        parts: (parts || [])
+          .map((p: any) => {
+            if (typeof p === 'string') return { text: p };
+            const part: any = {};
+            if (p.text !== undefined) part.text = p.text;
+            if (p.inlineData) part.inlineData = p.inlineData;
+            if (p.functionCall) part.functionCall = p.functionCall;
+            if (p.functionResponse) part.functionResponse = p.functionResponse;
+            return part;
+          })
+          .filter((p: any) => Object.keys(p).length > 0),
+      };
+    });
 
     // Reconstruct chat from the serialized history snapshot.
     // We pass remote tools only; local tools have already been executed by the client.

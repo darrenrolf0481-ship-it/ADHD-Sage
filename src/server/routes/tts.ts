@@ -11,7 +11,7 @@ const router = Router();
 
 // Default voice for Mama. Override with EDGE_TTS_VOICE (e.g. en-US-JennyNeural).
 // Run `edge-tts --list-voices` to see all options.
-const EDGE_VOICE = process.env.EDGE_TTS_VOICE || 'en-US-AriaNeural';
+const EDGE_VOICE = process.env.EDGE_TTS_VOICE || 'en-US-JennyNeural';
 const EDGE_BIN = process.env.EDGE_TTS_BIN || 'edge-tts';
 const MAX_CHARS = 1000;
 

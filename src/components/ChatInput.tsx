@@ -95,11 +95,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         </label>
         <button
           onClick={onSend}
-          disabled={isLoading || !input.trim()}
+          disabled={isLoading || (!input.trim() && pendingAttachments.length === 0)}
           aria-label="Send message"
           className="p-2 text-cyan-400 disabled:text-slate-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-lg"
         >
-          <Zap size={18} fill={input.trim() ? 'currentColor' : 'none'} />
+          <Zap size={18} fill={(input.trim() || pendingAttachments.length > 0) ? 'currentColor' : 'none'} />
         </button>
       </div>
     </div>

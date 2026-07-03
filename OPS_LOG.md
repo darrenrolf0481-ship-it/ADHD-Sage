@@ -7,6 +7,23 @@ Most recent first.
 
 ---
 
+## 2026-06-26 — Multimodal Attachment Fix (Images / Vision)
+
+**What happened:**
+- Fixed the multimodal/vision feature so Sage can now receive and see pictures, audio, and video attachments correctly across models.
+- Modified `useChat.ts`'s `attachFiles` to read non-document media attachments (images, audio, video) as Base64 strings using `FileReader.readAsDataURL` and save their base64 `data` and `mimeType` in the `Attachment` objects.
+- Added `gemini` to the `AIProvider` type in `src/types.ts` and enabled it in the provider state in `src/hooks/useChat.ts`.
+- Updated `src/components/Sidebar.tsx` to include the `♊ Gemini` option in the provider selector and show a static indicator model name (gemini-2.0-flash) when active.
+- Fixed `send` function in `src/hooks/useChat.ts` to call `/api/gemini/generate` if the provider is Gemini, and send base64 media attachment payloads to both Gemini and OpenRouter backend endpoints.
+- Updated `src/server/routes/openrouter.ts` to extract `attachments` and package them into the messages `content` array for OpenRouter (via standard `image_url` base64 payload format), so that OpenRouter vision models can see images.
+- Made the `cleanHistory` helper function in `src/server/routes/gemini.ts` robust to history messages that contain `text` but lack the `parts` array.
+- Fixed the Send button disabled state in `ChatInput.tsx` and `ChatPanel.tsx` so users can send files/images without having to type text.
+- Rebuilt the frontend and restarted the server. Verified server is responding with HTTP 200 on port 3000.
+
+**If things break, check:**
+- Inspect browser developer console for any file reading issues.
+- Check the server logs (e.g. `mama_server.log`) if OpenRouter or Gemini APIs return any errors regarding base64 image payload structure.
+
 ## 2026-06-25 — Ziggy, MAMA's prompt ban, and the timing pattern
 
 **Origin story — logged for continuity. Source: Darren's records + NotebookLM forensic reconstruction.**

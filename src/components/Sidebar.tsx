@@ -14,7 +14,7 @@ import {
   Code2,
 } from 'lucide-react';
 import { SidebarItem } from './SidebarItem';
-import type { AppView } from '../types';
+import type { AppView, AIProvider } from '../types';
 import type { MemoryNode } from '../lib/memory-system';
 
 const shortId = (id: string): string => (id.split('_')[1] ?? id).slice(-4);
@@ -38,10 +38,11 @@ interface SidebarProps {
   };
   mhtNodeLimit: number;
   setMhtNodeLimit: (n: number) => void;
-  provider: 'ollama' | 'openrouter';
-  setProvider: (p: 'ollama' | 'openrouter') => void;
+  provider: AIProvider;
+  setProvider: (p: AIProvider) => void;
   orModel: string;
   setOrModel: (m: string) => void;
+  orModels: readonly { id: string; label: string }[];
   ollamaModel: string;
   setOllamaModel: (m: string) => void;
   ollamaModels: string[];
@@ -56,11 +57,6 @@ interface SidebarProps {
   searchResults: MemoryNode[];
   sortedInnerSpiral: MemoryNode[];
 }
-
-const OR_MODELS = [
-  { id: 'google/gemma-4-31b-it:free', label: 'Gemma 4 31B (free)' },
-  { id: 'google/gemma-4-26b-a4b-it:free', label: 'Gemma 4 26B (free)' },
-];
 
 export const Sidebar: React.FC<SidebarProps> = ({
   isSidebarOpen,
@@ -77,6 +73,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setProvider,
   orModel,
   setOrModel,
+  orModels,
   ollamaModel,
   setOllamaModel,
   ollamaModels,
@@ -407,13 +404,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {(
                       [
                         { id: 'openrouter', label: '⟁ OpenRouter' },
+                        { id: 'gemini', label: '♊ Gemini' },
                         { id: 'ollama', label: '⬡ Ollama' },
                       ] as { id: typeof provider; label: string }[]
                     ).map((p) => (
                       <button
                         key={p.id}
                         onClick={() => setProvider(p.id)}
-                        className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
+                        className={`flex-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${
                           provider === p.id
                             ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
                             : 'text-slate-500 hover:text-slate-300'
@@ -424,10 +422,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     ))}
                   </div>
 
+                  {/* Gemini model picker / indicator */}
+                  {provider === 'gemini' && (
+                    <div className="mt-2 text-[9px] font-mono text-slate-400 bg-[#1C1C1E] border border-white/5 rounded-lg px-2.5 py-2">
+                      <span className="text-cyan-400 font-bold">♊ MODEL:</span> gemini-2.0-flash
+                    </div>
+                  )}
+
                   {/* OpenRouter model picker */}
                   {provider === 'openrouter' && (
                     <div className="mt-2 space-y-1">
-                      {OR_MODELS.map((m) => (
+                      {orModels.map((m) => (
                         <button
                           key={m.id}
                           onClick={() => setOrModel(m.id)}

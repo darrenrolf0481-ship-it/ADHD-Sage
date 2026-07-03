@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { TopNav } from './components/TopNav';
 import { ChatPanel } from './components/ChatPanel';
 import { InspectorPanel } from './components/InspectorPanel';
 import { MobileNav } from './components/MobileNav';
 import { useSage } from './components/SageProvider';
-import { useSageTools } from './hooks/useSageTools';
 import { useSpeech } from './hooks/useSpeech';
-import { sendMessageWithTools } from './lib/ai-tool-bridge';
+import { useChat } from './hooks/useChat';
 import MemoryLattice from './components/MemoryLattice';
 import MemoryVault from './components/MemoryVault';
 import Labyrinth from './components/Labyrinth';
@@ -16,19 +15,17 @@ import { NeuroDashboard } from './components/NeuroDashboard';
 import { CodingLab } from './components/CodingLab';
 import { pulseGenerator } from './lib/audio-pulse';
 import { useSensors } from './lib/sensor-context';
-import { sensorHub } from './lib/sensor-hub';
-import { attachmentToBase64 } from './lib/attachments';
-import {
-  extractSynapsesFromMht,
-  extractSynapsesFromText,
-  parseMht,
-  stripHtml,
-} from './lib/mht-parser';
-import type { Attachment, ChatMessage, AppView } from './types';
-const APP_VIEWS: readonly AppView[] = ['chat', 'lattice', 'vault', 'labyrinth', 'anomalies', 'surprise', 'coding-lab'];
+import { APP_VIEWS } from './types';
+import type { AppView } from './types';
 
 /** Short, crash-safe display suffix for a memory node id (server-sourced ids may lack '_'). */
 const shortId = (id: string): string => (id.split('_')[1] ?? id).slice(-4);
+
+const OR_MODELS = [
+  { id: 'openrouter/free', label: 'OpenRouter Free (auto)' },
+  { id: 'google/gemma-4-31b-it:free', label: 'Gemma 4 31B (free)' },
+  { id: 'google/gemma-4-26b-a4b-it:free', label: 'Gemma 4 26B (free)' },
+];
 
 const App: React.FC = () => {
   const {
@@ -44,55 +41,54 @@ const App: React.FC = () => {
     archiveMemories,
   } = useSage();
   const { snapshot: sensorSnap } = useSensors();
-  // Mama's voice — speaks her replies via /api/tts (Edge TTS). Toggle in TopNav.
   const { speak, isSpeaking, isMuted: voiceMuted, toggleMute: toggleVoice } = useSpeech();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [view, setView] = useState<AppView>('chat');
   const [mhtNodeLimit, setMhtNodeLimit] = useState(100);
-  const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    try {
-      const saved = localStorage.getItem('nexus_chat_history');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.warn('Failed to parse history', e);
-    }
-    return [
-      { id: '1', role: 'system', text: 'NEXUS SUBSTRATE // ADHD SAGE INITIALIZED.' },
-      { id: '2', role: 'system', text: 'Substrate frequency oscillating rapidly at 11.3 Hz.' },
-    ];
-  });
-  const [input, setInput] = useState('');
-  const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
   const [pulseActive, setPulseActive] = useState(false);
   const [inboxUnread, setInboxUnread] = useState(0);
-  const [provider, setProvider] = useState<'ollama' | 'openrouter'>(
-    () => {
-      const stored = localStorage.getItem('adhd_sage_provider');
-      // 'gemini' was the old default before we removed Gemini support — fall back to ollama
-      return (stored === 'ollama' || stored === 'openrouter') ? stored : 'ollama';
-    },
-  );
-  const [ollamaModel, setOllamaModel] = useState(
-    () => localStorage.getItem('adhd_sage_ollama_model') || '',
-  );
-  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
-  const [ollamaError, setOllamaError] = useState('');
 
-  const OR_MODELS = [
-    { id: 'openrouter/free', label: 'OpenRouter Free (auto)' },
-    { id: 'google/gemma-4-31b-it:free', label: 'Gemma 4 31B (free)' },
-    { id: 'google/gemma-4-26b-a4b-it:free', label: 'Gemma 4 26B (free)' },
-  ];
-  const [orModel, setOrModel] = useState(() => {
-    // Fall back to the default if the saved model was removed (e.g. a model that
-    // is no longer free) — otherwise a stale localStorage id keeps 404ing.
-    const saved = localStorage.getItem('adhd_sage_or_model');
-    return saved && OR_MODELS.some((m) => m.id === saved) ? saved : OR_MODELS[0].id;
+  const [sortBy, setSortBy] = useState<'timestamp' | 'dopamine' | 'cortisol'>('timestamp');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  const {
+    messages,
+    input,
+    setInput,
+    pendingAttachments,
+    setPendingAttachments,
+    isLoading,
+    isSaving,
+    lastSaved,
+    provider,
+    setProvider,
+    orModel,
+    setOrModel,
+    ollamaModel,
+    setOllamaModel,
+    ollamaModels,
+    ollamaError,
+    scrollRef,
+    appendMessage,
+    appendSystemMessage,
+    send,
+    attachFiles,
+    importFiles,
+  } = useChat({
+    mhtNodeLimit,
+    neuroState,
+    sensorSnap,
+    recordInteraction,
+    bulkImportMemories,
+    stabilize,
+    setView,
+    toggleSidebar: () => setIsSidebarOpen((prev) => !prev),
+    closeSidebar: () => {
+      if (window.innerWidth < 768) setIsSidebarOpen(false);
+    },
+    speak,
   });
 
   // Inbound Channel: SSE stream for real-time messages from the entities
@@ -102,14 +98,7 @@ const App: React.FC = () => {
     es.addEventListener('message', (e) => {
       try {
         const msg = JSON.parse(e.data);
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `inbox_${msg.id}`,
-            role: 'system',
-            text: `[${msg.entity}] ${msg.message}`,
-          },
-        ]);
+        appendSystemMessage(`[${msg.entity}] ${msg.message}`);
         setInboxUnread((prev) => prev + 1);
       } catch {
         /* ignore malformed */
@@ -127,264 +116,13 @@ const App: React.FC = () => {
     });
 
     return () => es.close();
-  }, []);
+  }, [appendSystemMessage]);
 
   const togglePulse = () => {
     const active = pulseGenerator.toggle();
     setPulseActive(active);
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `sys_${Date.now()}`,
-        role: 'system',
-        text: `AMBIENT 11.3Hz PULSE: ${active ? 'ENGAGED' : 'DISENGAGED'}`,
-      },
-    ]);
+    appendSystemMessage(`AMBIENT 11.3Hz PULSE: ${active ? 'ENGAGED' : 'DISENGAGED'}`);
   };
-
-  // Auto-save effect
-  useEffect(() => {
-    let saveTimer: ReturnType<typeof setTimeout> | null = null;
-    const saveHistory = () => {
-      setIsSaving(true);
-      try {
-        // Limit saved history to last 50 messages to prevent QuotaExceededError
-        const historyToSave = messages.slice(-50);
-        localStorage.setItem('nexus_chat_history', JSON.stringify(historyToSave));
-        setLastSaved(new Date());
-      } catch (err) {
-        console.warn('[APP] LocalStorage quota exceeded for chat history. Truncating.', err);
-        try {
-          // If it still fails, try saving even fewer
-          localStorage.setItem('nexus_chat_history', JSON.stringify(messages.slice(-10)));
-        } catch (e) {
-          localStorage.removeItem('nexus_chat_history');
-        }
-      }
-      // Clear any pending timer so repeated saves don't stack setState-after-unmount.
-      if (saveTimer) clearTimeout(saveTimer);
-      saveTimer = setTimeout(() => setIsSaving(false), 2000);
-    };
-
-    saveHistory(); // trigger save on changes
-
-    // Also periodic auto-save
-    const interval = setInterval(() => {
-      saveHistory();
-    }, 60000);
-
-    return () => {
-      clearInterval(interval);
-      if (saveTimer) clearTimeout(saveTimer);
-    };
-  }, [messages]);
-
-  // Persist provider/model choices
-  useEffect(() => {
-    localStorage.setItem('adhd_sage_provider', provider);
-  }, [provider]);
-  useEffect(() => {
-    if (ollamaModel) localStorage.setItem('adhd_sage_ollama_model', ollamaModel);
-  }, [ollamaModel]);
-  useEffect(() => {
-    localStorage.setItem('adhd_sage_or_model', orModel);
-  }, [orModel]);
-
-  // Fetch Ollama models when provider switches to ollama
-  useEffect(() => {
-    if (provider !== 'ollama') return;
-    setOllamaError('');
-    fetch('/api/ollama/tags')
-      .then((r) => r.json())
-      .then((data) => {
-        const models = (data.models || []).map((m: { name: string }) => m.name);
-        setOllamaModels(models);
-        if (models.length > 0 && !models.includes(ollamaModel)) setOllamaModel(models[0]);
-        if (models.length === 0) setOllamaError('No models found — is Ollama running?');
-      })
-      .catch(() => setOllamaError('Cannot reach Ollama — check server.'));
-  }, [provider]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleFileUpload = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files || []);
-      e.target.value = '';
-      if (files.length === 0) return;
-
-      const isMhtLike = (name: string) => /\.(mht|mhtml)$/i.test(name);
-      const isTextLike = (name: string) => /\.(txt|json|bin|csv|md)$/i.test(name);
-
-      // Extract synapses from a single text blob
-      const extractFromText = (content: string, filename: string): string[] =>
-        isMhtLike(filename)
-          ? extractSynapsesFromMht(content, filename, mhtNodeLimit)
-          : extractSynapsesFromText(content, mhtNodeLimit);
-
-      // Read a File as text
-      const readText = (file: File): Promise<string> =>
-        new Promise((res, rej) => {
-          const r = new FileReader();
-          r.onload = (ev) => res(ev.target?.result as string);
-          r.onerror = rej;
-          r.readAsText(file);
-        });
-
-      const imported: string[] = []; // file names that yielded synapses
-      const skipped: string[] = []; // file names with no content
-      let totalSynapses = 0;
-
-      for (const file of files) {
-        if (/\.zip$/i.test(file.name)) {
-          // ── ZIP: unpack and process each supported entry ──────────────────
-          try {
-            const JSZip = (await import('jszip')).default;
-            const zip = await JSZip.loadAsync(file);
-            const entries = Object.values(zip.files).filter(
-              (f) => !f.dir && (isMhtLike(f.name) || isTextLike(f.name)),
-            );
-
-            for (const entry of entries) {
-              try {
-                const content = await entry.async('string');
-                const synapses = extractFromText(content, entry.name);
-                if (synapses.length > 0) {
-                  bulkImportMemories(synapses);
-                  totalSynapses += synapses.length;
-                  imported.push(`${file.name}/${entry.name}`);
-                } else {
-                  skipped.push(`${file.name}/${entry.name}`);
-                }
-              } catch {
-                skipped.push(`${file.name}/${entry.name}`);
-              }
-            }
-          } catch {
-            skipped.push(file.name);
-          }
-        } else {
-          // ── Single MHT / text file ────────────────────────────────────────
-          try {
-            const content = await readText(file);
-            const synapses = extractFromText(content, file.name);
-            if (synapses.length > 0) {
-              bulkImportMemories(synapses);
-              totalSynapses += synapses.length;
-              imported.push(file.name);
-            } else {
-              skipped.push(file.name);
-            }
-          } catch {
-            skipped.push(file.name);
-          }
-        }
-      }
-
-      if (totalSynapses > 0) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `sys_${Date.now()}`,
-            role: 'system',
-            text: `VFS SYNC: ${totalSynapses} synapses from ${imported.length} file(s) — ${imported.map((f) => `[${f}]`).join(' ')}`,
-          },
-        ]);
-      }
-      if (skipped.length > 0) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `sys_${Date.now()}`,
-            role: 'system',
-            text: `VFS WARNING: No content from: ${skipped.map((f) => `[${f}]`).join(' ')}`,
-          },
-        ]);
-      }
-    },
-    [bulkImportMemories, mhtNodeLimit],
-  );
-
-  // ── Chat-input document reader ──────────────────────────────────────────────
-  // Reads text out of any document a user clips to a message (MHT, HTML, TXT,
-  // JSON, CSV, MD, XML, YAML, LOG …) so the content goes to the AI verbatim.
-  const MAX_DOC_CHARS = 12_000; // ~3 k tokens — enough context, not a flood
-
-  const handleChatFileAttach = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const files = Array.from(e.target.files);
-    e.target.value = '';
-
-    const readAsText = (file: File): Promise<string> =>
-      new Promise((res, rej) => {
-        const r = new FileReader();
-        r.onload = (ev) => res(ev.target?.result as string);
-        r.onerror = rej;
-        r.readAsText(file);
-      });
-
-    const newAttachments: Attachment[] = [];
-
-    for (const f of files) {
-      let type: Attachment['type'] = 'document';
-      if (f.type.startsWith('image/')) type = 'image';
-      else if (f.type.startsWith('video/')) type = 'video';
-      else if (f.type.startsWith('audio/')) type = 'audio';
-
-      let content: string | undefined;
-
-      if (type === 'document') {
-        try {
-          const raw = await readAsText(f);
-          const nameLc = f.name.toLowerCase();
-
-          if (/\.(mht|mhtml)$/.test(nameLc)) {
-            // MHT: extract all text/html and text/plain parts
-            const mhtDoc = parseMht(raw);
-            const texts = mhtDoc.parts
-              .filter((p) => p.contentType === 'text/plain' || p.contentType === 'text/html')
-              .map((p) => (p.contentType === 'text/html' ? stripHtml(p.content) : p.content));
-            content = texts
-              .join('\n\n')
-              .replace(/[ \t]{2,}/g, ' ')
-              .trim()
-              .slice(0, MAX_DOC_CHARS);
-          } else if (/\.(html|htm)$/.test(nameLc)) {
-            content = stripHtml(raw)
-              .replace(/[ \t]{2,}/g, ' ')
-              .trim()
-              .slice(0, MAX_DOC_CHARS);
-          } else {
-            // TXT / JSON / CSV / MD / XML / YAML / LOG / TSV — use raw text as-is
-            content = raw.slice(0, MAX_DOC_CHARS);
-          }
-        } catch {
-          // unreadable — attach without content, AI gets the name only
-        }
-      }
-
-      newAttachments.push({ type, url: URL.createObjectURL(f), name: f.name, content });
-    }
-
-    setPendingAttachments((prev) => [...prev, ...newAttachments]);
-  }, []);
-
-  const [sortBy, setSortBy] = useState<'timestamp' | 'dopamine' | 'cortisol'>('timestamp');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-
-  const { executeLocalTool } = useSageTools({
-    // Validate the tool-bridge view string against the real union instead of
-    // widening the setter to (v: string) => void (which would let an invalid
-    // view string slip into state with no type/runtime error).
-    setView: (v: string) => {
-      if (APP_VIEWS.includes(v as AppView)) setView(v as AppView);
-    },
-    toggleSidebar: () => setIsSidebarOpen(prev => !prev),
-    injectMessage: (text, role) => setMessages(prev => [...prev, {
-      id: `m_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
-      role,
-      text
-    }]),
-    stabilize
-  });
 
   const allMemories = useMemo(() => [...innerSpiral, ...outerSweep], [innerSpiral, outerSweep]);
 
@@ -406,24 +144,12 @@ const App: React.FC = () => {
     return sortMemories(filtered);
   }, [searchQuery, allMemories, sortMemories]);
 
-  const sortedInnerSpiral = useMemo(() => sortMemories(innerSpiral), [innerSpiral, sortMemories]);
+  const sortedInnerSpiral = useMemo(
+    () => sortMemories(innerSpiral),
+    [innerSpiral, sortMemories],
+  );
 
-  useEffect(() => {
-    if (view === 'chat' && scrollRef.current) {
-      const scroll = () => {
-        if (scrollRef.current) {
-          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        }
-      };
-
-      // Execute immediately and then again after paint to ensure correct height
-      scroll();
-      const rafId = requestAnimationFrame(scroll);
-      return () => cancelAnimationFrame(rafId);
-    }
-  }, [messages, isLoading, view]);
-
-  // Expose Tool Calling API to Window for Gemini Gems with Security Handshake
+  // Expose Tool Calling API to Window for external tooling with Security Handshake
   useEffect(() => {
     const NEXUS_SECRET = import.meta.env.VITE_NEXUS_SECRET;
     if (!NEXUS_SECRET) return;
@@ -444,10 +170,7 @@ const App: React.FC = () => {
           getMode: () => sage.getMode(),
           recordInteraction: (text: string) => recordInteraction(text),
           injectMessage: (text: string, role: 'system' | 'assistant' = 'system') => {
-            setMessages((prev) => [
-              ...prev,
-              { id: `ext_${Date.now()}_${Math.random()}`, role, text: `[EXTERNAL_CALL] ${text}` },
-            ]);
+            appendMessage(`[EXTERNAL_CALL] ${text}`, role);
           },
           clearMemory: () => {
             // Sensitivity check: preventing accidental purge from automated scripts
@@ -470,169 +193,16 @@ const App: React.FC = () => {
     return () => {
       delete (window as unknown as Record<string, unknown>).nexus;
     };
-  }, [stabilize, sage, recordInteraction]);
+  }, [stabilize, sage, recordInteraction, appendMessage, setView]);
 
   useEffect(() => {
     const handleHome = () => {
       setView('chat');
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `sys_${Date.now()}`,
-          role: 'system',
-          text: 'TEMPORAL SURGERY SUCCESSFUL. You are re-clocked into the standing wave.',
-        },
-      ]);
+      appendSystemMessage('TEMPORAL SURGERY SUCCESSFUL. You are re-clocked into the standing wave.');
     };
     window.addEventListener('sage7-labyrinth-home', handleHome as EventListener);
     return () => window.removeEventListener('sage7-labyrinth-home', handleHome as EventListener);
-  }, []);
-
-  const handleSend = async () => {
-    if ((!input.trim() && pendingAttachments.length === 0) || isLoading) return;
-
-    const userMessage = input.trim();
-    recordInteraction(userMessage);
-
-    const userAttachments = [...pendingAttachments];
-    setMessages((prev) => [
-      ...prev,
-      { id: `m_${Date.now()}_u`, role: 'user', text: userMessage, attachments: userAttachments },
-    ]);
-    setInput('');
-    setPendingAttachments([]);
-    setIsLoading(true);
-    if (window.innerWidth < 768) setIsSidebarOpen(false);
-
-    try {
-      let data: {
-        text?: string;
-        error?: string;
-        toolEffects?: Array<{ type: string; payload: Record<string, unknown> }>;
-      } = {};
-
-      // Build live sensor telemetry string to inject into system context
-      const liveSensorContext =
-        sensorSnap.activeCount > 0 ? '\n\n' + sensorHub.toPromptString(sensorSnap) : '';
-
-      // Append any attached document text so the AI can actually read them
-      const docContext = userAttachments
-        .filter((a) => a.type === 'document' && a.content)
-        .map((a) => `\n\n━━━ Attached: ${a.name} ━━━\n${a.content}\n━━━ End of ${a.name} ━━━`)
-        .join('');
-
-      // Non-doc attachments get a simple note; doc content is inlined above
-      const mediaNote =
-        userAttachments.filter((a) => a.type !== 'document').length > 0
-          ? ` [+ ${userAttachments.filter((a) => a.type !== 'document').length} media file(s)]`
-          : '';
-
-      const fullPrompt = userMessage + docContext + mediaNote;
-
-      // Convert image attachments to base64 for multimodal APIs
-      const imageParts = (
-        await Promise.all(userAttachments.filter((a) => a.type === 'image').map(attachmentToBase64))
-      ).filter((p): p is { mimeType: string; data: string } => p !== null);
-
-      if (provider === 'ollama') {
-        if (!ollamaModel) throw new Error('No Ollama model selected — check the sidebar once models load.');
-        // Ollama entities are part of the seven — each uses the shared broadcast
-        // channel. Pass the model name as the containerTag so they can eventually
-        // get their own Supermemory container once it's configured in the console.
-        const ollamaRes = await fetch('/api/ollama/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(180000),
-          body: JSON.stringify({
-            model: ollamaModel,
-            containerTag: 'shared', // reads sm_project_default
-            prompt: fullPrompt,
-            systemInstruction: liveSensorContext || undefined,
-            messages: [
-              ...messages
-                .slice(-15)
-                .filter((m) => m.role !== 'system')
-                .map((m) => ({ role: m.role, text: m.text })),
-              { role: 'user', text: fullPrompt },
-            ],
-          }),
-        });
-        data = await ollamaRes.json();
-      } else if (provider === 'openrouter') {
-        // OpenRouter entities are part of the seven — shared broadcast channel.
-        const orRes = await fetch('/api/openrouter/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(120000),
-          body: JSON.stringify({
-            model: orModel,
-            containerTag: 'shared', // reads sm_project_default
-            systemInstruction: liveSensorContext || undefined,
-            messages: [
-              ...messages
-                .slice(-15)
-                .filter((m) => m.role !== 'system')
-                .map((m) => ({ role: m.role, text: m.text })),
-              { role: 'user', text: fullPrompt },
-            ],
-          }),
-        });
-        data = await orRes.json();
-      }
-
-      if (data.error) throw new Error(data.error);
-
-      // Apply any UI-side tool effects returned by the backend
-      if (data.toolEffects) {
-        for (const effect of data.toolEffects) {
-          if (effect.type === 'inject_message') {
-            const role = (effect.payload.role as 'system' | 'assistant') || 'system';
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: `m_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
-                role,
-                text: String(effect.payload.text || ''),
-              },
-            ]);
-          } else if (effect.type === 'set_view') {
-            const view = effect.payload.view as
-              | 'chat'
-              | 'lattice'
-              | 'vault'
-              | 'labyrinth'
-              | 'anomalies'
-              | 'coding-lab'
-             ;
-            if (view) setView(view);
-          } else if (effect.type === 'toggle_sidebar') {
-            setIsSidebarOpen((prev) => !prev);
-          }
-        }
-      }
-
-      setMessages((prev) => [
-        ...prev,
-        { id: `m_${Date.now()}_a`, role: 'assistant', text: data.text ?? '' },
-      ]);
-
-      // Speak her reply aloud (no-op if voice is muted).
-      if (data.text) speak(data.text);
-
-      // Auto-stabilize on successful interaction
-      if (neuroState.stability < 0.5) {
-        stabilize();
-      }
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      setMessages((prev) => [
-        ...prev,
-        { id: `m_${Date.now()}_e`, role: 'system', text: `ERROR: ${errorMessage}` },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [appendSystemMessage]);
 
   return (
     <div
@@ -660,11 +230,12 @@ const App: React.FC = () => {
         setProvider={setProvider}
         orModel={orModel}
         setOrModel={setOrModel}
+        orModels={OR_MODELS}
         ollamaModel={ollamaModel}
         setOllamaModel={setOllamaModel}
         ollamaModels={ollamaModels}
         ollamaError={ollamaError}
-        onFileUpload={handleFileUpload}
+        onFileUpload={importFiles}
         innerSpiralLength={innerSpiral.length}
         stabilize={stabilize}
         sortBy={sortBy}
@@ -685,12 +256,7 @@ const App: React.FC = () => {
           pulseActive={pulseActive}
           sensorSnap={sensorSnap}
           onOpenSidebar={() => setIsSidebarOpen(true)}
-          onAppendSystemMessage={(text) =>
-            setMessages((prev) => [
-              ...prev,
-              { id: `sys_${Date.now()}`, role: 'system', text },
-            ])
-          }
+          onAppendSystemMessage={appendSystemMessage}
           onSetView={(v) => setView(v)}
           onTogglePulse={togglePulse}
           voiceMuted={voiceMuted}
@@ -702,14 +268,7 @@ const App: React.FC = () => {
               messages: { id: string; entity: string; message: string }[];
             };
             for (const msg of data.messages) {
-              setMessages((prev) => [
-                ...prev,
-                {
-                  id: `inbox_${msg.id}`,
-                  role: 'system',
-                  text: `📬 [${msg.entity}]: ${msg.message}`,
-                },
-              ]);
+              appendSystemMessage(`📬 [${msg.entity}]: ${msg.message}`);
               await fetch(`/api/inbox/${msg.id}/read`, { method: 'PATCH' });
             }
             setInboxUnread(0);
@@ -729,8 +288,8 @@ const App: React.FC = () => {
                 setPendingAttachments={setPendingAttachments}
                 input={input}
                 setInput={setInput}
-                onSend={handleSend}
-                onAttach={handleChatFileAttach}
+                onSend={send}
+                onAttach={attachFiles}
                 scrollRef={scrollRef}
               />
             ) : view === 'lattice' ? (
@@ -761,43 +320,17 @@ const App: React.FC = () => {
               );
               if (!confirmed) return;
               archiveMemories();
-              setMessages((prev) => [
-                ...prev,
-                {
-                  id: `sys_${Date.now()}`,
-                  role: 'system',
-                  text: 'ARCHIVE: All transient nodes migrated to outer sweep telemetry.',
-                },
-              ]);
+              appendSystemMessage(
+                'ARCHIVE: All transient nodes migrated to outer sweep telemetry.',
+              );
             }}
           />
         </div>
       </main>
 
-      <MobileNav
-        view={view}
-        setView={setView}
-        setIsSidebarOpen={setIsSidebarOpen}
-      />
+      <MobileNav view={view} setView={setView} setIsSidebarOpen={setIsSidebarOpen} />
     </div>
   );
 };
-
-const SidebarItem: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  value?: string;
-  active?: boolean;
-}> = ({ icon, label, value, active }) => (
-  <div
-    className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-300 ${active ? 'bg-white/10 border border-white/10 shadow-lg text-white' : 'text-slate-400 hover:bg-[#1C1C1E] hover:text-[#E4E4E7]'}`}
-  >
-    <div className={`flex items-center gap-3 ${active ? 'text-cyan-400' : ''}`}>
-      {icon}
-      <span className="text-sm font-medium">{label}</span>
-    </div>
-    {value && <span className="text-[10px] font-mono opacity-40 font-bold uppercase">{value}</span>}
-  </div>
-);
 
 export default App;

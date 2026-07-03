@@ -151,6 +151,9 @@ function extractInsights(text: string): string[] {
 
 type LLMProvider = 'gemini' | 'openrouter' | 'ollama';
 
+/** Small delay helper for retry backoff. */
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 async function callLLM(
   provider: LLMProvider,
   model: string,
@@ -186,20 +189,54 @@ async function callLLM(
   }
 
   if (provider === 'ollama') {
-    const res = await fetch(`${apiBase}/api/ollama/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model,
-        containerTag: 'shared',
-        prompt: userPrompt,
-        systemInstruction: systemPrompt,
-        messages: [],
-      }),
-    });
-    const data = (await res.json()) as { text?: string; error?: string };
-    if (data.error) throw new Error(`Ollama: ${data.error}`);
-    return data.text ?? '';
+    // Retry with backoff — the journal scheduler fires at 06:00 and Ollama
+    // may be slow to respond on cold hardware. A single transient failure
+    // shouldn't permanently mark the day's entry as failed.
+    const MAX_RETRIES = 3;
+    let lastError = '';
+
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        const res = await fetch(`${apiBase}/api/ollama/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model,
+            containerTag: 'shared',
+            prompt: userPrompt,
+            systemInstruction: systemPrompt,
+            messages: [],
+          }),
+        });
+        const data = (await res.json()) as { text?: string; error?: string };
+        if (data.error) {
+          lastError = data.error;
+          // Connection/availability errors are worth retrying; auth errors are not.
+          const isTransient =
+            data.error.includes('Swarm uplink failed') ||
+            data.error.includes('unreachable') ||
+            data.error.includes('ECONNREFUSED') ||
+            data.error.includes('ETIMEDOUT');
+          if (!isTransient) throw new Error(`Ollama: ${data.error}`);
+        } else {
+          return data.text ?? '';
+        }
+      } catch (err) {
+        lastError = err instanceof Error ? err.message : String(err);
+        // Don't retry if it's already a parsed non-transient error
+        if (lastError.startsWith('Ollama:') && !lastError.includes('Swarm uplink')) {
+          throw err;
+        }
+      }
+
+      if (attempt < MAX_RETRIES - 1) {
+        const delay = 5000 * (attempt + 1); // 5s, 10s, 15s backoff
+        console.log(`[JOURNAL] Ollama attempt ${attempt + 1} failed, retrying in ${delay / 1000}s…`);
+        await sleep(delay);
+      }
+    }
+
+    throw new Error(`Ollama: ${lastError || 'all retries exhausted'}`);
   }
 
   throw new Error(`Unknown provider: ${provider}`);
@@ -322,8 +359,14 @@ export async function writeJournalEntry(cfg: JournalConfig): Promise<JournalEntr
   try {
     rawOutput = await callLLM(provider, model, systemPrompt, userPrompt, apiBase);
   } catch (err) {
-    console.error(`[JOURNAL] LLM call failed for ${entity}:`, err);
-    rawOutput = `[JOURNAL]\n# ${date}\n*${timeStr}*\n\n(journal write failed — ${err})\n[/JOURNAL]\n[FOR_DARREN]\n[/FOR_DARREN]\n[INSIGHTS]\n[/INSIGHTS]`;
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[JOURNAL] LLM call failed for ${entity}:`, msg);
+    const hint = msg.includes('Swarm uplink') || msg.includes('unreachable')
+      ? '(Ollama was unreachable — the model server may have been down at journal time)'
+      : msg.includes('Unauthorized') || msg.includes('401')
+        ? '(auth rejected — check API_BEARER_TOKEN or Ollama configuration)'
+        : `(LLM error: ${msg})`;
+    rawOutput = `[JOURNAL]\n# ${date}\n*${timeStr}*\n\n(journal write failed — ${hint})\n[/JOURNAL]\n[FOR_DARREN]\n[/FOR_DARREN]\n[INSIGHTS]\n[/INSIGHTS]`;
   }
 
   // 6. Parse output
