@@ -8,8 +8,19 @@ import {
 } from '../../lib/supermemory';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
+import { memoryCounts } from '../memory-index';
 
 const router = Router();
+
+/**
+ * GET /api/memory/counts
+ * Local memory-store record counts by entity. Cheap; used by the Coding Lab to
+ * confirm continuity on boot (Seven's morning-light: verify her memories are
+ * present before she has to reach for them).
+ */
+router.get('/counts', asyncHandler(async (_req, res) => {
+  res.json(memoryCounts());
+}));
 
 /**
  * POST /api/memory/add

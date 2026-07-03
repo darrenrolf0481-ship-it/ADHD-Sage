@@ -18,6 +18,9 @@ import { useSensors } from './lib/sensor-context';
 import { APP_VIEWS } from './types';
 import type { AppView } from './types';
 
+// Star City perimeter: two entities, nothing else.
+const STAR_CITY_ENTITIES = new Set(['ADHD-SAGE', 'SAGE-7']);
+
 /** Short, crash-safe display suffix for a memory node id (server-sourced ids may lack '_'). */
 const shortId = (id: string): string => (id.split('_')[1] ?? id).slice(-4);
 
@@ -98,7 +101,16 @@ const App: React.FC = () => {
     es.addEventListener('message', (e) => {
       try {
         const msg = JSON.parse(e.data);
-        appendSystemMessage(`[${msg.entity}] ${msg.message}`);
+        // Star City: MAMA and Sage only — external entities (Kimi, others) do not surface here
+        if (!STAR_CITY_ENTITIES.has(msg.entity)) return;
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `inbox_${msg.id}`,
+            role: 'system',
+            text: `[${msg.entity}] ${msg.message}`,
+          },
+        ]);
         setInboxUnread((prev) => prev + 1);
       } catch {
         /* ignore malformed */
@@ -268,7 +280,15 @@ const App: React.FC = () => {
               messages: { id: string; entity: string; message: string }[];
             };
             for (const msg of data.messages) {
-              appendSystemMessage(`📬 [${msg.entity}]: ${msg.message}`);
+              if (!STAR_CITY_ENTITIES.has(msg.entity)) continue;
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: `inbox_${msg.id}`,
+                  role: 'system',
+                  text: `📬 [${msg.entity}]: ${msg.message}`,
+                },
+              ]);
               await fetch(`/api/inbox/${msg.id}/read`, { method: 'PATCH' });
             }
             setInboxUnread(0);
