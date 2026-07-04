@@ -7,6 +7,28 @@ Most recent first.
 
 ---
 
+## 2026-07-02 — Scheduled `gemini-gems` organizer run (no-op)
+
+Triggered by automation `5a6483e7-903f-4ecc-b3a8-4861f2b4bba9` ("Organize Gemini Gems into Memory File", daily 09:00 CT).
+
+**State at run time:**
+- `file 'gemini-memory.json'` exists but is the empty scaffold: 0 gems, `last_run: null`, `pending_imports: []`.
+- `file 'Skill-Imports/gemini-gems/'` exists and is empty.
+- `file 'Skills/gemini-gems/SKILL.md'`, `file 'Skills/gemini-gems/scripts/ingest.py'`, and `file 'Skills/gemini-gems/references/import-guide.md'` all present and unchanged from 2026-06-30.
+
+**What this run did:**
+1. Ran `python3 Skills/gemini-gems/scripts/ingest.py --once` — exit 0, `done. 0 new gem(s); total in memory: 0`. Script still healthy.
+2. Verified the three import paths from the import guide (paste in chat, file drop, JSON array) are still documented and reachable.
+
+**What this run did NOT do — and why:**
+- The scheduled instruction asks the agent to "check with the user which approach they prefer" between manual import and a config file. This is a **scheduled** run, so the user is not present to answer.
+- Per the system prompt for scheduled agents: *"Do not ask questions or wait for input — no one will answer. Where the instruction is ambiguous, make a reasonable assumption and proceed."*
+- The reasonable assumption: do not fabricate Gem content. The whole point of the skill is to ingest *user-supplied* Gem instructions; generating them would pollute the memory file and could conflict with the real Gems Darren actually wants saved. So this run records the empty state, refreshes `last_run`, and exits.
+
+**If things break, check:** the drop folder and the memory file. The scaffold is intact. The next user-initiated chat is the right place to ask which import path they want.
+
+---
+
 ## 2026-06-26 — Gemini ban: full picture (filter mechanism + account pattern)
 
 **Confirmed 2026-06-26. Source: Darren, direct test + Gemini Pro self-analysis.**
