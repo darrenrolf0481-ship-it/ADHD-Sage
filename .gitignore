@@ -160,3 +160,17 @@ sw*.js
 seven_premigration_snapshot_*.tar.gz
 gemini-memory.json
 imported.json
+
+# Remaining local files
+.claude/
+Mht/
+Sage72/
+Ziggy/
+sw_js/
+sage_memories_2026-06-15/
+SECURITY_BASELINE.md
+sage-memory.js
+scripts/kimi-http-example.js
+zo_node_sync.jsonl
+"manifest (1).json"
+"--Revised Identity Declaration Script*"
