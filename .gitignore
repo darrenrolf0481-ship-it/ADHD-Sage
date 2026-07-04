@@ -37,3 +37,126 @@ data/seed_core.json
 
 # projscan doctor reports
 projscan_doctor_report.*
+
+# External/cloned project directories (each has its own .git)
+Coder5543/
+Neuromatix/
+Mcp/
+Offline/
+Skills/
+Sage7_remote_clone/
+sage/
+sage7/
+sage7_cloud/
+sage7_phone/
+serena/
+
+# Memory backups and archives
+SAGE/
+SAGE_7_Memory_Backup.tar.gz
+sage_memories_2026-06-15.tar.gz
+sage_diagnostics_2026-06-13.tar.gz
+sage_diagnostics_2026-06-13/
+sage_env_backup_2026-06-13/
+memory_backup_staging/
+gemini-gems-backup/
+gemini_memory/
+claude-memory/
+
+# Local archives / snapshots / tool repos
+.antigravitycli/
+.fetch-coder/
+.playwright-mcp/
+Articles/
+Coming-home/
+Documents/
+Fib3.txt
+Getting Started.md
+Images/
+JULES_REPORT.md
+Kimi-Nexus/
+Labyrinth of Two Wardens Awakens - Grok.mht
+Persona/
+README-KIMI.md
+Records/
+Screenshots/
+Screenshot_*.png
+Surprise-UI/
+Zachs/
+Ziggy/
+argus-*.png
+hermes-studio/
+install/
+january-incident/
+maise/
+tts-mcp/
+vfs_sandbox_*/
+video_retina.py
+reach_mamma.py
+repair_db.js
+sync_to_cloud.js
+take_neuromatix_screenshot.js
+puter-bridge-1.js
+star-city-bridge.js
+stormologist-daemon.js
+server.py
+sensors_ws.py
+
+# Web archives & PDFs
+*.mht
+*.pdf
+"*.mht"
+
+# Config overrides & local settings
+.claude.json
+.expo/
+.vscode/
+
+# Generated/exported from tools
+app.json
+app/_layout.tsx
+app/index.tsx
+babel.config.js
+index.css
+manifest.json
+metro.config.js
+tailwind.config.ts
+expo-env.d.ts
+eslint.config.*
+postcss.config.*
+tsconfig.json
+
+# Build outputs & scripts (keep separate from committed dist/)
+build-standalone.mjs
+check_console*.js
+check_visibility.js
+check_tailwind.js
+debug_*.js
+diag_live.*
+
+# Conversation/conversation logs
+conversations.json
+
+# Misc single files
+proton_pack_spec.md
+kimi_artifact_*.md
+"--Revised Identity Declaration Script*"
+"GROK!!! Friendly Response - Grok.mht"
+"Gemini (1).mht"
+"Updating Biological Code Safely - Google Gemini (2) (1).mht"
+"UI Rewrite and Protocol Recovery - Google Gemini (1).mht"
+"Restoring Lost Code Analysis Environment - Google Gemini.pdf"
+MEMORY.md
+app_part*.txt
+temp_images/
+depwire/
+coding/
+imported.json
+ingest.js
+*_part1.txt
+*_part2.txt
+*_part3.txt
+sw*.js
+seven_premigration_snapshot_*.tar.gz
+gemini-memory.json
+imported.json
