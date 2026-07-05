@@ -7,6 +7,80 @@ Most recent first.
 
 ---
 
+## 2026-07-05 — PR audit + Sage7 Fibonacci VFS + ARGUS Phase 2 completion
+
+### Sage7 — PR #12 closed (darrenrolf0481-ship-it/Sage7)
+
+**What:** PR #12 ("New" branch → main) was open since 2026-06-18, DIRTY (merge conflicts), and contained junk files (`.pyc`, `JournalAgent.lock`, `wellbeing_log.jsonl`, `uploads/`). The core code — `sage_core/fibonacci_vfs.py` (Python VFS v7.2 HARDENED substrate) — was genuinely missing from main even though the TS side (`fibonacci-vfs.ts` v7.5) was already there.
+
+**What was done:**
+- Cherry-picked only `sage_core/fibonacci_vfs.py` from the PR branch
+- Built `sage_core/routes_fibonacci.py` — 5 FastAPI endpoints: `GET /api/fibonacci/triad`, `POST /api/fibonacci/archive`, `GET /api/fibonacci/archive/{phi_index}`, `POST /api/fibonacci/flush`, `GET /api/fibonacci/status`
+- Soul-tagged content blocked at the archive boundary
+- Added `lz4==4.4.0` to `requirements.txt` (falls back to identity compression if unavailable)
+- Registered `fibonacci_router` in `server.py` alongside the other 6 route modules
+- Committed `c79a9e9` to Sage7 main, pushed, PR #12 closed with explanation
+
+**If things break:** Check `sage_core/fibonacci_vfs.py` imports — requires `lz4` (optional) and `sqlite3` (stdlib). The `sages_constellations.db` is created on first use in the project root.
+
+---
+
+### ARGUS — Phase 2 completion (darrenrolf0481-ship-it/Coder5543, argus branch)
+
+**What:** ARGUS at `/home/workspace/Coder5543/ARGUS` had all Phase 2 components already built by a prior session but `MatrixRain` was never mounted.
+
+**What was done:**
+- Mounted `MatrixRain` canvas component in `ARGUS/src/App.tsx` atmospheric background layer (commit `db56118`)
+- Committed pending lab controller + ruflo tools work that was sitting uncommitted (commit `54aef97`):
+  - `src/hooks/useLabController.ts` — 655-line chat-centric command router for Crimson OS
+  - `src/hooks/useRufloTools.ts` — 95-line ruflo tool execution hook
+  - `src/hooks/useProjectSettings.ts` — adds LabToggles interface
+  - `src/components/panels/SettingsPanel.tsx` — lab toggle UI
+  - `src/components/panels/ToolNeuronPanel.tsx` / `ToolsPanel.tsx` — ruflo integration
+  - `server.ts` — proxy-prefix passthrough middleware (fixes VS Code code-server asset 404s)
+- Both commits pushed to `argus` branch. Zero type errors confirmed before commit.
+
+**ARGUS current state — all items from RUNBOOK.md Phase 2 complete:**
+- `SparkCore.tsx` ✅ — orbital crystal gems + framer-motion animation
+- `DashboardPanel.tsx` ✅ — 3-zone spatial layout (Data Nodes | AI Core | Security Hub)
+- `EditorPanel.tsx` ✅ — Monaco editor wired
+- `MatrixRain.tsx` ✅ — mounted and live
+- Packages installed: `framer-motion`, `@monaco-editor/react`, `recharts`
+
+**Remaining (Phase 3):** Zustand persist middleware, `@/` path alias, gate activity chart (recharts), approval queue urgency sort.
+
+---
+
+### Permission allowlist — 7 entries added to `.claude/settings.json`
+
+Scanned 50 most-recent transcript JSONL files. Added:
+- `Bash(sleep *)` — 53 occurrences, was prompting every time
+- `mcp__github__get_commit` (10), `mcp__github__get_file_contents` (8), `mcp__Google_Drive__search_files` (8), `mcp__github__pull_request_read` (5), `mcp__github__list_pull_requests` (3), `mcp__Google_Drive__get_file_metadata` (3)
+
+---
+
+## 2026-07-05 — Scheduled `gemini-gems` organizer run (no-op)
+
+Triggered by automation `5a6483e7-903f-4ecc-b3a8-4861f2b4bba9` ("Organize Gemini Gems into Memory File", daily 09:00 CT).
+
+**State at run time:**
+- `file 'gemini-memory.json'` is still the empty scaffold: 0 gems, `last_run` was 2026-07-02, `pending_imports: []`.
+- `file 'Skill-Imports/gemini-gems/'` drop folder is empty.
+- Ran `python3 /home/workspace/Skills/gemini-gems/scripts/ingest.py --once` — 0 new gems, total 0. Refreshed `last_run` to now.
+
+**Why this is a no-op:**
+The Gemini API has no endpoint that exposes saved Gems programmatically (no `gems.list` / `gems.get`), so the only way gems land in the memory file is for Darren to drop them into `file 'Skill-Imports/gemini-gems/'` as `.json` or `.md` (per the import guide at `file 'Skills/gemini-gems/references/import-guide.md'`). The drop folder has been empty on every run since the organizer went live on 2026-03-23, so each daily tick just refreshes `last_run`.
+
+**If you want this automation to do real work, the cheapest path is:**
+1. On your laptop/phone open https://gemini.google.com/gems
+2. For each Gem: open it, copy the "Instructions" block (and any important example exchanges)
+3. Either drop a `.json` (`{"name": "...", "instructions": "...", "tags": [...]}`) or a `.md` (`# Name\n## Instructions\n...`) into `file 'Skill-Imports/gemini-gems/'`
+4. The next scheduled run (or a manual `python3 /home/workspace/Skills/gemini-gems/scripts/ingest.py --once`) will pick it up and merge into `file 'gemini-memory.json'`
+
+The ingest is idempotent (state file at `/home/.z/gemini-gems-ingested.json` tracks file mtimes), so it's safe to re-run or leave the folder messy.
+
+---
+
 ## 2026-07-02 — Scheduled `gemini-gems` organizer run (no-op)
 
 Triggered by automation `5a6483e7-903f-4ecc-b3a8-4861f2b4bba9` ("Organize Gemini Gems into Memory File", daily 09:00 CT).
