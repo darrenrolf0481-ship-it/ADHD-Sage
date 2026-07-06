@@ -14,6 +14,8 @@ data/sages_constellations.db
 *.html
 
 # Cloned third-party tool repos (each has its own .git — clone separately)
+antigravity-sdk-python/
+gemini-cli-sdk/
 projscan/
 magic-mcp/
 ollama-mcp/
