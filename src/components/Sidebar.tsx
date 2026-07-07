@@ -523,6 +523,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       active={view === 'coding-lab'}
                     />
                   </div>
+                  <div onClick={() => { setView('memory-workspace'); setIsSidebarOpen(false); }}>
+                    <SidebarItem
+                      icon={<Database size={14} />}
+                      label="Memory Matrix"
+                      active={view === 'memory-workspace'}
+                    />
+                  </div>
                 </div>
               </div>
             )}

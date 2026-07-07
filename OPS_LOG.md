@@ -7,6 +7,31 @@ Most recent first.
 
 ---
 
+## 2026-07-07 — Unified Memory & Database Workspace
+
+**What happened:**
+- Implemented a unified **Memory Workspace** ("Memory Matrix") to inspect/manage SQLite database state and connected MCP servers, and manually inject context clues while keeping memories strictly read-only to preserve forensic integrity.
+- **Frontend views & components:**
+  - Added `'memory-workspace'` to `AppView` and `APP_VIEWS` in `src/types.ts`.
+  - Destructured `setMessages` from `useChat` and wired `view === 'memory-workspace'` in `src/App.tsx`.
+  - Added a "Memory Matrix" link to the "Terminal Nodes" section in `src/components/Sidebar.tsx`.
+  - Created `src/components/MemoryWorkspace.tsx` featuring a manual memory injector form, a read-only memory ledger (filters for inner/outer/pinned/all, search input), a Database Diagnostic matrix (SQLite stats, context buffer logs, Vacuum/FTS/Integrity check actions), and an MCP configuration tool deck.
+- **Backend diagnostics & MCP routing:**
+  - Added `/api/system/db/fts-sync`, `/api/system/db/vacuum`, and `/api/system/db/integrity` endpoints in `src/server/routes/system.ts`.
+  - Added `getMcpServersDetails()` to `src/core/mcp.ts` to query configured server details along with their tool schemas. Exposed it via the `/api/mcp/status` route in `src/server/routes/system.ts`.
+- **Validation:**
+  - Verified compilation via `npm run typecheck` and `npm run build`. Cleaned up all linter warnings/unused imports in modified files.
+- **Repository Migration:**
+  - Created a new, independent private GitHub repository: `https://github.com/darrenrolf0481-ship-it/ADHD-Sage-Workspace.git`.
+  - Configured remote `new-origin` and pushed the `main` branch to it.
+
+**If things break, check:**
+- Ensure `/api/mcp/status` or DB diagnostic endpoints are not returning 500.
+- Verify FTS trigram index syncing works correctly by monitoring server logs.
+- Memory workspace can be reached at `/proxy/3000/` under the new navigation tab.
+
+---
+
 ## 2026-06-26 — Multimodal Attachment Fix (Images / Vision)
 
 **What happened:**

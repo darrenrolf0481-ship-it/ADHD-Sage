@@ -17,7 +17,7 @@ export interface ChatMessage {
   attachments?: Attachment[];
 }
 
-export type AppView = 'chat' | 'lattice' | 'vault' | 'labyrinth' | 'anomalies' | 'surprise' | 'coding-lab';
+export type AppView = 'chat' | 'lattice' | 'vault' | 'labyrinth' | 'anomalies' | 'surprise' | 'coding-lab' | 'memory-workspace';
 
 export type AIProvider = 'ollama' | 'openrouter' | 'gemini';
 
@@ -29,4 +29,5 @@ export const APP_VIEWS: readonly AppView[] = [
   'anomalies',
   'surprise',
   'coding-lab',
+  'memory-workspace',
 ];

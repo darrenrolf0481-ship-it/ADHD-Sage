@@ -13,6 +13,7 @@ import Labyrinth from './components/Labyrinth';
 import { AnomaliesDesk } from './components/AnomaliesDesk';
 import { NeuroDashboard } from './components/NeuroDashboard';
 import { CodingLab } from './components/CodingLab';
+import { MemoryWorkspace } from './components/MemoryWorkspace';
 import { pulseGenerator } from './lib/audio-pulse';
 import { useSensors } from './lib/sensor-context';
 import { APP_VIEWS } from './types';
@@ -58,6 +59,7 @@ const App: React.FC = () => {
 
   const {
     messages,
+    setMessages,
     input,
     setInput,
     pendingAttachments,
@@ -320,6 +322,8 @@ const App: React.FC = () => {
               <AnomaliesDesk />
             ) : view === 'coding-lab' ? (
               <CodingLab />
+            ) : view === 'memory-workspace' ? (
+              <MemoryWorkspace />
             ) : (
               <Labyrinth />
             )}

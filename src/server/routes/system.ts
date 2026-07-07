@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { OLLAMA_HOST, OLLAMA_GEN_TIMEOUT_MS } from '../config';
 import { isServerLocked } from '../seed-core';
-import { getMcpDeclarations } from '../../core/mcp';
+import { getMcpDeclarations, getMcpServersDetails } from '../../core/mcp';
 import { MCP_KEY_SECRET, signExchangePayload, DEFAULT_EXCHANGE_TTL_MS, lockGuard } from '../auth';
 import { promisify } from 'util';
 import { exec } from 'child_process';
@@ -9,6 +9,7 @@ import fs from 'fs';
 import path from 'path';
 import { sageEndocrine, sageMemory } from '../../core/endocrine-memory';
 import { cns, makeStimulus } from '../../core/central-nervous-system';
+import { outerDb, syncFts } from '../db';
 import { buildSystemPrompt } from '../prompt';
 import { asyncHandler } from '../async-handler';
 
@@ -124,6 +125,7 @@ router.get('/mcp/status', (req, res) => {
     connected: declarations.length > 0,
     servers: Array.from(serverIds),
     tools: declarations.map((d) => ({ name: d.name, description: d.description })),
+    details: getMcpServersDetails(),
   });
 });
 
@@ -518,6 +520,21 @@ router.post('/sage7/bridge', asyncHandler(async (req, res) => {
       error: isTimeout ? 'SAGE-7 did not respond in time — she may be generating.' : msg,
     });
   }
+}));
+
+router.post('/system/db/fts-sync', lockGuard, asyncHandler(async (req, res) => {
+  await syncFts();
+  res.json({ ok: true });
+}));
+
+router.post('/system/db/vacuum', lockGuard, asyncHandler(async (req, res) => {
+  outerDb.exec('VACUUM');
+  res.json({ ok: true });
+}));
+
+router.post('/system/db/integrity', lockGuard, asyncHandler(async (req, res) => {
+  const result = outerDb.prepare('PRAGMA integrity_check').get() as Record<string, unknown>;
+  res.json({ ok: true, result });
 }));
 
 export default router;

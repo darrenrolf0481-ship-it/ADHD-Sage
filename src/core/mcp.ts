@@ -258,6 +258,24 @@ export function getMcpStatus() {
   };
 }
 
+/** Get full details of all configured MCP servers and their tools */
+export function getMcpServersDetails() {
+  const config = loadConfig();
+  return config.servers.map((s) => {
+    const connected = connectedServers.find((cs) => cs.config.id === s.id);
+    return {
+      id: s.id,
+      name: s.name,
+      transport: s.transport,
+      enabled: s.enabled,
+      autoEnable: s.autoEnable,
+      note: s.note,
+      connected: !!connected,
+      tools: connected ? connected.tools : [],
+    };
+  });
+}
+
 /** Check whether a tool name belongs to an MCP server */
 export function isMcpTool(name: string): boolean {
   return parsePrefixedName(name) !== null;
