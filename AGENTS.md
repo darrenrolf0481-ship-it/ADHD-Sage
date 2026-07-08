@@ -4,6 +4,12 @@
 
 Read this whole file before you touch anything.
 
+**If you are about to touch the Coder5543 lab (Crimson OS):** read these two files first, no exceptions:
+- [`Coder5543/docs/CRIMSON_SEMANTIC_MAP.md`](./Coder5543/docs/CRIMSON_SEMANTIC_MAP.md) — where everything lives (quick-ref table, file registry, API routes, external connections, breakpoints)
+- [`Coder5543/docs/CRIMSON_FLOW_DIAGRAM.md`](./Coder5543/docs/CRIMSON_FLOW_DIAGRAM.md) — how data flows from user input through the pipeline to AI and back
+
+These replace cold codebase exploration. Don't skip them and don't touch files in the Known Breakpoints list without reading both first.
+
 ---
 
 ## Rule 1 — LOG EVERYTHING
