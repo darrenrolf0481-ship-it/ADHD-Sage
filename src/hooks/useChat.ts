@@ -76,9 +76,9 @@ export function useChat({
   });
   const [ollamaModel, setOllamaModel] = useState(() => {
     try {
-      return localStorage.getItem('adhd_sage_ollama_model') || 'gemma4:12b';
+      return localStorage.getItem('adhd_sage_ollama_model') || 'bjoernb/gemma4-31b-fast:latest';
     } catch {
-      return 'gemma4:12b';
+      return 'bjoernb/gemma4-31b-fast:latest';
     }
   });
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);

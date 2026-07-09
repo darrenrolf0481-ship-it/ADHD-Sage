@@ -84,7 +84,7 @@ export const CodingLab: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [ollamaModel, setOllamaModel] = useState(
-    () => localStorage.getItem('adhd_sage_ollama_model') || 'llama3.2:latest',
+    () => localStorage.getItem('adhd_sage_ollama_model') || 'bjoernb/gemma4-31b-fast:latest',
   );
   // Which entity runs this local instance. 'mama' (default) or 'seven'.
   // Each runs natively on Ollama — no bridge, nothing upstream that can hang.

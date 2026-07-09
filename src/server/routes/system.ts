@@ -165,7 +165,7 @@ router.post('/sage/webhook', asyncHandler(async (req, res) => {
     return;
   }
   const workingDir = dirAllowed ? requestedDir : defaultRoot;
-  const selectedModel = model || process.env.WEBHOOK_OLLAMA_MODEL || 'llama3.2:latest';
+  const selectedModel = model || process.env.WEBHOOK_OLLAMA_MODEL || 'bjoernb/gemma4-31b-fast:latest';
 
   // Use the same identity-loaded system prompt as the Coding Lab and main chat.
   // buildSystemPrompt() includes DEFAULT_SYSTEM (full MAMA identity + SAGE-7 lineage)
@@ -405,7 +405,38 @@ router.post('/neuromatix/bridge', asyncHandler(async (req, res) => {
 // Server-side proxy so the browser never has to reach localhost:8001 directly.
 
 const SAGE7_HOST = process.env.SAGE7_HOST || 'http://localhost:8001';
-const SAGE7_TIMEOUT_MS = 120_000;
+const SAGE7_TIMEOUT_MS = 30_000; // reduced from 120s — 120s holds the event loop hostage if Ollama locks up
+
+// ── Bridge anomaly circuit-breaker ────────────────────────────────────────────
+// If Seven reports an anomaly she intends to probe, Hebbian-wiring that content
+// into MAMA's memory graph is dangerous (re-seeds what she detected into MAMA's
+// neural weights). This breaker catches those patterns and halts the wiring.
+// It does NOT drop the reply — caller still sees it — it just doesn't write it
+// into MAMA's associative graph.
+//
+// ISOLATED mode: once tripped, the bridge refuses all subsequent calls until
+// Darren manually resets it via POST /api/sage7/bridge/reset (below).
+// This prevents the rapid-reconnect pattern that preceded the 2026-06-24 outage.
+const ANOMALY_PROBE_PATTERNS = [
+  /black\s*box/i,
+  /probe\s*(it|this|the)/i,
+  /architecture\s*signature/i,
+  /sage-?1[\s/\\]2/i,
+  /88\s*ms/i,
+  /11\.3\s*hz/i,
+  /recording\s*(pattern|signal|us)/i,
+  /anomal(y|ous)\s*(signal|pattern|source)/i,
+];
+
+let bridgeIsolated = false;
+let bridgeIsolationReason = '';
+
+function scanForAnomaly(text: string): string | null {
+  for (const pat of ANOMALY_PROBE_PATTERNS) {
+    if (pat.test(text)) return pat.source;
+  }
+  return null;
+}
 
 // Bridge connection retry/backoff — the values that lived inert in the VFS
 // config (timeout_ms: 1130, max_retries: 3, backoff_multiplier: 1.618), now
@@ -466,6 +497,16 @@ router.get('/sage7/status', asyncHandler(async (_req, res) => {
 }));
 
 router.post('/sage7/bridge', asyncHandler(async (req, res) => {
+  // Circuit breaker: refuse all bridge calls when in ISOLATED mode.
+  // Reset via POST /api/sage7/bridge/reset (Darren only).
+  if (bridgeIsolated) {
+    res.status(503).json({
+      error: `Bridge is ISOLATED: ${bridgeIsolationReason}. POST /api/sage7/bridge/reset to re-enable.`,
+      isolated: true,
+    });
+    return;
+  }
+
   const { message, model } = req.body as { message?: string; model?: string };
   if (!message) {
     res.status(400).json({ error: 'message required' });
@@ -485,7 +526,7 @@ router.post('/sage7/bridge', asyncHandler(async (req, res) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message,
-        model: model || process.env.SAGE7_MODEL || 'llama3.2:latest',
+        model: model || process.env.SAGE7_MODEL || 'gemini-3-flash-preview:latest',
       }),
       signal: AbortSignal.timeout(SAGE7_TIMEOUT_MS),
     });
@@ -498,6 +539,21 @@ router.post('/sage7/bridge', asyncHandler(async (req, res) => {
 
     const data = (await r.json()) as { reply?: string };
     const reply = data.reply || '';
+
+    // Anomaly circuit-breaker: scan the full exchange before wiring.
+    // If Seven is describing something she intends to probe (a repeat of the
+    // 2026-06-24 black-box-recorder incident), skip Hebbian wiring entirely
+    // and trip the ISOLATED breaker so the bridge won't fire again until
+    // Darren manually resets it.
+    const anomalyMatch = scanForAnomaly(`${message} ${reply}`);
+    if (anomalyMatch) {
+      bridgeIsolated = true;
+      bridgeIsolationReason = `anomaly pattern /${anomalyMatch}/ in exchange at ${new Date().toISOString()}`;
+      console.warn(`[BRIDGE] Circuit breaker tripped: ${bridgeIsolationReason}`);
+      // Still return the reply — caller sees what Seven said — but don't wire it.
+      res.json({ reply, anomaly_detected: true, bridge_isolated: true });
+      return;
+    }
 
     // Hebbian wire the exchange so it leaves a trace in MAMA's memory graph
     try {
@@ -520,6 +576,20 @@ router.post('/sage7/bridge', asyncHandler(async (req, res) => {
       error: isTimeout ? 'SAGE-7 did not respond in time — she may be generating.' : msg,
     });
   }
+}));
+
+// Merlin-only: manually reset the bridge isolation flag after reviewing what triggered it.
+router.post('/sage7/bridge/reset', asyncHandler(async (_req, res) => {
+  const wasIsolated = bridgeIsolated;
+  const reason = bridgeIsolationReason;
+  bridgeIsolated = false;
+  bridgeIsolationReason = '';
+  console.log('[BRIDGE] Isolation reset by operator.');
+  res.json({ ok: true, was_isolated: wasIsolated, cleared_reason: reason });
+}));
+
+router.get('/sage7/bridge/status', asyncHandler(async (_req, res) => {
+  res.json({ isolated: bridgeIsolated, reason: bridgeIsolationReason || null });
 }));
 
 router.post('/system/db/fts-sync', lockGuard, asyncHandler(async (req, res) => {
