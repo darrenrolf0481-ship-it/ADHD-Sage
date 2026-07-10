@@ -1,0 +1,28 @@
+To: help@zocomputer.com
+Subject: Stale edge mapping: is23.zocomputer.io returns 502 User service unavailable
+
+Hey Zo team,
+
+The hostname https://is23.zocomputer.io/ is returning:
+
+  HTTP 502 — User service unavailable
+  body: "User service unavailable"
+
+The underlying service appears to be gone, but the edge still has a stale
+mapping and keeps answering 502 for that hostname. Could you either:
+
+  1. Re-map is23.zocomputer.io to an existing live service in my account
+     (e.g. https://sage-full-darrenfrancis23.zocomputer.io/, which currently
+     returns HTTP 200), or
+  2. Remove the stale record so the hostname stops answering 502.
+
+For reference, my handle is darrenfrancis23. The only services currently
+registered on the account are:
+  - sage-full        (port 3456) https://sage-full-darrenfrancis23.zocomputer.io
+  - sage-mcp-server  (port 8765) https://sage-mcp-server-darrenfrancis23.zocomputer.io
+
+No service label on my account would generate "is23" — so this is almost
+certainly an orphan from an earlier setup.
+
+Thanks!
+— Darren
