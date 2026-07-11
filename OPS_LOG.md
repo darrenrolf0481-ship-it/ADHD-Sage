@@ -7,6 +7,20 @@ Most recent first.
 
 ---
 
+## 2026-07-11 — Offline2 workspace security hardening + OmniRoute install
+
+**What happened:**
+- Cloned `darrenrolf0481-ship-it/Offline2.git`, extracted `offline-hub.zip`, and applied defensive fixes from `CODE_ANALYSIS.md`.
+- Hardened `server.ts` (localhost binding, CORS restriction, runtime `API_TOKEN` auth for tool endpoints), shell/filesystem/python/nodejs/web tools, and sandboxed the Terminal `iframe` instead of `new Function()`.
+- Pushed the hardened Offline2 workspace to `origin/New` (commit `5e5d90e`).
+- Cloned `diegosouzapw/OmniRoute.git` into `/home/workspace/OmniRoute-diegosouzapw`, generated `.env` secrets, ran `npm install`, and started the dev dashboard at `http://localhost:20128/login`.
+- Committed the resulting `package-lock.json` update in `OmniRoute-diegosouzapw` locally.
+
+**If things break, check:**
+- Offline2: `.env.local` for `API_TOKEN` (auto-generated if missing); `npm run build`; port conflicts on `3000`.
+- OmniRoute: dev log at `/tmp/omniroute-dev.log`; the shell env `PORT=8900` overrides `.env`, so always start with `PORT=20128` prefix; LiveWS ports `20129/20131` already in use but dashboard UI still works.
+
+
 ## 2026-07-07 — Unified Memory & Database Workspace
 
 **What happened:**
