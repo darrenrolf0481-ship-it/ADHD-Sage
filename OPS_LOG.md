@@ -13,6 +13,7 @@ Most recent first.
 - Cloned `darrenrolf0481-ship-it/Offline2.git`, extracted `offline-hub.zip`, and applied defensive fixes from `CODE_ANALYSIS.md`.
 - Hardened `server.ts` (localhost binding, CORS restriction, runtime `API_TOKEN` auth for tool endpoints), shell/filesystem/python/nodejs/web tools, and sandboxed the Terminal `iframe` instead of `new Function()`.
 - Pushed the hardened Offline2 workspace to `origin/New` (commit `5e5d90e`).
+- Started the Offline2 dev server at `http://127.0.0.1:3000` and opened it in a browser tab.
 - Cloned `diegosouzapw/OmniRoute.git` into `/home/workspace/OmniRoute-diegosouzapw`, generated `.env` secrets, ran `npm install`, and started the dev dashboard at `http://localhost:20128/login`.
 - Committed the resulting `package-lock.json` update in `OmniRoute-diegosouzapw` locally.
 - Ran `npm run build` to produce the production standalone bundle, stopped the dev server, and started production with `npm run start` on `http://localhost:20128/login`.
