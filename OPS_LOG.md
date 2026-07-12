@@ -15,6 +15,7 @@ Most recent first.
 - Pushed the hardened Offline2 workspace to `origin/New` (commit `5e5d90e`).
 - Cloned `diegosouzapw/OmniRoute.git` into `/home/workspace/OmniRoute-diegosouzapw`, generated `.env` secrets, ran `npm install`, and started the dev dashboard at `http://localhost:20128/login`.
 - Committed the resulting `package-lock.json` update in `OmniRoute-diegosouzapw` locally.
+- Ran `npm run build` to produce the production standalone bundle, stopped the dev server, and started production with `npm run start` on `http://localhost:20128/login`.
 
 **If things break, check:**
 - Offline2: `.env.local` for `API_TOKEN` (auto-generated if missing); `npm run build`; port conflicts on `3000`.
