@@ -236,6 +236,28 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
         addMemory(`Q: ${prompt.slice(0, 500)}\nA: ${finalText.slice(0, 500)}`, tag).catch(() => {});
       }
 
+      // Append to shared conversations.json so Coder5543 ConversationIngestor can ingest it.
+      // Ingestor expects a JSON array; we read-modify-write. Fire-and-forget.
+      if (prompt && finalText) {
+        const CONV_FILE = '/home/workspace/conversations.json';
+        const entry = {
+          timestamp: new Date().toISOString(),
+          source: 'ADHD-SAGE',
+          model,
+          user: prompt.slice(0, 1000),
+          assistant: finalText.slice(0, 2000),
+        };
+        import('fs/promises').then(async (fsp) => {
+          let arr: unknown[] = [];
+          try { arr = JSON.parse(await fsp.readFile(CONV_FILE, 'utf8')); } catch {}
+          if (!Array.isArray(arr)) arr = [];
+          arr.push(entry);
+          // Keep last 500 entries so file doesn't grow unbounded
+          if (arr.length > 500) arr = arr.slice(-500);
+          await fsp.writeFile(CONV_FILE, JSON.stringify(arr, null, 2));
+        }).catch(() => {});
+      }
+
       res.json({ text: finalText, toolsInvoked, toolsAvailable: ollamaTools.length });
     } catch (error: unknown) {
       recordMetric('ollama', Date.now() - startMs, false);
