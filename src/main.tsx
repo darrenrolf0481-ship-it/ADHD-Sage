@@ -21,7 +21,7 @@ import './index.css';
       const cleanPath = input.pathname.slice(1);
       input = new URL(cleanBase + cleanPath, input.origin);
     }
-    return originalFetch.call(this, input, init);
+    return originalFetch.call(window, input, init);
   };
 
   const originalEventSource = window.EventSource;

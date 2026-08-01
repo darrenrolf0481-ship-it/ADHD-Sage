@@ -570,7 +570,7 @@ export const MemoryWorkspace: React.FC = () => {
                           <div className="flex justify-between items-center text-[10px]">
                             <div className="flex items-center gap-2">
                               <span className="font-mono text-cyan-400 font-bold">
-                                #{node.id.split('_')[1]?.slice(-4) ?? node.id.slice(-4)}
+                                #{(node.id ?? '').split('_')[1]?.slice(-4) ?? (node.id ?? '').slice(-4)}
                               </span>
                               <span
                                 className={`text-[8px] uppercase tracking-wider font-mono font-bold px-1.5 py-0.5 rounded ${
