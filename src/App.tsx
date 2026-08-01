@@ -330,9 +330,10 @@ const App: React.FC = () => {
 
     for (const f of files) {
       let type: Attachment['type'] = 'document';
-      if (f.type.startsWith('image/')) type = 'image';
-      else if (f.type.startsWith('video/')) type = 'video';
-      else if (f.type.startsWith('audio/')) type = 'audio';
+      const mimeType = f.type || '';
+      if (mimeType.startsWith('image/')) type = 'image';
+      else if (mimeType.startsWith('video/')) type = 'video';
+      else if (mimeType.startsWith('audio/')) type = 'audio';
 
       let content: string | undefined;
 

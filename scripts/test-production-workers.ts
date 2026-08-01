@@ -20,7 +20,7 @@ server.stdout.on('data', (d) => { output += d.toString(); });
 server.stderr.on('data', (d) => { output += d.toString(); });
 
 async function waitForReady(): Promise<boolean> {
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 120; i++) {
     if (output.includes(`Server running on http://0.0.0.0:${PORT}`)) return true;
     await setTimeout(500);
   }

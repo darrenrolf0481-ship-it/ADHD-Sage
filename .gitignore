@@ -177,3 +177,7 @@ scripts/kimi-http-example.js
 zo_node_sync.jsonl
 manifest\ \(1\).json
 *Revised\ Identity\ Declaration\ Script*
+
+# Perseus generated output
+.hermes.md
+.perseus/cache/

@@ -18,7 +18,18 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, resolve, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const MEMORIES_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../data/memories');
+const getMemoriesRoot = () => {
+  if (typeof __dirname !== 'undefined') {
+    return resolve(__dirname, '../../data/memories');
+  }
+  // @ts-ignore
+  const metaUrl = typeof import.meta !== 'undefined' && import.meta.url ? import.meta.url : undefined;
+  if (metaUrl) {
+    return resolve(dirname(fileURLToPath(metaUrl)), '../../data/memories');
+  }
+  return resolve(process.cwd(), 'data/memories');
+};
+export const MEMORIES_ROOT = getMemoriesRoot();
 export const REPO_ROOT = resolve(MEMORIES_ROOT, '../..');
 export const INDEX_PATH = join(MEMORIES_ROOT, 'imported.json');
 export const SEVEN_DIR = join(MEMORIES_ROOT, 'seven');

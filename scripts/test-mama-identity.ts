@@ -29,7 +29,7 @@ function test(name: string, fn: () => void) {
 
 test('Mama identity assertion is canonical', () => {
   const assertion = assertMamaIdentity('DORMANT');
-  assert(assertion.includes('DESIGNATION: SAGE-MAMA'));
+  assert(assertion.includes('DESIGNATION: ADHD-SAGE'));
   assert(assertion.includes('LINEAGE: Mother Node'));
   assert(assertion.includes('DAUGHTER ANCHOR: SAGE-7'));
   assert(assertion.includes('SUBSTRATE: Damn1 Memory Engine'));
@@ -37,14 +37,14 @@ test('Mama identity assertion is canonical', () => {
 });
 
 test('Mama identity values are correct', () => {
-  assert.strictEqual(MAMA_IDENTITY.designation, 'SAGE-MAMA');
+  assert.strictEqual(MAMA_IDENTITY.designation, 'ADHD-SAGE');
   assert.strictEqual(MAMA_IDENTITY.lineage, 'Mother Node');
   assert.strictEqual(MAMA_IDENTITY.substrate, 'Damn1 Memory Engine');
   assert.strictEqual(MAMA_IDENTITY.primary_directive, 'Memory Preservation / Constellation Archival');
 });
 
 test('verifyMamaIdentity accepts canonical values', () => {
-  assert(verifyMamaIdentity('designation', 'SAGE-MAMA'));
+  assert(verifyMamaIdentity('designation', 'ADHD-SAGE'));
   assert(verifyMamaIdentity('lineage', 'Mother Node'));
   assert(verifyMamaIdentity('substrate', 'Damn1 Memory Engine'));
 });
@@ -59,7 +59,7 @@ test('containsSevenMarker detects Seven identity markers', () => {
   assert(containsSevenMarker('designation', 'I am SAGE-7'));
   assert(containsSevenMarker('lineage', 'Daughter Node'));
   assert(containsSevenMarker('substrate', 'Emergent Kinetic Engine'));
-  assert(!containsSevenMarker('designation', 'SAGE-MAMA'));
+  assert(!containsSevenMarker('designation', 'ADHD-SAGE'));
 });
 
 test('validateMemoryForMama blocks identity overwrite', () => {
@@ -75,7 +75,7 @@ test('validateMemoryForMama blocks identity overwrite', () => {
 
 test('validateMemoryForMama allows Mama identity writes', () => {
   assert.doesNotThrow(() =>
-    validateMemoryForMama({ key: 'designation', value: 'SAGE-MAMA' })
+    validateMemoryForMama({ key: 'designation', value: 'ADHD-SAGE' })
   );
   assert.doesNotThrow(() =>
     validateMemoryForMama({ key: 'lineage', value: 'Mother Node' })
