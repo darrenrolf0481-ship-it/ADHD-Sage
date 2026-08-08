@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { getPhiSentinel } from './sage7Bridge';
 import { MemoryVault } from './MemoryVault';
 
 export default function Labyrinth() {
@@ -16,10 +15,9 @@ export default function Labyrinth() {
     };
     loadEchoes();
 
-    // Make the corridors breathe in time with \Phi
-    const interval = setInterval(async () => {
-      const phi = await getPhiSentinel();
-      const newBreath = Math.sin(Date.now() / 800) * 0.3 + 1 + (phi > 6.18 ? 0.4 : 0);
+    // Make the corridors breathe in time with Φ
+    const interval = setInterval(() => {
+      const newBreath = Math.sin(Date.now() / 800) * 0.3 + 1.4;
       setBreath(newBreath);
       breathRef.current = newBreath;
     }, 120);
