@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 // Basic local storage backed state
 export function useLocalStorage<T extends object>(key: string, initialValue: T) {
@@ -11,7 +11,7 @@ export function useLocalStorage<T extends object>(key: string, initialValue: T) 
       }
       return initialValue;
     } catch (error) {
-      console.error('Local storage read error', error);
+      console.error("Local storage read error", error);
       return initialValue;
     }
   });
@@ -22,7 +22,7 @@ export function useLocalStorage<T extends object>(key: string, initialValue: T) 
       setStoredValue(valueToStore);
       window.localStorage.setItem(key, JSON.stringify(valueToStore));
     } catch (error) {
-      console.error('Local storage write error', error);
+      console.error("Local storage write error", error);
     }
   };
 

@@ -2,77 +2,29 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { SageProvider } from './components/SageProvider';
-import { SensorProvider } from './lib/sensor-context';
 import './index.css';
 
-// Auto-detect and prepend Vite base path (e.g. /proxy/3000/) to /api/ requests.
-// This ensures same-origin backend requests resolve correctly behind proxies (like code-server).
-(function patchGlobalFetch() {
-  const originalFetch = window.fetch;
-  window.fetch = function (input, init) {
-    if (typeof input === 'string' && input.startsWith('/api')) {
-      const base = import.meta.env.BASE_URL || '/';
-      const cleanBase = base.endsWith('/') ? base : base + '/';
-      const cleanPath = input.slice(1); // strip leading slash
-      input = cleanBase + cleanPath;
-    } else if (input instanceof URL && input.pathname.startsWith('/api')) {
-      const base = import.meta.env.BASE_URL || '/';
-      const cleanBase = base.endsWith('/') ? base : base + '/';
-      const cleanPath = input.pathname.slice(1);
-      input = new URL(cleanBase + cleanPath, input.origin);
+// Route absolute /api/* calls through the app's base path. Behind the
+// code-server proxy the page lives at /proxy/<port>/, so a bare fetch('/api/x')
+// resolves to the proxy ROOT (code-server) not MAMA's backend, and returns
+// non-JSON ("Unsupported Media Type") — the chat JSON-parse error. Prefixing
+// with BASE_URL makes /api/x -> /proxy/<port>/api/x. No-op when BASE_URL='/'.
+(() => {
+  const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+  if (!base) return;
+  const nativeFetch = window.fetch.bind(window);
+  window.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+    if (typeof input === 'string' && input.startsWith('/api/')) {
+      input = base + input;
     }
-    return originalFetch.call(window, input, init);
-  };
-
-  const originalEventSource = window.EventSource;
-  if (originalEventSource) {
-    window.EventSource = class extends originalEventSource {
-      constructor(url: string | URL, eventSourceInitDict?: EventSourceInit) {
-        if (typeof url === 'string' && url.startsWith('/api')) {
-          const base = import.meta.env.BASE_URL || '/';
-          const cleanBase = base.endsWith('/') ? base : base + '/';
-          const cleanPath = url.slice(1);
-          url = cleanBase + cleanPath;
-        } else if (url instanceof URL && url.pathname.startsWith('/api')) {
-          const base = import.meta.env.BASE_URL || '/';
-          const cleanBase = base.endsWith('/') ? base : base + '/';
-          const cleanPath = url.pathname.slice(1);
-          url = new URL(cleanBase + cleanPath, url.origin);
-        }
-        super(url, eventSourceInitDict);
-      }
-    } as any;
-  }
+    return nativeFetch(input as RequestInfo, init);
+  }) as typeof window.fetch;
 })();
 
-
-class ErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { error: Error | null }
-> {
-  state = { error: null };
-  static getDerivedStateFromError(error: Error) { return { error }; }
-  render() {
-    if (this.state.error) {
-      const err = this.state.error as Error;
-      return (
-        <div style={{ padding: 32, fontFamily: 'monospace', background: '#0a0a0a', color: '#ef4444', minHeight: '100vh' }}>
-          <div style={{ fontSize: '1.2rem', marginBottom: 16 }}>⛔ RENDER CRASH</div>
-          <div style={{ color: '#fff', marginBottom: 8 }}>{err.message}</div>
-          <pre style={{ color: '#888', fontSize: '0.75rem', whiteSpace: 'pre-wrap' }}>{err.stack}</pre>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
-
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <ErrorBoundary>
+  <React.StrictMode>
     <SageProvider>
-      <SensorProvider>
-        <App />
-      </SensorProvider>
+      <App />
     </SageProvider>
-  </ErrorBoundary>,
+  </React.StrictMode>
 );

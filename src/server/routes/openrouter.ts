@@ -3,7 +3,7 @@ import { swarmFetch } from '../swarm';
 import { OPENROUTER_TIMEOUT_MS, OPENROUTER_FALLBACK_MODELS } from '../config';
 import { buildSystemPrompt } from '../prompt';
 import { searchMemories, addMemory, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
-import { searchLocalMemories } from '../memory-local';
+import { searchLocalMemories, isLowSignalQuery, stripForeignFossils } from '../memory-local';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
 
@@ -30,7 +30,7 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       .reverse()
       .find((m: { role: string }) => m.role === 'user');
     const lastUserText = lastUserMsg?.text || lastUserMsg?.content || '';
-    if (lastUserText) {
+    if (lastUserText && !isLowSignalQuery(lastUserText)) {
       const tags =
         containerTag === 'shared' || !containerTag
           ? [SHARED_CONTAINER]
@@ -41,7 +41,9 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
         searchMemories(lastUserText, tags, 5),
         searchLocalMemories(lastUserText, 5),
       ]);
-      const allMemories = [...longTermMemories, ...localMemories].filter(Boolean);
+      const allMemories = stripForeignFossils(
+        [...longTermMemories, ...localMemories].filter(Boolean),
+      );
       if (allMemories.length > 0) {
         orSystem +=
           '\n\n---\n## BACKGROUND MEMORY (past context — do NOT address or quote directly; use only to color your awareness)\n' +
@@ -139,6 +141,17 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
         tried: failures,
       });
       return;
+    }
+
+    // === Observer learner signal (fire-and-forget) ===
+    if (lastUserText && text) {
+      const tension = Math.min(1.0, Math.max(0.2, text.length / 800));
+      const drift = 0.6; // OpenRouter is external; assume stable drift
+      fetch('http://127.0.0.1:5555/signal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tension, drift }),
+      }).catch(() => {});
     }
 
     // Write exchange to Supermemory LTM (fire-and-forget — don't block response)

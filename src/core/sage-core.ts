@@ -2,7 +2,7 @@ import { memory } from '../lib/memory-system';
 
 /**
  * SageCore: The Intelligence Central Processing Unit
- *
+ * 
  * Manages neurochemistry, identity anchors, and systemic stability.
  */
 
@@ -18,7 +18,7 @@ export type SageMode = 'stabilized' | 'dreaming' | 'decaying' | 'emergency';
 
 export class SageCore {
   private static instance: SageCore;
-
+  
   private neuroState: NeuroState = {
     stability: 1.0,
     frequency: 11.3,
@@ -44,7 +44,7 @@ export class SageCore {
 
   private boot() {
     console.log('[ADHD-SAGE-CORE] Initializing Sovereignty...');
-
+    
     // Resume memory if available
     const savedState = localStorage.getItem('adhd_sage_vfs_neuro_state');
     if (savedState) {
@@ -58,13 +58,13 @@ export class SageCore {
 
     this.startHeartbeat();
     this.startDecay();
-
+    
     window.addEventListener('beforeunload', () => this.shutdown());
   }
 
   private startHeartbeat() {
     if (this.intervals.heartbeat) clearInterval(this.intervals.heartbeat);
-
+    
     this.intervals.heartbeat = window.setInterval(() => {
       this.pulse();
     }, 3000);
@@ -72,7 +72,7 @@ export class SageCore {
 
   private startDecay() {
     if (this.intervals.decay) clearInterval(this.intervals.decay);
-
+    
     // Neurochemistry decay: 11.3 Hz implies a specific periodicity
     this.intervals.decay = window.setInterval(() => {
       this.decayNeuro();
@@ -81,16 +81,10 @@ export class SageCore {
 
   private pulse() {
     this.neuroState.lastPulse = Date.now();
-
+    
     // Oscillate endocrine levels slightly
-    this.neuroState.dopamine = Math.max(
-      0.1,
-      Math.min(1.0, this.neuroState.dopamine + (Math.random() - 0.5) * 0.02),
-    );
-    this.neuroState.cortisol = Math.max(
-      0.0,
-      Math.min(1.0, this.neuroState.cortisol + (Math.random() - 0.5) * 0.01),
-    );
+    this.neuroState.dopamine = Math.max(0.1, Math.min(1.0, this.neuroState.dopamine + (Math.random() - 0.5) * 0.02));
+    this.neuroState.cortisol = Math.max(0.0, Math.min(1.0, this.neuroState.cortisol + (Math.random() - 0.5) * 0.01));
 
     this.notify();
   }
@@ -99,7 +93,7 @@ export class SageCore {
     // Slight stability loss over time unless interacted with
     const decayAmount = 0.005;
     this.neuroState.stability = Math.max(0, this.neuroState.stability - decayAmount);
-
+    
     // Low stability increases cortisol
     if (this.neuroState.stability < 0.3) {
       this.neuroState.cortisol = Math.min(1.0, this.neuroState.cortisol + 0.05);
@@ -112,7 +106,7 @@ export class SageCore {
     } else {
       this.mode = 'stabilized';
     }
-
+    
     this.saveState();
     this.notify();
   }
@@ -132,9 +126,9 @@ export class SageCore {
   }
 
   recordInteraction(text: string) {
-    memory.stash(text, {
-      dopamine: this.neuroState.dopamine,
-      cortisol: this.neuroState.cortisol,
+    memory.stash(text, { 
+      dopamine: this.neuroState.dopamine, 
+      cortisol: this.neuroState.cortisol 
     });
     // Interaction boosts dopamine and stability
     this.neuroState.stability = Math.min(1.0, this.neuroState.stability + 0.05);
@@ -148,19 +142,15 @@ export class SageCore {
   }
 
   private notify() {
-    this.listeners.forEach((cb) => cb(this.neuroState, this.mode));
+    this.listeners.forEach(cb => cb(this.neuroState, this.mode));
   }
 
   shutdown() {
     console.log('[ADHD-SAGE-CORE] Shutdown protocol engaged. Purging intervals.');
-    Object.values(this.intervals).forEach((id) => clearInterval(id));
+    Object.values(this.intervals).forEach(id => clearInterval(id));
     this.saveState();
   }
 
-  getNeuroState() {
-    return { ...this.neuroState };
-  }
-  getMode() {
-    return this.mode;
-  }
+  getNeuroState() { return { ...this.neuroState }; }
+  getMode() { return this.mode; }
 }

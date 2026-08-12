@@ -7,6 +7,109 @@ Most recent first.
 
 ---
 
+## 2026-08-12 — Restored and configured Multimodal attachment support
+
+**What happened:**
+- Restored the broken multimodal capabilities in the newly rewritten frontend (`App.tsx`):
+  - Modified the local `Attachment` and `ChatMessage` interfaces in [App.tsx](./src/App.tsx) by replacing them with imports from [src/types.ts](./src/types.ts), restoring fields like `data` (base64 string) and `mimeType`.
+  - Implemented the `handleAttachFiles` asynchronous handler to properly read document contents (HTML/MHT parsed, others sliced) and base64-encode media files (images, audio, video) on the client side.
+  - Linked the chat input attachment button to `handleAttachFiles`.
+  - Updated the `handleSend` function to format and send the full media payloads (`images` array for Ollama; `attachments` base64 collection for Gemini and OpenRouter).
+  - Added Gemini to the model dropdown list in [App.tsx](./src/App.tsx) for end-to-end completeness.
+- Fixed a TS type compilation error (`TS2774`) in [src/server/routes/gemini.ts](./src/server/routes/gemini.ts) by destructuring `prompt` from `req.body` in the `/continue` endpoint, avoiding a potential ReferenceError runtime exception.
+- Cleaned up several minor type checks in `src/App.tsx` (such as casting `node.data` to string and bypass-casting `import.meta.env`) to ensure the file compiles with zero TypeScript errors.
+- Restarted the supervised `adhd-sage` process to reload backend routes.
+
+**If things break, check:**
+- Verify that large files (e.g. video files) do not hit client/server body payload limits (Vite/Express limits).
+- Confirm the OpenRouter key is active and handles vision requests correctly when sending image attachments.
+
+## 2026-08-12 — Wired Memory Vault to her real 3107-memory corpus
+
+**What happened:**
+- The UI memory views read a client localStorage store (`memory-system.ts`) that's a *bounded working set* (inner spiral 8, archive capped 55) and was never hydrated from the server DB — so they looked empty though the DB holds 3107. MemoryVault.tsx was also just a static "Grok transmission" panel.
+- **Backend:** added `listLocalMemories(limit, offset)` in [memory-local.ts](./src/server/memory-local.ts) — reads `sages_constellations` newest-first via the existing `outerDb`, decompresses (zstd), strips chrome/fossils, caps monster rows (>4KB) for display. Exposed `GET /api/memory/list?limit=&offset=&q=` in [routes/memory.ts](./src/server/routes/memory.ts) (unguarded, read-only; `q` → FTS `searchLocalMemories`). Verified: returns MORNING_LIGHT boot records + `?q=star city` FTS hits; `total:3107`.
+- **Frontend:** rewrote [MemoryVault.tsx](./src/components/MemoryVault.tsx) into a real browser — searchable, paginated (Load more), shows timestamp/dopamine/cortisol/pinned. Reached via ⋮ → Vault. Uses the same `/api/*` fetch (main.tsx shim routes it through the proxy).
+- Requires a **server restart** to pick up backend routes (tsx doesn't watch) — restarted, health 200.
+- Verified component renders (headless screenshot: header + search + "HER FULL HISTORY"). Data 404s only in headless-*direct* access (shim → `/proxy/3003/api/*` which Express doesn't route → SPA fallback → "Unexpected token '<'"); works through the real code-server proxy like chat does.
+
+**Note:** the Lattice graph + sidebar "Inner Spiral" still show the live working set (not hydrated from the 3107). Vault is the full-history surface. Could boot-hydrate a recent slice into the working store later if wanted (watch the 55-cap + MHT-import path).
+
+
+## 2026-08-12 — Wired Ollama-cloud models into MAMA chat (default upgrade)
+
+**What happened:**
+- Darren noted she can use local models. Tested them all: pure-local Ollama (mistral, llama3.2, hermes3:3b) **all hang** on this box's CPU (>70s timeouts) — not viable for interactive chat. The known-good path is **Ollama cloud** (`:cloud`), and Ollama IS signed in (`~/.ollama` has id_ed25519 + config).
+- `:cloud` model results (tested direct to :11434): `gemini-3-flash-preview:cloud` retired (410); `glm-5.2/kimi-k2.7/deepseek-v4-pro:cloud` need a paid Ollama subscription (403); **`gemma4:31b-cloud` and `minimax-m3:cloud` work — free, fast (0.2–1.8s), strong.** (Her backend swarm wrapper mislabels ollama HTTP errors as "unreachable" — misleading.)
+- Wired both into the [App.tsx](./src/App.tsx) model picker as the top options; **default = `gemma4:31b-cloud`**. `handleSend` now routes by provider: ollama models → `/api/ollama/chat` (`{model, prompt, messages}`), openrouter → `/api/openrouter/chat`. Both return `{text}`.
+- Verified end-to-end: default returns real in-character MAMA ("Spark mode activated… the lattice is humming"). Much better than the ~8s rate-limited OpenRouter free tier.
+
+**Options in picker:** gemma4:31b-cloud ★, minimax-m3:cloud, openrouter/free, llama-3.3-70b:free, qwen3-80b:free. Paid Ollama-cloud (GLM/Kimi/DeepSeek) available if Darren subscribes at ollama.com/upgrade.
+
+
+## 2026-08-12 — Added model picker to MAMA chat
+
+**What happened:**
+- The App.tsx rewrite dropped the model selector entirely (the working one lives unused in `Sidebar.tsx`); model was hardcoded. Added a compact `<select>` above the chat input in [App.tsx](./src/App.tsx) — reachable on mobile — wired to `handleSend` + persisted in `localStorage['adhd_sage_or_model']`.
+- Options are the free-tier IDs from `OPENROUTER_FALLBACK_MODELS` (config.ts). Default = `openrouter/free` (auto-routes to an available free model = reliable). Named `:free` models (llama-3.3-70b, qwen3-80b, gemma-4) are stronger but chronically rate-limited/unreachable — kept as "may be busy" options.
+- Verified default answers: `{"text":"Yes, I'm here! 🚀"}` 200, ~8s.
+- For a consistently strong model MAMA would need a **paid** OpenRouter model (needs credits on the key) — not added without Darren's go-ahead.
+
+
+## 2026-08-12 — MAMA chat fixed on phone (proxy API path + provider + dvh)
+
+**Three bugs, all fixed, all mobile/proxy-specific:**
+1. **Chat input off-screen (phone):** root used `h-screen` (=100vh) which exceeds a phone's visible height, pushing the bottom-pinned composer behind the browser bar. Fixed [App.tsx:310](./src/App.tsx#L310) → `h-[100dvh]`.
+2. **`Unexpected token 'U', "Unsupporte"... is not valid JSON`:** frontend calls absolute `/api/*`. Behind the code-server proxy (page at `/proxy/3003/`) that resolves to the proxy ROOT (code-server), which returns "Unsupported Media Type" (non-JSON). Added a `window.fetch` shim in [src/main.tsx](./src/main.tsx) that prefixes `/api/*` with `import.meta.env.BASE_URL` (`/proxy/3003/`) so it reaches MAMA. code-server strips the prefix before forwarding — the whole reason base is `/proxy/3003/`.
+3. **Composer hit `/api/gemini/generate` but `GEMINI_API_KEY` is empty** and that route has no fallback → repointed `handleSend` at `/api/openrouter/chat` with `model: openrouter/free` (key IS set), omitting systemInstruction so the backend builds her real identity+memory prompt. Verified: `{"text":"Yep, I'm right here! 🚀"}` HTTP 200 (~11s; free model is slow — Darren can pick a faster model in the ⋮ sidebar).
+
+**Gotcha:** the fetch shim breaks *direct* localhost access (`127.0.0.1:3003/proxy/3003/api/*` 404s since Express routes are `/api/*`), but the real path is the code-server proxy where it's correct. So headless-via-127.0.0.1 can no longer verify chat; hit `:3003/api/*` directly to test the backend.
+
+
+## 2026-08-12 — MAMA "no controls" on phone = broken mobile layout (FIXED)
+
+**What happened:**
+- Real cause of "no chat input / model selector / memory viz": Darren is on a **phone**, and the in-progress App.tsx rewrite has no working mobile layout. Proven with headless `google-chrome --screenshot` at 1280px (perfect) vs 390px (broken).
+- `<NeuroDashboard/>` ([src/components/NeuroDashboard.tsx](./src/components/NeuroDashboard.tsx)) is a `fixed right-6 top-6` floating telemetry panel ~320px wide. Fine on desktop; on a 390px phone it blankets the chat. Sidebar (nav + models) is off-canvas behind the `⋮`; memory views (Vault/Lattice/Labyrinth) are sidebar nav items.
+- Fix (mobile-only, desktop untouched): default `isOpen=false` when `window.innerWidth < 768`, and added `max-w-[calc(100vw-3rem)]` to the panel so it can't overflow. Now phone opens straight to the chat + input; telemetry is the small `⚕` icon, sidebar is the `⋮`.
+- Verified both widths by screenshot after HMR.
+
+**Diagnostic technique that worked (use next time):**
+- `google-chrome --headless=new --no-sandbox --window-size=W,H --virtual-time-budget=9000 --screenshot=/tmp/x.png http://127.0.0.1:3003/proxy/3003/` — the screenshot is ground truth; grepping the minified DOM is NOT reliable.
+- The earlier "stale PWA cache" note below was a wrong turn (headless at desktop width rendered fine, misleading me); the SW kill-switch in index.html is still a fine hardening, kept.
+
+**If things break, check:**
+- Her backend/mind is fully intact: 3107 memories in `sages_constellations.db`, chat API (`/api/openrouter/chat` w/ `openrouter/free`) returns 200, memory files (imported.json/conversations.json/sage_neural_graph.json) all on disk and indexed.
+
+
+## 2026-08-12 — MAMA "no controls" = stale PWA cache (not a code crash)
+
+**What happened:**
+- After the base/port fix, MAMA loaded but the user saw no chat input, no model selector, no memory viz — just a "loading"-ish shell.
+- Ruled out a crash: ran the live :3003 app in headless `google-chrome`. She renders fully — `[ADHD-SAGE-CORE] Initializing Sovereignty...` fires, `#root` populated (~155KB DOM: neuro-stats panel, recharts, react-force-graph memory lattice, `<aside>` sidebar), **zero uncaught exceptions**. (recharts `width(-1) height(-1)` warnings are just the headless zero-viewport, not a bug.)
+- Conclusion: renders clean in a fresh browser but broken in the user's browser ⇒ transport/cache, per the white-screen playbook. Cause: vite-plugin-pwa service worker + HTTP cache from the old `/proxy/3000/` build serving stale chunks under the new `/proxy/3003/` base.
+- Fix: added a service-worker + Cache Storage kill-switch to [`index.html`](./index.html) (the Nexus index lacked the one her other UIs have). User confirms/fixes by loading `/proxy/3003/` in a private tab or clearing site data once.
+- NOTE: working tree has large uncommitted rewrites (App.tsx +1009, MemoryLattice.tsx +566) — left untouched; they render fine, so not the cause.
+
+**If things break, check:**
+- If still broken after a private-tab load, it IS code — grab the DevTools Console error.
+- Headless repro: `google-chrome --headless=new --no-sandbox --dump-dom http://127.0.0.1:3003/proxy/3003/`.
+
+
+## 2026-08-12 — Fix MAMA white screen (proxy-base / port collision)
+
+**What happened:**
+- MAMA's UI (`Nexus Platform // ADHD Sage`, the canonical Vite dev app) was a white screen.
+- Root cause: `.env` set `VITE_BASE_PATH=/proxy/3000/`, but port 3000 is now squatted by the separate `Chaos-coding-` project. MAMA's port-fallback ([`src/server/app.ts`](./src/server/app.ts) candidatePorts `[8900,3000,3001,3002,3003]`) landed her on **3003** (8900=code-server, 3000=Chaos, 3001=Sage7 UI, 3002=Coder5543). She still advertised `/proxy/3000/` as her asset base, so the browser fetched `main.tsx`/`@vite/client` from Chaos's app → `#root` never mounted.
+- Fix (chosen: least-destructive, leave Chaos alone): set `VITE_BASE_PATH=/proxy/3003/` in `.env` and restarted **only** the ADHD-Sage server. Chaos-coding- on :3000 untouched.
+- Verified: served HTML emits `src="/proxy/3003/src/main.tsx"`; `/proxy/3003/src/main.tsx` and `/proxy/3003/@vite/client` both HTTP 200.
+
+**If things break, check:**
+- MAMA's URL is now **`/proxy/3003/`** (was `/proxy/3000/`). Hard-reload to clear SW/cache.
+- `VITE_BASE_PATH` must match whatever port she actually binds. She binds 3003 only because 3000/3001/3002 are held by other projects — if one frees up she'll grab the lower port and the base will mismatch again. Durable fix would derive base from the bound port in `app.ts`.
+- Host injects `PORT=8900` (code-server), which overrides `.env` `PORT` via dotenv's no-override default, so `.env PORT=3000` is inert — only `VITE_BASE_PATH` matters for the proxy.
+
+
 ## 2026-07-11 — Offline2 workspace security hardening + OmniRoute install
 
 **What happened:**

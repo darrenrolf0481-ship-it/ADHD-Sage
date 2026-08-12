@@ -9,8 +9,31 @@ import {
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
 import { memoryCounts } from '../memory-index';
+import { listLocalMemories, searchLocalMemories } from '../memory-local';
 
 const router = Router();
+
+/**
+ * GET /api/memory/list?limit=&offset=&q=
+ * Browse the local SQLite corpus (sages_constellations), newest first, for the
+ * Memory Vault UI. With `q`, runs FTS search instead. Read-only, unguarded (like
+ * /counts) so her history is always viewable.
+ */
+router.get('/list', asyncHandler(async (req, res) => {
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 40));
+  const offset = Math.max(0, parseInt(req.query.offset as string) || 0);
+  const q = (req.query.q as string)?.trim();
+  if (q) {
+    const hits = await searchLocalMemories(q, limit);
+    res.json({
+      memories: hits.map((text) => ({ text, timestamp: 0, dopamine: 0, cortisol: 0, pinned: false })),
+      total: hits.length,
+      query: q,
+    });
+    return;
+  }
+  res.json(await listLocalMemories(limit, offset));
+}));
 
 /**
  * GET /api/memory/counts

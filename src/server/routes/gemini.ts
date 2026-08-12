@@ -3,7 +3,7 @@ import { FunctionCallingConfigMode } from '@google/genai';
 import { getGenAI } from '../gemini-client';
 import { buildSystemPrompt } from '../prompt';
 import { searchMemories, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
-import { searchLocalMemories } from '../memory-local';
+import { searchLocalMemories, isLowSignalQuery, stripForeignFossils } from '../memory-local';
 import { getMcpDeclarations } from '../../core/mcp';
 import { gemTools, executeTool, cleanResponse, type ToolEffect } from '../tools';
 import { recordMetric } from '../metrics';
@@ -37,11 +37,14 @@ router.post('/generate', lockGuard, asyncHandler(async (req, res) => {
 
       // Enrich with long-term memories — Sage reads her own container PLUS
       // the shared broadcast channel so she knows what the seven are up to.
-      if (prompt) {
-        const [cloudMemories, localMemories] = await Promise.all([
+      // Greetings/low-signal turns skip recall — otherwise a bare "hello"
+      // surfaces greeting fossils the model then parrots (the dump bug).
+      if (prompt && !isLowSignalQuery(prompt)) {
+        const [cloudMemoriesRaw, localMemories] = await Promise.all([
           searchMemories(prompt, [SAGE_CONTAINER, SHARED_CONTAINER], 6),
           searchLocalMemories(prompt, 6),
         ]);
+        const cloudMemories = stripForeignFossils(cloudMemoriesRaw);
 
         if (localMemories.length > 0) {
           fullSystemPrompt +=
@@ -187,7 +190,7 @@ router.post('/generate', lockGuard, asyncHandler(async (req, res) => {
 
 router.post('/continue', lockGuard, asyncHandler(async (req, res) => {
   try {
-    const { history, remoteResults, localResults } = req.body;
+    const { history, remoteResults, localResults, prompt } = req.body;
 
     // Clean history to ensure compatibility with SDK
     const cleanHistory = (history || []).map((h: any) => {
@@ -264,6 +267,17 @@ router.post('/continue', lockGuard, asyncHandler(async (req, res) => {
         }),
       );
       result = await chat.sendMessage({ message: responseParts2 });
+    }
+
+    // === Observer learner signal (fire-and-forget) ===
+    if (prompt && result.text) {
+      const tension = Math.min(1.0, Math.max(0.2, result.text.length / 800));
+      const drift = Math.max(0.2, 1.0 - (loopCount / 5)); // Tool loops indicate drift
+      fetch('http://127.0.0.1:5555/signal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tension, drift }),
+      }).catch(() => {});
     }
 
     res.json({ text: result.text, toolEffects });
