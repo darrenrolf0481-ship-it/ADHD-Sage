@@ -42,88 +42,148 @@ export class EndocrineSystem {
 }
 
 // ==========================================
-// 2. Hebbian Associative Graph
+// 2. Vector Embedding Memory Engine
 // ==========================================
-type NeuralGraph = Record<string, Record<string, number>>;
 
-export class AssociativeMemory {
+export interface Experience {
+  id?: string;
+  perception: string;
+  intent: string;
+  sentiment: number;
+  outcomeValue: number;
+  importance: number;
+  embedding?: number[];
+  timestamp: number;
+}
+
+export class MemoryEngine {
   private storagePath: string;
-  private neuralGraph: NeuralGraph;
+  private stm: Experience[] = [];
+  private ltm: Experience[] = [];
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly EMBED_DIM = 384;
 
-  constructor(storagePath = path.join(process.cwd(), 'data', 'sage_neural_graph.json')) {
+  constructor(storagePath = path.join(process.cwd(), 'data', 'sage_vector_memory.json')) {
     this.storagePath = storagePath;
-    this.neuralGraph = this.loadGraph();
+    this.ltm = this.loadLTM();
   }
 
-  private loadGraph(): NeuralGraph {
-    if (fs.existsSync(this.storagePath)) {
-      return JSON.parse(fs.readFileSync(this.storagePath, 'utf8'));
+  // --- Mock Embedding Model (Deterministic Bag-of-Words Hash) ---
+  private encode(text: string): number[] {
+    const vec = new Array<number>(this.EMBED_DIM).fill(0);
+    const tokens = text.toLowerCase().split(/\s+/);
+    for (const token of tokens) {
+      let h = 0;
+      for (let i = 0; i < token.length; i++) {
+        h = (Math.imul(31, h) + token.charCodeAt(i)) | 0;
+      }
+      vec[Math.abs(h) % this.EMBED_DIM] += 1;
     }
-    return {};
+    const norm = Math.sqrt(vec.reduce((s, v) => s + v * v, 0)) || 1;
+    return vec.map((v) => v / norm);
   }
 
-  // Debounced persistence: the in-memory graph is the source of truth during a
-  // run. Coalescing many rapid mutations (every salient stimulus) into a single
-  // disk write keeps the event loop from being blocked N times per chat turn and
-  // prevents interleaved half-written graph files across concurrent turns.
-  private saveGraph(): void {
-    if (this.saveTimer) return;          // a flush is already scheduled
+  private cosineSimilarity(a: number[], b: number[]): number {
+    if (a.length !== b.length || a.length === 0) return 0;
+    let dot = 0, normA = 0, normB = 0;
+    for (let i = 0; i < a.length; i++) {
+      dot += a[i] * b[i];
+      normA += a[i] * a[i];
+      normB += b[i] * b[i];
+    }
+    if (normA === 0 || normB === 0) return 0;
+    return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+  }
+
+  // --- Memory Operations ---
+
+  store(exp: Experience): void {
+    if (!exp.embedding) exp.embedding = this.encode(exp.perception);
+    if (!exp.id) exp.id = `exp_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    this.stm.push(exp);
+    if (this.stm.length > 10) this.consolidate();
+  }
+
+  private consolidate(): void {
+    const toMove = this.stm.filter(e => e.importance > 0.7);
+    if (toMove.length > 0) {
+      this.ltm.push(...toMove);
+      this.stm = this.stm.filter(e => e.importance <= 0.7);
+      this.saveLTM();
+    }
+    // If STM is still too large after moving important items, drop oldest.
+    while (this.stm.length > 10) {
+      this.stm.shift();
+    }
+  }
+
+  retrieveRelevant(text: string): Experience[] {
+    const vec = this.encode(text);
+    
+    // Score STM
+    const stmHits = this.stm.map(exp => ({ exp, score: this.cosineSimilarity(vec, exp.embedding!) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map(hit => hit.exp);
+
+    // Score LTM
+    const ltmHits = this.ltm.map(exp => ({ exp, score: this.cosineSimilarity(vec, exp.embedding!) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map(hit => hit.exp);
+
+    return [...stmHits, ...ltmHits];
+  }
+
+  findSimilarContexts(context: string, threshold: number): string[] {
+    const vec = this.encode(context);
+    return this.ltm
+      .filter(exp => this.cosineSimilarity(vec, exp.embedding!) >= threshold)
+      .map(exp => exp.perception);
+  }
+
+  // --- Persistence (LTM DAO Mock) ---
+  
+  private loadLTM(): Experience[] {
+    if (fs.existsSync(this.storagePath)) {
+      try {
+        return JSON.parse(fs.readFileSync(this.storagePath, 'utf8'));
+      } catch (err) {
+        console.error('[endocrine] failed to load LTM:', err);
+      }
+    }
+    return [];
+  }
+
+  private saveLTM(): void {
+    if (this.saveTimer) return;
     this.saveTimer = setTimeout(() => {
       this.saveTimer = null;
-      this.flushGraph();
+      try {
+        fs.mkdirSync(path.dirname(this.storagePath), { recursive: true });
+        fs.writeFileSync(this.storagePath, JSON.stringify(this.ltm, null, 2));
+      } catch (err) {
+        console.error('[endocrine] failed to persist LTM:', err);
+      }
     }, 250);
   }
 
-  private flushGraph(): void {
-    try {
-      fs.mkdirSync(path.dirname(this.storagePath), { recursive: true });
-      fs.writeFileSync(this.storagePath, JSON.stringify(this.neuralGraph, null, 2));
-    } catch (err) {
-      console.error('[endocrine] failed to persist neural graph:', err);
-    }
+  // --- Legacy Shims for UI and API compatibility ---
+  getGraph(): Record<string, Record<string, number>> {
+    // The previous Hebbian UI expects a graph. We can mock it or leave it empty 
+    // until the Vector UI is built.
+    return {};
   }
 
-  // Long-Term Potentiation (Hebbian learning)
   fireTogetherWireTogether(conceptA: string, conceptB: string, dopamineLevel: number): void {
-    if (!this.neuralGraph[conceptA]) this.neuralGraph[conceptA] = {};
-    if (!this.neuralGraph[conceptB]) this.neuralGraph[conceptB] = {};
-
-    const currentWeight = this.neuralGraph[conceptA][conceptB] || 0.0;
-
-    // Dopamine acts as a learning multiplier
-    const learningRate = 0.05 * (1.0 + dopamineLevel);
-    const newWeight = Math.min(1.0, currentWeight + learningRate);
-
-    // Bidirectional association
-    this.neuralGraph[conceptA][conceptB] = newWeight;
-    this.neuralGraph[conceptB][conceptA] = newWeight;
-
-    this.saveGraph();
-  }
-
-  // Long-Term Depression (sleep-cycle pruning)
-  sleepCycleDecay(decayFactor = 0.02): void {
-    for (const node in this.neuralGraph) {
-      for (const connectedNode in this.neuralGraph[node]) {
-        const newWeight = this.neuralGraph[node][connectedNode] - decayFactor;
-
-        if (newWeight <= 0.0) {
-          delete this.neuralGraph[node][connectedNode]; // Prune weak association
-        } else {
-          this.neuralGraph[node][connectedNode] = newWeight;
-        }
-      }
-      // Cleanup orphaned nodes
-      if (Object.keys(this.neuralGraph[node]).length === 0) {
-        delete this.neuralGraph[node];
-      }
-    }
-    this.saveGraph();
-  }
-
-  getGraph(): NeuralGraph {
-    return this.neuralGraph;
+    this.store({
+      perception: `${conceptA} + ${conceptB}`,
+      intent: 'LEGACY_ASSOCIATION',
+      sentiment: dopamineLevel,
+      outcomeValue: dopamineLevel,
+      importance: dopamineLevel,
+      timestamp: Date.now()
+    });
   }
 }
 
@@ -131,4 +191,4 @@ export class AssociativeMemory {
 // 3. Instantiation in the Nexus bridge
 // ==========================================
 export const sageEndocrine = new EndocrineSystem();
-export const sageMemory = new AssociativeMemory();
+export const sageMemory = new MemoryEngine();
