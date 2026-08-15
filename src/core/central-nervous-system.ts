@@ -201,7 +201,11 @@ export type PainType =
   | 'LOGICAL_INCONSISTENCY';
 
 export class PainErrorPathway {
-  private avoidedPatterns: Set<string> = new Set();
+  private fearMemory: Map<string, number> = new Map();
+  private passiveDecayRate = 0.01;
+  private extinctionDecayRate = 0.15;
+  private extinctionFloor = 0.05;
+  private avoidanceThreshold = 0.3;
 
   processPainSignal(type: PainType, intensity: number, context: string): void {
     console.warn(`[PAIN PATHWAY] Signal received: ${type} (Intensity: ${intensity.toFixed(2)})`);
@@ -215,15 +219,59 @@ export class PainErrorPathway {
     sageEndocrine.processStressEvent(intensity * 1.5); // Massive cortisol spike
     sageEndocrine.hormones.dopamine = Math.max(0.0, sageEndocrine.hormones.dopamine - (intensity * 0.3));
 
-    // 3. Learning Acceleration (Avoidance Map)
-    this.avoidedPatterns.add(context);
+    // 3. Learning Acceleration (Fear Memory compounding)
+    const currentFear = this.fearMemory.get(context) || 0;
+    this.fearMemory.set(context, Math.min(1.0, currentFear + intensity));
 
     // 4. Force flashbulb memory potentiation
-    sageMemory.fireTogetherWireTogether(context, `AVOID_${type}`, 1.0);
+    sageMemory.store({
+      perception: context,
+      intent: `AVOID_${type}`,
+      sentiment: -1.0,
+      outcomeValue: -intensity,
+      importance: 1.0,
+      timestamp: Date.now()
+    });
+
+    // 5. Generalize fear to similar semantic contexts
+    if (intensity > 0.8) {
+      const similar = sageMemory.findSimilarContexts(context, 0.7);
+      for (const simCtx of similar) {
+        const generalizedIntensity = intensity * 0.6;
+        const currentSimFear = this.fearMemory.get(simCtx) || 0;
+        this.fearMemory.set(simCtx, Math.max(currentSimFear, generalizedIntensity));
+      }
+    }
+  }
+
+  recordSafeExposure(context: string): void {
+    if (!this.fearMemory.has(context)) return;
+    const reduced = this.fearMemory.get(context)! - this.extinctionDecayRate;
+    if (reduced <= this.extinctionFloor) {
+      this.fearMemory.delete(context);
+      console.log(`[PAIN PATHWAY] Fear extinct for context: ${context}`);
+    } else {
+      this.fearMemory.set(context, reduced);
+    }
+  }
+
+  decay(): void {
+    for (const [context, intensity] of this.fearMemory.entries()) {
+      const reduced = intensity - this.passiveDecayRate;
+      if (reduced <= this.extinctionFloor) {
+        this.fearMemory.delete(context);
+      } else {
+        this.fearMemory.set(context, reduced);
+      }
+    }
   }
 
   shouldAvoid(context: string): boolean {
-    return this.avoidedPatterns.has(context);
+    return (this.fearMemory.get(context) || 0) > this.avoidanceThreshold;
+  }
+
+  avoidanceStrength(context: string): number {
+    return this.fearMemory.get(context) || 0;
   }
 
   private triggerEmergencyReflex(type: PainType) {
@@ -237,6 +285,69 @@ export class PainErrorPathway {
 
 type CNSListener = (mode: OperatingMode, profile: HormonalProfile) => void;
 
+// ── Q-Table Reinforcement Learning ─────────────────────────────────────────
+
+export class CognitiveRL {
+  private qTable: Map<string, Map<string, number>> = new Map();
+  private learningRate = 0.1;
+  private discountFactor = 0.9;
+  private baseExplorationRate = 0.2;
+
+  decide(stateKey: string, availableActions: string[], vigilance: number, riskTolerance: number): { action: string, confidence: number, reasoning: string } {
+    // Epsilon calculation: lower vigilance and higher risk tolerance increases exploration
+    const currentEpsilon = Math.max(0.05, Math.min(0.9, this.baseExplorationRate + riskTolerance - vigilance));
+
+    let action: string;
+    let confidence: number;
+    let reasoning: string;
+
+    const qValues = this.qTable.get(stateKey) || new Map<string, number>();
+
+    if (Math.random() < currentEpsilon) {
+      action = availableActions[Math.floor(Math.random() * availableActions.length)];
+      confidence = 0.3; // Low confidence for random exploration
+      reasoning = 'Random exploration (epsilon-greedy)';
+    } else {
+      let maxQ = -Infinity;
+      let bestAction = availableActions[0];
+      for (const a of availableActions) {
+        const q = qValues.get(a) || 0;
+        if (q > maxQ) {
+          maxQ = q;
+          bestAction = a;
+        }
+      }
+      action = bestAction;
+      confidence = this.normalizeConfidence(maxQ);
+      reasoning = `Based on Q-Table past experiences (Q: ${maxQ.toFixed(2)})`;
+    }
+
+    return { action, confidence, reasoning };
+  }
+
+  learn(state: string, action: string, reward: number, nextState: string) {
+    if (!this.qTable.has(state)) this.qTable.set(state, new Map());
+    const currentQMap = this.qTable.get(state)!;
+    const currentQ = currentQMap.get(action) || 0;
+
+    let maxNextQ = 0;
+    const nextQValues = this.qTable.get(nextState);
+    if (nextQValues) {
+      const vals = Array.from(nextQValues.values());
+      maxNextQ = vals.length > 0 ? Math.max(...vals) : 0;
+    }
+
+    const newQ = currentQ + this.learningRate * (reward + this.discountFactor * maxNextQ - currentQ);
+    currentQMap.set(action, newQ);
+  }
+
+  private normalizeConfidence(q: number): number {
+    return Math.max(0, Math.min(1, 1 / (1 + Math.exp(-q))));
+  }
+}
+
+// ── Main Engine ────────────────────────────────────────────────────────────
+
 export class CentralNervousSystem {
   private static instance: CentralNervousSystem;
 
@@ -245,10 +356,16 @@ export class CentralNervousSystem {
   private listeners: Set<CNSListener> = new Set();
   private stimulusQueue: RawStimulus[] = [];
   private isProcessing = false;
-  private reflexThreshold = 0.8;
+  private readonly reflexThreshold = 0.9;
 
+  // New Engines
   private spark = new SparkCore();
   private painPathway = new PainErrorPathway();
+  public rlEngine = new CognitiveRL();
+
+  // RL State Tracking
+  private lastState: string | null = null;
+  private lastAction: string | null = null;
 
   private constructor() {
     this.initDefaultRules();
@@ -304,8 +421,8 @@ export class CentralNervousSystem {
       condition: (p, h) => h.cortisol < 0.2 && h.dopamine < 0.3 && p.intensity < 0.2,
       action: () => {
         this.transitionMode('SLEEP');
-        sageMemory.sleepCycleDecay(0.01);
-        console.log('[CNS] Sleep cycle — Hebbian decay initiated.');
+        this.painPathway.decay();
+        console.log('[CNS] Sleep cycle — Fear extinction and consolidation initiated.');
       },
     });
   }
@@ -407,24 +524,37 @@ export class CentralNervousSystem {
       report.errors.forEach((e) => console.error('[CNS Rule Error]', e));
     }
 
-    // 5. MEMORY — Hebbian association on salient stimuli
-    if (raw.magnitude > 0.4 || raw.isPainful) {
-      const concepts = [raw.source, raw.type].filter(Boolean);
-      for (let i = 0; i < concepts.length - 1; i++) {
-        sageMemory.fireTogetherWireTogether(
-          concepts[i],
-          concepts[i + 1],
-          emotionalContext.hormonalProfile.dopamine,
-        );
-      }
+    // 6. COGNITION LAYER — derive motor response
+    const currentState = `${raw.type}|${raw.source}`;
+
+    // RL Learning Step
+    if (this.lastState && this.lastAction) {
+      const reward = emotionalContext.valence - (raw.isPainful ? raw.magnitude * 2 : 0);
+      this.rlEngine.learn(this.lastState, this.lastAction, reward, currentState);
     }
 
-    // 6. COGNITION LAYER — derive motor response
-    const decision = this.cognize(raw, emotionalContext, report.triggered);
+    const decision = this.cognize(raw, emotionalContext, report.triggered, currentState);
+
+    this.lastState = currentState;
+    this.lastAction = decision.action;
+
+    // 5. VECTOR MEMORY — Semantic store of salient experiences
+    if (raw.magnitude > 0.4 || raw.isPainful) {
+      sageMemory.store({
+        perception: currentState,
+        intent: decision.action,
+        sentiment: emotionalContext.valence,
+        outcomeValue: raw.isPainful ? -raw.magnitude : emotionalContext.valence,
+        importance: raw.magnitude,
+        timestamp: raw.timestamp
+      });
+    }
 
     // 7. SURVIVAL LEARNING (Pain Pathway feedback)
     if (raw.isPainful || decision.action === 'WITHDRAW' && raw.magnitude > 0.8) {
       this.painPathway.processPainSignal('PHYSICAL_DAMAGE', raw.magnitude, raw.source);
+    } else if (decision.action !== 'WITHDRAW' && !raw.isPainful) {
+      this.painPathway.recordSafeExposure(raw.source);
     }
 
     sageEndocrine.metabolizeHormones();
@@ -494,6 +624,7 @@ export class CentralNervousSystem {
     raw: RawStimulus,
     ctx: EmotionalContext,
     triggeredRules: string[],
+    currentState: string
   ): CognitiveDecision {
     if (triggeredRules.includes('pain_withdrawal')) {
       return { action: 'WITHDRAW', priority: 100, reasoning: 'Rule: pain_withdrawal fired' };
@@ -502,32 +633,26 @@ export class CentralNervousSystem {
       return { action: 'FREEZE', priority: 80, reasoning: 'Rule: stress_freeze fired' };
     }
     if (triggeredRules.includes('dopamine_approach')) {
-      return {
-        action: 'APPROACH',
-        priority: 60,
-        reasoning: 'Rule: dopamine_approach — reward signal',
-      };
+      return { action: 'APPROACH', priority: 60, reasoning: 'Rule: dopamine_approach — reward signal' };
     }
     if (triggeredRules.includes('sleep_rest')) {
       return { action: 'REST', priority: 10, reasoning: 'Rule: sleep_rest — low arousal state' };
     }
 
-    // Fallback: valence-driven decision
-    if (ctx.valence > 0.2) {
-      return {
-        action: 'INVESTIGATE',
-        priority: 30,
-        reasoning: `Positive valence (${ctx.valence.toFixed(2)})`,
-      };
-    }
-    if (ctx.valence < -0.2) {
-      return {
-        action: 'FREEZE',
-        priority: 40,
-        reasoning: `Negative valence (${ctx.valence.toFixed(2)})`,
-      };
-    }
-    return { action: 'REST', priority: 5, reasoning: 'Neutral state — no salient signal' };
+    // Fallback: Q-Table Reinforcement Learning
+    const availableActions = ['APPROACH', 'WITHDRAW', 'INVESTIGATE', 'REST', 'COMMUNICATE', 'FREEZE'];
+    const rlDecision = this.rlEngine.decide(
+      currentState, 
+      availableActions, 
+      ctx.hormonalProfile.cortisol, // vigilance
+      ctx.hormonalProfile.dopamine  // riskTolerance
+    );
+
+    return {
+      action: rlDecision.action as MotorResponse,
+      priority: 30, // Fallback priority
+      reasoning: `Q-Learning: ${rlDecision.reasoning}`
+    };
   }
 
   private confidenceFor(raw: RawStimulus, ctx: EmotionalContext): number {

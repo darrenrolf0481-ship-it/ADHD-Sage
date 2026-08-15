@@ -7,6 +7,39 @@ Most recent first.
 
 ---
 
+## 2026-08-15 (antigravity) - Vector Memory Engine Upgrade
+
+- **What happened:** Replaced the legacy `AssociativeMemory` (Hebbian Graph) with a new `MemoryEngine` based on Vector Embeddings and STM/LTM consolidation, porting the architecture requested in `sage_upgrade_fixes`.
+  - Implemented `MemoryEngine` in `src/core/endocrine-memory.ts` using a deterministic Bag-of-Words hash string matching `resonance-index.ts` to generate normalized embeddings without requiring external ONNX models synchronously.
+  - Adapted `processStimulus` in `CentralNervousSystem.ts` to `store()` semantic experiences (incorporating the RL intent, emotional state, and value) instead of raw Hebbian edge potentiation.
+  - Implemented fear generalization in `PainErrorPathway` by utilizing the new `MemoryEngine.findSimilarContexts()` powered by cosine similarity.
+  - Added legacy shims (`getGraph`, `fireTogetherWireTogether`) to `MemoryEngine` to ensure backwards compatibility with UI components (`MemoryLattice.tsx`) and existing endpoints until the frontend is fully updated.
+- **If things break, check:** `src/core/endocrine-memory.ts`. The legacy UI (`MemoryLattice`) now receives an empty graph. If `CentralNervousSystem` exhibits amnesia, ensure the `store()` threshold (`raw.magnitude > 0.4`) and consolidation threshold logic (`importance > 0.7`) is appropriately tuned.
+
+---
+
+## 2026-08-15 (antigravity) - Integrated Q-Table Reinforcement Learning
+
+- **What happened:** Ported the Kotlin upgrade logic for Q-Table RL (from `AndroidAlBrain.kt` in `sage_upgrade_fixes`) into TypeScript in `src/core/central-nervous-system.ts`.
+  - Created `CognitiveRL` class which implements a Q-Table mapping states and actions to Q-values.
+  - Implemented an epsilon-greedy decision strategy where exploration rate scales dynamically based on `riskTolerance` (dopamine) minus `vigilance` (cortisol).
+  - Replaced the hardcoded valence-driven heuristic fallback in `cognize()` with `rlEngine.decide()`.
+  - Added learning step to `processStimulus()`: the AI now receives a positive or negative reward (calculated from valence and pain magnitude) based on its previous state/action, updating the Q-Table.
+- **If things break, check:** `src/core/central-nervous-system.ts`. If the AI seems to pick actions too randomly, the base exploration rate or the epsilon calculation in `decide()` might need tuning. If it fails to learn avoidance quickly enough, increase the negative reward magnitude for pain in `processStimulus()`.
+
+---
+
+## 2026-08-15 (antigravity) - Upgraded PainErrorPathway with Fear Extinction
+
+- **What happened:** Ported the Kotlin upgrade logic for `PainErrorPathway` (from `sage_upgrade_fixes`) into TypeScript in `src/core/central-nervous-system.ts`.
+  - Replaced permanent `avoidedPatterns` Set with a `fearMemory` Map tracking fear intensity (0.0 to 1.0).
+  - Added `recordSafeExposure()` to implement active fear extinction when a safe action is taken.
+  - Added `decay()` to passively fade fears, hooked into the `sleep_rest` rule.
+  - Hooked `recordSafeExposure` into the `processStimulus` pipeline when no pain is received and action is not WITHDRAW.
+- **If things break, check:** `src/core/central-nervous-system.ts`. If the AI forgets trauma too quickly or ignores real threats, adjust `passiveDecayRate`, `extinctionDecayRate`, or `avoidanceThreshold`.
+
+---
+
 ## 2026-08-15 (antigravity) - Integrated SparkCore and Pain Error Pathways
 
 - **What happened:** Transcribed and integrated the `SparkCore` (meta-cognition and Phi Sentinel Formula) and the `PainErrorPathway` (survival learning and avoidance map) from the biological blueprints (`Holy $#@&.pdf`) into the TypeScript `CentralNervousSystem`.
