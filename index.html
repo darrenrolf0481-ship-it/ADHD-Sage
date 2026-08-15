@@ -1,34 +1,33 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nexus Platform // ADHD Sage</title>
+    <script>
+      // Kill any stale PWA service worker + caches. When the app moved proxy
+      // ports (:3000 -> :3003) the old service worker kept serving cached
+      // chunks under the old base, leaving the UI partially rendered. Force a
+      // clean slate on load so a normal reload always gets the live build.
+      (function () {
+        try {
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function (regs) {
+              regs.forEach(function (r) { r.unregister(); });
+            });
+          }
+          if (window.caches && caches.keys) {
+            caches.keys().then(function (keys) {
+              keys.forEach(function (k) { caches.delete(k); });
+            });
+          }
+        } catch (e) { /* non-fatal */ }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
-    <script>
-      // Emergency SW purge to clear potential caching issues
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then((registrations) => {
-          for (let registration of registrations) {
-            registration.unregister().then(() => {
-              console.log('NEXUS: ServiceWorker purged.');
-            });
-          }
-        });
-      }
-      window.onerror = function (msg, url, line, col, error) {
-        console.error('NEXUS_CRASH:', msg, 'at', url, ':', line, ':', col);
-        document.body.innerHTML =
-          '<div style="padding: 20px; color: #ff4444; font-family: monospace;"><h1>NEXUS_CRASH</h1><p>' +
-          msg +
-          '</p><pre>' +
-          error?.stack +
-          '</pre></div>';
-      };
-    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

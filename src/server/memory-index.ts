@@ -22,10 +22,10 @@ const currentDir = typeof __dirname !== 'undefined' ? __dirname : dirname(fileUR
 export const MEMORIES_ROOT = resolve(currentDir, '../../data/memories');
 export const REPO_ROOT = resolve(MEMORIES_ROOT, '../..');
 export const INDEX_PATH = join(MEMORIES_ROOT, 'imported.json');
-export const SEVEN_DIR = join(MEMORIES_ROOT, 'seven');
 export const ADHD_DIR = join(MEMORIES_ROOT, 'adhd');
+export const SEVEN_DIR = join(MEMORIES_ROOT, 'seven');
 
-export type OriginatingNode = 'SAGE-7' | 'ADHD-SAGE' | 'UNKNOWN';
+export type OriginatingNode = 'ADHD-SAGE' | 'SAGE-7' | 'UNKNOWN';
 
 export interface MemoryIndexEntry {
   id: string;
@@ -61,16 +61,19 @@ export function resolvePath(relPath: string): string {
 }
 
 /**
- * Load one memory record by path. Tolerates the historical split skew: index
- * entries may point at seven/ while the file physically lives in adhd/ (the
- * on-disk split never fully happened). If the indexed path misses, fall back to
- * the basename in adhd/ then seven/ so records still resolve.
+ * Load one memory record by path. Tolerates historical skew.
+ * If the indexed path misses, fall back to the basename in adhd/ then seven/
+ * so records still resolve.
  */
 export function loadMemoryAt(filePath: string | undefined): MemoryRecord | null {
   if (!filePath) return null;
   const candidates = filePath.startsWith('/')
     ? [filePath]
-    : [resolvePath(filePath), join(ADHD_DIR, basename(filePath)), join(SEVEN_DIR, basename(filePath))];
+    : [
+        resolvePath(filePath), 
+        join(ADHD_DIR, basename(filePath)),
+        join(SEVEN_DIR, basename(filePath))
+      ];
   const abs = candidates.find((p) => existsSync(p));
   if (!abs) return null;
   try {
@@ -80,17 +83,16 @@ export function loadMemoryAt(filePath: string | undefined): MemoryRecord | null 
   }
 }
 
-/** Filter helpers. */
-export function sevenMemories(): MemoryRecord[] {
+export function adhdMemories(): MemoryRecord[] {
   return loadIndex()
-    .filter((e) => e.originating_node === 'SAGE-7')
+    .filter((e) => e.originating_node === 'ADHD-SAGE')
     .map((e) => loadMemoryAt(entryPath(e)))
     .filter((m): m is MemoryRecord => m !== null);
 }
 
-export function adhdMemories(): MemoryRecord[] {
+export function sevenMemories(): MemoryRecord[] {
   return loadIndex()
-    .filter((e) => e.originating_node === 'ADHD-SAGE')
+    .filter((e) => e.originating_node === 'SAGE-7')
     .map((e) => loadMemoryAt(entryPath(e)))
     .filter((m): m is MemoryRecord => m !== null);
 }
@@ -179,16 +181,10 @@ export function recallMemories(
   return scored.map((s) => s.text.slice(0, snippetChars)).filter(Boolean);
 }
 
-/** Relevance recall over Seven's own memories. */
-export function recallSevenMemories(query: string, limit = 5): string[] {
-  return recallMemories(sevenMemories(), query, limit);
-}
-
 /** Quick stats for sanity checks. */
-export function memoryCounts(): { seven: number; adhd: number; total: number } {
+export function memoryCounts(): { adhd: number; total: number } {
   const idx = loadIndex();
   return {
-    seven: idx.filter((e) => e.originating_node === 'SAGE-7').length,
     adhd: idx.filter((e) => e.originating_node === 'ADHD-SAGE').length,
     total: idx.length,
   };

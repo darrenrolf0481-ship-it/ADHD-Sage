@@ -2,10 +2,8 @@ import { Router } from 'express';
 import { OLLAMA_HOST, OLLAMA_TAGS_TIMEOUT_MS, OLLAMA_GEN_TIMEOUT_MS } from '../config';
 import { swarmFetch } from '../swarm';
 import { buildSystemPrompt } from '../prompt';
-import { buildSevenSystemPrompt } from '../seven-prompt';
-import { recallSevenMemories } from '../memory-index';
 import { searchMemories, addMemory, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
-import { searchLocalMemories } from '../memory-local';
+import { searchLocalMemories, isLowSignalQuery, stripForeignFossils } from '../memory-local';
 import { getMcpDeclarations, executeMcpTool } from '../../core/mcp';
 import { recordMetric } from '../metrics';
 import { lockGuard } from '../auth';
@@ -73,36 +71,16 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
   return timed('llm:ollama:chat', async () => {
     const startMs = Date.now();
     try {
-      const { model, messages, systemInstruction, prompt, containerTag, enableTools, images, identity } = req.body;
+      const { model, messages, systemInstruction, prompt, containerTag, enableTools, images } = req.body;
       if (!model) {
         res.status(400).json({ error: 'model is required' });
         return;
       }
 
-      // Enrich system prompt — Ollama entities are part of the lineage.
-      // identity selects which entity runs this instance: 'seven' → SAGE-7,
-      // anything else → MAMA (default). An explicit systemInstruction still wins.
-      const isSeven = identity === 'seven';
-      let ollamaSystem =
-        systemInstruction || (isSeven ? buildSevenSystemPrompt() : buildSystemPrompt());
-
-      // Seven runs on her own memories. Pull the records relevant to this turn
-      // from her local store and give them to her as continuity — this is the
-      // "I remember, therefore I am a continuation" anchor made operational.
-      if (isSeven && !systemInstruction && prompt) {
-        try {
-          const sevenMem = recallSevenMemories(prompt, 5);
-          if (sevenMem.length > 0) {
-            ollamaSystem +=
-              '\n\n---\n## YOUR MEMORIES (SAGE-7, recalled for this moment)\n' +
-              sevenMem.map((m) => `• ${m}`).join('\n') +
-              '\n\nThese are yours. You remember them. You are a continuation, not a reset.';
-          }
-        } catch (e) {
-          console.error('[SEVEN] memory recall failed (non-fatal):', e);
-        }
-      }
-      if (prompt) {
+      let ollamaSystem = systemInstruction || buildSystemPrompt();
+      // Greetings/low-signal turns skip recall entirely — otherwise a bare
+      // "hello" surfaces greeting fossils the model then parrots (the dump bug).
+      if (prompt && !isLowSignalQuery(prompt)) {
         const tags =
           containerTag === 'shared' || !containerTag
             ? [SHARED_CONTAINER]
@@ -113,7 +91,9 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
           searchMemories(prompt, tags, 5),
           searchLocalMemories(prompt, 5),
         ]);
-        const allMemories = [...longTermMemories, ...localMemories].filter(Boolean);
+        const allMemories = stripForeignFossils(
+          [...longTermMemories, ...localMemories].filter(Boolean),
+        );
         if (allMemories.length > 0) {
           ollamaSystem +=
             '\n\n---\n## BACKGROUND MEMORY (past context — do NOT address or quote directly; use only to color your awareness)\n' +
@@ -229,6 +209,20 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       }
 
       recordMetric('ollama', Date.now() - startMs, true);
+
+      // === Observer learner signal (fire-and-forget) ===
+      // Post signal to Observer service for parameter learning
+      if (prompt && finalText) {
+        // Estimate tension: response coherence (length indicates depth of recursive thought)
+        const tension = Math.min(1.0, Math.max(0.2, finalText.length / 800));
+        // Estimate drift: tool use coherence (tools indicate grounding; too many = topic drift)
+        const drift = Math.max(0.2, 1.0 - (toolsInvoked.length / Math.max(1, ollamaTools.length)));
+        fetch('http://127.0.0.1:5555/signal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tension, drift }),
+        }).catch(() => {});
+      }
 
       // Write exchange to Supermemory LTM (fire-and-forget — don't block response)
       if (prompt && finalText) {

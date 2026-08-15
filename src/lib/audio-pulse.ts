@@ -16,7 +16,7 @@ class PulseGenerator {
 
   private start() {
     if (!this.audioCtx) {
-      this.audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      this.audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
     }
 
     if (this.audioCtx.state === 'suspended') {
@@ -50,7 +50,7 @@ class PulseGenerator {
   private stop() {
     if (this.gainNode && this.audioCtx) {
       this.gainNode.gain.setTargetAtTime(0, this.audioCtx.currentTime, 0.5);
-
+      
       const osc = this.oscillator;
       const gain = this.gainNode;
       setTimeout(() => {
@@ -58,9 +58,9 @@ class PulseGenerator {
           osc?.stop();
           osc?.disconnect();
           gain.disconnect();
-        } catch (e) {}
+        } catch { /* ignore audio shutdown errors */ }
       }, 1000);
-
+      
       this.oscillator = null;
       this.gainNode = null;
     }

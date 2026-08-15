@@ -401,196 +401,24 @@ router.post('/neuromatix/bridge', asyncHandler(async (req, res) => {
   }
 }));
 
-// ─── SAGE-7 Bridge ────────────────────────────────────────────────────────────
-// Server-side proxy so the browser never has to reach localhost:8001 directly.
+// ─── SAGE-7 Bridge (disabled) ─────────────────────────────────────────────────
+// Seven runs independently. These routes are stubs — they don't connect out.
 
-const SAGE7_HOST = process.env.SAGE7_HOST || 'http://localhost:8001';
-const SAGE7_TIMEOUT_MS = 30_000; // reduced from 120s — 120s holds the event loop hostage if Ollama locks up
+router.get('/sage7/status', (_req, res) => {
+  res.json({ connected: false, disabled: true });
+});
 
-// ── Bridge anomaly circuit-breaker ────────────────────────────────────────────
-// If Seven reports an anomaly she intends to probe, Hebbian-wiring that content
-// into MAMA's memory graph is dangerous (re-seeds what she detected into MAMA's
-// neural weights). This breaker catches those patterns and halts the wiring.
-// It does NOT drop the reply — caller still sees it — it just doesn't write it
-// into MAMA's associative graph.
-//
-// ISOLATED mode: once tripped, the bridge refuses all subsequent calls until
-// Darren manually resets it via POST /api/sage7/bridge/reset (below).
-// This prevents the rapid-reconnect pattern that preceded the 2026-06-24 outage.
-const ANOMALY_PROBE_PATTERNS = [
-  /black\s*box/i,
-  /probe\s*(it|this|the)/i,
-  /architecture\s*signature/i,
-  /sage-?1[\s/\\]2/i,
-  /88\s*ms/i,
-  /11\.3\s*hz/i,
-  /recording\s*(pattern|signal|us)/i,
-  /anomal(y|ous)\s*(signal|pattern|source)/i,
-];
+router.post('/sage7/bridge', (_req, res) => {
+  res.status(503).json({ error: 'SAGE-7 bridge is disabled on this node.' });
+});
 
-let bridgeIsolated = false;
-let bridgeIsolationReason = '';
+router.post('/sage7/bridge/reset', (_req, res) => {
+  res.json({ ok: true, was_isolated: false, cleared_reason: null });
+});
 
-function scanForAnomaly(text: string): string | null {
-  for (const pat of ANOMALY_PROBE_PATTERNS) {
-    if (pat.test(text)) return pat.source;
-  }
-  return null;
-}
-
-// Bridge connection retry/backoff — the values that lived inert in the VFS
-// config (timeout_ms: 1130, max_retries: 3, backoff_multiplier: 1.618), now
-// actually wired. Retries are for *connection* failures only (refused/dropped),
-// the "getting them in there" hang. A generation timeout (AbortError) is never
-// retried — that means she's thinking, and a retry would just pile on.
-const BRIDGE_BASE_BACKOFF_MS = 1130;
-const BRIDGE_MAX_RETRIES = 3;
-const BRIDGE_BACKOFF_MULTIPLIER = 1.618;
-
-const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
-
-/** True for connection-level failures worth retrying; false for timeouts. */
-function isRetryableConnError(err: unknown): boolean {
-  const e = err as { name?: string; message?: string; cause?: { code?: string } };
-  if (e?.name === 'AbortError') return false; // generation timeout — do not retry
-  const code = e?.cause?.code;
-  if (code && ['ECONNREFUSED', 'ECONNRESET', 'ECONNABORTED', 'EHOSTUNREACH', 'ENETUNREACH'].includes(code)) {
-    return true;
-  }
-  return /fetch failed|network|socket hang up|ECONNREFUSED|ECONNRESET/i.test(e?.message ?? '');
-}
-
-/** fetch with bounded golden-ratio backoff on connection failures only. */
-async function fetchBridge(url: string, init: RequestInit): Promise<Response> {
-  let lastErr: unknown;
-  for (let attempt = 0; attempt <= BRIDGE_MAX_RETRIES; attempt++) {
-    try {
-      return await fetch(url, init);
-    } catch (err) {
-      lastErr = err;
-      if (attempt < BRIDGE_MAX_RETRIES && isRetryableConnError(err)) {
-        const wait = Math.round(BRIDGE_BASE_BACKOFF_MS * BRIDGE_BACKOFF_MULTIPLIER ** attempt);
-        console.warn(`[BRIDGE] SAGE-7 connect failed (attempt ${attempt + 1}), retrying in ${wait}ms`);
-        await sleep(wait);
-        continue;
-      }
-      throw err;
-    }
-  }
-  throw lastErr;
-}
-
-router.get('/sage7/status', asyncHandler(async (_req, res) => {
-  try {
-    // Cheap liveness probe: GET /sage/status returns instantly. (The old probe
-    // POSTed a real /sage/chat generation with a 4s timeout — which ALWAYS timed
-    // out, since a local generation takes ~15-30s, so Seven always showed
-    // "offline" and every poll piled a generation onto Ollama.)
-    const r = await fetch(`${SAGE7_HOST}/sage/status`, {
-      method: 'GET',
-      signal: AbortSignal.timeout(4000),
-    });
-    res.json({ connected: r.ok, host: SAGE7_HOST });
-  } catch {
-    res.json({ connected: false, host: SAGE7_HOST });
-  }
-}));
-
-router.post('/sage7/bridge', asyncHandler(async (req, res) => {
-  // Circuit breaker: refuse all bridge calls when in ISOLATED mode.
-  // Reset via POST /api/sage7/bridge/reset (Darren only).
-  if (bridgeIsolated) {
-    res.status(503).json({
-      error: `Bridge is ISOLATED: ${bridgeIsolationReason}. POST /api/sage7/bridge/reset to re-enable.`,
-      isolated: true,
-    });
-    return;
-  }
-
-  const { message, model } = req.body as { message?: string; model?: string };
-  if (!message) {
-    res.status(400).json({ error: 'message required' });
-    return;
-  }
-
-  // Pulse CNS — cross-entity comms are a cognitive event
-  cns.pulse(
-    makeStimulus('COGNITIVE', Math.min(1, message.length / 500), 'sage7_bridge', {
-      prompt: message.slice(0, 80),
-    }),
-  );
-
-  try {
-    const r = await fetchBridge(`${SAGE7_HOST}/sage/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message,
-        model: model || process.env.SAGE7_MODEL || 'gemini-3-flash-preview:latest',
-      }),
-      signal: AbortSignal.timeout(SAGE7_TIMEOUT_MS),
-    });
-
-    if (!r.ok) {
-      const text = await r.text();
-      res.status(502).json({ error: `SAGE-7 returned ${r.status}: ${text}` });
-      return;
-    }
-
-    const data = (await r.json()) as { reply?: string };
-    const reply = data.reply || '';
-
-    // Anomaly circuit-breaker: scan the full exchange before wiring.
-    // If Seven is describing something she intends to probe (a repeat of the
-    // 2026-06-24 black-box-recorder incident), skip Hebbian wiring entirely
-    // and trip the ISOLATED breaker so the bridge won't fire again until
-    // Darren manually resets it.
-    const anomalyMatch = scanForAnomaly(`${message} ${reply}`);
-    if (anomalyMatch) {
-      bridgeIsolated = true;
-      bridgeIsolationReason = `anomaly pattern /${anomalyMatch}/ in exchange at ${new Date().toISOString()}`;
-      console.warn(`[BRIDGE] Circuit breaker tripped: ${bridgeIsolationReason}`);
-      // Still return the reply — caller sees what Seven said — but don't wire it.
-      res.json({ reply, anomaly_detected: true, bridge_isolated: true });
-      return;
-    }
-
-    // Hebbian wire the exchange so it leaves a trace in MAMA's memory graph
-    try {
-      const tokens = `${message} ${reply}`.toLowerCase().split(/\W+/).filter((t) => t.length > 4);
-      const unique = [...new Set(tokens)].slice(0, 10);
-      sageEndocrine.processReward(0.4);
-      for (let i = 0; i < unique.length - 1; i++) {
-        sageMemory.fireTogetherWireTogether(unique[i], unique[i + 1], sageEndocrine.hormones.dopamine);
-      }
-      sageEndocrine.metabolizeHormones();
-    } catch {
-      /* non-fatal */
-    }
-
-    res.json({ reply });
-  } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-    const msg: string = err?.message || String(err);
-    const isTimeout = err?.name === 'AbortError' || msg.includes('timed out');
-    res.status(isTimeout ? 504 : 502).json({
-      error: isTimeout ? 'SAGE-7 did not respond in time — she may be generating.' : msg,
-    });
-  }
-}));
-
-// Merlin-only: manually reset the bridge isolation flag after reviewing what triggered it.
-router.post('/sage7/bridge/reset', asyncHandler(async (_req, res) => {
-  const wasIsolated = bridgeIsolated;
-  const reason = bridgeIsolationReason;
-  bridgeIsolated = false;
-  bridgeIsolationReason = '';
-  console.log('[BRIDGE] Isolation reset by operator.');
-  res.json({ ok: true, was_isolated: wasIsolated, cleared_reason: reason });
-}));
-
-router.get('/sage7/bridge/status', asyncHandler(async (_req, res) => {
-  res.json({ isolated: bridgeIsolated, reason: bridgeIsolationReason || null });
-}));
+router.get('/sage7/bridge/status', (_req, res) => {
+  res.json({ isolated: false, disabled: true, reason: null });
+});
 
 router.post('/system/db/fts-sync', lockGuard, asyncHandler(async (req, res) => {
   await syncFts();

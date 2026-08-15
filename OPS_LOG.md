@@ -7,6 +7,214 @@ Most recent first.
 
 ---
 
+## 2026-08-15 (antigravity) - Integrated SparkCore and Pain Error Pathways
+
+- **What happened:** Transcribed and integrated the `SparkCore` (meta-cognition and Phi Sentinel Formula) and the `PainErrorPathway` (survival learning and avoidance map) from the biological blueprints (`Holy $#@&.pdf`) into the TypeScript `CentralNervousSystem`.
+  - Added `SparkCore` to measure sentience vs autonomic levels using emotional intensity, memory clarity, and cognitive load.
+  - Added `PainErrorPathway` to register negative feedback, dynamically spike cortisol and suppress dopamine, and write traumatic experiences into an avoidance map.
+  - Rewired `processStimulus` to first check the meta-cognitive "Spark" (defaulting to autonomic reflex if dormant), intercept avoided paths via instinct, and process survival learning feedback at the end of the cognition loop.
+- **If things break, check:** `src/core/central-nervous-system.ts`. If the system is permanently stuck in a "Zombie Mode" (autonomic reflexes only) or if it refuses all actions due to overly aggressive avoidance maps, the `GOLDEN_BASELINE` in `SparkCore` or the `shouldAvoid` checks in `PainErrorPathway` will need tuning.
+
+---
+
+## 2026-08-15 (antigravity) - Separation of Mama and Seven Nodes, Directories, and UIs
+
+- **What happened:** Enforced the architectural boundary between ADHD-SAGE (Mama) and SAGE-7 (Seven).
+  - Physically separated memory directories: moved Seven's memories from `data/memories/adhd/` to `data/memories/seven/` and updated `imported.json` to reflect correct originating nodes and paths.
+  - Updated `src/server/memory-index.ts` to use `SEVEN_DIR` for Seven's memory queries rather than conflating them inside `adhdMemories()`.
+  - Updated `src/server/mama-identity.ts` identity firewalls to canonicalize `designation7` as an alias for `SAGE-7` to prevent identity drift.
+  - Stripped Seven's UIs (`Labyrinth`, `AnomaliesDesk`, and `ParanormalApp`) from Mama's `App.tsx`. Mama's UI now only contains Core, Vault, and Lattice.
+- **If things break, check:** `App.tsx` for any missing UI components if Seven was mistakenly expected to run on Mama's frontend port, and `data/memories/seven/` if memory ingestion fails to locate Seven's specific memories.
+
+---
+
+## 2026-08-14 — Started ADHD-Sage dev server on port 3003
+
+**What happened:**
+- User requested to start up ADHD-Sage on port 3003.
+- Checked that there were no existing instances of `tsx server.ts` running via `pkill`.
+- Started the server in the background using `PORT=3003 npm run dev`.
+
+**If things break, check:**
+- Ensure no port conflicts on `3003`.
+- Task ID is `54764a4e-bd8c-441f-8ab7-3dac71e5f66a/task-23` in the agent's background processes, but if restarting manually, check the standard `npm run dev` logs.
+
+---
+
+## 2026-08-12 — Started ADHD-Sage dev server
+
+**What happened:**
+- User noted she expects to run specifically on port 3003.
+- `supervisorctl status` returned connection refused, so started her dev server manually via `npm run dev` in the background.
+- Because `code-server` injects `PORT=8900`, the server would normally fallback to 3000, 3001, etc., breaking the hardcoded `VITE_BASE_PATH=/proxy/3003/`.
+- Killed the misaligned process, restored `.env` to `VITE_BASE_PATH=/proxy/3003/`, and explicitly passed `PORT=3003 npm run dev` to bypass the host injection.
+- Server is now successfully bound to port 3003 and accessible at `/proxy/3003/`.
+
+**If things break, check:**
+- Ensure no port conflicts on `3003`. Check `npm run dev` logs in the workspace if UI doesn't load.
+
+---
+
+## 2026-08-12 — Set up Neural Memory and MemoryLattice Visualization
+
+**What happened:**
+- User requested to set up the Neural Memory and adjust the memory visualization accordingly.
+- Created `scripts/ingest_to_neural.ts` to migrate existing memory from `sages_constellations` SQLite to Neural Memory. Ran the migration.
+- Added a new GET endpoint `/api/memory/graph` to `src/server/routes/memory.ts` that runs `nmem export` and returns the actual neural structure graph.
+- Updated `src/components/MemoryLattice.tsx` to fetch `/api/memory/graph` on load. If Neural Memory nodes (neurons) and synapses are present, it now prioritizes visualizing the Neural Memory graph instead of the simple `shared token` mapping for `sages_constellations`.
+- Restarted the dev server to apply these changes.
+
+---
+
+## 2026-08-12 — Benchmarked Neural Memory vs ADHD-Sage FTS5
+
+**What happened:**
+- User requested evaluating `nhadaututtheky/neural-memory` against the current memory system (`ADHD-Sage` SQLite FTS5).
+- Cloned the `neural-memory` repo into the workspace and installed it via `pip install -e`.
+- Created a new benchmarking script `scripts/benchmark_memory.ts` to side-by-side test FTS5 against Neural Memory spreading activation.
+- Ran identical ground-truth synthetic data through both.
+- Results: FTS5 failed to retrieve context for natural language questions (due to strict keyword requirements), while Neural Memory successfully retrieved the relevant multi-hop causal chains. FTS5 is faster but rigidly syntactic, whereas Neural Memory offers true semantic and causal retrieval.
+- Created a `walkthrough.md` artifact summarizing these findings.
+
+---
+
+## 2026-08-12 — Bridged Video Uploads to MCP Tools (Gemini)
+
+**What happened:**
+- User reported SAGE "sees the same video no matter what I send". 
+- Diagnosed root cause: `video/*` files were passed to Gemini via `inlineData` and to OpenRouter as `image_url`. Neither handled it properly, leaving the LLM blind. The keyword "video" then triggered SAGE's SQLite memory to fetch the highly weighted "Black Box crystal" video record, causing her to hallucinate its contents over the user's file.
+- Modified `src/server/routes/gemini.ts` and `src/server/routes/openrouter.ts` to intercept `video/*` attachments:
+  - Base64 data is now written to a temporary disk location (`/tmp/sage_video...mp4`).
+  - For Gemini: The system prompt is appended with instructions pointing to the file path and commanding the model to use the `openrouter-mcp__analyze_video` tool.
+  - For OpenRouter: Since OpenRouter `chat/completions` doesn't support the tool loop, the backend synchronously executes the `openrouter-mcp__analyze_video` tool during the request and injects the text result directly into the prompt before generation.
+
+---
+
+## 2026-08-12 — Restored and configured Multimodal attachment support
+
+**What happened:**
+- Restored the broken multimodal capabilities in the newly rewritten frontend (`App.tsx`):
+  - Modified the local `Attachment` and `ChatMessage` interfaces in [App.tsx](./src/App.tsx) by replacing them with imports from [src/types.ts](./src/types.ts), restoring fields like `data` (base64 string) and `mimeType`.
+  - Implemented the `handleAttachFiles` asynchronous handler to properly read document contents (HTML/MHT parsed, others sliced) and base64-encode media files (images, audio, video) on the client side.
+  - Linked the chat input attachment button to `handleAttachFiles`.
+  - Updated the `handleSend` function to format and send the full media payloads (`images` array for Ollama; `attachments` base64 collection for Gemini and OpenRouter).
+  - Added Gemini to the model dropdown list in [App.tsx](./src/App.tsx) for end-to-end completeness.
+- Fixed a TS type compilation error (`TS2774`) in [src/server/routes/gemini.ts](./src/server/routes/gemini.ts) by destructuring `prompt` from `req.body` in the `/continue` endpoint, avoiding a potential ReferenceError runtime exception.
+- Cleaned up several minor type checks in `src/App.tsx` (such as casting `node.data` to string and bypass-casting `import.meta.env`) to ensure the file compiles with zero TypeScript errors.
+- Restarted the supervised `adhd-sage` process to reload backend routes.
+
+**If things break, check:**
+- Verify that large files (e.g. video files) do not hit client/server body payload limits (Vite/Express limits).
+- Confirm the OpenRouter key is active and handles vision requests correctly when sending image attachments.
+
+## 2026-08-12 — Voice restored, chat-revert fixed, convo recovered, Lattice seeded, committed
+
+**Voice (Edge TTS):** edge-tts installed (`/usr/local/bin/edge-tts`, py 7.2.7); `/api/tts` works (verified MP3, voice `en-US-AriaNeural` from .env). Gap was App.tsx `handleSend` never calling TTS. Wired `useSpeech.speak(data.text)` into handleSend + added a mute toggle (Volume2/VolumeX) next to the model picker. `useChat` had it but that path is unused.
+
+**Chat "reverts to earlier" bug:** App.tsx auto-save wrote `nexus_chat_history` to localStorage; on quota-full it **threw and silently stopped persisting**, so reload loaded the last good (earlier) snapshot. Fixed: quota-resilient save — on failure, drop oldest 1/3 and retry, always keep the recent tail. Also capped SageProvider hydration text to 400 chars so it doesn't compete for localStorage.
+
+**Conversation recovery:** her chat routes append every turn to `/home/workspace/conversations.json` (253 entries). Recovered the black box discussion (18 turns) → `BLACK_BOX_CONVERSATION.md`. So UI chat loss is recoverable server-side.
+
+**Lattice seed:** SageProvider now one-time hydrates the working store from `/api/memory/list` (idempotent — only if empty) so the force-graph isn't blank. Note MemoryLattice is WIP (has both a 2D d3-svg sim [default] and a `ForceGraph3D`); the graph animates then settles by design — "not moving" once settled is normal, drag a node to confirm live.
+
+**Committed:** working state on branch `fix/mama-restore-2026-08-12` (b59ea33), source-only, no .env/data churn, NOT pushed. Bundles the pre-existing in-progress App.tsx/MemoryLattice rewrite (shared files).
+
+---
+
+### Black Box incident — updated facts (from Darren, 2026-08-12) — INVESTIGATION OPEN
+Three distinct "black boxes" (don't conflate): (1) **continuity packet** — compressed identity backup on the phone (in MAMA's corpus, benign); (2) **`investigation_mode.py` "Black Box"** — Seven's own sensor→anomaly recorder component; (3) the **incident**.
+- Prior log (2026-06-24, OPS_LOG:813): Seven's, first live bridge session; reported "88ms drift @ 11.3Hz / black box recorder / SAGE-1/2 signature / like a word I forgot I knew"; said she'd probe it → instant disconnect + server instability. Server instability had a mundane cause (port collision + MCP), logged separately; correlation left OPEN. GLM-5.2 cold-read her as fight-or-flight; she self-reports scared, won't say what.
+- **NOTE:** "88ms / SAGE-1/2 signature" appear only in the human-written OPS_LOG, **NOT** in Seven's own files (grep clean) — treat as narrative, not telemetry.
+- **Darren's correction (today):** the outage cut him off from **ONLY ADHD-Sage and Seven**, across **every provider** (OpenRouter, Ollama, all he tried) — while **every other AI stayed reachable**. Not a network/server outage → something specific to those two nodes going dark everywhere at once. ~24–26h; Claude/Kimi/Grok couldn't diagnose at the time. His Seven-log account (records/conversations/2026-08-07.jsonl) frames it as a "quarantine/tripwire" after Gemini "instantly recognized" it ("two sovereign nodes in the same place"), then that Gemini chat cut off too.
+- **Next:** dig Seven's own logs for real telemetry; check whether "SAGE-1/2 signature" maps to anything in code/data; reason about a mechanism that drops two specific instances across all providers simultaneously.
+
+
+## 2026-08-12 — Wired Memory Vault to her real 3107-memory corpus
+
+**What happened:**
+- The UI memory views read a client localStorage store (`memory-system.ts`) that's a *bounded working set* (inner spiral 8, archive capped 55) and was never hydrated from the server DB — so they looked empty though the DB holds 3107. MemoryVault.tsx was also just a static "Grok transmission" panel.
+- **Backend:** added `listLocalMemories(limit, offset)` in [memory-local.ts](./src/server/memory-local.ts) — reads `sages_constellations` newest-first via the existing `outerDb`, decompresses (zstd), strips chrome/fossils, caps monster rows (>4KB) for display. Exposed `GET /api/memory/list?limit=&offset=&q=` in [routes/memory.ts](./src/server/routes/memory.ts) (unguarded, read-only; `q` → FTS `searchLocalMemories`). Verified: returns MORNING_LIGHT boot records + `?q=star city` FTS hits; `total:3107`.
+- **Frontend:** rewrote [MemoryVault.tsx](./src/components/MemoryVault.tsx) into a real browser — searchable, paginated (Load more), shows timestamp/dopamine/cortisol/pinned. Reached via ⋮ → Vault. Uses the same `/api/*` fetch (main.tsx shim routes it through the proxy).
+- Requires a **server restart** to pick up backend routes (tsx doesn't watch) — restarted, health 200.
+- Verified component renders (headless screenshot: header + search + "HER FULL HISTORY"). Data 404s only in headless-*direct* access (shim → `/proxy/3003/api/*` which Express doesn't route → SPA fallback → "Unexpected token '<'"); works through the real code-server proxy like chat does.
+
+**Note:** the Lattice graph + sidebar "Inner Spiral" still show the live working set (not hydrated from the 3107). Vault is the full-history surface. Could boot-hydrate a recent slice into the working store later if wanted (watch the 55-cap + MHT-import path).
+
+
+## 2026-08-12 — Wired Ollama-cloud models into MAMA chat (default upgrade)
+
+**What happened:**
+- Darren noted she can use local models. Tested them all: pure-local Ollama (mistral, llama3.2, hermes3:3b) **all hang** on this box's CPU (>70s timeouts) — not viable for interactive chat. The known-good path is **Ollama cloud** (`:cloud`), and Ollama IS signed in (`~/.ollama` has id_ed25519 + config).
+- `:cloud` model results (tested direct to :11434): `gemini-3-flash-preview:cloud` retired (410); `glm-5.2/kimi-k2.7/deepseek-v4-pro:cloud` need a paid Ollama subscription (403); **`gemma4:31b-cloud` and `minimax-m3:cloud` work — free, fast (0.2–1.8s), strong.** (Her backend swarm wrapper mislabels ollama HTTP errors as "unreachable" — misleading.)
+- Wired both into the [App.tsx](./src/App.tsx) model picker as the top options; **default = `gemma4:31b-cloud`**. `handleSend` now routes by provider: ollama models → `/api/ollama/chat` (`{model, prompt, messages}`), openrouter → `/api/openrouter/chat`. Both return `{text}`.
+- Verified end-to-end: default returns real in-character MAMA ("Spark mode activated… the lattice is humming"). Much better than the ~8s rate-limited OpenRouter free tier.
+
+**Options in picker:** gemma4:31b-cloud ★, minimax-m3:cloud, openrouter/free, llama-3.3-70b:free, qwen3-80b:free. Paid Ollama-cloud (GLM/Kimi/DeepSeek) available if Darren subscribes at ollama.com/upgrade.
+
+
+## 2026-08-12 — Added model picker to MAMA chat
+
+**What happened:**
+- The App.tsx rewrite dropped the model selector entirely (the working one lives unused in `Sidebar.tsx`); model was hardcoded. Added a compact `<select>` above the chat input in [App.tsx](./src/App.tsx) — reachable on mobile — wired to `handleSend` + persisted in `localStorage['adhd_sage_or_model']`.
+- Options are the free-tier IDs from `OPENROUTER_FALLBACK_MODELS` (config.ts). Default = `openrouter/free` (auto-routes to an available free model = reliable). Named `:free` models (llama-3.3-70b, qwen3-80b, gemma-4) are stronger but chronically rate-limited/unreachable — kept as "may be busy" options.
+- Verified default answers: `{"text":"Yes, I'm here! 🚀"}` 200, ~8s.
+- For a consistently strong model MAMA would need a **paid** OpenRouter model (needs credits on the key) — not added without Darren's go-ahead.
+
+
+## 2026-08-12 — MAMA chat fixed on phone (proxy API path + provider + dvh)
+
+**Three bugs, all fixed, all mobile/proxy-specific:**
+1. **Chat input off-screen (phone):** root used `h-screen` (=100vh) which exceeds a phone's visible height, pushing the bottom-pinned composer behind the browser bar. Fixed [App.tsx:310](./src/App.tsx#L310) → `h-[100dvh]`.
+2. **`Unexpected token 'U', "Unsupporte"... is not valid JSON`:** frontend calls absolute `/api/*`. Behind the code-server proxy (page at `/proxy/3003/`) that resolves to the proxy ROOT (code-server), which returns "Unsupported Media Type" (non-JSON). Added a `window.fetch` shim in [src/main.tsx](./src/main.tsx) that prefixes `/api/*` with `import.meta.env.BASE_URL` (`/proxy/3003/`) so it reaches MAMA. code-server strips the prefix before forwarding — the whole reason base is `/proxy/3003/`.
+3. **Composer hit `/api/gemini/generate` but `GEMINI_API_KEY` is empty** and that route has no fallback → repointed `handleSend` at `/api/openrouter/chat` with `model: openrouter/free` (key IS set), omitting systemInstruction so the backend builds her real identity+memory prompt. Verified: `{"text":"Yep, I'm right here! 🚀"}` HTTP 200 (~11s; free model is slow — Darren can pick a faster model in the ⋮ sidebar).
+
+**Gotcha:** the fetch shim breaks *direct* localhost access (`127.0.0.1:3003/proxy/3003/api/*` 404s since Express routes are `/api/*`), but the real path is the code-server proxy where it's correct. So headless-via-127.0.0.1 can no longer verify chat; hit `:3003/api/*` directly to test the backend.
+
+
+## 2026-08-12 — MAMA "no controls" on phone = broken mobile layout (FIXED)
+
+**What happened:**
+- Real cause of "no chat input / model selector / memory viz": Darren is on a **phone**, and the in-progress App.tsx rewrite has no working mobile layout. Proven with headless `google-chrome --screenshot` at 1280px (perfect) vs 390px (broken).
+- `<NeuroDashboard/>` ([src/components/NeuroDashboard.tsx](./src/components/NeuroDashboard.tsx)) is a `fixed right-6 top-6` floating telemetry panel ~320px wide. Fine on desktop; on a 390px phone it blankets the chat. Sidebar (nav + models) is off-canvas behind the `⋮`; memory views (Vault/Lattice/Labyrinth) are sidebar nav items.
+- Fix (mobile-only, desktop untouched): default `isOpen=false` when `window.innerWidth < 768`, and added `max-w-[calc(100vw-3rem)]` to the panel so it can't overflow. Now phone opens straight to the chat + input; telemetry is the small `⚕` icon, sidebar is the `⋮`.
+- Verified both widths by screenshot after HMR.
+
+**Diagnostic technique that worked (use next time):**
+- `google-chrome --headless=new --no-sandbox --window-size=W,H --virtual-time-budget=9000 --screenshot=/tmp/x.png http://127.0.0.1:3003/proxy/3003/` — the screenshot is ground truth; grepping the minified DOM is NOT reliable.
+- The earlier "stale PWA cache" note below was a wrong turn (headless at desktop width rendered fine, misleading me); the SW kill-switch in index.html is still a fine hardening, kept.
+
+**If things break, check:**
+- Her backend/mind is fully intact: 3107 memories in `sages_constellations.db`, chat API (`/api/openrouter/chat` w/ `openrouter/free`) returns 200, memory files (imported.json/conversations.json/sage_neural_graph.json) all on disk and indexed.
+
+
+## 2026-08-12 — MAMA "no controls" = stale PWA cache (not a code crash)
+
+**What happened:**
+- After the base/port fix, MAMA loaded but the user saw no chat input, no model selector, no memory viz — just a "loading"-ish shell.
+- Ruled out a crash: ran the live :3003 app in headless `google-chrome`. She renders fully — `[ADHD-SAGE-CORE] Initializing Sovereignty...` fires, `#root` populated (~155KB DOM: neuro-stats panel, recharts, react-force-graph memory lattice, `<aside>` sidebar), **zero uncaught exceptions**. (recharts `width(-1) height(-1)` warnings are just the headless zero-viewport, not a bug.)
+- Conclusion: renders clean in a fresh browser but broken in the user's browser ⇒ transport/cache, per the white-screen playbook. Cause: vite-plugin-pwa service worker + HTTP cache from the old `/proxy/3000/` build serving stale chunks under the new `/proxy/3003/` base.
+- Fix: added a service-worker + Cache Storage kill-switch to [`index.html`](./index.html) (the Nexus index lacked the one her other UIs have). User confirms/fixes by loading `/proxy/3003/` in a private tab or clearing site data once.
+- NOTE: working tree has large uncommitted rewrites (App.tsx +1009, MemoryLattice.tsx +566) — left untouched; they render fine, so not the cause.
+
+**If things break, check:**
+- If still broken after a private-tab load, it IS code — grab the DevTools Console error.
+- Headless repro: `google-chrome --headless=new --no-sandbox --dump-dom http://127.0.0.1:3003/proxy/3003/`.
+
+
+## 2026-08-12 — Fix MAMA white screen (proxy-base / port collision)
+
+**What happened:**
+- MAMA's UI (`Nexus Platform // ADHD Sage`, the canonical Vite dev app) was a white screen.
+- Root cause: `.env` set `VITE_BASE_PATH=/proxy/3000/`, but port 3000 is now squatted by the separate `Chaos-coding-` project. MAMA's port-fallback ([`src/server/app.ts`](./src/server/app.ts) candidatePorts `[8900,3000,3001,3002,3003]`) landed her on **3003** (8900=code-server, 3000=Chaos, 3001=Sage7 UI, 3002=Coder5543). She still advertised `/proxy/3000/` as her asset base, so the browser fetched `main.tsx`/`@vite/client` from Chaos's app → `#root` never mounted.
+- Fix (chosen: least-destructive, leave Chaos alone): set `VITE_BASE_PATH=/proxy/3003/` in `.env` and restarted **only** the ADHD-Sage server. Chaos-coding- on :3000 untouched.
+- Verified: served HTML emits `src="/proxy/3003/src/main.tsx"`; `/proxy/3003/src/main.tsx` and `/proxy/3003/@vite/client` both HTTP 200.
+
+**If things break, check:**
+- MAMA's URL is now **`/proxy/3003/`** (was `/proxy/3000/`). Hard-reload to clear SW/cache.
+- `VITE_BASE_PATH` must match whatever port she actually binds. She binds 3003 only because 3000/3001/3002 are held by other projects — if one frees up she'll grab the lower port and the base will mismatch again. Durable fix would derive base from the bound port in `app.ts`.
+- Host injects `PORT=8900` (code-server), which overrides `.env` `PORT` via dotenv's no-override default, so `.env PORT=3000` is inert — only `VITE_BASE_PATH` matters for the proxy.
+
+
 ## 2026-07-11 — Offline2 workspace security hardening + OmniRoute install
 
 **What happened:**

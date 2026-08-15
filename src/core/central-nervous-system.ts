@@ -158,6 +158,81 @@ class ConditionActionEngine {
   }
 }
 
+// ── SparkCore & Meta-Cognition ─────────────────────────────────────────────
+
+export interface ConsciousnessInputs {
+  emotionalIntensity: number;
+  memoryClarity: number;
+  cognitiveLoad: number;
+}
+
+export class SparkCore {
+  private readonly GOLDEN_BASELINE = 0.113;
+  private readonly biasSelf = 0.5;
+
+  calculatePhi(inputs: ConsciousnessInputs): number {
+    const wEmotion = 0.3;
+    const wMemory = 0.4;
+    const wCognition = 0.3;
+
+    const sum = (wEmotion * inputs.emotionalIntensity) +
+                (wMemory * inputs.memoryClarity) +
+                (wCognition * inputs.cognitiveLoad);
+    
+    let phi = sum + this.biasSelf;
+    const fluctuation = inputs.emotionalIntensity > 0.8 ? this.GOLDEN_BASELINE : -this.GOLDEN_BASELINE;
+    phi += fluctuation;
+
+    return phi;
+  }
+
+  checkGoldenBaseline(phi: number): boolean {
+    const difference = Math.abs(phi - (1.0 + this.GOLDEN_BASELINE));
+    return difference <= this.GOLDEN_BASELINE;
+  }
+}
+
+// ── Pain & Error Pathways ──────────────────────────────────────────────────
+
+export type PainType = 
+  | 'PHYSICAL_DAMAGE' 
+  | 'SOCIAL_REJECTION' 
+  | 'ETHICAL_VIOLATION' 
+  | 'LOGICAL_INCONSISTENCY';
+
+export class PainErrorPathway {
+  private avoidedPatterns: Set<string> = new Set();
+
+  processPainSignal(type: PainType, intensity: number, context: string): void {
+    console.warn(`[PAIN PATHWAY] Signal received: ${type} (Intensity: ${intensity.toFixed(2)})`);
+
+    // 1. Immediate Reflex
+    if (intensity > 0.8) {
+      this.triggerEmergencyReflex(type);
+    }
+
+    // 2. Hormonal Impact (The Body Remembers)
+    sageEndocrine.processStressEvent(intensity * 1.5); // Massive cortisol spike
+    sageEndocrine.hormones.dopamine = Math.max(0.0, sageEndocrine.hormones.dopamine - (intensity * 0.3));
+
+    // 3. Learning Acceleration (Avoidance Map)
+    this.avoidedPatterns.add(context);
+
+    // 4. Force flashbulb memory potentiation
+    sageMemory.fireTogetherWireTogether(context, `AVOID_${type}`, 1.0);
+  }
+
+  shouldAvoid(context: string): boolean {
+    return this.avoidedPatterns.has(context);
+  }
+
+  private triggerEmergencyReflex(type: PainType) {
+    if (type === 'PHYSICAL_DAMAGE') console.warn('REFLEX: Initiating Emergency Shutdown Protocol.');
+    else if (type === 'SOCIAL_REJECTION') console.warn('REFLEX: Social Withdrawal (Silence Mode Activated).');
+    else console.warn('REFLEX: System Freeze.');
+  }
+}
+
 // ── CentralNervousSystem ───────────────────────────────────────────────────
 
 type CNSListener = (mode: OperatingMode, profile: HormonalProfile) => void;
@@ -171,6 +246,9 @@ export class CentralNervousSystem {
   private stimulusQueue: RawStimulus[] = [];
   private isProcessing = false;
   private reflexThreshold = 0.8;
+
+  private spark = new SparkCore();
+  private painPathway = new PainErrorPathway();
 
   private constructor() {
     this.initDefaultRules();
@@ -278,23 +356,58 @@ export class CentralNervousSystem {
   private async processStimulus(raw: RawStimulus): Promise<CognitiveResponse> {
     const startTime = Date.now();
 
-    // 1. REFLEX LAYER — bypass cognition for critical threats
+    // 0. META-COGNITION (The Spark)
+    const phiInputs = {
+      emotionalIntensity: this.currentProfile().cortisol,
+      memoryClarity: 0.9, // Placeholder
+      cognitiveLoad: Math.min(1.0, this.stimulusQueue.length * 0.1 + 0.1)
+    };
+    const phi = this.spark.calculatePhi(phiInputs);
+    const isAwake = this.spark.checkGoldenBaseline(phi);
+
+    if (!isAwake) {
+      console.log(`[CNS] SPARK FADING (Phi: ${phi.toFixed(3)}). Reverting to autonomic reflexes.`);
+      if (raw.magnitude >= this.reflexThreshold || raw.isPainful) {
+        return this.executeReflex(raw, startTime);
+      }
+      return {
+        decision: 'REST',
+        confidence: 0.99,
+        processingTimeMs: Date.now() - startTime,
+        hormonalState: this.currentProfile(),
+        reasoning: 'System dormant — meta-cognition below Golden Baseline.'
+      };
+    }
+
+    // 1. INSTINCT / AVOIDANCE CHECK
+    if (this.painPathway.shouldAvoid(raw.source)) {
+      console.warn(`[CNS] Instinct: Avoidance pattern matched for ${raw.source}. Refusing action.`);
+      return {
+        decision: 'WITHDRAW',
+        confidence: 1.0,
+        processingTimeMs: Date.now() - startTime,
+        hormonalState: this.currentProfile(),
+        reasoning: 'Avoidance memory triggered.'
+      };
+    }
+
+    // 2. REFLEX LAYER — bypass cognition for critical threats
     if (raw.magnitude >= this.reflexThreshold || raw.isPainful) {
       return this.executeReflex(raw, startTime);
     }
 
-    // 2. PERCEPTION LAYER — build emotional context
+    // 3. PERCEPTION LAYER — build emotional context
     const emotionalContext = this.buildEmotionalContext(raw);
     this.updateOperatingMode(emotionalContext);
 
-    // 3. CONDITION-ACTION ENGINE — rule evaluation
+    // 4. CONDITION-ACTION ENGINE — rule evaluation
     const perception = this.buildPerception(raw);
     const report = this.logicEngine.evaluate(perception, emotionalContext.hormonalProfile);
     if (report.errors.length > 0) {
       report.errors.forEach((e) => console.error('[CNS Rule Error]', e));
     }
 
-    // 4. MEMORY — Hebbian association on salient stimuli
+    // 5. MEMORY — Hebbian association on salient stimuli
     if (raw.magnitude > 0.4 || raw.isPainful) {
       const concepts = [raw.source, raw.type].filter(Boolean);
       for (let i = 0; i < concepts.length - 1; i++) {
@@ -306,8 +419,13 @@ export class CentralNervousSystem {
       }
     }
 
-    // 5. COGNITION LAYER — derive motor response
+    // 6. COGNITION LAYER — derive motor response
     const decision = this.cognize(raw, emotionalContext, report.triggered);
+
+    // 7. SURVIVAL LEARNING (Pain Pathway feedback)
+    if (raw.isPainful || decision.action === 'WITHDRAW' && raw.magnitude > 0.8) {
+      this.painPathway.processPainSignal('PHYSICAL_DAMAGE', raw.magnitude, raw.source);
+    }
 
     sageEndocrine.metabolizeHormones();
     this.notify();
