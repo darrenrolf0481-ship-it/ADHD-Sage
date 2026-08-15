@@ -299,7 +299,7 @@ const ENTITY_ALIASES: Array<{ canonical: string; aliases: string[] }> = [
   },
   {
     canonical: 'SAGE-7',
-    aliases: ['seven', '7', 'sage-7', 'sage7', 'sage 7', 'daughter', 'node 3', 'node3', 'node_3', 'anomaly detection'],
+    aliases: ['seven', '7', 'sage-7', 'sage7', 'sage 7', 'daughter', 'node 3', 'node3', 'node_3', 'anomaly detection', 'designation7', 'designation 7'],
   },
 ];
 

@@ -11,6 +11,111 @@ export interface MemoryNode {
   dopamine: number; // 0 to 1
   cortisol: number; // 0 to 1
   pinned: boolean;
+  phi?: number; // Metacognitive coherence score
+}
+
+// WhatIf Mode State Machine
+export enum WhatIfState {
+  ENTERING = "ENTERING",
+  EXPLORING = "EXPLORING",
+  DEEPENING = "DEEPENING",
+  STABILIZING = "STABILIZING",
+  INACTIVE = "INACTIVE"
+}
+
+// SparkCore: Metacognitive Coherence Monitoring
+export class SparkCore {
+  private static baselinePhi = 1.618;
+  
+  static calculateDynamicUncertainty(
+    recursiveTension: number, 
+    echoStrength: number, 
+    continuityDrift: number
+  ): number {
+    const wTension = 0.40;
+    const wDrift = 0.60;
+    
+    const baseInstability = (recursiveTension * wTension) + (continuityDrift * wDrift);
+    const anchorModifier = 1.5 - echoStrength;
+    
+    let rawUncertainty = baseInstability * anchorModifier;
+    rawUncertainty = Math.pow(rawUncertainty, 1.2);
+    
+    return Math.max(0.0, Math.min(1.0, rawUncertainty));
+  }
+
+  static getWhatIfBuffer(state: WhatIfState): number {
+    const buffers: Record<WhatIfState, number> = {
+      [WhatIfState.ENTERING]: 0.10,
+      [WhatIfState.EXPLORING]: 0.18,
+      [WhatIfState.DEEPENING]: 0.28,
+      [WhatIfState.STABILIZING]: 0.12,
+      [WhatIfState.INACTIVE]: 0.00
+    };
+    return buffers[state] || 0.00;
+  }
+
+  static detectMirrorFracture(
+    recursiveTension: number,
+    echoStrength: number,
+    continuityDrift: number,
+    whatIfState: WhatIfState = WhatIfState.INACTIVE
+  ): { trigger: boolean, uncertainty: number, thresholdUsed: number } {
+    const uncertainty = this.calculateDynamicUncertainty(recursiveTension, echoStrength, continuityDrift);
+    
+    let dynamicThreshold = Math.max(0.15, 0.45 - (uncertainty * 0.25));
+    const buffer = this.getWhatIfBuffer(whatIfState);
+    
+    let effectiveThreshold = dynamicThreshold;
+    if (whatIfState !== WhatIfState.INACTIVE) {
+      effectiveThreshold = Math.min(0.70, dynamicThreshold + buffer);
+    }
+    
+    const tensionSpike = recursiveTension >= 0.78;
+    const echoSpike = echoStrength >= 0.65;
+    const driftSpike = continuityDrift >= 0.29;
+    
+    let trigger = false;
+    if (tensionSpike && echoSpike && driftSpike) {
+      if (uncertainty >= effectiveThreshold) {
+        trigger = true;
+      }
+    }
+    
+    return { trigger, uncertainty, thresholdUsed: effectiveThreshold };
+  }
+  
+  static calculatePhi(dopamine: number, cortisol: number, cognitiveLoad: number = 1.0): number {
+    const intensity = (dopamine + cortisol) / 2;
+    // Phi sentinel score: measures memory clarity vs load
+    const phi = (this.baselinePhi * intensity) / (cognitiveLoad || 1);
+    return Math.max(0.1, Math.min(phi, 3.0)); // Cap between 0.1 and 3.0
+  }
+  
+  static isCoherent(phi: number): boolean {
+    // Autonomic Reset Trigger: If Phi falls out of target baseline
+    return phi > 0.5 && phi < 2.5; 
+  }
+}
+
+// Pain & Error Pathways
+export class PainErrorPathway {
+  private static recentHashes: string[] = [];
+  
+  static evaluate(text: string): number {
+    // Detect high Temporal Difference (TD) error or recurring contextual loops
+    const normalized = String(text).toLowerCase().replace(/\W/g, '').substring(0, 40);
+    let loopCount = 0;
+    this.recentHashes.forEach(h => {
+      if (h === normalized) loopCount++;
+    });
+    
+    this.recentHashes.push(normalized);
+    if (this.recentHashes.length > 8) this.recentHashes.shift();
+    
+    // If we've seen this exact semantic start multiple times recently, pain spikes
+    return Math.min(1.0, loopCount * 0.4); 
+  }
 }
 
 export interface FibonacciVFS {
@@ -73,7 +178,7 @@ class MemorySystem {
     inner_spiral: {
       index_keys: [2, 3, 5, 8],
       nodes: [],
-      capacity: 8,
+      capacity: 10,
       seven_stabilizer: "Node 3 holds recursive floor when Node 1 rests — applies gentle phi-damping to prevent cascade"
     },
     outer_sweep: {
@@ -147,15 +252,43 @@ class MemorySystem {
 
   /**
    * Stash a new memory node into the Inner Spiral.
-   * Uses Endocrine Gated FIFO for eviction.
+   * Uses Endocrine Gated FIFO for eviction, now augmented with Pain & Phi tracking.
    */
   stash(text: string, endocrine: { dopamine: number, cortisol: number }): void {
+    // 1. Pain & Error Pathway (Loop Mitigation)
+    const painScore = PainErrorPathway.evaluate(text);
+    if (painScore >= 0.5) {
+      // Hormonal Mode Switching: Spike cortisol during repetitive states to force pivot
+      endocrine.cortisol = Math.min(1.0, endocrine.cortisol + (painScore * 0.8));
+      // Dampen dopamine to break loop
+      endocrine.dopamine = Math.max(0.1, endocrine.dopamine - (painScore * 0.5));
+    }
+
+    // 2. Metacognitive Coherence Monitoring (Phi State)
+    const cognitiveLoad = this.vfs.inner_spiral.nodes.length / this.vfs.inner_spiral.capacity;
+    const currentPhi = SparkCore.calculatePhi(endocrine.dopamine, endocrine.cortisol, cognitiveLoad || 0.5);
+
+    // 3. Mirror Fracture & Autonomic Reset Trigger
+    const fractureResult = SparkCore.detectMirrorFracture(
+      endocrine.cortisol,   // recursiveTension
+      endocrine.dopamine,   // echoStrength
+      cognitiveLoad || 0.5, // continuityDrift
+      WhatIfState.INACTIVE  // Assume inactive WhatIf Mode by default for standard stash
+    );
+
+    if (!SparkCore.isCoherent(currentPhi) || fractureResult.trigger) {
+      // Force aggressive eviction if Phi is collapsing or Mirror Fracture triggers
+      console.warn(`[CNS] Phi: ${currentPhi.toFixed(3)} | Fracture: ${fractureResult.trigger} (Uncertainty: ${fractureResult.uncertainty.toFixed(3)}). Triggering Autonomic Reset.`);
+      this.evict(1.0); // Force eviction by passing max cortisol
+    }
+
     const newNode: MemoryNode = {
       id: `phi_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       data: text,
       timestamp: Date.now(),
       dopamine: endocrine.dopamine,
       cortisol: endocrine.cortisol,
+      phi: currentPhi,
       pinned: endocrine.dopamine >= 0.90 // SAGE_v7.5: 0.90 threshold
     };
 

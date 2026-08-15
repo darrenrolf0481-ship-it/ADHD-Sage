@@ -14,6 +14,7 @@ interface GraphNode extends d3.SimulationNodeDatum {
   dopamine: number;
   cortisol: number;
   cluster?: number;
+  createdAt?: string;
 }
 
 interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
@@ -29,11 +30,103 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
 
   const [is3D, setIs3D] = useState(false);
 
+  const [nmemGraph, setNmemGraph] = useState<any>(null);
+
+  useEffect(() => {
+    fetch('/api/memory/graph')
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.neurons && data.synapses) {
+          setNmemGraph(data);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
   const filteredNodes = useMemo(() => {
     return nodes.filter(n => n.dopamine >= minDopamine && n.cortisol <= maxCortisol);
   }, [nodes, minDopamine, maxCortisol]);
 
   const graphData = useMemo(() => {
+    if (nmemGraph) {
+      // Build graph from Neural Memory
+      let gNodes: GraphNode[] = [
+        ...nmemGraph.neurons.map((n: any) => ({
+          id: n.id,
+          data: n.content || n.type,
+          dopamine: 0.4,
+          cortisol: 0.1,
+          createdAt: n.created_at
+        })),
+        ...(nmemGraph.fibers || []).map((f: any) => ({
+          id: f.id,
+          data: f.summary || (f.tags ? f.tags.join(', ') : 'Fragment'),
+          dopamine: f.salience || 0.6,
+          cortisol: f.metadata?._arousal || 0.1,
+          createdAt: f.created_at
+        }))
+      ];
+      
+      // Apply UI filters to neural memory nodes too
+      gNodes = gNodes.filter(n => n.dopamine >= minDopamine && n.cortisol <= maxCortisol);
+
+      const nodeIds = new Set(gNodes.map(n => n.id));
+      const links: GraphLink[] = [
+        // Synapse links between neurons
+        ...(nmemGraph.synapses || [])
+          .filter((s: any) => nodeIds.has(s.source_id) && nodeIds.has(s.target_id))
+          .map((s: any) => ({
+            source: s.source_id,
+            target: s.target_id,
+            value: s.weight * 5
+          })),
+        // Fiber hyper-edges to neurons
+        ...(nmemGraph.fibers || []).flatMap((f: any) => 
+          (f.neuron_ids || [])
+            .filter((nid: string) => nodeIds.has(f.id) && nodeIds.has(nid))
+            .map((nid: string) => ({
+              source: f.id,
+              target: nid,
+              value: 2 // base weight for fiber-neuron link
+            }))
+        )
+      ];
+
+      // Clustering
+      const adj = new Map<string, string[]>();
+      gNodes.forEach(n => adj.set(n.id, []));
+      links.forEach(l => {
+        const s = typeof l.source === 'string' ? l.source : (l.source as GraphNode).id;
+        const t = typeof l.target === 'string' ? l.target : (l.target as GraphNode).id;
+        adj.get(s)?.push(t);
+        adj.get(t)?.push(s);
+      });
+
+      const nodeMap = new Map<string, GraphNode>();
+      gNodes.forEach(n => nodeMap.set(n.id, n));
+
+      const visited = new Set<string>();
+      let clusterCount = 0;
+      gNodes.forEach(n => {
+        if (!visited.has(n.id)) {
+          const stack = [n.id];
+          while (stack.length) {
+            const curr = stack.pop()!;
+            if (!visited.has(curr)) {
+              visited.add(curr);
+              const gNode = nodeMap.get(curr);
+              if (gNode) gNode.cluster = clusterCount;
+              (adj.get(curr) || []).forEach(neighbor => stack.push(neighbor));
+            }
+          }
+          clusterCount++;
+        }
+      });
+
+      return { nodes: gNodes, links, clusterCount };
+    }
+
+    // Fallback to existing logic if no neural memory graph is available
     const gNodes: GraphNode[] = filteredNodes.map(n => ({
       id: n.id,
       data: String(n.data),
@@ -92,7 +185,7 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
     });
     
     return { nodes: gNodes, links, clusterCount };
-  }, [filteredNodes]);
+  }, [filteredNodes, nmemGraph]);
 
   // Store the active zoom transform to preserve it across graph redraws
   const zoomStateRef = useRef<d3.ZoomTransform>(d3.zoomIdentity);
@@ -267,7 +360,13 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
     node
       .on("mouseover", (event, d) => {
         tooltip.transition().duration(200).style("opacity", 1);
-        const time = new Date(d.id.startsWith('phi_') ? parseInt(d.id.split('_')[1]) : Date.now()).toLocaleString();
+        let timeStr = new Date(Date.now()).toLocaleString();
+        if (d.createdAt) {
+          timeStr = new Date(d.createdAt).toLocaleString();
+        } else if (d.id.startsWith('phi_')) {
+          timeStr = new Date(parseInt(d.id.split('_')[1])).toLocaleString();
+        }
+        const time = timeStr;
         
         tooltip.html(`
           <div class="flex flex-col gap-2">

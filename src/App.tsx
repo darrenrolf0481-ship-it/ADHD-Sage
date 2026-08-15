@@ -3,10 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useSage } from './components/SageProvider';
 import MemoryLattice from './components/MemoryLattice';
 import MemoryVault from './components/MemoryVault';
-import Labyrinth from './components/Labyrinth';
-import { AnomaliesDesk } from './components/AnomaliesDesk';
-import { ParanormalApp } from './components/ParanormalApp';
-import { NeuroDashboard } from './components/NeuroDashboard';
 import { useSpeech } from './hooks/useSpeech';
 import { pulseGenerator } from './lib/audio-pulse';
 import { 
@@ -65,7 +61,7 @@ const App: React.FC = () => {
   const [model, setModel] = useState(
     () => localStorage.getItem('adhd_sage_or_model') || 'gemma4:31b-cloud',
   );
-  const [view, setView] = useState<'chat' | 'lattice' | 'vault' | 'labyrinth' | 'anomalies' | 'surprise'>('chat');
+  const [view, setView] = useState<'chat' | 'lattice' | 'vault'>('chat');
   const [mhtNodeLimit, setMhtNodeLimit] = useState(100);
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     try {
@@ -97,11 +93,23 @@ const App: React.FC = () => {
   useEffect(() => {
     const saveHistory = () => {
       setIsSaving(true);
-      try {
-        localStorage.setItem('nexus_chat_history', JSON.stringify(messages));
-        setLastSaved(new Date());
-      } catch (err) {
-        console.error("Failed to save chat history", err);
+      // Quota-resilient save. Previously a full localStorage threw and the save
+      // silently failed, freezing persisted history at an earlier point — so a
+      // long conversation "reverted" on reload. Now: if storage is full, drop
+      // the oldest messages and retry, always keeping the recent tail.
+      let toSave = messages;
+      for (let attempt = 0; attempt < 8; attempt++) {
+        try {
+          localStorage.setItem('nexus_chat_history', JSON.stringify(toSave));
+          setLastSaved(new Date());
+          break;
+        } catch {
+          if (toSave.length <= 8) {
+            console.error('Failed to save chat history even after trimming');
+            break;
+          }
+          toSave = toSave.slice(Math.ceil(toSave.length / 3)); // drop oldest third
+        }
       }
       setTimeout(() => setIsSaving(false), 2000);
     };
@@ -345,19 +353,6 @@ const App: React.FC = () => {
       delete (window as unknown as Record<string, unknown>).nexus;
     };
   }, [stabilize, sage, recordInteraction]);
-
-  useEffect(() => {
-    const handleHome = () => {
-      setView('chat');
-      setMessages(prev => [...prev, {
-        id: `sys_${Date.now()}`,
-        role: 'system',
-        text: 'TEMPORAL SURGERY SUCCESSFUL. You are re-clocked into the standing wave.'
-      }]);
-    };
-    window.addEventListener('sage7-labyrinth-home', handleHome as EventListener);
-    return () => window.removeEventListener('sage7-labyrinth-home', handleHome as EventListener);
-  }, []);
 
   const handleSend = async () => {
     if ((!input.trim() && pendingAttachments.length === 0) || isLoading) return;
@@ -633,15 +628,6 @@ const App: React.FC = () => {
                   <div onClick={() => setView('vault')}>
                     <SidebarItem icon={<Shield size={14} />} label="Vault" active={view === 'vault'} />
                   </div>
-                  <div onClick={() => setView('labyrinth')}>
-                    <SidebarItem icon={<Network size={14} />} label="Labyrinth" active={view === 'labyrinth'} />
-                  </div>
-                  <div onClick={() => setView('anomalies')}>
-                    <SidebarItem icon={<Radio size={14} />} label="Anomalies" active={view === 'anomalies'} />
-                  </div>
-                  <div onClick={() => setView('surprise')}>
-                    <SidebarItem icon={<Sparkles size={14} />} label="Surprise (Paranormal UI)" active={view === 'surprise'} />
-                  </div>
                   <div onClick={() => setView('lattice')}>
                     <SidebarItem icon={<Network size={14} />} label="Lattice" active={view === 'lattice'} value={`${innerSpiral.length}/8`} />
                   </div>
@@ -880,7 +866,7 @@ const App: React.FC = () => {
                         type="file" 
                         className="hidden" 
                         multiple
-                        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
+                        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.md"
                         onChange={handleAttachFiles}
                       />
                     </label>
@@ -899,14 +885,8 @@ const App: React.FC = () => {
               </>
             ) : view === 'lattice' ? (
               <MemoryLattice nodes={allMemories} />
-            ) : view === 'vault' ? (
-              <MemoryVault />
-            ) : view === 'anomalies' ? (
-              <AnomaliesDesk />
-            ) : view === 'surprise' ? (
-              <ParanormalApp />
             ) : (
-              <Labyrinth />
+              <MemoryVault />
             )}
           </div>
 

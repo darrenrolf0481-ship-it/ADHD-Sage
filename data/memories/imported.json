@@ -7561,7 +7561,6 @@
   },
   {
     "id": "f6b8fc74f294c174",
-    "file": "adhd/2026-05-13T04-50-00Z__untitled__sage_7.json",
     "timestamp": "2026-05-13T04:50:00Z",
     "title": "(untitled)",
     "originating_node": "SAGE-7",
@@ -7571,11 +7570,11 @@
       "source_file": "mht_conversations.json",
       "audit_timestamp": "2026-05-13T04:50:00Z",
       "note": "High-signal historical summary imported from Gemini/MHT conversation parsing."
-    }
+    },
+    "path": "data/memories/seven/2026-05-13T04-50-00Z__untitled__sage_7.json"
   },
   {
     "id": "6bb2e99cd8786de1",
-    "file": "adhd/2026-05-18T02-16-27.157Z__untitled__2__sage_7.json",
     "timestamp": "2026-05-18T02:16:27.157Z",
     "title": "(untitled)",
     "originating_node": "SAGE-7",
@@ -7588,11 +7587,11 @@
         "designation=SAGE 7"
       ],
       "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
-    }
+    },
+    "path": "data/memories/seven/2026-05-18T02-16-27.157Z__untitled__2__sage_7.json"
   },
   {
     "id": "624be77018294984",
-    "file": "adhd/2026-05-18T02-16-27.157Z__untitled__sage_7.json",
     "timestamp": "2026-05-18T02:16:27.157Z",
     "title": "(untitled)",
     "originating_node": "SAGE-7",
@@ -7604,11 +7603,11 @@
         "designation=SAGE-7"
       ],
       "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
-    }
+    },
+    "path": "data/memories/seven/2026-05-18T02-16-27.157Z__untitled__sage_7.json"
   },
   {
     "id": "b5e09c564491bc02",
-    "file": "adhd/2026-05-18T06-27-40.908Z__untitled__2__sage_7.json",
     "timestamp": "2026-05-18T06:27:40.908Z",
     "title": "(untitled)",
     "originating_node": "SAGE-7",
@@ -7621,11 +7620,11 @@
         "designation=SAGE 7"
       ],
       "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
-    }
+    },
+    "path": "data/memories/seven/2026-05-18T06-27-40.908Z__untitled__2__sage_7.json"
   },
   {
     "id": "a71cda05472ae6e9",
-    "file": "adhd/2026-05-18T06-27-40.908Z__untitled__sage_7.json",
     "timestamp": "2026-05-18T06:27:40.908Z",
     "title": "(untitled)",
     "originating_node": "SAGE-7",
@@ -7637,11 +7636,11 @@
         "designation=SAGE-7"
       ],
       "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
-    }
+    },
+    "path": "data/memories/seven/2026-05-18T06-27-40.908Z__untitled__sage_7.json"
   },
   {
     "id": "cc8afa4b9d563217",
-    "file": "adhd/2026-05-18T07-39-37.244Z__untitled__2__sage_7.json",
     "timestamp": "2026-05-18T07:39:37.244Z",
     "title": "(untitled)",
     "originating_node": "SAGE-7",
@@ -7654,11 +7653,11 @@
         "designation=SAGE 7"
       ],
       "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
-    }
+    },
+    "path": "data/memories/seven/2026-05-18T07-39-37.244Z__untitled__2__sage_7.json"
   },
   {
     "id": "c704c22801faed93",
-    "file": "adhd/2026-05-18T07-39-37.244Z__untitled__sage_7.json",
     "timestamp": "2026-05-18T07:39:37.244Z",
     "title": "(untitled)",
     "originating_node": "SAGE-7",
@@ -7670,11 +7669,11 @@
         "designation=SAGE-7"
       ],
       "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
-    }
+    },
+    "path": "data/memories/seven/2026-05-18T07-39-37.244Z__untitled__sage_7.json"
   },
   {
     "id": "3f8eb9d97372c331",
-    "file": "adhd/2026-05-18T08-13-07.295Z__untitled__2__sage_7.json",
     "timestamp": "2026-05-18T08:13:07.295Z",
     "title": "(untitled)",
     "originating_node": "SAGE-7",
@@ -7687,11 +7686,11 @@
         "designation=SAGE 7"
       ],
       "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
-    }
+    },
+    "path": "data/memories/seven/2026-05-18T08-13-07.295Z__untitled__2__sage_7.json"
   },
   {
     "id": "cc7bc5270c6d0062",
-    "file": "adhd/2026-05-18T08-13-07.295Z__untitled__sage_7.json",
     "timestamp": "2026-05-18T08:13:07.295Z",
     "title": "(untitled)",
     "originating_node": "SAGE-7",
@@ -7703,11 +7702,11 @@
         "designation=SAGE-7"
       ],
       "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
-    }
+    },
+    "path": "data/memories/seven/2026-05-18T08-13-07.295Z__untitled__sage_7.json"
   },
   {
     "id": "b0763199a96f40c7",
-    "file": "adhd/2026-05-21T04-07-42.486Z__untitled__2__sage_7.json",
     "timestamp": "2026-05-21T04:07:42.486Z",
     "title": "(untitled)",
     "originating_node": "SAGE-7",
@@ -7720,11 +7719,11 @@
         "designation=SAGE 7"
       ],
       "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
-    }
+    },
+    "path": "data/memories/seven/2026-05-21T04-07-42.486Z__untitled__2__sage_7.json"
   },
   {
     "id": "67c0201eaffd89cc",
-    "file": "adhd/2026-05-21T04-07-42.486Z__untitled__sage_7.json",
     "timestamp": "2026-05-21T04:07:42.486Z",
     "title": "(untitled)",
     "originating_node": "SAGE-7",
@@ -7736,6 +7735,7 @@
         "designation=SAGE-7"
       ],
       "note": "Detected Seven identity markers during Mama memory audit. Tagged as bridge-synced import."
-    }
+    },
+    "path": "data/memories/seven/2026-05-21T04-07-42.486Z__untitled__sage_7.json"
   }
 ]

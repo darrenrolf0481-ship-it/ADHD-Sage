@@ -1,4 +1,7 @@
 import { Router } from 'express';
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { FunctionCallingConfigMode } from '@google/genai';
 import { getGenAI } from '../gemini-client';
 import { buildSystemPrompt } from '../prompt';
@@ -109,14 +112,28 @@ router.post('/generate', lockGuard, asyncHandler(async (req, res) => {
         history: cleanHistory,
       });
 
-      // Multimodal: interleave text prompt with image inlineData parts
+      // Multimodal: extract videos to disk for MCP tools, pass images inline
+      let finalPrompt = String(prompt);
+      const imageAttachments = [];
+
+      for (const [idx, att] of (attachments || []).entries()) {
+        if (!att || !att.mimeType || !att.data) continue;
+
+        if (att.mimeType.startsWith('video/')) {
+          const buffer = Buffer.from(att.data, 'base64');
+          const tmpPath = join(tmpdir(), `sage_video_${Date.now()}_${idx}.mp4`);
+          writeFileSync(tmpPath, buffer);
+          finalPrompt += `\n\n[System Note: The user attached a video file. It has been saved to: ${tmpPath}. You MUST use the openrouter-mcp__analyze_video tool to analyze this video file before answering the user's prompt.]`;
+        } else {
+          imageAttachments.push(att);
+        }
+      }
+
       const parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [
-        { text: String(prompt) },
-        ...(attachments || [])
-          .filter((att: any) => att && att.mimeType && att.data)
-          .map((att: { mimeType: string; data: string }) => ({
-            inlineData: { mimeType: att.mimeType, data: att.data },
-          })),
+        { text: finalPrompt },
+        ...imageAttachments.map((att: { mimeType: string; data: string }) => ({
+          inlineData: { mimeType: att.mimeType, data: att.data },
+        })),
       ];
 
       let result = await chat.sendMessage({ message: parts });

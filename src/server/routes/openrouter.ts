@@ -1,9 +1,13 @@
 import { Router } from 'express';
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { swarmFetch } from '../swarm';
 import { OPENROUTER_TIMEOUT_MS, OPENROUTER_FALLBACK_MODELS } from '../config';
 import { buildSystemPrompt } from '../prompt';
 import { searchMemories, addMemory, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
 import { searchLocalMemories, isLowSignalQuery, stripForeignFossils } from '../memory-local';
+import { executeMcpTool } from '../../core/mcp';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
 
@@ -51,29 +55,43 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       }
     }
 
-    const orMessages: any[] = [
-      { role: 'system', content: orSystem },
-      ...(messages || []).map((m: { role: string; text?: string; content?: string }, idx: number) => {
-        const isLast = idx === messages.length - 1;
-        const role = m.role === 'assistant' ? 'assistant' : m.role === 'system' ? 'system' : 'user';
-        const textContent = m.text || m.content || '';
+    const orMessages: any[] = [{ role: 'system', content: orSystem }];
+    for (let idx = 0; idx < (messages || []).length; idx++) {
+      const m = messages[idx];
+      const isLast = idx === messages.length - 1;
+      const role = m.role === 'assistant' ? 'assistant' : m.role === 'system' ? 'system' : 'user';
+      let textContent = m.text || m.content || '';
 
-        if (role === 'user' && isLast && attachments && attachments.length > 0) {
-          const contentParts: any[] = [
-            { type: 'text', text: textContent },
-            ...attachments.map((att: { mimeType: string; data: string }) => ({
-              type: 'image_url',
-              image_url: {
-                url: `data:${att.mimeType};base64,${att.data}`,
-              },
-            })),
-          ];
-          return { role, content: contentParts };
+      if (role === 'user' && isLast && attachments && attachments.length > 0) {
+        const imageAttachments = [];
+        for (const [aIdx, att] of attachments.entries()) {
+          if (!att || !att.mimeType || !att.data) continue;
+          if (att.mimeType.startsWith('video/')) {
+            const buffer = Buffer.from(att.data, 'base64');
+            const tmpPath = join(tmpdir(), `sage_video_${Date.now()}_${aIdx}.mp4`);
+            writeFileSync(tmpPath, buffer);
+            const toolRes = await executeMcpTool('openrouter-mcp__analyze_video', { video_path: tmpPath, question: textContent });
+            textContent += `\n\n[System Note: A video was attached. Automatic analysis from MCP tool:\n${toolRes?.result || JSON.stringify(toolRes)}\n]`;
+          } else {
+            imageAttachments.push(att);
+          }
         }
 
-        return { role, content: textContent };
-      }),
-    ];
+        const contentParts: any[] = [
+          { type: 'text', text: textContent },
+          ...imageAttachments.map((att: any) => ({
+            type: 'image_url',
+            image_url: {
+              url: `data:${att.mimeType};base64,${att.data}`,
+            },
+          })),
+        ];
+        orMessages.push({ role, content: contentParts });
+        continue;
+      }
+
+      orMessages.push({ role, content: textContent });
+    }
 
     // When images are attached, wildcard/auto-routing models (e.g. openrouter/free)
     // silently strip image_url content — they succeed but return a text-only response.

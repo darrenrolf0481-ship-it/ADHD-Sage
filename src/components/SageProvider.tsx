@@ -48,8 +48,8 @@ export const SageProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .then((r) => r.json())
         .then((d) => {
           const texts: string[] = (d?.memories || [])
-            .map((m: { text?: string }) => m.text)
-            .filter((t: unknown): t is string => typeof t === 'string' && t.trim().length > 0);
+            .map((m: { text?: string }) => (m.text || '').slice(0, 400)) // keep localStorage lean
+            .filter((t: string) => t.trim().length > 0);
           if (texts.length) memory.bulkStash(texts);
         })
         .catch(() => {});

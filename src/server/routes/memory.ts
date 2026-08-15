@@ -123,4 +123,24 @@ router.get('/profile', lockGuard, asyncHandler(async (req, res) => {
   res.json(profile ?? {});
 }));
 
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+
+/**
+ * GET /api/memory/graph
+ * Exports the current Neural Memory brain graph to JSON and returns it for the UI.
+ */
+router.get('/graph', lockGuard, asyncHandler(async (req, res) => {
+  try {
+    const tmpPath = path.join('/tmp', `brain_export_${Date.now()}.json`);
+    execSync(`nmem export ${tmpPath}`, { stdio: 'pipe' });
+    const data = JSON.parse(fs.readFileSync(tmpPath, 'utf8'));
+    fs.unlinkSync(tmpPath);
+    res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ error: 'Failed to export Neural Memory graph', details: err.message });
+  }
+}));
+
 export default router;

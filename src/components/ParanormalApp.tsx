@@ -265,10 +265,29 @@ function ChatTab({ settings }: { settings: Settings }) {
 
       <div className="flex-1 overflow-y-auto mb-4 space-y-4 bg-[linear-gradient(135deg,rgba(255,255,255,0.02),transparent)] border border-white/5 p-4 rounded-[24px] overflow-x-hidden shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
         {chatLog.map((entry, i) => (
-          <div key={i} className={`p-3 rounded-2xl max-w-[85%] text-sm font-sans leading-relaxed ${entry.role === 'user' ? 'bg-[#22d3ee]/5 border border-[#22d3ee]/20 ml-auto text-white shadow-[0_0_15px_rgba(34,211,238,0.05)]' : entry.role === 'sys' ? 'bg-red-500/5 border border-red-500/20 text-red-400' : 'bg-[#c084fc]/5 border border-[#c084fc]/10 text-white/90 shadow-[0_0_15px_rgba(192,132,252,0.05)]'}`}>
+          <div key={i} className={`relative group p-3 rounded-2xl max-w-[85%] text-sm font-sans leading-relaxed ${entry.role === 'user' ? 'bg-[#22d3ee]/5 border border-[#22d3ee]/20 ml-auto text-white shadow-[0_0_15px_rgba(34,211,238,0.05)]' : entry.role === 'sys' ? 'bg-red-500/5 border border-red-500/20 text-red-400' : 'bg-[#c084fc]/5 border border-[#c084fc]/10 text-white/90 shadow-[0_0_15px_rgba(192,132,252,0.05)]'}`}>
             <span className={`text-[9px] font-bold tracking-widest block mb-1.5 uppercase ${entry.role === 'user' ? 'text-[#22d3ee]/70' : entry.role === 'sys' ? 'text-red-500/70' : 'text-[#c084fc]/70'}`}>
               {isDecrypted ? entry.role : `NODE_${i.toString(16).padStart(4, '0')}`}
             </span>
+            {entry.role !== 'user' && entry.role !== 'sys' && entry.text && (
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(entry.text);
+                  const btn = document.getElementById(`paranormal-copy-btn-${i}`);
+                  if (btn) {
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                    setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
+                  }
+                }}
+                id={`paranormal-copy-btn-${i}`}
+                className="absolute top-2 right-2 p-1 rounded bg-[#c084fc]/10 border border-[#c084fc]/20 text-[#c084fc]/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:text-[#c084fc] transition-all focus:outline-none"
+                title="Copy message"
+                aria-label="Copy message"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
+            )}
             <div className={`whitespace-pre-wrap ${!isDecrypted ? 'font-mono text-[10px] opacity-70 break-all' : ''}`}>
               {!isDecrypted ? `[DATA_PACKET_0x${(i+1).toString(16).toUpperCase()}]\n${encodeHex(entry.text)}` : entry.text}
             </div>
@@ -326,7 +345,7 @@ function ChatTab({ settings }: { settings: Settings }) {
           ref={fileInputRef} 
           className="hidden" 
           multiple
-          accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
+          accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.md"
           onChange={(e) => {
              if (e.target.files && e.target.files.length > 0) {
                const newAttachments = Array.from(e.target.files).map(f => {
