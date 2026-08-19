@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useSage } from './components/SageProvider';
 import MemoryLattice from './components/MemoryLattice';
 import MemoryVault from './components/MemoryVault';
+import NeuroDashboard from './components/NeuroDashboard';
 import { useSpeech } from './hooks/useSpeech';
 import { pulseGenerator } from './lib/audio-pulse';
 import { 
@@ -46,21 +47,51 @@ const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   // Chat model — free-tier OpenRouter IDs this deployment validates. Persisted.
-  // Chat models. Ollama-cloud (gemma4:31b-cloud, minimax-m3:cloud) are free,
-  // fast and strong here → default + top of list. OpenRouter free is the
-  // fallback (its named models are often rate-limited). Pure-local Ollama
-  // models are omitted: they hang on this box's CPU. Choice is persisted.
-  const MODELS: { id: string; label: string; provider: AIProvider }[] = [
-    { id: 'gemma4:31b-cloud', label: 'Gemma4 31B · cloud (free, fast) ★', provider: 'ollama' },
-    { id: 'minimax-m3:cloud', label: 'MiniMax M3 · cloud (free)', provider: 'ollama' },
-    { id: 'openrouter/free', label: 'OpenRouter auto (free)', provider: 'openrouter' },
-    { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash (requires key)', provider: 'gemini' },
-    { id: 'meta-llama/llama-3.3-70b-instruct:free', label: 'Llama 3.3 70B · OR (may be busy)', provider: 'openrouter' },
-    { id: 'qwen/qwen3-next-80b-a3b-instruct:free', label: 'Qwen3 80B · OR (may be busy)', provider: 'openrouter' },
+  const [localOllamaModels, setLocalOllamaModels] = useState<{ id: string; label: string; provider: AIProvider }[]>([]);
+
+  useEffect(() => {
+    fetch('/api/ollama/tags')
+      .then((r) => r.json())
+      .then((data) => {
+        const found = (data.models || []).map((m: { name: string }) => ({
+          id: m.name,
+          label: `🦙 ${m.name} (Local Ollama) ★`,
+          provider: 'ollama' as AIProvider,
+        }));
+        if (found.length > 0) setLocalOllamaModels(found);
+      })
+      .catch(() => {});
+  }, []);
+
+  const BASE_MODELS: { id: string; label: string; provider: AIProvider }[] = [
+    { id: 'gemma2:2b', label: '🦙 Gemma 2:2B (Local Ollama) ★', provider: 'ollama' },
+    { id: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet (OpenRouter)', provider: 'openrouter' },
+    { id: 'anthropic/claude-3.5-haiku', label: 'Claude 3.5 Haiku (OpenRouter)', provider: 'openrouter' },
+    { id: 'openai/gpt-4o', label: 'GPT-4o (OpenRouter)', provider: 'openrouter' },
+    { id: 'deepseek/deepseek-chat', label: 'DeepSeek Chat (OpenRouter)', provider: 'openrouter' },
+    { id: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B (OpenRouter)', provider: 'openrouter' },
+    { id: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash (OpenRouter)', provider: 'openrouter' },
+    { id: 'openrouter/free', label: 'OpenRouter Auto (Free)', provider: 'openrouter' },
+    { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash (Direct API)', provider: 'gemini' },
   ];
-  const [model, setModel] = useState(
-    () => localStorage.getItem('adhd_sage_or_model') || 'gemma4:31b-cloud',
-  );
+
+  const MODELS = useMemo(() => {
+    const combined = [...localOllamaModels];
+    for (const m of BASE_MODELS) {
+      if (!combined.some((c) => c.id === m.id)) {
+        combined.push(m);
+      }
+    }
+    return combined;
+  }, [localOllamaModels]);
+
+  const [model, setModel] = useState(() => {
+    const saved = localStorage.getItem('adhd_sage_or_model');
+    if (!saved || saved.includes('gemma4') || saved.includes('google/gemma') || saved.includes('bjoernb')) {
+      return 'gemma2:2b';
+    }
+    return saved;
+  });
   const [view, setView] = useState<'chat' | 'lattice' | 'vault'>('chat');
   const [mhtNodeLimit, setMhtNodeLimit] = useState(100);
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
@@ -368,7 +399,8 @@ const App: React.FC = () => {
     if (window.innerWidth < 768) setIsSidebarOpen(false);
 
     try {
-      const provider = MODELS.find((m) => m.id === model)?.provider ?? 'openrouter';
+      const isOllama = model.startsWith('gemma') || localOllamaModels.some((m) => m.id === model) || (!model.includes('/') && !model.startsWith('gemini'));
+      const provider: AIProvider = isOllama ? 'ollama' : (MODELS.find((m) => m.id === model)?.provider ?? (model.includes('/') ? 'openrouter' : 'ollama'));
       const history = messages
         .slice(-15)
         .filter((m) => m.role !== 'system')
@@ -423,11 +455,13 @@ const App: React.FC = () => {
           .filter((a) => a.type !== 'document' && a.data && a.mimeType)
           .map((a) => ({ mimeType: a.mimeType, data: a.data }));
 
+        const orApiKey = localStorage.getItem('openrouter_api_key') || localStorage.getItem('OPENROUTER_API_KEY') || undefined;
         response = await fetch('/api/openrouter/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           signal: AbortSignal.timeout(120000),
           body: JSON.stringify({
+            apiKey: orApiKey,
             model,
             containerTag: 'shared',
             messages: [...history, { role: 'user', text: fullPrompt }],
@@ -841,9 +875,21 @@ const App: React.FC = () => {
                     }}
                     className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-slate-300 outline-none focus:border-cyan-500/50 cursor-pointer"
                   >
-                    {MODELS.map((m) => (
-                      <option key={m.id} value={m.id} className="bg-[#0a0a0c] text-slate-200">{m.label}</option>
-                    ))}
+                    <optgroup label="🦙 Local Ollama (Offline / Active)">
+                      {MODELS.filter(m => m.provider === 'ollama').map((m) => (
+                        <option key={m.id} value={m.id} className="bg-[#0a0a0c] text-cyan-300 font-semibold">{m.label}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="⟁ OpenRouter (Cloud / API Key)">
+                      {MODELS.filter(m => m.provider === 'openrouter').map((m) => (
+                        <option key={m.id} value={m.id} className="bg-[#0a0a0c] text-slate-200">{m.label}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="♊ Google Gemini">
+                      {MODELS.filter(m => m.provider === 'gemini').map((m) => (
+                        <option key={m.id} value={m.id} className="bg-[#0a0a0c] text-slate-200">{m.label}</option>
+                      ))}
+                    </optgroup>
                   </select>
                 </div>
 

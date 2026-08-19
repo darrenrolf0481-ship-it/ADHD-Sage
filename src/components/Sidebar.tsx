@@ -12,6 +12,10 @@ import {
   RefreshCw,
   Radio,
   Code2,
+  Key,
+  Eye,
+  EyeOff,
+  Check,
 } from 'lucide-react';
 import { SidebarItem } from './SidebarItem';
 import type { AppView, AIProvider } from '../types';
@@ -88,6 +92,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
   searchResults,
   sortedInnerSpiral,
 }) => {
+  const [openRouterKey, setOpenRouterKey] = React.useState(() => {
+    try {
+      return localStorage.getItem('openrouter_api_key') || localStorage.getItem('OPENROUTER_API_KEY') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [showKey, setShowKey] = React.useState(false);
+  const [keySaved, setKeySaved] = React.useState(false);
+
+  const saveKey = (val: string) => {
+    setOpenRouterKey(val);
+    try {
+      localStorage.setItem('openrouter_api_key', val);
+      localStorage.setItem('OPENROUTER_API_KEY', val);
+      setKeySaved(true);
+      setTimeout(() => setKeySaved(false), 2000);
+    } catch (e) {
+      console.warn('Failed to save key to localStorage', e);
+    }
+  };
+
   return (
     <>
       {/* Mobile Sidebar Overlay */}
@@ -429,23 +455,84 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                   )}
 
-                  {/* OpenRouter model picker */}
+                  {/* OpenRouter configuration */}
                   {provider === 'openrouter' && (
-                    <div className="mt-2 space-y-1">
-                      {orModels.map((m) => (
-                        <button
-                          key={m.id}
-                          onClick={() => setOrModel(m.id)}
-                          className={`w-full text-left px-2 py-1.5 rounded-lg text-[10px] font-mono transition-all ${
-                            orModel === m.id
-                              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-                              : 'bg-[#1C1C1E] text-slate-500 border border-transparent hover:text-slate-300'
-                          }`}
-                        >
-                          {orModel === m.id ? '▶ ' : '  '}
-                          {m.label}
-                        </button>
-                      ))}
+                    <div className="mt-3 space-y-2">
+                      {/* API Key Input */}
+                      <div className="p-2.5 rounded-xl bg-[#1C1C1E] border border-white/10">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-[9px] font-mono text-slate-400 uppercase font-bold flex items-center gap-1.5">
+                            <Key size={11} className="text-cyan-400" />
+                            OpenRouter API Key
+                          </label>
+                          {keySaved && (
+                            <span className="text-[8px] font-mono text-emerald-400 flex items-center gap-0.5">
+                              <Check size={10} /> SAVED
+                            </span>
+                          )}
+                        </div>
+                        <div className="relative flex items-center">
+                          <input
+                            type={showKey ? 'text' : 'password'}
+                            value={openRouterKey}
+                            onChange={(e) => saveKey(e.target.value)}
+                            placeholder="sk-or-v1-..."
+                            className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] font-mono text-cyan-300 placeholder-slate-600 focus:outline-none focus:border-cyan-400/50 pr-7"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowKey(!showKey)}
+                            className="absolute right-1.5 text-slate-500 hover:text-slate-300 transition-colors"
+                          >
+                            {showKey ? <EyeOff size={12} /> : <Eye size={12} />}
+                          </button>
+                        </div>
+                        <p className="text-[8px] text-slate-500 mt-1">
+                          Stored locally in your browser.
+                        </p>
+                      </div>
+
+                      {/* Quick Model Presets */}
+                      <div className="space-y-1">
+                        <p className="text-[9px] font-mono text-slate-500 uppercase px-1">
+                          Model Presets
+                        </p>
+                        <div className="grid grid-cols-2 gap-1">
+                          {[
+                            { id: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet' },
+                            { id: 'anthropic/claude-3.5-haiku', label: 'Claude 3.5 Haiku' },
+                            { id: 'openai/gpt-4o', label: 'GPT-4o' },
+                            { id: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B' },
+                            { id: 'deepseek/deepseek-chat', label: 'DeepSeek Chat' },
+                            { id: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+                            { id: 'openrouter/free', label: 'OpenRouter Free' },
+                          ].map((preset) => (
+                            <button
+                              key={preset.id}
+                              onClick={() => setOrModel(preset.id)}
+                              className={`px-2 py-1 rounded text-[9px] font-mono text-left truncate transition-all ${
+                                orModel === preset.id
+                                  ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 font-bold'
+                                  : 'bg-[#1C1C1E] text-slate-400 hover:text-white border border-white/5'
+                              }`}
+                              title={preset.id}
+                            >
+                              {preset.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Custom Model Selector */}
+                      <div className="mt-1">
+                        <input
+                          type="text"
+                          value={orModel}
+                          onChange={(e) => setOrModel(e.target.value)}
+                          placeholder="Custom model: author/model-id"
+                          className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] font-mono text-slate-300 placeholder-slate-600 focus:outline-none focus:border-cyan-400/50"
+                        />
+                      </div>
                     </div>
                   )}
 

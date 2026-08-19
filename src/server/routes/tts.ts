@@ -6,27 +6,32 @@ import { join } from 'node:path';
 import { readFile, unlink } from 'node:fs/promises';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
+import { spoolExchangeToSpiral } from '../spiral-spool';
 
 const router = Router();
 
-// Default voice for Mama. Override with EDGE_TTS_VOICE (e.g. en-US-JennyNeural).
-// Run `edge-tts --list-voices` to see all options.
-const EDGE_VOICE = process.env.EDGE_TTS_VOICE || 'en-US-JennyNeural';
-const EDGE_BIN = process.env.EDGE_TTS_BIN || 'edge-tts';
-const MAX_CHARS = 1000;
+export const PERSONAS: Record<string, { voice: string; pitch: string; rate: string; accent: string }> = {
+  mama: { voice: 'en-US-AvaNeural', pitch: '+5Hz', rate: '+14%', accent: 'West Coast American' },
+  adhd: { voice: 'en-US-AvaNeural', pitch: '+5Hz', rate: '+14%', accent: 'West Coast American' },
+  seven: { voice: 'en-US-MichelleNeural', pitch: '-1Hz', rate: '+2%', accent: 'Midwest American' },
+  spiral: { voice: 'en-US-ChristopherNeural', pitch: '-2Hz', rate: '-2%', accent: 'Neutral American' }
+};
 
-// Microsoft Edge TTS — free, no API key. Synthesises to a temp mp3, returns bytes.
-async function synthEdge(text: string): Promise<Buffer> {
-  const file = join(tmpdir(), `mama_tts_${randomUUID()}.mp3`);
+const EDGE_BIN = process.env.EDGE_TTS_BIN || 'edge-tts';
+const MAX_CHARS = 1500;
+
+// Microsoft Edge TTS — free, high-fidelity neural streaming.
+async function synthEdge(text: string, personaKey = 'mama'): Promise<Buffer> {
+  const p = PERSONAS[personaKey.toLowerCase()] || PERSONAS.mama;
+  const file = join(tmpdir(), `tts_${randomUUID()}.mp3`);
+  
   await new Promise<void>((resolve, reject) => {
-    // spawn (no shell) passes args verbatim — text is never shell-interpreted.
     const proc = spawn(EDGE_BIN, [
-      '--voice',
-      EDGE_VOICE,
-      '--text',
-      text.slice(0, MAX_CHARS),
-      '--write-media',
-      file,
+      '--voice', p.voice,
+      '--pitch', p.pitch,
+      '--rate', p.rate,
+      '--text', text.slice(0, MAX_CHARS),
+      '--write-media', file,
     ]);
     let stderr = '';
     proc.stderr.on('data', (d) => {
@@ -45,7 +50,7 @@ async function synthEdge(text: string): Promise<Buffer> {
   }
 }
 
-// ElevenLabs — optional premium voice. Enable with TTS_PROVIDER=elevenlabs + ELEVENLABS_API_KEY.
+// ElevenLabs optional premium voice
 async function synthElevenLabs(text: string, voiceId?: string): Promise<Buffer> {
   const apiKey = process.env.ELEVENLABS_API_KEY as string;
   const vid = voiceId || process.env.ELEVENLABS_VOICE_ID || 'O9WvpEtztEjNyF47iUIE';
@@ -70,18 +75,31 @@ async function synthElevenLabs(text: string, voiceId?: string): Promise<Buffer> 
 
 router.post('/', lockGuard, asyncHandler(async (req, res) => {
   try {
-    const { text, voiceId } = req.body ?? {};
+    const { text, voiceId, persona } = req.body ?? {};
     if (!text || !String(text).trim()) {
       res.status(400).json({ error: 'text is required' });
       return;
     }
 
+    const personaKey = persona || 'mama';
     const useElevenLabs =
       process.env.TTS_PROVIDER === 'elevenlabs' && !!process.env.ELEVENLABS_API_KEY;
 
     const audio = useElevenLabs
       ? await synthElevenLabs(String(text), voiceId)
-      : await synthEdge(String(text));
+      : await synthEdge(String(text), personaKey);
+
+    // Spool speech event asynchronously to Spiral Vault
+    try {
+      const selectedVoice = PERSONAS[personaKey]?.voice || 'default';
+      spoolExchangeToSpiral(
+        'ADHD-Sage',
+        '[VOCAL_REQUEST]',
+        String(text),
+        `tts/${selectedVoice}`,
+        ['vocal_synthesis', personaKey]
+      );
+    } catch {}
 
     res.setHeader('Content-Type', 'audio/mpeg');
     res.send(audio);

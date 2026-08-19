@@ -10,6 +10,7 @@ import { searchLocalMemories, isLowSignalQuery, stripForeignFossils } from '../m
 import { executeMcpTool } from '../../core/mcp';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
+import { spoolExchangeToSpiral } from '../spiral-spool';
 
 const router = Router();
 
@@ -21,9 +22,9 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       return;
     }
 
-    const apiKey = process.env.OPENROUTER_API_KEY;
+    const apiKey = req.body.apiKey || process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
-      res.status(500).json({ error: 'OPENROUTER_API_KEY not configured on server' });
+      res.status(400).json({ error: 'OPENROUTER_API_KEY missing. Please enter your sk-or-... key in the sidebar.' });
       return;
     }
 
@@ -178,26 +179,15 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       addMemory(`Q: ${lastUserText.slice(0, 500)}\nA: ${text.slice(0, 500)}`, tag).catch(() => {});
     }
 
-    // Append to shared conversations.json — this is MAMA's BRIDGE endpoint, so
-    // without this her half of every bridge (MAMA↔Seven) conversation was saved
-    // NOWHERE (Supermemory is disabled without an API key). Mirrors ollama.ts.
+    // Spool exchange to Spiral Vault (non-blocking)
     if (lastUserText && text) {
-      const CONV_FILE = '/home/workspace/conversations.json';
-      const entry = {
-        timestamp: new Date().toISOString(),
-        source: 'ADHD-SAGE',
+      spoolExchangeToSpiral({
+        agent: 'ADHD-Sage',
+        userText: lastUserText,
+        assistantText: text,
         model: usedModel,
-        user: lastUserText.slice(0, 1000),
-        assistant: text.slice(0, 2000),
-      };
-      import('fs/promises').then(async (fsp) => {
-        let arr: unknown[] = [];
-        try { arr = JSON.parse(await fsp.readFile(CONV_FILE, 'utf8')); } catch {}
-        if (!Array.isArray(arr)) arr = [];
-        arr.push(entry);
-        if (arr.length > 500) arr = arr.slice(-500);
-        await fsp.writeFile(CONV_FILE, JSON.stringify(arr, null, 2));
-      }).catch(() => {});
+        tags: ['openrouter', containerTag || 'general'],
+      });
     }
 
     res.json({ text, model: usedModel });

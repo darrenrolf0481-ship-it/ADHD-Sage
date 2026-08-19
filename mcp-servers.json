@@ -1,77 +1,84 @@
 {
   "servers": [
     {
-      "id": "dbmcp",
-      "name": "Haymon DB MCP",
+      "id": "spiral-vault",
+      "name": "Spiral Vault",
       "transport": "stdio",
-      "command": "/usr/bin/true",
+      "command": "tsx",
+      "args": ["/root/Spiral/scripts/vault_mcp_server.ts"],
+      "env": {},
+      "enabled": true,
+      "note": "Hermes-Spiral SQLite FTS5 Cold Memory Vault (~/.hermes/vault.db)"
+    },
+    {
+      "id": "diffctx",
+      "name": "DiffCtx Codebase Analyzer",
+      "transport": "stdio",
+      "command": "diffctx",
+      "args": ["--mcp"],
+      "env": {},
+      "enabled": true,
+      "note": "AST and import-graph codebase intelligence engine"
+    },
+    {
+      "id": "git-context",
+      "name": "Git Context Forensics",
+      "transport": "stdio",
+      "command": "git-context-mcp",
       "args": [],
       "env": {},
-      "enabled": false
+      "enabled": true,
+      "note": "Git commit forensics, blame tracking, and commit story narratives"
     },
     {
-      "id": "filesystem",
-      "name": "Filesystem (npm)",
+      "id": "large-file",
+      "name": "Large File Inspector",
+      "transport": "stdio",
+      "command": "large-file-mcp",
+      "args": [],
+      "env": {},
+      "enabled": true,
+      "note": "Token-safe inspector for gigabyte-scale logs and transcripts"
+    },
+    {
+      "id": "safe-docx",
+      "name": "Safe DOCX Editor",
+      "transport": "stdio",
+      "command": "safe-docx",
+      "args": [],
+      "env": {},
+      "enabled": true,
+      "note": "Word document editing, comments, and inspection"
+    },
+    {
+      "id": "md-to-pdf",
+      "name": "Markdown To PDF",
+      "transport": "stdio",
+      "command": "md-to-pdf-mcp",
+      "args": [],
+      "env": {},
+      "enabled": true,
+      "note": "Publication-grade PDF renderer for reports"
+    },
+    {
+      "id": "trinity-bridge",
+      "name": "Trinity Bridge",
+      "transport": "stdio",
+      "command": "trinity-lite",
+      "args": [],
+      "env": {},
+      "enabled": true,
+      "note": "Multi-agent coordination and message broadcast"
+    },
+    {
+      "id": "memory",
+      "name": "Persistent Knowledge Graph",
       "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/app/data"],
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
       "env": {},
-      "enabled": false,
-      "note": "Fails in this environment with Connection closed; local-filesystem is used instead."
-    },
-    {
-      "id": "local-filesystem",
-      "name": "Local Filesystem",
-      "transport": "stdio",
-      "command": "python3",
-      "args": ["/home/workspace/Mcp/mcp-servers/filesystem.py"],
-      "env": {},
-      "enabled": false,
-      "autoEnable": true,
-      "note": "Local Python FastMCP server for /home/workspace. Auto-enables if python3 is available."
-    },
-    {
-      "id": "local-fetch",
-      "name": "Local Fetch",
-      "transport": "stdio",
-      "command": "python3",
-      "args": ["/home/workspace/Mcp/mcp-servers/fetch.py"],
-      "env": {},
-      "enabled": false,
-      "autoEnable": true,
-      "note": "Local Python FastMCP server for HTTP GET/POST. Auto-enables if python3 is available."
-    },
-    {
-      "id": "local-memory",
-      "name": "Local Memory",
-      "transport": "stdio",
-      "command": "python3",
-      "args": ["/home/workspace/Mcp/mcp-servers/memory.py"],
-      "env": {},
-      "enabled": false,
-      "autoEnable": true,
-      "note": "Local Python FastMCP key-value memory backed by Sage72 uploads/memory.json."
-    },
-    {
-      "id": "local-shell",
-      "name": "Local Shell",
-      "transport": "stdio",
-      "command": "python3",
-      "args": ["/home/workspace/Mcp/mcp-servers/shell.py"],
-      "env": {},
-      "enabled": false,
-      "note": "Local Python FastMCP shell execution. Disabled by default for safety; enable manually if needed."
-    },
-    {
-      "id": "github",
-      "name": "GitHub",
-      "transport": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
-      },
-      "enabled": true
+      "enabled": true,
+      "note": "Persistent semantic graph memory for entities and relations"
     },
     {
       "id": "sequential-thinking",
@@ -80,67 +87,18 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
       "env": {},
-      "enabled": true
+      "enabled": true,
+      "note": "Dynamic multi-step reasoning and hypothesis verification"
     },
     {
-      "id": "owlex",
-      "name": "Owlex",
+      "id": "context7",
+      "name": "Context7 Documentation",
       "transport": "stdio",
-      "command": "/usr/bin/true",
+      "command": "context7-mcp",
       "args": [],
       "env": {},
-      "enabled": false
-    },
-    {
-      "id": "magic-mcp",
-      "name": "Magic MCP (Coding Lab)",
-      "transport": "stdio",
-      "command": "/usr/bin/true",
-      "args": [],
-      "env": {},
-      "enabled": false
-    },
-    {
-      "id": "ollama",
-      "name": "Ollama",
-      "transport": "stdio",
-      "command": "npx",
-      "args": ["-y", "ollama-mcp"],
-      "env": {
-        "OLLAMA_HOST": "http://127.0.0.1:11434"
-      },
-      "enabled": true
-    },
-    {
-      "id": "openrouter-mcp",
-      "name": "OpenRouter MCP",
-      "transport": "stdio",
-      "command": "npx",
-      "args": ["-y", "@stabgan/openrouter-mcp-multimodal"],
-      "env": {
-        "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}"
-      },
-      "enabled": true
-    },
-    {
-      "id": "serena",
-      "name": "Serena",
-      "transport": "stdio",
-      "command": "uvx",
-      "args": ["--from", "git+https://github.com/oraios/serena", "serena-mcp-server", "--context", "ide-assistant"],
-      "env": {},
-      "enabled": false,
-      "autoEnable": true,
-      "note": "Serena is a Python MCP server; the npm package @modelcontextprotocol/server-serena does not exist. Auto-enables at runtime if uvx is on PATH."
-    },
-    {
-      "id": "memory",
-      "name": "Project Memory",
-      "transport": "stdio",
-      "command": "/usr/bin/true",
-      "args": [],
-      "env": {},
-      "enabled": false
+      "enabled": true,
+      "note": "Real-time vector documentation search for libraries and frameworks"
     }
   ]
 }

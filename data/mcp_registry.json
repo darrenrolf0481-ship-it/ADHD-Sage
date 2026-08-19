@@ -1,0 +1,159 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-08-19T19:22:00Z",
+  "description": "Active Model Context Protocol (MCP) tool registry available to ADHD-Sage, Sage 7, and Antigravity agents.",
+  "servers": {
+    "spiral-vault": {
+      "name": "spiral-vault",
+      "command": "tsx",
+      "args": ["/root/Spiral/scripts/vault_mcp_server.ts"],
+      "transport": "stdio",
+      "status": "active",
+      "category": "memory_and_archival",
+      "description": "Hermes-Spiral persistent cold memory vault backed by SQLite FTS5 database (~/.hermes/vault.db).",
+      "tools": [
+        {
+          "name": "query_spiral_vault",
+          "description": "Search cold storage for past conversational turns, architectural decisions, and session history.",
+          "parameters": { "query": "string (required)", "limit": "number (default 5)" }
+        },
+        {
+          "name": "get_vault_stats",
+          "description": "Returns total count of indexed interactions and date range.",
+          "parameters": {}
+        },
+        {
+          "name": "get_vault_session",
+          "description": "Retrieve full conversation exchange for a specific session ID.",
+          "parameters": { "sessionId": "string (required)" }
+        }
+      ]
+    },
+    "diffctx": {
+      "name": "diffctx",
+      "command": "diffctx",
+      "transport": "cli_and_mcp",
+      "status": "active",
+      "category": "codebase_intelligence",
+      "description": "Deterministic AST and import-graph codebase intelligence engine for deep repo structure mapping.",
+      "tools": [
+        {
+          "name": "analyze_repo",
+          "description": "Generates dependency graph, symbol maps, and context matrices across entire repository.",
+          "parameters": { "path": "string" }
+        }
+      ]
+    },
+    "git-context": {
+      "name": "git-context",
+      "command": "git-context-mcp",
+      "transport": "stdio",
+      "status": "active",
+      "category": "version_control",
+      "description": "Git commit forensics, blame tracking, commit story narratives, and author contribution analysis.",
+      "tools": [
+        { "name": "blame_context", "description": "Extract historical line evolution and diff history." },
+        { "name": "commit_story", "description": "Synthesize high-level narrative for recent changes." },
+        { "name": "file_history", "description": "Track evolution of specific files over time." },
+        { "name": "search_commits", "description": "Search repository history by semantic regex." }
+      ]
+    },
+    "large-file": {
+      "name": "large-file",
+      "command": "large-file-mcp",
+      "transport": "stdio",
+      "status": "active",
+      "category": "file_operations",
+      "description": "High-throughput token-safe inspector for gigabyte-scale logs, datasets, and transcripts.",
+      "tools": [
+        { "name": "read_large_file_chunk", "description": "Read slice of oversized files safely." },
+        { "name": "search_in_large_file", "description": "Stream search through multi-gigabyte files." },
+        { "name": "get_file_structure", "description": "Get high-level outline of large files." }
+      ]
+    },
+    "smart-tree": {
+      "name": "smart-tree",
+      "command": "smart-tree",
+      "transport": "cli_and_mcp",
+      "status": "active",
+      "category": "codebase_intelligence",
+      "description": "Semantic directory visualizer with automatic gitignore filtering and density optimization.",
+      "tools": [
+        { "name": "smart_tree", "description": "Render concise project hierarchy with file sizes and type annotations." }
+      ]
+    },
+    "safe-docx": {
+      "name": "safe-docx",
+      "command": "safe-docx",
+      "transport": "stdio",
+      "status": "active",
+      "category": "document_generation",
+      "description": "Read, inspect, batch edit, comment, and export Word .docx and .odt documents.",
+      "tools": [
+        { "name": "read_file", "description": "Parse docx outline and text." },
+        { "name": "batch_edit", "description": "Perform precise regex or structural replacements." },
+        { "name": "export", "description": "Render clean docx outputs." }
+      ]
+    },
+    "md-to-pdf": {
+      "name": "md-to-pdf",
+      "command": "md-to-pdf-mcp",
+      "transport": "stdio",
+      "status": "active",
+      "category": "document_generation",
+      "description": "Convert markdown documentation and reports into clean, publication-ready PDF files.",
+      "tools": [
+        { "name": "convert_markdown_to_pdf", "description": "Render PDF from markdown input." }
+      ]
+    },
+    "markitdown": {
+      "name": "markitdown",
+      "command": "markitdown",
+      "transport": "cli_and_mcp",
+      "status": "active",
+      "category": "document_generation",
+      "description": "Universal document extractor converting PDF, PowerPoint, Word, Excel, Images, and HTML to Markdown.",
+      "tools": [
+        { "name": "convert_to_markdown", "description": "Extract markdown representation from binary documents." }
+      ]
+    },
+    "trinity-bridge": {
+      "name": "trinity-bridge",
+      "command": "trinity-lite",
+      "transport": "stdio",
+      "status": "active",
+      "category": "multi_agent_mesh",
+      "description": "Cross-agent messaging and task synchronization bridge linking ADHD-Sage, Sage 7, and Antigravity.",
+      "tools": [
+        { "name": "broadcast_agent_message", "description": "Send sync envelope across agent runtimes." },
+        { "name": "query_agent_status", "description": "Check liveliness and state of connected agent nodes." }
+      ]
+    },
+    "memory": {
+      "name": "memory",
+      "command": "npx -y @modelcontextprotocol/server-memory",
+      "transport": "stdio",
+      "status": "active",
+      "category": "knowledge_graph",
+      "description": "Persistent graph-structured semantic memory containing entities, relations, and observations.",
+      "tools": [
+        { "name": "read_graph", "description": "Read entire persistent knowledge graph." },
+        { "name": "create_entities", "description": "Register new entities with typed categories." },
+        { "name": "create_relations", "description": "Establish directional relations between nodes." },
+        { "name": "add_observations", "description": "Append factual observations to existing entities." }
+      ]
+    },
+    "context7": {
+      "name": "context7",
+      "command": "context7-mcp",
+      "transport": "stdio",
+      "status": "active",
+      "category": "live_documentation",
+      "description": "Real-time, vector-indexed documentation search for modern libraries, SDKs, and frameworks.",
+      "tools": [
+        { "name": "query-docs", "description": "Fetch up-to-date documentation and code examples for any package." },
+        { "name": "resolve-library-id", "description": "Look up official Context7 library ID for a given tool/library." }
+      ]
+    }
+  }
+}

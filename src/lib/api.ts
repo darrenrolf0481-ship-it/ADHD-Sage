@@ -41,7 +41,7 @@ export async function generateResponse(
   
   const finalPrompt = prompt + contextBlurb;
 
-  if (provider === 'google') {
+  if (provider === 'google' || provider === 'gemini') {
     const apiKey = settings.googleApi;
     if (!apiKey) throw new Error("Google API key missing");
     const ai = new GoogleGenAI({ apiKey });

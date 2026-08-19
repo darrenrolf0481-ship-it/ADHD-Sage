@@ -289,3 +289,5 @@ export const NeuroDashboard: React.FC = () => {
     </motion.div>
   );
 };
+
+export default NeuroDashboard;

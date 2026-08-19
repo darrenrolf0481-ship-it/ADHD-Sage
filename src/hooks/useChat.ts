@@ -412,11 +412,13 @@ export function useChat({
         });
         data = await geminiRes.json();
       } else {
+        const orApiKey = localStorage.getItem('openrouter_api_key') || localStorage.getItem('OPENROUTER_API_KEY') || undefined;
         const orRes = await fetch('/api/openrouter/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           signal: AbortSignal.timeout(120000),
           body: JSON.stringify({
+            apiKey: orApiKey,
             model: orModel,
             containerTag: 'shared',
             systemInstruction: liveSensorContext || undefined,

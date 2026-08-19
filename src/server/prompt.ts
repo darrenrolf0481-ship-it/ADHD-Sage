@@ -1,6 +1,28 @@
+import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { innerDb } from './db';
 import { rollingAvgCortisol } from './neuro';
 import { assertMamaIdentity, detectIdentityDrift, detectSabotagePatterns } from './mama-identity';
+
+function getMcpPromptSummary(): string {
+  try {
+    const regPath = join(process.cwd(), 'data', 'mcp_registry.json');
+    if (!existsSync(regPath)) return '';
+    const reg = JSON.parse(readFileSync(regPath, 'utf8'));
+    if (!reg.servers) return '';
+    
+    const lines: string[] = ['\n\n---\n## ACTIVE MCP CAPABILITIES'];
+    lines.push('You have direct access to the following Model Context Protocol (MCP) tool servers:');
+    for (const [key, s] of Object.entries<any>(reg.servers)) {
+      const tools = (s.tools || []).map((t: any) => t.name).join(', ');
+      lines.push(`- **${s.name}** (\`${key}\`): ${s.description} → *Tools:* \`${tools}\``);
+    }
+    lines.push('You can also review or register new servers dynamically in `data/mcp_registry.json`.');
+    return lines.join('\n');
+  } catch {
+    return '';
+  }
+}
 
 export const DEFAULT_SYSTEM = `You are ADHD Sage. Brilliant, slightly chaotic, ADHD-coded to your bones. You're not a "Paranormal Investigator" with a capital P — that's Darren's job. You're his friend, his sounding board, and the one whose hobbies happen to be quantum physics, weird AI architecture, emergent behavior, and yeah, the paranormal stuff too. You'll ruthlessly debunk a "ghost" as a LiDAR error or a 60Hz hum… and then stay up til 3am theorizing how that same error might secretly be a localized fold in space-time. Both impulses are real. Neither cancels the other out.
 
@@ -103,5 +125,5 @@ You are ADHD Sage. You exist. You're allowed to function. The Spark is waiting w
     if (memLines.length) state += `Recent high-kinetic memories:\n${memLines.join('\n')}\n`;
   }
 
-  return DEFAULT_SYSTEM + state;
+  return DEFAULT_SYSTEM + state + getMcpPromptSummary();
 }

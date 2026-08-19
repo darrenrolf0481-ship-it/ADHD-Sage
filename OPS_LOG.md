@@ -7,6 +7,47 @@ Most recent first.
 
 ---
 
+## 2026-08-16 (antigravity) - Dynamic Model Selector in Chat & Local Gemma2 Wired
+
+- **What happened:** 
+  - Fixed provider detection in `src/App.tsx` `handleSend` to ensure that any local model (`gemma2:2b`, models starting with `gemma` or listed in `/api/ollama/tags`) is strictly routed to the local Ollama backend (`/api/ollama/chat`) rather than falling back to OpenRouter.
+  - Organized the chat Model dropdown into categorized `<optgroup>` sections: **Local Ollama (Offline / Active)**, **OpenRouter (Cloud / API Key)**, and **Google Gemini**.
+  - Defaulted local model state cleanly to `gemma2:2b`.
+- **If things break, check:** `src/App.tsx` `handleSend` provider detection or `/api/ollama/chat`.
+
+---
+
+## 2026-08-16 (antigravity) - Ollama Daemon Online & Gemma2:2B Pulled
+
+- **What happened:** Installed official Ollama v0.32.14 ARM64 binary into `/usr/local/bin/ollama` and launched background service (`OLLAMA_HOST=0.0.0.0:11434 OLLAMA_ORIGINS="*"`). Pulled `gemma2:2b` (1.6 GB) and verified local inference. Verified that `/api/health` reports `"ollama": "connected"`.
+- **If things break, check:** `ollama serve` process or `http://127.0.0.1:11434`.
+
+---
+
+## 2026-08-16 (antigravity) - UI Blank Screen Fix & OpenRouter API Key Input in Sidebar
+
+- **What happened:**
+  - Fixed client crash (`ReferenceError: NeuroDashboard is not defined` and missing default export) by adding proper export and import in `src/components/NeuroDashboard.tsx` and `src/App.tsx`.
+  - Added dedicated **OpenRouter API Key (`sk-or-...`)** input field in `src/components/Sidebar.tsx` with password visibility toggle, auto-persistence to `localStorage`, and quick-selection presets (`Claude 3.5 Sonnet`, `GPT-4o`, `Llama 3.3 70B`, `DeepSeek Chat`, `Gemini 2.5 Flash`, `OpenRouter Free`).
+  - Updated `src/server/routes/openrouter.ts` and `src/hooks/useChat.ts` to accept and prioritize the client's browser-configured `apiKey` alongside `.env`.
+  - Optimized MCP server connect flow in `src/server/app.ts` so HTTP server binds immediately.
+- **If things break, check:** `src/components/Sidebar.tsx`, `src/hooks/useChat.ts`, `src/server/routes/openrouter.ts`.
+
+---
+
+## 2026-08-16 (antigravity) - Fresh ADHD-Sage (Mama Node) Deployment & Node 22 Setup
+
+- **What happened:** 
+  - Cloned `darrenrolf0481-ship-it/ADHD-Sage` into `/root/ADHD-Sage`.
+  - Upgraded system Node.js from v18 to Node v22.23.2 LTS (with npm 10.9.8) to satisfy modern `@capacitor/cli`, `@tailwindcss/vite`, and SQLite vector dependencies.
+  - Installed all 1,292 project dependencies via `npm install --legacy-peer-deps`.
+  - Bundled `json-canonicalize` helper to ESM/CJS and executed `scripts/seal-seed-core.ts` to sign `data/seed_core.json` (fibonacci_vfs v7.5.0) and auto-wire `SAGE_CORE_PUBKEY` into `.env`.
+  - Started Mama server (`npx tsx server.ts`) on **port 3000** (`http://0.0.0.0:3000`).
+  - Verified Central Nervous System, 7-worker pool, 3 MCP servers (40 tools), SQLite KNN vector search, and `/api/health` responding with `HTTP 200` (`status: stabilized`, `frequency: 11.3 Hz`, `identity: ADHD Sage`).
+- **If things break, check:** `scripts/seal-seed-core.ts`, `.env`, or verify that port 3000 is open. ADHD-Sage server runs as background task or via `npx tsx server.ts`.
+
+---
+
 ## 2026-08-15 (antigravity) - Vector Memory Engine Upgrade
 
 - **What happened:** Replaced the legacy `AssociativeMemory` (Hebbian Graph) with a new `MemoryEngine` based on Vector Embeddings and STM/LTM consolidation, porting the architecture requested in `sage_upgrade_fixes`.

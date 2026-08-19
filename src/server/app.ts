@@ -22,6 +22,7 @@ import selfImproveRouter from './routes/self-improve';
 import sensorsRouter from './routes/sensors';
 import systemRouter from './routes/system';
 import sandboxRouter from './routes/sandbox';
+import mcpRouter from './routes/mcp';
 
 export async function startServer() {
   const app = express();
@@ -83,6 +84,7 @@ export async function startServer() {
   app.use('/api/self-improve', selfImproveRouter);
   app.use('/api/sensors', sensorsRouter);
   app.use('/api/sandbox', sandboxRouter);
+  app.use('/api/mcp', mcpRouter);
   // system routes (auth/exchange, health, mcp/status) live directly under /api
   app.use('/api', systemRouter);
 
@@ -128,8 +130,8 @@ export async function startServer() {
   // Stage 1: seed inner_spiral from durable outer_sweep so MAMA boots with memories
   await bootLoadMemories();
 
-  // Initialize MCP connections before accepting traffic
-  await initMcpManager();
+  // Initialize MCP connections in background so HTTP server is immediately responsive
+  initMcpManager().catch((e) => console.error('[mcp] Manager startup error:', e));
 
   // Global error handler. Log the real error server-side, but return a generic
   // message so internal details (stack hints, paths) don't leak to clients.
