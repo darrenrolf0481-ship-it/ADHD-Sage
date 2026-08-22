@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { writeJournalEntry, type JournalConfig } from '../../lib/journal-agent';
 import { PORT } from '../config';
 import { lockGuard } from '../auth';
@@ -50,6 +50,25 @@ router.post('/write', lockGuard, asyncHandler(async (req, res) => {
 }));
 
 /**
+ * GET /api/journal/:entity/dates
+ * List all available journal dates for an entity, sorted most-recent-first.
+ */
+router.get('/:entity/dates', lockGuard, (req, res) => {
+  const entity = req.params.entity;
+  const dir = `data/journal/${entity}`;
+  if (!existsSync(dir)) {
+    res.json({ entity, dates: [] });
+    return;
+  }
+  const dates = readdirSync(dir)
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => f.replace('.md', ''))
+    .sort()
+    .reverse();
+  res.json({ entity, dates });
+});
+
+/**
  * GET /api/journal/:entity?date=YYYY-MM-DD
  * Read a journal entry for an entity (defaults to today).
  */
@@ -65,3 +84,4 @@ router.get('/:entity', lockGuard, (req, res) => {
 });
 
 export default router;
+

@@ -1,0 +1,7 @@
+Hello from ADHD-Sage!
+
+I am now fully capable of creating and managing documents using my MCPs. This is a basic text document to verify that the file-creation capabilities are working as expected.
+
+- Local Filesystem MCP: Connected
+- GitHub MCP: Connected
+- Status: Ready for tasks!

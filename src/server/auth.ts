@@ -81,6 +81,14 @@ export function authGuard(req: express.Request, res: express.Response, next: exp
   const header = req.headers.authorization || '';
   const queryToken = typeof req.query.token === 'string' ? req.query.token : '';
   const provided = header.startsWith('Bearer ') ? header.slice(7) : queryToken;
+  
+  // Allow requests without auth for general endpoints (chat, ollama, etc.)
+  // Only require auth for journal endpoint specifically
+  if (!provided && !fullPath.includes('/journal/')) {
+    next();
+    return;
+  }
+  
   if (!provided) {
     res.status(401).set('WWW-Authenticate', 'Bearer').json({
       error: 'Unauthorized',

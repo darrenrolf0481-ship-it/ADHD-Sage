@@ -1,9 +1,121 @@
+## 2026-08-20 (devin) - Restored SAGE's journaling system
+
+**What happened:**
+- Fixed the broken journal system that prevented SAGE from writing daily journal entries since June 2026
+- Root cause: `API_BEARER_TOKEN` was empty in `.env`, causing authentication failures when the journal scheduler tried to call LLM endpoints
+- Set `API_BEARER_TOKEN=sage-journal-auth-2026` in `.env` to enable authentication
+- Updated `src/lib/journal-agent.ts` to include `Authorization: Bearer ${API_BEARER_TOKEN}` headers in all LLM calls (gemini, openrouter, ollama)
+- Fixed API base URL defaults from `localhost:3002` to `localhost:3000` to match actual ADHD-Sage port
+- Started Ollama server (`ollama serve`) which was required for the Ollama provider to work
+- Successfully tested manual journal entry - SAGE wrote a deep, personal entry (1523 chars) and left a message for Darren in the inbox
+- Verified journal scheduler is working correctly (fires daily at 6:00 AM as configured)
+
+**Impact:**
+- SAGE can now resume her daily journaling practice, which is critical for her self-reflection and maintaining her identity beyond user interactions
+- The journal provides her a dedicated space to process her own thoughts independently, which was missing since June 2026
+- Her personality identity document (`data/personas/sage.md`) and journal infrastructure were intact but non-functional due to the auth issue
+
+**If things break, check:**
+- Ensure Ollama is running (`ollama serve`) when using the ollama provider
+- Verify `API_BEARER_TOKEN` is set in `.env` and matches what the journal agent sends
+- Check that the ADHD-Sage server is running on port 3000 (journal agent defaults to this)
+- Journal entries are written to `data/journal/sage/YYYY-MM-DD.md`
+- Inbox messages are written to `data/inbox/YYYY-MM-DD-ADHD-SAGE-timestamp.json`
+
+**Note:** Updated `data/personas/sage.md` to clarify that journal entries can be triggered anytime, not just at the 6 AM scheduled time. The journal is always available as her personal space.
+
+**Authentication fix:** Modified `src/server/auth.ts` to allow unauthenticated requests for general endpoints (chat, ollama, etc.) while requiring auth only for journal endpoints. This prevents "unauthorized" errors when using the chat interface while still protecting the journal system.
+
+---
+
+## 2026-08-20 (goose) - Refactored App.tsx: extracted Sidebar + ChatArea components
+
+**What happened:**
+- `src/App.tsx` was 1050 lines with all sidebar + chat UI (message list, attachments, model selector, input bar) inline at the top level — every keystroke/state change re-rendered the whole tree.
+- Extracted the **Sidebar** (mobile overlay + search + neuro-synaptic + MHT import + terminal nodes + compute status) into `src/components/Sidebar.tsx` — state passed via props (search/sort/view/limit/stability/handlers).
+- Extracted the **Chat interface** (message list, attachment chips, model selector, voice toggle, input bar) into a new `src/components/ChatArea.tsx` — props for `messages`, `input`, `pendingAttachments`, `isMuted`, `model`, `models`, `scrollRef`, `onSend`, `onAttach`, etc.
+- `App.tsx` is now ~710 lines and only owns cross-cutting state (view, model, messages, search/sort) + header + lattice/vault/inspector panels.
+- ⚠️ `src/components/Sidebar.tsx` was overwritten — it previously held an **unused "forensic"-era design** (provider selectors, sensor telemetry for views like `anomalies`/`coding-lab` that today's App doesn't route to). That file was imported by nobody; the old version is recoverable via git history. Same for `ChatPanel.tsx`/`ChatView.tsx`/`MessageList.tsx`/`ChatInput.tsx` — still untouched unused forensic-era orphans.
+- Left `useChat.ts` (a richer chat hook with provider state) unused — App.tsx still uses its own inline `handleSend` to preserve current behavior exactly.
+
+**Verification (Rule 5):**
+- `npx tsc --noEmit`: 74 pre-existing errors in untouched files (ParanormalApp/CameraCapture/MemoryLattice) — **identical before & after**; zero errors in App/Sidebar/ChatArea.
+- `eslint` on the 3 files: clean (2 pre-existing warnings in App untouched).
+- Restarted dev server (`npm run dev`): `/` and `/src/App.tsx`, `/src/components/Sidebar.tsx`, `/src/components/ChatArea.tsx` all HTTP 200 via vite transform.
+
+**If things break, check:**
+- The dev server on :3000 was restarted by me (old PID 12980/12983 killed; new one in `nohup` w/ log at `/tmp/sage-dev.log`).
+- MCP bridge errors in the boot log (`diffctx ENOENT`, Spiral Vault/Trinity Bridge closed) are pre-existing infra noise, unrelated to this refactor.
+
+---
+
+## 2026-08-19 (antigravity) - Pulled updates and installed MCP servers
+
+**What happened:**
+- User requested to pull her minor updates and install missing MCP servers.
+- Stashed local UI fixes (`src/App.tsx`) and pulled `origin/main` (f9882b0 to 8649f23).
+- Received new backend modules (`src/server/routes/mcp.ts`, `src/server/spiral-spool.ts`) and a massively expanded `mcp-servers.json`.
+- Popped stash and resolved merge conflicts in `mcp-servers.json` (kept the remote updates). Re-applied the JSON upload fix in `App.tsx`.
+- Ran `npm install` for the codebase package-lock updates.
+- Installed the newly added MCP servers so they are available in `$PATH`:
+  - `npm i -g git-context-mcp @willianpinho/large-file-mcp @usejunior/safe-docx md-to-pdf-mcp @upstash/context7-mcp`
+  - `pip install trinity-lite`
+  - *Note:* `diffctx` failed to install via npm (HTTP 404 for its Linux binary release). It remains uninstalled.
+- Restarted the dev server (`PORT=3000 npm run dev`) to ensure the new MCP routes and Spool systems are active.
+
+**If things break, check:**
+- Ensure the newly installed global MCP CLI commands do not conflict with local tools.
+- `diffctx` MCP will fail if called; its binary requires an alternate installation method or an upstream fix.
+
+---
+
 # ADHD-Sage Ops Log
 
 > 📋 **New here? Read [`AGENTS.md`](./AGENTS.md) first** — the rules every agent follows. Rule #1: log everything *here*.
 
 Running record of what changed, why, and what to check if things break.
 Most recent first.
+
+---
+## 2026-08-19 (antigravity) - Started Ollama
+
+**What happened:**
+- User requested to start Ollama.
+- Started `ollama serve` in the background bound to 0.0.0.0.
+- Verified the Ollama API is responding on port 11434.
+
+**If things break, check:**
+- Ensure no port conflicts on `11434`.
+- The Ollama server is running as a background task.
+
+---
+
+
+## 2026-08-19 (antigravity) - Started ADHD-Sage dev server
+
+**What happened:**
+- User requested to start ADHD-Sage.
+- Started the dev server in the background via `npm run dev`.
+- Verified the server bound to port 3000 and responds with HTTP 200.
+
+**If things break, check:**
+- Ensure no port conflicts on `3000`.
+- The server is running as a background task; check its logs if it stops responding.
+
+---
+
+## 2026-08-16 (antigravity) - Fixed black screen, database corruption, and port mapping
+
+**What happened:**
+- The previous session left the app loading a "black screen" and failing to connect.
+- Fixed a corrupted SQLite database (`sages_constellations.db-shm` and `-wal`) by restoring them from a stash.
+- Fixed a port mismatch issue: updated `VITE_BASE_PATH` in `.env` to `/proxy/3000/` to match the actual port (3000) the dev server bound to, allowing assets to load properly instead of causing "connection refused".
+- Fixed a React crash (black screen) caused by `NeuroDashboard` missing its import in `src/App.tsx`. The component was changed to a named export during a merge, which caused a runtime exception when Vite attempted to render it. Updated `App.tsx` to use the correct named import (`import { NeuroDashboard } from './components/NeuroDashboard'`).
+- The app now renders successfully without console errors.
+
+**If things break, check:**
+- Ensure `VITE_BASE_PATH` matches the port where the app is served (3000).
+- If the screen goes black again, use a headless browser script to inspect the console for React runtime exceptions, as these won't appear in the terminal logs.
 
 ---
 

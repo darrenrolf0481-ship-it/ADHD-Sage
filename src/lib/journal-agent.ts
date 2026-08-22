@@ -159,12 +159,15 @@ async function callLLM(
   model: string,
   systemPrompt: string,
   userPrompt: string,
-  apiBase = 'http://localhost:3002',
+  apiBase = 'http://localhost:3000',
 ): Promise<string> {
   if (provider === 'gemini') {
     const res = await fetch(`${apiBase}/api/gemini/generate`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.API_BEARER_TOKEN || ''}`
+      },
       body: JSON.stringify({ prompt: userPrompt, systemInstruction: systemPrompt }),
     });
     const data = (await res.json()) as { text?: string; error?: string };
@@ -175,7 +178,10 @@ async function callLLM(
   if (provider === 'openrouter') {
     const res = await fetch(`${apiBase}/api/openrouter/chat`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.API_BEARER_TOKEN || ''}`
+      },
       body: JSON.stringify({
         model,
         containerTag: 'shared',
@@ -199,7 +205,10 @@ async function callLLM(
       try {
         const res = await fetch(`${apiBase}/api/ollama/chat`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.API_BEARER_TOKEN || ''}`
+          },
           body: JSON.stringify({
             model,
             containerTag: 'shared',
@@ -250,7 +259,7 @@ export interface JournalConfig {
   model: string;
   /** Supermemory container for this entity's private insights */
   container?: string;
-  /** API base URL (default: http://localhost:3002) */
+  /** API base URL (default: http://localhost:3000) */
   apiBase?: string;
   /** Timezone string for date display (default: system) */
   timezone?: string;
@@ -262,7 +271,7 @@ export async function writeJournalEntry(cfg: JournalConfig): Promise<JournalEntr
     provider,
     model,
     container = entity === 'sage' ? SAGE_CONTAINER : SHARED_CONTAINER,
-    apiBase = 'http://localhost:3002',
+    apiBase = 'http://localhost:3000',
     timezone,
   } = cfg;
 

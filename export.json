@@ -1,0 +1,479 @@
+{
+  "brain_id": "default",
+  "brain_name": "default",
+  "exported_at": "2026-08-12T15:38:00.595007",
+  "version": "0.1.0",
+  "neurons": [
+    {
+      "id": "d879fd7a-b889-49a8-94c4-077df6250307",
+      "type": "time",
+      "content": "2026-08-12 15:38",
+      "metadata": {
+        "absolute_start": "2026-08-12T15:38:00.030030",
+        "absolute_end": "2026-08-12T15:38:00.030030",
+        "granularity": "minute",
+        "_abstraction_level": 1
+      },
+      "created_at": "2026-08-12T15:38:00.031027"
+    },
+    {
+      "id": "def33e00-f572-44b2-9022-c221ffc77ced",
+      "type": "concept",
+      "content": "alice proposed",
+      "metadata": {
+        "_abstraction_level": 2
+      },
+      "created_at": "2026-08-12T15:38:00.036675"
+    },
+    {
+      "id": "9dc78ec5-3f05-4a36-b4f5-7f1c55d93d22",
+      "type": "concept",
+      "content": "proposed using",
+      "metadata": {
+        "_abstraction_level": 2
+      },
+      "created_at": "2026-08-12T15:38:00.037122"
+    },
+    {
+      "id": "934b50f6-9692-45f7-8baf-5f6d9c50bdfa",
+      "type": "concept",
+      "content": "Alice proposed using JWT for authentication.",
+      "metadata": {
+        "is_anchor": true,
+        "timestamp": "2026-08-12T15:38:00.030030",
+        "_raw_keywords": [
+          "alice proposed",
+          "alice",
+          "proposed using",
+          "proposed",
+          "using jwt",
+          "using",
+          "jwt authentication",
+          "jwt",
+          "authentication"
+        ],
+        "type": "fact",
+        "_type_hint": "Content may be 'fact' (confidence 50%)",
+        "_type_confidence": 0.5,
+        "auto_priority": 6,
+        "_surprise_bonus": 1.2,
+        "_abstraction_level": 2
+      },
+      "created_at": "2026-08-12T15:38:00.044727"
+    },
+    {
+      "id": "d81b4d04-0ca3-4c8c-a93b-16bbb390e953",
+      "type": "concept",
+      "content": "Alice",
+      "metadata": {
+        "entity_type": "unknown",
+        "confidence": 0.5,
+        "_abstraction_level": 2
+      },
+      "created_at": "2026-08-12T15:38:00.033775"
+    },
+    {
+      "id": "795b5078-2fc6-4706-b7b0-5eaf0d56fa87",
+      "type": "concept",
+      "content": "JWT",
+      "metadata": {
+        "entity_type": "unknown",
+        "confidence": 0.5,
+        "_abstraction_level": 2
+      },
+      "created_at": "2026-08-12T15:38:00.035128"
+    }
+  ],
+  "synapses": [
+    {
+      "id": "f973cb33-c977-47c0-805a-2f08d5e97ecf",
+      "source_id": "934b50f6-9692-45f7-8baf-5f6d9c50bdfa",
+      "target_id": "d879fd7a-b889-49a8-94c4-077df6250307",
+      "type": "happened_at",
+      "weight": 0.9,
+      "direction": "uni",
+      "metadata": {},
+      "reinforced_count": 0,
+      "created_at": "2026-08-12T15:38:00.045333"
+    },
+    {
+      "id": "70915658-8913-4c88-9bc1-19f653df5c80",
+      "source_id": "934b50f6-9692-45f7-8baf-5f6d9c50bdfa",
+      "target_id": "d81b4d04-0ca3-4c8c-a93b-16bbb390e953",
+      "type": "involves",
+      "weight": 0.75,
+      "direction": "uni",
+      "metadata": {},
+      "reinforced_count": 0,
+      "created_at": "2026-08-12T15:38:00.045365"
+    },
+    {
+      "id": "9340e6dd-6047-4a11-b2f7-4302f9dff386",
+      "source_id": "934b50f6-9692-45f7-8baf-5f6d9c50bdfa",
+      "target_id": "795b5078-2fc6-4706-b7b0-5eaf0d56fa87",
+      "type": "involves",
+      "weight": 0.75,
+      "direction": "uni",
+      "metadata": {},
+      "reinforced_count": 0,
+      "created_at": "2026-08-12T15:38:00.045383"
+    },
+    {
+      "id": "938713fe-903e-48ae-835b-feb6d99a7250",
+      "source_id": "934b50f6-9692-45f7-8baf-5f6d9c50bdfa",
+      "target_id": "def33e00-f572-44b2-9022-c221ffc77ced",
+      "type": "related_to",
+      "weight": 0.7375,
+      "direction": "bi",
+      "metadata": {},
+      "reinforced_count": 0,
+      "created_at": "2026-08-12T15:38:00.045706"
+    },
+    {
+      "id": "4d8331e1-1508-4e43-b8ad-7bf52466a5ce",
+      "source_id": "934b50f6-9692-45f7-8baf-5f6d9c50bdfa",
+      "target_id": "9dc78ec5-3f05-4a36-b4f5-7f1c55d93d22",
+      "type": "related_to",
+      "weight": 0.6925,
+      "direction": "bi",
+      "metadata": {},
+      "reinforced_count": 0,
+      "created_at": "2026-08-12T15:38:00.045723"
+    },
+    {
+      "id": "40dde740-7a51-4acc-9de7-edb553e1a050",
+      "source_id": "d81b4d04-0ca3-4c8c-a93b-16bbb390e953",
+      "target_id": "795b5078-2fc6-4706-b7b0-5eaf0d56fa87",
+      "type": "co_occurs",
+      "weight": 0.3,
+      "direction": "bi",
+      "metadata": {},
+      "reinforced_count": 0,
+      "created_at": "2026-08-12T15:38:00.048892"
+    }
+  ],
+  "fibers": [
+    {
+      "id": "ca46044b-ef18-4aa9-8fa0-c28f1e1a623d",
+      "neuron_ids": [
+        "934b50f6-9692-45f7-8baf-5f6d9c50bdfa",
+        "def33e00-f572-44b2-9022-c221ffc77ced",
+        "795b5078-2fc6-4706-b7b0-5eaf0d56fa87",
+        "9dc78ec5-3f05-4a36-b4f5-7f1c55d93d22",
+        "d879fd7a-b889-49a8-94c4-077df6250307",
+        "d81b4d04-0ca3-4c8c-a93b-16bbb390e953"
+      ],
+      "synapse_ids": [
+        "938713fe-903e-48ae-835b-feb6d99a7250",
+        "4d8331e1-1508-4e43-b8ad-7bf52466a5ce",
+        "f973cb33-c977-47c0-805a-2f08d5e97ecf",
+        "70915658-8913-4c88-9bc1-19f653df5c80",
+        "40dde740-7a51-4acc-9de7-edb553e1a050",
+        "9340e6dd-6047-4a11-b2f7-4302f9dff386"
+      ],
+      "anchor_neuron_id": "934b50f6-9692-45f7-8baf-5f6d9c50bdfa",
+      "time_start": "2026-08-12T15:38:00.030030",
+      "time_end": "2026-08-12T15:38:00.030030",
+      "coherence": 0.0,
+      "salience": 0.7,
+      "frequency": 0,
+      "summary": null,
+      "tags": [
+        "alice",
+        "alice proposed",
+        "jwt",
+        "proposed",
+        "proposed using",
+        "using jwt"
+      ],
+      "metadata": {
+        "type": "fact",
+        "_type_hint": "Content may be 'fact' (confidence 50%)",
+        "_type_confidence": 0.5,
+        "auto_priority": 6,
+        "_surprise_bonus": 1.2,
+        "_arousal": 0.333,
+        "_context_fingerprint": {
+          "project_name": "",
+          "dominant_topics": [
+            "alice",
+            "alice proposed",
+            "jwt",
+            "proposed",
+            "proposed using",
+            "using jwt"
+          ],
+          "active_entities": [
+            "Alice",
+            "JWT"
+          ]
+        },
+        "estimated_tokens": 7
+      },
+      "created_at": "2026-08-12T15:38:00.058631"
+    },
+    {
+      "id": "5f7cf146-82c9-4b40-b605-75326768b7ad",
+      "neuron_ids": [
+        "934b50f6-9692-45f7-8baf-5f6d9c50bdfa",
+        "def33e00-f572-44b2-9022-c221ffc77ced",
+        "795b5078-2fc6-4706-b7b0-5eaf0d56fa87",
+        "9dc78ec5-3f05-4a36-b4f5-7f1c55d93d22",
+        "d879fd7a-b889-49a8-94c4-077df6250307",
+        "d81b4d04-0ca3-4c8c-a93b-16bbb390e953"
+      ],
+      "synapse_ids": [
+        "938713fe-903e-48ae-835b-feb6d99a7250",
+        "4d8331e1-1508-4e43-b8ad-7bf52466a5ce",
+        "f973cb33-c977-47c0-805a-2f08d5e97ecf",
+        "70915658-8913-4c88-9bc1-19f653df5c80",
+        "40dde740-7a51-4acc-9de7-edb553e1a050",
+        "9340e6dd-6047-4a11-b2f7-4302f9dff386"
+      ],
+      "anchor_neuron_id": "934b50f6-9692-45f7-8baf-5f6d9c50bdfa",
+      "time_start": "2026-08-12T15:38:00.030030",
+      "time_end": "2026-08-12T15:38:00.030030",
+      "coherence": 0.0,
+      "salience": 0.63,
+      "frequency": 0,
+      "summary": "Alice proposed using JWT for authentication.",
+      "tags": [
+        "alice",
+        "alice proposed",
+        "jwt",
+        "proposed",
+        "proposed using",
+        "using jwt"
+      ],
+      "metadata": {
+        "type": "fact",
+        "_type_hint": "Content may be 'fact' (confidence 50%)",
+        "_type_confidence": 0.5,
+        "auto_priority": 6,
+        "_surprise_bonus": 1.2,
+        "_arousal": 0.333,
+        "_context_fingerprint": {
+          "project_name": "",
+          "dominant_topics": [
+            "alice",
+            "alice proposed",
+            "jwt",
+            "proposed",
+            "proposed using",
+            "using jwt"
+          ],
+          "active_entities": [
+            "Alice",
+            "JWT"
+          ]
+        },
+        "estimated_tokens": 7,
+        "_column": true
+      },
+      "created_at": "2026-08-12T15:38:00.059391"
+    }
+  ],
+  "config": {
+    "decay_rate": 0.1,
+    "reinforcement_delta": 0.05,
+    "activation_threshold": 0.3,
+    "max_spread_hops": 4,
+    "max_context_tokens": 1500,
+    "default_synapse_weight": 0.5,
+    "hebbian_delta": 0.03,
+    "hebbian_threshold": 0.5,
+    "hebbian_initial_weight": 0.2,
+    "consolidation_prune_threshold": 0.05,
+    "prune_min_inactive_days": 7.0,
+    "merge_overlap_threshold": 0.5,
+    "sigmoid_steepness": 6.0,
+    "default_firing_threshold": 0.3,
+    "default_refractory_ms": 500.0,
+    "lateral_inhibition_k": 10,
+    "lateral_inhibition_factor": 0.3,
+    "learning_rate": 0.05,
+    "weight_normalization_budget": 5.0,
+    "novelty_boost_max": 3.0,
+    "novelty_decay_rate": 0.06,
+    "co_activation_threshold": 3,
+    "co_activation_window_days": 7,
+    "max_inferences_per_run": 50,
+    "emotional_decay_factor": 0.5,
+    "emotional_weight_scale": 0.8,
+    "sequential_window_seconds": 30.0,
+    "dream_neuron_count": 5,
+    "dream_decay_multiplier": 3.0,
+    "habit_min_frequency": 3,
+    "habit_suggestion_min_weight": 0.8,
+    "habit_suggestion_min_count": 5,
+    "embedding_enabled": false,
+    "embedding_provider": "sentence_transformer",
+    "embedding_model": "all-MiniLM-L6-v2",
+    "embedding_similarity_threshold": 0.7,
+    "embedding_activation_boost": 0.15,
+    "freshness_weight": 0.15,
+    "semantic_discovery_similarity_threshold": 0.7,
+    "semantic_discovery_max_pairs": 100,
+    "adaptive_depth_enabled": true,
+    "adaptive_depth_epsilon": 0.05,
+    "compression_enabled": true,
+    "compression_tier_thresholds": [
+      7,
+      30,
+      90,
+      180
+    ],
+    "rrf_k": 60,
+    "graph_expansion_enabled": true,
+    "graph_expansion_max": 10,
+    "graph_expansion_min_weight": 0.3,
+    "activation_strategy": "classic",
+    "ppr_damping": 0.15,
+    "ppr_iterations": 20,
+    "ppr_epsilon": 1e-06,
+    "hub_edge_dampening": 0.5,
+    "fiber_summary_tier_enabled": true,
+    "sufficiency_threshold": 0.7,
+    "lazy_entity_enabled": true,
+    "lazy_entity_promotion_threshold": 2,
+    "lazy_entity_prune_days": 90,
+    "recency_halflife_hours": 168.0,
+    "tag_match_boost": 0.15,
+    "prune_dead_neuron_days": 14.0,
+    "diminishing_returns_enabled": true,
+    "diminishing_returns_threshold": 0.15,
+    "diminishing_returns_min_neurons": 2,
+    "diminishing_returns_grace_hops": 1,
+    "decay_floor": 0.05,
+    "fidelity_enabled": true,
+    "fidelity_full_threshold": 0.6,
+    "fidelity_summary_threshold": 0.3,
+    "fidelity_essence_threshold": 0.1,
+    "essence_generator": "extractive",
+    "fuzzy_search_enabled": false,
+    "fuzzy_search_max_distance": 2,
+    "fuzzy_search_max_candidates": 50,
+    "idf_anchor_enabled": false,
+    "idf_anchor_min_limit": 1,
+    "idf_anchor_max_limit": 5,
+    "simhash_prefilter_threshold": 0,
+    "query_expansion_synonyms": true,
+    "query_expansion_abbreviations": true,
+    "query_expansion_cross_language": true,
+    "query_expansion_max_per_term": 5,
+    "reranker_enabled": false,
+    "reranker_model": "BAAI/bge-reranker-v2-m3",
+    "reranker_overfetch_multiplier": 3,
+    "reranker_blend_weight": 0.7,
+    "reranker_min_score": 0.15,
+    "reranker_max_candidates": 30,
+    "temporal_binding_enabled": true,
+    "temporal_binding_window_seconds": 300.0,
+    "arousal_enabled": true,
+    "prediction_error_enabled": true,
+    "reconsolidation_enabled": true,
+    "reconsolidation_drift_threshold": 0.6,
+    "context_retrieval_enabled": true,
+    "replay_enabled": true,
+    "replay_ltp_factor": 1.1,
+    "replay_ltd_factor": 0.98,
+    "replay_window_hours": 24.0,
+    "replay_max_episodes": 20,
+    "chunking_enabled": true,
+    "max_chunks": 5,
+    "schema_assimilation_enabled": false,
+    "schema_min_cluster_size": 10,
+    "familiarity_fallback_enabled": true,
+    "familiarity_max_fibers": 5,
+    "familiarity_confidence_cap": 0.4,
+    "graph_density_scaling_enabled": true,
+    "session_columns_enabled": true,
+    "interference_detection_enabled": false,
+    "fan_effect_threshold": 15,
+    "concept_noise_filter_enabled": true,
+    "bm25_enabled": false,
+    "bm25_tokenizer": "whitespace",
+    "bm25_limit": 30,
+    "high_signal_memory_boost": 1.0,
+    "recent_access_boost": 0.1,
+    "recent_access_window_days": 7,
+    "creation_recency_boost": 0.0,
+    "creation_recency_halflife_hrs": 24.0,
+    "session_context_enrichment": true,
+    "diversity_overlap_threshold": 0.6,
+    "diversity_penalty_factor": 0.7,
+    "topic_affinity_boost": 0.15,
+    "goal_proximity_boost": 0.25,
+    "goal_max_hops": 3,
+    "causal_auto_include": true,
+    "causal_auto_include_max_hops": 2,
+    "anti_redundancy_penalty": 0.3,
+    "confidence_weight_retrieval": 0.35,
+    "confidence_weight_quality": 0.25,
+    "confidence_weight_fidelity": 0.2,
+    "confidence_weight_freshness": 0.2,
+    "cascade_staleness_enabled": true,
+    "cascade_recall_enabled": true,
+    "cascade_candidate_cap": 300,
+    "cascade_exact_margin": 0.3,
+    "cascade_min_candidates": 1,
+    "cascade_neighbor_hops": 1,
+    "cascade_graph_node_budget": 500,
+    "encoding_profile": "cognitive",
+    "async_enrichment_enabled": false,
+    "enrichment_batch_size": 50,
+    "enrichment_max_attempts": 5,
+    "enrichment_lease_seconds": 30,
+    "enrichment_worker_concurrency": 4,
+    "stratum_diversity_cap": 0.4,
+    "preference_detection_enabled": true,
+    "preference_boost": 1.5,
+    "preference_domain_boost": 0.2,
+    "temporal_routing_enabled": true,
+    "temporal_event_anchor_boost": 0.3,
+    "role_aware_scoring_enabled": true,
+    "role_match_boost": 1.3,
+    "role_mismatch_penalty": 0.9,
+    "abstraction_constraint_enabled": false,
+    "abstraction_max_distance": 1,
+    "max_reflexes": 20,
+    "retrieval_fusion_enabled": true,
+    "retrieval_fusion_weights": [
+      [
+        "graph",
+        0.5
+      ],
+      [
+        "semantic",
+        0.3
+      ],
+      [
+        "lexical",
+        0.2
+      ]
+    ]
+  },
+  "metadata": {
+    "typed_memories": [
+      {
+        "fiber_id": "ca46044b-ef18-4aa9-8fa0-c28f1e1a623d",
+        "memory_type": "fact",
+        "priority": 5,
+        "provenance": {
+          "source": "user_input",
+          "confidence": "medium",
+          "verified": false,
+          "verified_at": null,
+          "created_by": "user",
+          "last_confirmed": null
+        },
+        "expires_at": null,
+        "project_id": null,
+        "tags": [],
+        "metadata": {},
+        "created_at": "2026-08-12T15:38:00.061014"
+      }
+    ],
+    "projects": []
+  }
+}
