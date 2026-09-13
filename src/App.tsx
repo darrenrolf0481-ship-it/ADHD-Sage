@@ -59,7 +59,7 @@ const App: React.FC = () => {
     { id: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B (OpenRouter)', provider: 'openrouter' },
     { id: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash (OpenRouter)', provider: 'openrouter' },
     { id: 'openrouter/free', label: 'OpenRouter Auto (Free)', provider: 'openrouter' },
-    { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash (Direct API)', provider: 'gemini' },
+    { id: 'gemini-3.6-flash', label: 'Gemini 3.6 Flash (Direct API)', provider: 'gemini' },
   ];
 
   const MODELS = useMemo(() => {

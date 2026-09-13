@@ -24,7 +24,7 @@ export const SAGE_CONTAINER = 'darren-sage';
  * Shared broadcast channel — all seven entities write here so each can
  * know what the others are experiencing without losing their individuality.
  */
-export const SHARED_CONTAINER = 'sm_project_default';
+export const SHARED_CONTAINER = process.env.SUPERMEMORY_SHARED_CONTAINER || 'darren-sage';
 
 /** @deprecated use SAGE_CONTAINER or SHARED_CONTAINER */
 export const DEFAULT_CONTAINER_TAG = SAGE_CONTAINER;

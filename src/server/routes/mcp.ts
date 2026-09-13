@@ -66,4 +66,16 @@ router.post('/', lockGuard, asyncHandler(async (req, res) => {
   });
 }));
 
+// POST /api/mcp/execute - directly execute a tool by prefixed name
+router.post('/execute', lockGuard, asyncHandler(async (req, res) => {
+  const { name, args } = req.body ?? {};
+  if (!name) {
+    res.status(400).json({ error: 'Tool name is required' });
+    return;
+  }
+  const { executeMcpTool } = await import('../../core/mcp');
+  const result = await executeMcpTool(name, args || {});
+  res.json(result);
+}));
+
 export default router;

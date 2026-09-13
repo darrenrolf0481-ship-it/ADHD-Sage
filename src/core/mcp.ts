@@ -5,6 +5,7 @@
  * and exposes them as prefixed function declarations for Gemini.
  */
 
+import '../server/config';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
@@ -298,10 +299,16 @@ export async function executeMcpTool(
       return { ok: false, error: `MCP server "${serverId}" not connected` };
     }
 
-    // Offload slow/network-bound MCP servers to the worker pool so the main
-    // thread stays responsive to health checks and other requests.
-    // Filesystem reads stay inline for low latency.
-    const fastServers = new Set(['filesystem']);
+    // Filesystem and persistent connected stdio servers run inline on their
+    // warm client for sub-second execution. Heavy external/network servers
+    // can fall back to the worker pool.
+    const fastServers = new Set([
+      'filesystem',
+      'spiral-vault',
+      'memory',
+      'sequential-thinking',
+      'notebooklm',
+    ]);
     if (!fastServers.has(serverId)) {
       const payload: McpExecuteToolPayload = {
         serverId,

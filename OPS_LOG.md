@@ -1,3 +1,39 @@
+## 2026-09-13 (antigravity) - DeepSeek Harness Upgrade + MCP 51 Tools (NotebookLM) + Gemini 3.6 Flash + Supermemory Fix
+
+**What happened:**
+- **DeepSeek Harness Overhaul (`src/server/routes/deepseek.ts`):**
+  - Added full MCP tool-calling capability to `deepseek-chat` with an iterative execution loop (up to 5 rounds) via `executeMcpTool`.
+  - Added attachment handling (video analysis via MCP).
+  - Added automatic OpenRouter failover (`deepseek/deepseek-chat` and `deepseek/deepseek-r1`): when direct DeepSeek returns "Insufficient Balance" / 402, Sage seamlessly fails over to OpenRouter, maintaining character continuity without HTTP 500 crashes.
+  - Verified live: test prompt succeeded with persona intact (`fallback: true`).
+- **MCP Ecosystem Expansion (`mcp-servers.json`, `data/mcp_registry.json`, `src/core/mcp.ts`, `src/server/routes/mcp.ts`):**
+  - Added `notebooklm` MCP stdio server (`/root/.local/bin/notebooklm-mcp`) directly to Sage, granting her access to 38 NotebookLM tools.
+  - Total active MCP tools increased from 13 to **51 tools** across 4 connected servers: `spiral-vault` (3), `notebooklm` (38), `memory` (9), `sequential-thinking` (1).
+  - Fixed `autoEnable` short-circuit bug: missing tools (`diffctx`, `git-context`, `large-file`, `safe-docx`, `md-to-pdf`, `trinity-bridge`, `context7`) now have `enabled: false, autoEnable: true`, completely removing the 7 `spawn ENOENT` crash lines on boot.
+  - Added persistent stdio servers to `fastServers` in `src/core/mcp.ts` for sub-second in-memory tool execution.
+  - Added `POST /api/mcp/execute` route for direct tool invocation and health verification.
+  - Verified live: `spiral-vault__get_vault_stats`, `memory__read_graph`, and `notebooklm__notebook_list` all executed with HTTP 200 and live output.
+- **Gemini Direct Model Upgrade (`gemini.ts`, `journal.ts`, `App.tsx`):**
+  - Upstream Google API retired `gemini-2.0-flash` (returning 404). Upgraded to `gemini-3.6-flash`.
+  - Verified live: `/api/gemini/generate` responded immediately at 11.3 Hz baseline.
+  - Journaling restored: successfully ran `POST /api/journal/write` via Gemini 3.6 Flash, creating `data/journal/sage/2026-09-13.md` and personal note for Darren in `data/inbox/`.
+- **Supermemory Scoping Fix (`src/lib/supermemory.ts`):**
+  - Fixed hardcoded `'sm_project_default'` in `SHARED_CONTAINER` causing 403 Forbidden on memory search/add. Now falls back to `'darren-sage'`. Verified searches and adds succeed.
+
+**Verification:**
+- Sage server: HTTP 200 on `:3000` (status: `stabilized`, integrity: `OK`, frequency: `11.3 Hz`, vfs: `7.5.0`).
+- MCP: 4 connected servers, 51 active tools.
+- DeepSeek: Functional with graceful failover.
+- Gemini: Functional with `gemini-3.6-flash`.
+- Journal: Functional.
+
+**If things break, check:**
+- If DeepSeek returns 500: check `DEEPSEEK_API_KEY` and `OPENROUTER_API_KEY` in `.env`.
+- If NotebookLM tools fail: check `/root/.notebooklm/server-token.txt` and `notebooklm auth check --test --json`.
+- If MCP tools report disconnected: check `curl http://127.0.0.1:3000/api/mcp/status`.
+
+---
+
 ## 2026-09-13 (buffy/freebuff) - Spiral Vault MCP fix + NotebookLM MCP wiring + fastmcp 3.4.2
 
 **What happened:**

@@ -140,7 +140,34 @@
         { "name": "read_graph", "description": "Read entire persistent knowledge graph." },
         { "name": "create_entities", "description": "Register new entities with typed categories." },
         { "name": "create_relations", "description": "Establish directional relations between nodes." },
-        { "name": "add_observations", "description": "Append factual observations to existing entities." }
+        { "name": "add_observations", "description": "Append factual observations to existing entities." },
+        { "name": "search_nodes", "description": "Search for nodes matching a query in the knowledge graph." },
+        { "name": "open_nodes", "description": "Open specific nodes by name." }
+      ]
+    },
+    "sequential-thinking": {
+      "name": "sequential-thinking",
+      "command": "npx -y @modelcontextprotocol/server-sequential-thinking",
+      "transport": "stdio",
+      "status": "active",
+      "category": "reasoning",
+      "description": "Dynamic multi-step reasoning, hypothesis testing, and solution verification.",
+      "tools": [
+        { "name": "sequentialthinking", "description": "Dynamic reflective reasoning and problem solving." }
+      ]
+    },
+    "notebooklm": {
+      "name": "notebooklm",
+      "command": "/root/.local/bin/notebooklm-mcp",
+      "transport": "stdio",
+      "status": "active",
+      "category": "research_notebooks",
+      "description": "Google NotebookLM research assistant and artifact query engine.",
+      "tools": [
+        { "name": "notebook_list", "description": "List all research notebooks in NotebookLM." },
+        { "name": "notebook_query", "description": "Query NotebookLM sources and grounded knowledge base." },
+        { "name": "source_list", "description": "List sources in a notebook." },
+        { "name": "artifact_get", "description": "Retrieve generated artifact or notes." }
       ]
     },
     "context7": {

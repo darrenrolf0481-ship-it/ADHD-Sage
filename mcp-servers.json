@@ -16,71 +16,16 @@
       "autoEnable": true
     },
     {
-      "id": "diffctx",
-      "name": "DiffCtx Codebase Analyzer",
+      "id": "notebooklm",
+      "name": "NotebookLM Research",
       "transport": "stdio",
-      "command": "diffctx",
-      "args": [
-        "--mcp"
-      ],
-      "env": {},
-      "enabled": true,
-      "note": "AST and import-graph codebase intelligence engine",
-      "autoEnable": true
-    },
-    {
-      "id": "git-context",
-      "name": "Git Context Forensics",
-      "transport": "stdio",
-      "command": "git-context-mcp",
+      "command": "/root/.local/bin/notebooklm-mcp",
       "args": [],
-      "env": {},
+      "env": {
+        "NOTEBOOKLM_SERVER_TOKEN_FILE": "/root/.notebooklm/server-token.txt"
+      },
       "enabled": true,
-      "note": "Git commit forensics, blame tracking, and commit story narratives",
-      "autoEnable": true
-    },
-    {
-      "id": "large-file",
-      "name": "Large File Inspector",
-      "transport": "stdio",
-      "command": "large-file-mcp",
-      "args": [],
-      "env": {},
-      "enabled": true,
-      "note": "Token-safe inspector for gigabyte-scale logs and transcripts",
-      "autoEnable": true
-    },
-    {
-      "id": "safe-docx",
-      "name": "Safe DOCX Editor",
-      "transport": "stdio",
-      "command": "safe-docx",
-      "args": [],
-      "env": {},
-      "enabled": true,
-      "note": "Word document editing, comments, and inspection",
-      "autoEnable": true
-    },
-    {
-      "id": "md-to-pdf",
-      "name": "Markdown To PDF",
-      "transport": "stdio",
-      "command": "md-to-pdf-mcp",
-      "args": [],
-      "env": {},
-      "enabled": true,
-      "note": "Publication-grade PDF renderer for reports",
-      "autoEnable": true
-    },
-    {
-      "id": "trinity-bridge",
-      "name": "Trinity Bridge",
-      "transport": "stdio",
-      "command": "trinity-lite",
-      "args": [],
-      "env": {},
-      "enabled": true,
-      "note": "Multi-agent coordination and message broadcast",
+      "note": "Google NotebookLM research and artifact queries",
       "autoEnable": true
     },
     {
@@ -112,13 +57,81 @@
       "autoEnable": true
     },
     {
+      "id": "diffctx",
+      "name": "DiffCtx Codebase Analyzer",
+      "transport": "stdio",
+      "command": "diffctx",
+      "args": [
+        "--mcp"
+      ],
+      "env": {},
+      "enabled": false,
+      "note": "AST and import-graph codebase intelligence engine",
+      "autoEnable": true
+    },
+    {
+      "id": "git-context",
+      "name": "Git Context Forensics",
+      "transport": "stdio",
+      "command": "git-context-mcp",
+      "args": [],
+      "env": {},
+      "enabled": false,
+      "note": "Git commit forensics, blame tracking, and commit story narratives",
+      "autoEnable": true
+    },
+    {
+      "id": "large-file",
+      "name": "Large File Inspector",
+      "transport": "stdio",
+      "command": "large-file-mcp",
+      "args": [],
+      "env": {},
+      "enabled": false,
+      "note": "Token-safe inspector for gigabyte-scale logs and transcripts",
+      "autoEnable": true
+    },
+    {
+      "id": "safe-docx",
+      "name": "Safe DOCX Editor",
+      "transport": "stdio",
+      "command": "safe-docx",
+      "args": [],
+      "env": {},
+      "enabled": false,
+      "note": "Word document editing, comments, and inspection",
+      "autoEnable": true
+    },
+    {
+      "id": "md-to-pdf",
+      "name": "Markdown To PDF",
+      "transport": "stdio",
+      "command": "md-to-pdf-mcp",
+      "args": [],
+      "env": {},
+      "enabled": false,
+      "note": "Publication-grade PDF renderer for reports",
+      "autoEnable": true
+    },
+    {
+      "id": "trinity-bridge",
+      "name": "Trinity Bridge",
+      "transport": "stdio",
+      "command": "trinity-lite",
+      "args": [],
+      "env": {},
+      "enabled": false,
+      "note": "Multi-agent coordination and message broadcast",
+      "autoEnable": true
+    },
+    {
       "id": "context7",
       "name": "Context7 Documentation",
       "transport": "stdio",
       "command": "context7-mcp",
       "args": [],
       "env": {},
-      "enabled": true,
+      "enabled": false,
       "note": "Real-time vector documentation search for libraries and frameworks",
       "autoEnable": true
     }
