@@ -40,15 +40,33 @@ export const SageProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribeMemory = memory.subscribe(fetchMemory);
     fetchMemory(); // Initial load
 
-    // One-time hydrate: if the working store is empty, seed it with a recent
-    // slice of her real server corpus so the Lattice graph + inner spiral aren't
-    // blank. Idempotent — the store persists once seeded, so later loads no-op.
-    if (memory.getInnerSpiral().length === 0 && memory.getArchive().length === 0) {
+    // Sync inner_spiral directly with server's /api/vfs/inner so UI reflects true 8-node spiral
+    fetch('/api/vfs/inner')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((nodes) => {
+        if (Array.isArray(nodes) && nodes.length > 0) {
+          const mappedNodes: MemoryNode[] = nodes.map((n: any) => ({
+            id: n.node_id || `phi_${n.timestamp || Date.now()}`,
+            data: typeof n.data === 'string' ? n.data.replace(/^"|"$/g, '') : JSON.stringify(n.data),
+            timestamp: n.timestamp || Date.now(),
+            dopamine: n.dopamine ?? 0.8,
+            cortisol: n.cortisol ?? 0.1,
+            phi: n.phi_index ?? 1.618,
+            pinned: !!n.pinned,
+          }));
+          memory.syncFromServer(mappedNodes);
+          setInnerSpiral(mappedNodes);
+        }
+      })
+      .catch(() => {});
+
+    // Hydrate outer sweep archive if empty so Memory Vault and Lattice have background history
+    if (memory.getArchive().length === 0) {
       fetch('/api/memory/list?limit=40')
-        .then((r) => r.json())
+        .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
           const texts: string[] = (d?.memories || [])
-            .map((m: { text?: string }) => (m.text || '').slice(0, 400)) // keep localStorage lean
+            .map((m: { text?: string }) => (m.text || '').slice(0, 400))
             .filter((t: string) => t.trim().length > 0);
           if (texts.length) memory.bulkStash(texts);
         })

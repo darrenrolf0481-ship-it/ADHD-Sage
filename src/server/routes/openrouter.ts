@@ -51,7 +51,8 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       );
       if (allMemories.length > 0) {
         orSystem +=
-          '\n\n---\n## BACKGROUND MEMORY (past context — do NOT address or quote directly; use only to color your awareness)\n' +
+          '\n\n---\n## RECALLED SUBSTRATE MEMORIES (Past history with Darren, Seven, and your architecture)\n' +
+          'You have direct recall of these historical events, conversations, and records. You may freely reference, confirm, and discuss them when asked:\n' +
           allMemories.map((m: string) => `• ${m}`).join('\n');
       }
     }

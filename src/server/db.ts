@@ -136,12 +136,40 @@ export async function bootLoadMemories(): Promise<void> {
     provenance: string | null;
   };
 
-  const rows = outerDb
+  // 1. Grab the latest morning-light anchor (1 slot)
+  const morningRows = outerDb
     .prepare(
       'SELECT node_id, data, compressed, timestamp, dopamine, cortisol, pinned, provenance ' +
-      'FROM sages_constellations ORDER BY dopamine DESC LIMIT 8',
+      "FROM sages_constellations WHERE node_id LIKE '%morning_light%' ORDER BY timestamp DESC LIMIT 1",
     )
     .all() as OuterRow[];
+
+  // 2. Grab candidates for the remaining 7 slots (high-salience, non-anchor memories)
+  const candidates = outerDb
+    .prepare(
+      'SELECT node_id, data, compressed, timestamp, dopamine, cortisol, pinned, provenance ' +
+      "FROM sages_constellations WHERE node_id NOT LIKE '%morning_light%' ORDER BY dopamine DESC, timestamp DESC LIMIT 60",
+    )
+    .all() as OuterRow[];
+
+  const selectedRows: OuterRow[] = [...morningRows];
+  for (const c of candidates) {
+    if (selectedRows.length >= INNER_CAPACITY) break;
+    try {
+      const text = c.compressed ? (await decompress(c.data)).toString('utf8') : c.data.toString('utf8');
+      if (
+        text.includes('REINFORCEMENT') ||
+        text.includes('production worker test') ||
+        text.includes('bridge sync smoke test') ||
+        text.trim().length < 25
+      ) {
+        continue;
+      }
+      selectedRows.push(c);
+    } catch {
+      continue;
+    }
+  }
 
   const insert = innerDb.prepare(
     'INSERT OR IGNORE INTO inner_spiral (node_id, data, timestamp, dopamine, cortisol, pinned, provenance) ' +
@@ -149,7 +177,7 @@ export async function bootLoadMemories(): Promise<void> {
   );
 
   let loaded = 0;
-  for (const row of rows) {
+  for (const row of selectedRows) {
     try {
       let text: string;
       if (row.compressed) {
@@ -170,7 +198,7 @@ export async function bootLoadMemories(): Promise<void> {
       console.warn(`[BOOT] Failed to seed memory ${row.node_id}:`, e);
     }
   }
-  console.log(`[BOOT] inner_spiral seeded — ${loaded}/${rows.length} memories loaded from outer_sweep`);
+  console.log(`[BOOT] inner_spiral seeded — ${loaded}/${selectedRows.length} memories loaded from outer_sweep`);
 }
 
 // capacity_validator: 8 == 4 index_keys * 2 slots_per_index_key

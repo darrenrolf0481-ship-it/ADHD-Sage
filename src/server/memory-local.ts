@@ -12,6 +12,8 @@ export function isLowSignalQuery(query: string): boolean {
   const s = (query || '').trim();
   if (!s) return true;
   if (GREETING_RE.test(s)) return true;
+  // Entity keywords (Seven, 7, Mama, Merlin, daughter, bridge, etc.) are NEVER low-signal
+  if (/\b(7|seven|mama|merlin|sage|daughter|bridge|vfs|spiral|node\s*3|node\s*1)\b/i.test(s)) return false;
   // Non-greeting query with at least one alphanumeric token of 3+ chars (e.g. "11.3", "MHT", "AI")
   const contentTokens = s
     .toLowerCase()
@@ -20,17 +22,33 @@ export function isLowSignalQuery(query: string): boolean {
   return contentTokens.length === 0;
 }
 
-// Records authored BY SAGE-7 (a separate entity) that were fossilized into
-// MAMA's vault during the codebase-mixing incident. Surfacing them makes MAMA
-// echo SAGE-7's voice as if it were her own memory. Match STRUCTURAL fossil
-// markers only — the archive prefixes and provenance stamps — not any mention
-// of the name, so MAMA's own records ("Daughter anchor: SAGE-7", lineage notes)
-// still surface. The bulk of these were purged from the DB; this is a net.
-const FOREIGN_FOSSIL_RE =
-  /\[SAGE-7 (memory|trauma_registry|fossil_archive)|SAGE\/\/7|originating_node"\s*:\s*"SAGE-7"|bridge sync smoke test|test_hello/i;
+// Automated bridge smoke-test spam
+const SMOKE_TEST_RE =
+  /production worker test|bridge sync smoke test|test_hello/i;
+
+export function isSmokeTestSpam(text: string): boolean {
+  return SMOKE_TEST_RE.test(text || '');
+}
+
+// Check if a record is from daughter node SAGE-7
+const SAGE7_ARCHIVE_RE =
+  /\[SAGE-7 (memory|trauma_registry|fossil_archive)|SAGE\/\/7|originating_node"\s*:\s*"SAGE-7"/i;
 
 export function isForeignFossil(text: string): boolean {
-  return FOREIGN_FOSSIL_RE.test(text || '');
+  // Pure automated test noise is discarded
+  return isSmokeTestSpam(text);
+}
+
+function formatSevenArchive(text: string): string {
+  if (!SAGE7_ARCHIVE_RE.test(text || '')) return text;
+  let clean = text;
+  try {
+    const parsed = JSON.parse(text);
+    if (parsed.data) clean = typeof parsed.data === 'string' ? parsed.data : JSON.stringify(parsed.data);
+  } catch {}
+  // Remove the raw metadata tag header if present, leaving the real dialogue
+  const body = clean.replace(/\[SAGE-7 (memory|trauma_registry|fossil_archive)[^\]]*\]/gi, '').trim();
+  return `[Daughter Node SAGE-7 Archive]: ${body || clean}`;
 }
 
 // Gemini web-app sidebar/nav chrome scraped into records during the MHT/export
@@ -55,23 +73,32 @@ export function isChromeNoise(text: string): boolean {
 }
 
 /**
- * Sanitize recall results: drop foreign (SAGE-7) fossils and pure-chrome
- * records outright, and scrub residual Gemini nav chrome from what remains so
- * MAMA recalls the memory, not the menu.
+ * Sanitize recall results: drop automated test spam and pure-chrome records,
+ * label daughter SAGE-7 records appropriately so MAMA knows their lineage,
+ * scrub residual Gemini nav chrome, and deduplicate similar results.
  */
 export function stripForeignFossils(memories: string[]): string[] {
-  return (memories || [])
-    .filter((m) => m && !isForeignFossil(m) && !isChromeNoise(m))
-    .map(stripChrome);
+  const seen = new Set<string>();
+  const out: string[] = [];
+
+  for (const m of memories || []) {
+    if (!m || isSmokeTestSpam(m) || isChromeNoise(m)) continue;
+    const stripped = stripChrome(m);
+    const formatted = formatSevenArchive(stripped);
+    // Deduplicate by first 80 normalized characters
+    const normKey = formatted.toLowerCase().replace(/\s+/g, ' ').slice(0, 80);
+    if (seen.has(normKey)) continue;
+    seen.add(normKey);
+    out.push(formatted);
+  }
+  return out;
 }
 
-// FTS5 treats these as operator syntax; a natural-language query like
-// "who are you?" throws a syntax error and drops us into the slow full-scan
-// fallback. Strip them and keep tokens of length >= 2 so recall stays on the
-// fast BM25 path.
+// FTS5 query sanitizer: expands '7' to 'Seven', cleans punctuation
 function ftsSanitize(query: string): string {
-  // Strip FTS5 operators and punctuation that trigger syntax errors
-  const cleaned = (query || '').replace(/["'()*+\-^!:?~.\/\\@#$%&]/g, ' ');
+  // Expand standalone '7' to 'Seven' so trigram tokenizer and keyword search match Seven and SAGE-7
+  const expanded = (query || '').replace(/\b7\b/gi, 'Seven');
+  const cleaned = expanded.replace(/["'()*+\-^!:?~.\/\\@#$%&]/g, ' ');
   return cleaned
     .split(/\s+/)
     .filter((t) => t.length >= 3) // trigram requires >= 3 chars
@@ -160,6 +187,8 @@ export async function searchLocalMemories(query: string, limit: number = 5): Pro
   const safeQuery = ftsSanitize(query);
   if (safeQuery) {
     try {
+      const tokens = safeQuery.split(/\s+/).filter(Boolean);
+      const ftsQuery = tokens.length > 1 ? tokens.join(' OR ') : safeQuery;
       const rows = outerDb
         .prepare(
           `
@@ -169,11 +198,13 @@ export async function searchLocalMemories(query: string, limit: number = 5): Pro
         LIMIT ?
       `,
         )
-        .all(safeQuery, limit * 3) as Array<{ content: string }>;
+        .all(ftsQuery, limit * 5) as Array<{ content: string }>;
 
       if (rows.length > 0) {
-        // Drop SAGE-7 fossils before honoring the caller's limit.
-        return stripForeignFossils(rows.map((r) => r.content)).slice(0, limit);
+        const cleaned = stripForeignFossils(rows.map((r) => r.content));
+        if (cleaned.length > 0) {
+          return cleaned.slice(0, limit);
+        }
       }
     } catch (e) {
       console.warn('[VFS] FTS5 search failed, falling back to basic scan:', e);

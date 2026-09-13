@@ -354,6 +354,13 @@ class MemorySystem {
     }
   }
 
+  syncFromServer(nodes: MemoryNode[]) {
+    if (!Array.isArray(nodes) || nodes.length === 0) return;
+    this.vfs.inner_spiral.nodes = nodes.slice(0, this.vfs.inner_spiral.capacity || 8);
+    this.saveToStorage(true);
+    this.notify();
+  }
+
   getInnerSpiral() {
     return [...this.vfs.inner_spiral.nodes];
   }
