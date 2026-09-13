@@ -37,3 +37,10 @@ data/seed_core.json
 
 # projscan doctor reports
 projscan_doctor_report.*
+
+# Sage runtime SQLite companion files (created/removed live — don't commit)
+data/sages_constellations.db-shm
+data/sages_constellations.db-wal
+
+# Local DB backups (corruption recovery artifacts — keep out of git)
+data/sages_constellations.db.bak.*
