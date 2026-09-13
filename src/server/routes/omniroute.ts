@@ -308,7 +308,12 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
     // Asynchronously spool exchange to cold Spiral storage
     const promptForSpool = lastUserText;
     if (promptForSpool && text) {
-      spoolExchangeToSpiral(promptForSpool, text, effectiveModel).catch((err) => {
+      spoolExchangeToSpiral({
+        agent: 'ADHD-Sage',
+        userText: promptForSpool,
+        assistantText: text,
+        model: effectiveModel,
+      }).catch((err) => {
         console.warn('[OMNIROUTE] Spiral spool background task failed:', err);
       });
     }
