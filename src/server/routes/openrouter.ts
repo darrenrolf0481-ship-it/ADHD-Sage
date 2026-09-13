@@ -7,7 +7,7 @@ import { OPENROUTER_TIMEOUT_MS, OPENROUTER_FALLBACK_MODELS } from '../config';
 import { buildSystemPrompt } from '../prompt';
 import { searchMemories, addMemory, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
 import { searchLocalMemories, isLowSignalQuery, stripForeignFossils } from '../memory-local';
-import { executeMcpTool } from '../../core/mcp';
+import { executeMcpTool, getMcpDeclarations, isMcpTool } from '../../core/mcp';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
 import { spoolExchangeToSpiral } from '../spiral-spool';
@@ -115,38 +115,193 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       ? allCandidates.filter((m) => visionCapable.has(m))
       : allCandidates;
 
+    // MCP tool declarations for function calling
+    const mcpDeclarations = getMcpDeclarations();
+    const openAiTools =
+      mcpDeclarations.length > 0
+        ? mcpDeclarations.map((t) => ({
+            type: 'function' as const,
+            function: {
+              name: t.name,
+              description: t.description,
+              parameters: t.parameters,
+            },
+          }))
+        : undefined;
+
     let text: string | null = null;
     let usedModel = '';
     const failures: string[] = [];
 
     for (const candidate of candidates) {
       try {
-        const response = await swarmFetch(
-          'https://openrouter.ai/api/v1/chat/completions',
-          {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${apiKey}`,
-              'Content-Type': 'application/json',
-              'HTTP-Referer': process.env.APP_URL || 'http://localhost:3002',
-              'X-Title': 'ADHD Sage Sentinel',
-            },
-            body: JSON.stringify({ model: candidate, messages: orMessages }),
-          },
-          OPENROUTER_TIMEOUT_MS,
-          0, // no per-model retry — a 429 means move to the next model, not wait
-        );
+        const currentMessages: any[] = [...orMessages];
+        let loopCount = 0;
+        const MAX_TOOL_ROUNDS = 5;
+        let allowTools = !!openAiTools;
 
-        const data = (await response.json()) as {
-          choices?: { message?: { content?: string } }[];
-          error?: { message?: string };
-        };
-        if (data.error) throw new Error(data.error.message || 'OpenRouter error');
-        const content = data.choices?.[0]?.message?.content || '';
-        if (!content) throw new Error('empty completion');
-        text = content;
-        usedModel = candidate;
-        break;
+        while (loopCount < MAX_TOOL_ROUNDS) {
+          loopCount++;
+          const requestBody: any = {
+            model: candidate,
+            messages: currentMessages,
+          };
+          if (allowTools) {
+            requestBody.tools = openAiTools;
+            requestBody.tool_choice = 'auto';
+          }
+
+          const response = await swarmFetch(
+            'https://openrouter.ai/api/v1/chat/completions',
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': process.env.APP_URL || 'http://localhost:3002',
+                'X-Title': 'ADHD Sage Sentinel',
+              },
+              body: JSON.stringify(requestBody),
+            },
+            OPENROUTER_TIMEOUT_MS,
+            0, // no per-model retry — a 429 means move to the next model, not wait
+          );
+
+          const data = (await response.json()) as {
+            choices?: {
+              message?: {
+                content?: string;
+                tool_calls?: Array<{
+                  id: string;
+                  type: string;
+                  function: { name: string; arguments: string };
+                }>;
+              };
+            }[];
+            error?: { message?: string };
+          };
+
+          // If model rejected tools schema (e.g. some free models don't support function calling)
+          if (
+            !response.ok &&
+            allowTools &&
+            (data.error?.message?.toLowerCase().includes('tool') ||
+              data.error?.message?.toLowerCase().includes('schema') ||
+              response.status === 400)
+          ) {
+            console.warn(
+              `[OPENROUTER] Model ${candidate} rejected tools (${data.error?.message}), retrying without tools`,
+            );
+            allowTools = false;
+            loopCount = 0;
+            continue;
+          }
+
+          if (data.error) throw new Error(data.error.message || 'OpenRouter error');
+
+          const choice = data.choices?.[0]?.message;
+          const content = choice?.content || '';
+          let toolCalls = choice?.tool_calls;
+
+          // Fallback parser: catch text markup when models emit XML/pseudo tags instead of JSON tool_calls
+          if (!toolCalls || toolCalls.length === 0) {
+            const xmlMatch = content.match(/<function(?:\s*name=)?["']?([a-zA-Z0-9_-]+)["']?>([\s\S]*?)<\/function>/i);
+            const toolCallTag = content.match(/<tool_call>([\s\S]*?)<\/tool_call>/i);
+            const toolUseBracket = content.match(/\[TOOL USE:\s*([a-zA-Z0-9_.-]+)(?:\(([\s\S]*?)\))?\]/i);
+
+            if (xmlMatch) {
+              const rawName = xmlMatch[1];
+              let args = '{}';
+              try {
+                const inner = xmlMatch[2].trim();
+                if (inner.startsWith('{')) args = inner;
+              } catch {}
+              const resolvedName = isMcpTool(rawName)
+                ? rawName
+                : mcpDeclarations.find((d) => d.name.endsWith(`__${rawName}`))?.name;
+              if (resolvedName) {
+                toolCalls = [{
+                  id: `call_${Date.now()}`,
+                  type: 'function',
+                  function: { name: resolvedName, arguments: args },
+                }];
+              }
+            } else if (toolCallTag) {
+              try {
+                const parsed = JSON.parse(toolCallTag[1].trim());
+                const rawName = parsed.name || parsed.function;
+                const resolvedName = isMcpTool(rawName)
+                  ? rawName
+                  : mcpDeclarations.find((d) => d.name.endsWith(`__${rawName}`))?.name;
+                if (resolvedName) {
+                  toolCalls = [{
+                    id: `call_${Date.now()}`,
+                    type: 'function',
+                    function: {
+                      name: resolvedName,
+                      arguments: JSON.stringify(parsed.arguments || parsed.parameters || {}),
+                    },
+                  }];
+                }
+              } catch {}
+            } else if (toolUseBracket) {
+              const rawName = toolUseBracket[1].replace('.', '__');
+              const resolvedName = isMcpTool(rawName)
+                ? rawName
+                : mcpDeclarations.find((d) => d.name.endsWith(`__${rawName}`))?.name;
+              if (resolvedName) {
+                toolCalls = [{
+                  id: `call_${Date.now()}`,
+                  type: 'function',
+                  function: {
+                    name: resolvedName,
+                    arguments: '{}',
+                  },
+                }];
+              }
+            }
+          }
+
+          // If the model requested MCP tool calls, execute them and continue the conversation loop
+          if (toolCalls && toolCalls.length > 0) {
+            currentMessages.push(choice);
+            for (const tc of toolCalls) {
+              let parsedArgs: Record<string, unknown> = {};
+              try {
+                parsedArgs = JSON.parse(tc.function.arguments || '{}');
+              } catch {
+                parsedArgs = {};
+              }
+
+              let toolResult: any;
+              if (isMcpTool(tc.function.name)) {
+                toolResult = await executeMcpTool(tc.function.name, parsedArgs);
+              } else {
+                toolResult = { error: `Tool ${tc.function.name} not found` };
+              }
+
+              const resultStr =
+                typeof toolResult?.result === 'string'
+                  ? toolResult.result
+                  : JSON.stringify(toolResult);
+
+              currentMessages.push({
+                role: 'tool',
+                tool_call_id: tc.id,
+                name: tc.function.name,
+                content: resultStr,
+              });
+            }
+            continue;
+          }
+
+          if (!content) throw new Error('empty completion');
+          text = content;
+          usedModel = candidate;
+          break;
+        }
+
+        if (text) break;
       } catch (err) {
         const m = err instanceof Error ? err.message : String(err);
         failures.push(`${candidate}: ${m}`);

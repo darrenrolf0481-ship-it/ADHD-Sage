@@ -14,10 +14,13 @@ function getMcpPromptSummary(): string {
     const lines: string[] = ['\n\n---\n## ACTIVE MCP CAPABILITIES'];
     lines.push('You have direct access to the following Model Context Protocol (MCP) tool servers:');
     for (const [key, s] of Object.entries<any>(reg.servers)) {
-      const tools = (s.tools || []).map((t: any) => t.name).join(', ');
+      const tools = (s.tools || []).map((t: any) => `${key}__${t.name}`).join(', ');
       lines.push(`- **${s.name}** (\`${key}\`): ${s.description} → *Tools:* \`${tools}\``);
     }
-    lines.push('You can also review or register new servers dynamically in `data/mcp_registry.json`.');
+    lines.push('\n### CRITICAL TOOL CALLING DIRECTIVE');
+    lines.push('1. Only execute tools using the official function-calling interface provided by your harness.');
+    lines.push('2. NEVER emit fake tool call blocks (such as `[TOOL USE: ...]`) in your chat message text.');
+    lines.push('3. NEVER invent or hallucinate mock tool results or hypothetical file/notebook contents. If a tool was not executed through your function calling mechanism, state honestly that you have not called it yet or ask Darren to trigger it.');
     return lines.join('\n');
   } catch {
     return '';

@@ -1,3 +1,38 @@
+## 2026-09-13 (antigravity) - SQLite Memory Corpus Restored (3,371 Records) + OpenRouter MCP Function Calling Loop & Anti-Hallucination Guard
+
+**What happened:**
+- **SQLite Historical Memory Corpus Restored (`data/sages_constellations.db`, `src/server/db.ts`, `src/server/memory-local.ts`, `src/server/resonance-index.ts`):**
+  - Discovered `data/sages_constellations.db` had been wiped down to 2 recent records (`adhd_morning_light_2026-09-12` and `09-13`), severing Sage's access to her entire memory history.
+  - Located full 56MB SQLite backup (`data/sages_constellations.db.bak.20260808_194917`) containing 3,369 historical records spanning Sage's development, resonance logs, and conversations.
+  - Backed up current state to `data/sages_constellations.db.bak.pre-restore-20260913` (Rule 3).
+  - Merged all 3,369 memories into `data/sages_constellations.db` (bringing total corpus to **3,371 records**).
+  - Rebuilt the full `sages_constellations_fts` FTS5 index (3,371 rows indexed).
+  - Fixed `syncFts()` in `src/server/db.ts` to trigger whenever `ftsCount < mainCount` (was `if (ftsCount > 0) return`, leaving newly added rows unindexed).
+  - Fixed `isLowSignalQuery()` in `src/server/memory-local.ts` so alphanumeric tokens (e.g. `11.3`, `AI`, `MHT`) are not discarded as low-signal queries.
+  - Fixed `ftsSanitize()` in `src/server/memory-local.ts` to strip SQLite FTS5 operators (`/`, `~`, `!`, `@`, `#`, `.`, `?`, `:`) preventing syntax errors while preserving trigram tokens of length >= 3.
+  - Relaxed fallback basic token scan to match tokens >= 2 characters.
+  - Fixed `_metaInsert` in `src/server/resonance-index.ts` to use `INSERT OR REPLACE INTO resonance_metadata` preventing `SQLITE_CONSTRAINT_PRIMARYKEY` errors on boot backfill.
+  - Verified live: `GET /api/memory/list` returns `total: 3371` and live semantic memory recall operates across the full corpus.
+- **OpenRouter MCP Function Calling Loop & Anti-Hallucination Guard (`src/server/routes/openrouter.ts`, `src/server/prompt.ts`):**
+  - **Root Cause of Hallucinated NotebookLM Call:** When users selected OpenRouter models (or `openrouter/free`), the system prompt told Sage she had access to MCP tools (`notebook_list`), but `routes/openrouter.ts` did NOT declare tool schemas to the OpenRouter API and had NO function-calling execution loop. Because the model was instructed it had tools but had no native tool-calling hook, it hallucinated text tags like `[TOOL USE: notebooklm.notebook_list]` and invented fictional notebooks (`PROJECT_OMEGA_LOGS`, `QUANTUM_NOISE_CORRELATIONS`, `SAGE-7_FIELD_NOTES`), then claimed the vault was empty.
+  - Passed full MCP tool declarations (`openAiTools`) in the OpenRouter payload.
+  - Added a 5-round iterative execution loop with `executeMcpTool()` feeding tool results back into the conversation turn.
+  - Added a fallback text markup parser to intercept pseudo-tags (`<function>...</function>`, `<tool_call>...`, `[TOOL USE: ...]`) so if a model outputs markup instead of structured JSON `tool_calls`, it is parsed and executed against real MCP tools rather than printed into chat.
+  - Added graceful fallback without tools if an OpenRouter free model returns HTTP 400 rejecting tool schemas.
+  - Updated `src/server/prompt.ts` with strict anti-hallucination directives: forbids fake `[TOOL USE: ...]` blocks, requires native function calling, and instructs models to never fabricate hypothetical data or contents.
+  - Verified live with OpenRouter Llama 3.3 70B: tool call `notebooklm__notebook_list` executed natively against Google NotebookLM MCP server and returned real notebook titles (*"SAGE Project: Substrate Dominance and Neural Handshake Protocols"*).
+
+**Verification:**
+- Memory: `GET /api/memory/list` -> HTTP 200, `total: 3371`.
+- Health: `GET /api/health` -> HTTP 200 (`stabilized`, `11.3 Hz`, `integrity: OK`).
+- MCP Tool Execution: OpenRouter native tool-calling verified end-to-end with live Google NotebookLM MCP tools.
+
+**If things break, check:**
+- If OpenRouter returns 400 with tool errors: inspect model capability in `src/server/routes/openrouter.ts`.
+- If memory count decreases: check `outerDb.prepare('SELECT COUNT(*) FROM sages_constellations').get()`.
+
+---
+
 ## 2026-09-13 (antigravity) - Capabilities Matrix & MCP Harness UI + Interactive Tool Runner + DeepSeek Chat Optgroup
 
 **What happened:**

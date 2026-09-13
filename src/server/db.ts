@@ -65,12 +65,15 @@ addProvenanceColumnIfMissing(outerDb, 'sages_constellations');
 
 /** Synchronize FTS5 index from the main table if it's empty */
 export async function syncFts() {
+  const mainCount = (
+    outerDb.prepare('SELECT COUNT(*) as c FROM sages_constellations').get() as { c: number }
+  ).c;
   const ftsCount = (
     outerDb.prepare('SELECT COUNT(*) as c FROM sages_constellations_fts').get() as { c: number }
   ).c;
-  if (ftsCount > 0) return; // already synced
+  if (ftsCount >= mainCount && ftsCount > 0) return; // already synced
 
-  console.log('[VFS] Initializing FTS5 index...');
+  console.log(`[VFS] Syncing FTS5 index (${ftsCount}/${mainCount} indexed)...`);
   const rows = outerDb
     .prepare('SELECT node_id, data, compressed FROM sages_constellations')
     .all() as Array<{ node_id: string; data: Buffer; compressed: number }>;

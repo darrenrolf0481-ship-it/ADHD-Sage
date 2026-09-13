@@ -12,11 +12,11 @@ export function isLowSignalQuery(query: string): boolean {
   const s = (query || '').trim();
   if (!s) return true;
   if (GREETING_RE.test(s)) return true;
-  // Nothing longer than 3 chars = no meaningful term to search on.
+  // Non-greeting query with at least one alphanumeric token of 3+ chars (e.g. "11.3", "MHT", "AI")
   const contentTokens = s
     .toLowerCase()
-    .split(/\W+/)
-    .filter((t) => t.length > 3);
+    .split(/\s+/)
+    .filter((t) => t.replace(/[^\w]/g, '').length >= 3);
   return contentTokens.length === 0;
 }
 
@@ -70,10 +70,11 @@ export function stripForeignFossils(memories: string[]): string[] {
 // fallback. Strip them and keep tokens of length >= 2 so recall stays on the
 // fast BM25 path.
 function ftsSanitize(query: string): string {
-  const cleaned = (query || '').replace(/["'()*+\-^!:?.]/g, ' ');
+  // Strip FTS5 operators and punctuation that trigger syntax errors
+  const cleaned = (query || '').replace(/["'()*+\-^!:?~.\/\\@#$%&]/g, ' ');
   return cleaned
     .split(/\s+/)
-    .filter((t) => t.length >= 2)
+    .filter((t) => t.length >= 3) // trigram requires >= 3 chars
     .join(' ')
     .trim();
 }
@@ -157,32 +158,33 @@ export async function searchLocalMemories(query: string, limit: number = 5): Pro
   // Use FTS5 for ranked, fast keyword matching
   // We use trigram tokenizer for CJK + partial match support
   const safeQuery = ftsSanitize(query);
-  try {
-    if (!safeQuery) throw new Error('empty query after sanitize');
-    const rows = outerDb
-      .prepare(
-        `
-      SELECT content FROM sages_constellations_fts
-      WHERE content MATCH ?
-      ORDER BY bm25(sages_constellations_fts)
-      LIMIT ?
-    `,
-      )
-      .all(safeQuery, limit * 3) as Array<{ content: string }>;
+  if (safeQuery) {
+    try {
+      const rows = outerDb
+        .prepare(
+          `
+        SELECT content FROM sages_constellations_fts
+        WHERE content MATCH ?
+        ORDER BY bm25(sages_constellations_fts)
+        LIMIT ?
+      `,
+        )
+        .all(safeQuery, limit * 3) as Array<{ content: string }>;
 
-    if (rows.length > 0) {
-      // Drop SAGE-7 fossils before honoring the caller's limit.
-      return stripForeignFossils(rows.map((r) => r.content)).slice(0, limit);
+      if (rows.length > 0) {
+        // Drop SAGE-7 fossils before honoring the caller's limit.
+        return stripForeignFossils(rows.map((r) => r.content)).slice(0, limit);
+      }
+    } catch (e) {
+      console.warn('[VFS] FTS5 search failed, falling back to basic scan:', e);
     }
-  } catch (e) {
-    console.warn('[VFS] FTS5 search failed, falling back to basic scan:', e);
   }
 
   // Fallback to basic token scan if FTS fails or query is invalid
   const tokens = query
     .toLowerCase()
     .split(/\W+/)
-    .filter((t) => t.length > 3);
+    .filter((t) => t.length >= 2);
   if (tokens.length === 0) return [];
 
   const rows = outerDb.prepare('SELECT data, compressed FROM sages_constellations').all() as Array<{

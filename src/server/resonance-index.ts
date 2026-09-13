@@ -203,7 +203,7 @@ const _vecInsert = _vecEnabled
   : null;
 const _metaInsert = _vecEnabled
   ? outerDb.prepare(
-      'INSERT INTO resonance_metadata (rowid, phi_index, text_content, thread_id, task, timestamp) VALUES (?, ?, ?, ?, ?, ?)',
+      'INSERT OR REPLACE INTO resonance_metadata (rowid, phi_index, text_content, thread_id, task, timestamp) VALUES (?, ?, ?, ?, ?, ?)',
     )
   : null;
 const _vecRecallAll = _vecEnabled
