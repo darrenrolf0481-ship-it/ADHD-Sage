@@ -7,6 +7,7 @@ export function validateEnv() {
     { name: 'SAGE_CORE_PUBKEY', required: true, desc: 'Seed core integrity' },
     { name: 'SUPERMEMORY_API_KEY', required: false, desc: 'Long-term memory' },
     { name: 'OPENROUTER_API_KEY', required: false, desc: 'OpenRouter provider' },
+    { name: 'DEEPSEEK_API_KEY', required: false, desc: 'DeepSeek direct (api.deepseek.com)' },
     { name: 'ELEVENLABS_API_KEY', required: false, desc: 'Voice synthesis' },
     { name: 'API_BEARER_TOKEN', required: false, desc: 'API authentication' },
     { name: 'MCP_KEY_SECRET', required: false, desc: 'MCP key exchange' },

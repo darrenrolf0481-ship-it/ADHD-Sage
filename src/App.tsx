@@ -53,6 +53,8 @@ const App: React.FC = () => {
     { id: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet (OpenRouter)', provider: 'openrouter' },
     { id: 'anthropic/claude-3.5-haiku', label: 'Claude 3.5 Haiku (OpenRouter)', provider: 'openrouter' },
     { id: 'openai/gpt-4o', label: 'GPT-4o (OpenRouter)', provider: 'openrouter' },
+    { id: 'deepseek-chat', label: 'DeepSeek Chat (Direct)', provider: 'deepseek' },
+    { id: 'deepseek-reasoner', label: 'DeepSeek Reasoner (Direct)', provider: 'deepseek' },
     { id: 'deepseek/deepseek-chat', label: 'DeepSeek Chat (OpenRouter)', provider: 'openrouter' },
     { id: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B (OpenRouter)', provider: 'openrouter' },
     { id: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash (OpenRouter)', provider: 'openrouter' },
@@ -384,7 +386,14 @@ const App: React.FC = () => {
     if (window.innerWidth < 768) setIsSidebarOpen(false);
 
     try {
-      const isOllama = model.startsWith('gemma') || localOllamaModels.some((m) => m.id === model) || (!model.includes('/') && !model.startsWith('gemini'));
+      const isDeepseekDirect = model === 'deepseek-chat' || model === 'deepseek-reasoner';
+      const isGeminiDirect = model.startsWith('gemini');
+      const isOllama =
+        !isDeepseekDirect &&
+        !isGeminiDirect &&
+        (model.startsWith('gemma') ||
+          localOllamaModels.some((m) => m.id === model) ||
+          !model.includes('/'));
       const provider: AIProvider = isOllama ? 'ollama' : (MODELS.find((m) => m.id === model)?.provider ?? (model.includes('/') ? 'openrouter' : 'ollama'));
       const history = messages
         .slice(-15)
@@ -417,6 +426,26 @@ const App: React.FC = () => {
             prompt: fullPrompt,
             messages: [...history, { role: 'user', text: fullPrompt }],
             images: imageAttachments.length > 0 ? imageAttachments : undefined,
+          }),
+        });
+      } else if (provider === 'deepseek') {
+        const dsKey =
+          localStorage.getItem('deepseek_api_key') ||
+          localStorage.getItem('DEEPSEEK_API_KEY') ||
+          undefined;
+        const dsAttachments = userAttachments
+          .filter((a) => a.type !== 'document' && a.data && a.mimeType)
+          .map((a) => ({ mimeType: a.mimeType, data: a.data }));
+        response = await fetch('/api/deepseek/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(120000),
+          body: JSON.stringify({
+            apiKey: dsKey,
+            model, // deepseek-chat | deepseek-reasoner
+            containerTag: 'shared',
+            messages: [...history, { role: 'user', text: fullPrompt }],
+            attachments: dsAttachments.length > 0 ? dsAttachments : undefined,
           }),
         });
       } else if (provider === 'gemini') {

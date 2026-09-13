@@ -1,3 +1,48 @@
+## 2026-09-13 (buffy/freebuff) - Spiral Vault MCP fix + NotebookLM MCP wiring + fastmcp 3.4.2
+
+**What happened:**
+- **Sage MCP config FIX (`mcp-servers.json`):** spiral-vault entry had `command: "tsx"` which the MCP runner couldn't resolve (spawn tsx ENOENT). Changed to `command: "npx"` with `args: ["-y", "tsx", "/root/Spiral/scripts/vault_mcp_server.ts"]`. CONFIRMED WORKING — Sage now shows 3 connected MCP servers (spiral-vault + memory + sequential-thinking), HTTP 200 on :3000.
+- **NotebookLM MCP WIRED into Freebuff's config (`/root/.mcp.json`):** added `notebooklm-mcp` entry matching user's Termux pattern — `command: "/root/.local/bin/notebooklm-mcp"`, no args, `NOTEBOOKLM_SERVER_TOKEN_FILE` env for auth. Freebuff (MCP host pid 11857) reads this and launches notebooklm-mcp per-request as a stdio server.
+- **notebooklm-mcp FIXED:** root blocker was wrong fastmcp version. notebooklm-py 0.8.2's METADATA declares `fastmcp==3.4.2; extra == all`. I installed fastmcp 0.2.0→0.4.1 first (all wrong — each failed: 0.2.0 missing `fastmcp.utilities.types`, 0.4.1 missing `mcp.server.request_state`, etc.). The fix was the EXACT version: `fastmcp==3.4.2` via `uv pip install --python /root/.local/share/uv/tools/notebooklm-py fastmcp==3.4.2`. Also installed `python-multipart`, `fastapi`, `uvicorn` for the REST server path.
+- **Grafter loop restarted** (pid 18690): 5-min drain of `~/.spiral/spool/` into `~/.hermes/vault.db`. Vault 806KB, 0 spool files, 1 archive dir.
+- **`/root/.agents/skills/notebooklm/SKILL.md`:** `nlm auth` section already updated earlier in session (Netscape→JSON cookie conversion, PSIDTS re-rooting, pyplay venv with UV_LINK_MODE=copy gotcha).
+
+**Discovery — two separate MCP ecosystems on this box:**
+- **Sage's internal MCP:** reads `mcp-servers.json` (this is where the spiral-vault fix landed). Sage does NOT read `/root/.mcp.json`.
+- **Freebuff's MCP host** (pid 11857, `/root/.mcp.json`): reads `/root/.mcp.json`. This is where notebooklm-mcp was wired. Freebuff manages Sage as a child process (Sage pid 17263 is a child of freebuff pid 11857) — so do NOT launch your own Sage; freebuff owns it.
+
+**The notebooklm-mcp blocker (for the record — this took most of the session):**
+- notebooklm-py 0.8.2 ships `notebooklm-mcp` (FastMCP stdio server) + `notebooklm-server` (FastAPI/uvicorn REST on :8000). Both need `NOTEBOOKLM_SERVER_TOKEN_FILE` pointing at a bearer token file.
+- `notebooklm-mcp` imports `from fastmcp import FastMCP` + `from mcp.server.request_state import RequestStateSecurity` + `from fastmcp.tools.tool import ToolResult` — these come from fastmcp==3.4.2 exactly (bundled mcp 3.x stack). Any other fastmcp version fails a different way.
+- `notebooklm-server` CAN start (verbose python -v probe proved it: "Uvicorn running on http://127.0.0.1:8000") but CANNOT be made persistent headless — every launch method (setsid, nohup, redirect, PYTHONUNBUFFERED) dies on Freebuff tool-call teardown. So the stdio `notebooklm-mcp` path is the correct one for Freebuff.
+
+**Verification:**
+- Sage: HTTP 200 :3000 | 3 MCP servers (spiral-vault, memory, sequential-thinking) | Spiral Vault MCP pid 17392 running
+- NotebookLM MCP: 38 tools exposed | `notebook_list` → 28 notebooks (first: "SAGE-7: The Sovereign Arc") | auth OK (cookies valid, Google API calls succeed) | tool calls work end-to-end
+- `/root/.mcp.json`: 4 servers (buffy-memory, huggingface, playwright, notebooklm-mcp)
+- Grafter loop: pid 18690 | vault 806KB | 0 spool | 1 archive
+
+**Files changed:**
+- `/root/ADHD-Sage/mcp-servers.json`: spiral-vault command tsx→npx (surgical 2-line change, git-tracked)
+- `/root/.mcp.json`: added notebooklm-mcp entry (4 servers now; backed up to `/root/.mcp.json.bak-20260912`)
+- `/root/.local/share/uv/tools/notebooklm-py`: fastmcp 3.4.2 + mcp 1.30.0 + fastmcp-slim 3.4.2 installed (replaced wrong versions)
+- `/root/.notebooklm/server-token.txt`: bearer token file for notebooklm auth (created earlier in session)
+
+**If things break, check:**
+- Sage not responding: it's a freebuff child — check freebuff pid 11857 is alive; don't pkill/restart Sage independently
+- notebooklm-mcp fails to launch: `fastmcp==3.4.2` must be installed in notebooklm-py env — `uv pip install --python /root/.local/share/uv/tools/notebooklm-py fastmcp==3.4.2`
+- notebooklm auth fails: re-import cookies or re-auth; token at `/root/.notebooklm/server-token.txt`; check: `notebooklm auth check --test --json`
+- Spiral Vault MCP not connecting: `mcp-servers.json` spiral-vault entry MUST have `command: "npx"`, `args: ["-y", "tsx", "/root/Spiral/scripts/vault_mcp_server.ts"]`
+- Grafter not draining spool: pid 18690 alive? log at `/root/.spiral/grafter.log`; restart: `setsid bash /root/.spiral/grafter-loop.sh`
+- `/root/.mcp.json` edited incorrectly: restore from `/root/.mcp.json.bak-20260912`
+
+**Operational constraints (important):**
+- notebooklm-server (REST :8000) cannot persist headless here — use notebooklm-mcp (stdio, per-request) instead
+- Sage is a freebuff child process — freebuff manages its lifecycle
+- `/root/.mcp.json` = Freebuff's config; `mcp-servers.json` = Sage's config — don't confuse them
+
+---
+
 ## 2026-08-20 (devin) - Restored SAGE's journaling system
 
 **What happened:**
@@ -1287,3 +1332,18 @@ The "Sentinel mode" complaint was that the Coding Lab system prompt (in ADHD-Sag
 - MAMA must be running at :3000 for Bridge MAMA pane and Studio `attach adhd` to work.
 - Seven must be running at :8001 (`npx tsx seven.ts` in Sage72) for Seven pane and `attach sage-7`.
 - `/api/mama` GET health check uses MAMA's public path — if auth tokens are set in ADHD-Sage `.env`, the ollama/chat POST will need a bearer token added to the proxy.
+
+---
+
+## 2026-09-13 (buffy/freebuff) — agy Antigravity auth + Sage revival + DeepSeek wire push
+
+**What happened:**
+- **agy (Antigravity CLI) authenticated** (`/root/.local/bin/agy` v1.2.2): PTY-held `agy --print hello` with `code_challenge=f5OA45WRPOsL0lB661j_FsWFupABanCWRWIXSjYtir0` / `state=MWNeOd...`. Second `4/0A` code `4/0ATsMZqCXazl...58Q` (first one expired after PKCE rotation) fed to same pty via `/tmp/agy-code-live.txt` → `auth_method=consumer`, `darren.francis048107@gmail.com`, token `ya29.a0Ad...` + refresh `1//04SQyO...` at `~/.gemini/antigravity-cli/antigravity-oauth-token` (1.6K, expiry 2026-09-13T08:40:24Z). Verified: `agy --print "hi"` → `Hello!` (tools need allow-rule or --dangerously-skip-permissions).
+- **Sage down → revived:** hermes Node 26 `ResetStdio EBADF` crash left Sage + watchdog + grafter dead after agy pty held ports. Revived watchdog (`setsid bash sage-watchdog.sh`, pid 29237) + grafter-loop. Sage `29288: node tsx server.ts`, HTTP 200, MCP `connected=True servers=[spiral-vault,memory,sequential-thinking] tools=13` (7 ENOENT expected).
+- **Spiral is its own repo** (user clarif): ADHD-Sage `mcp-servers.json` `command: npx` `args: [-y,tsx,\${SPIRAL_VAULT_PATH}]` + `${SPIRAL_VAULT_PATH}=/root/Spiral/...` already on origin via Jules — not local-only, correct to share. Spiral daemon (`/root/.spiral/grafter-loop.sh`, 5-min, vault `ok`) runs hermes vault, not ADHD-Sage.
+- **Pushed `e5462d1` to origin/main:** DeepSeek direct (`src/server/routes/deepseek.ts` + app/env/types/App picker), `vite.config.ts` `watch.ignored ['**/.env']` (hermes EBADF fix), `.env.example` DeepSeek docs, OPS_LOG, untrack `db-shm/wal/bak` (now .gitignore). Secrets-clean, `0 0` ahead/behind pre-push, backup branch `backup/pre-deepseek-20260913`. Left local: `data/journal/sage/2026-09-13.md` (failed write), `sage-watchdog.sh`.
+
+**If things break, check:**
+- agy auth: `~/.gemini/antigravity-cli/antigravity-oauth-token` missing/expired → redo PTY flow above; piped codes to a *new* agy fail (PKCE mismatch) — must feed the *live* pty.
+- Sage HTTP 000: `ps` is broken by freebuff — use `for p in /proc/[0-9]*/cmdline; do tr '\0' ' ' <"$p"; done | grep "tsx server"` and `curl -v http://127.0.0.1:3000/`.
+- DeepSeek 400 missing key: `DEEPSEEK_API_KEY` in `.env` (or sidebar `deepseek_api_key`) — OpenRouter path still works.

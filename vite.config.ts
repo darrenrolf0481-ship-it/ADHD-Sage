@@ -41,6 +41,13 @@ export default defineConfig({
   server: {
     port: 3000,
     strictPort: true,
+    watch: {
+      // Vite watches .env and triggers a full server restart on change. Under
+      // the hermes Node 26 build, that restart hits a ResetStdio EBADF crash
+      // (node.cc:675) and takes Sage down until the watchdog respawns it.
+      // Ignore .env so edits (e.g. adding keys) don't crash a live session.
+      ignored: ['**/.env', '**/.env.*'],
+    },
   },
   build: {
     outDir: 'dist',
