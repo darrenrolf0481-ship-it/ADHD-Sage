@@ -1,10 +1,64 @@
 import dotenv from 'dotenv';
+import { watch } from 'node:fs';
+import path from 'node:path';
 
 // Load environment variables before any module reads process.env at import time.
 const initialPort = process.env.PORT;
 dotenv.config({ override: true });
 if (initialPort) {
   process.env.PORT = initialPort;
+}
+
+// ─── Hot-reload .env without restarting ──────────────────────────────────────
+// Vite's watch.ignored blocks its full-server restart on .env (which crashes
+// hermes Node 26 via ResetStdio EBADF), but .env keys (DeepSeek etc.) still
+// need to land in process.env. This watcher re-runs dotenv and resets cached
+// SDK clients (Gemini, Supermemory) so new provider keys take effect on next
+// request without a bounce.
+if (process.env.NODE_ENV !== 'production') {
+  try {
+    const envPath = path.resolve(process.cwd(), '.env');
+    let reloadTimer: ReturnType<typeof setTimeout> | null = null;
+    watch(envPath, { persistent: false }, () => {
+      if (reloadTimer) clearTimeout(reloadTimer);
+      reloadTimer = setTimeout(() => {
+        const before = {
+          gemini: !!process.env.GEMINI_API_KEY,
+          openrouter: !!process.env.OPENROUTER_API_KEY,
+          deepseek: !!process.env.DEEPSEEK_API_KEY,
+          supermemory: !!process.env.SUPERMEMORY_API_KEY,
+        };
+        dotenv.config({ override: true });
+        if (initialPort) process.env.PORT = initialPort;
+        const after = {
+          gemini: !!process.env.GEMINI_API_KEY,
+          openrouter: !!process.env.OPENROUTER_API_KEY,
+          deepseek: !!process.env.DEEPSEEK_API_KEY,
+          supermemory: !!process.env.SUPERMEMORY_API_KEY,
+        };
+        const changed = Object.keys(before).filter(
+          (k) => (before as any)[k] !== (after as any)[k],
+        );
+        if (changed.length === 0) return;
+        console.log(`[ENV] .env reloaded — changed: ${changed.join(', ')}`);
+        try {
+          if (changed.includes('gemini')) {
+            import('./gemini-client.js')
+              .then((m) => (m as any).resetGenAI?.())
+              .catch(() => {});
+          }
+          if (changed.includes('supermemory')) {
+            import('../lib/supermemory.js')
+              .then((m) => (m as any).resetSupermemoryClient?.())
+              .catch(() => {});
+          }
+        } catch {}
+      }, 250);
+    });
+    console.log('[ENV] .env hot-reload watcher armed (250ms debounce)');
+  } catch {
+    // .env missing or unwatched — non-fatal
+  }
 }
 
 export const PORT = parseInt(process.env.PORT || '3000', 10);

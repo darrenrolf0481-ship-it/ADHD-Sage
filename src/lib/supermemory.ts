@@ -47,6 +47,10 @@ export function getSupermemoryClient(): Supermemory | null {
   return _client;
 }
 
+export function resetSupermemoryClient(): void {
+  _client = null;
+}
+
 /**
  * Add a memory, returning its id or null on failure.
  */

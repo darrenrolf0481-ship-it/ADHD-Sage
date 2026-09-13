@@ -15,3 +15,7 @@ export function getGenAI(): GoogleGenAI {
   }
   return genAI;
 }
+
+export function resetGenAI(): void {
+  genAI = null;
+}
