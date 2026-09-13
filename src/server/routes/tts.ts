@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { existsSync } from 'node:fs';
 import { readFile, unlink } from 'node:fs/promises';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
@@ -17,7 +18,21 @@ export const PERSONAS: Record<string, { voice: string; pitch: string; rate: stri
   spiral: { voice: 'en-US-ChristopherNeural', pitch: '-2Hz', rate: '-2%', accent: 'Neutral American' }
 };
 
-const EDGE_BIN = process.env.EDGE_TTS_BIN || 'edge-tts';
+function resolveEdgeBin(): string {
+  if (process.env.EDGE_TTS_BIN && existsSync(process.env.EDGE_TTS_BIN)) {
+    return process.env.EDGE_TTS_BIN;
+  }
+  const candidates = [
+    '/root/.local/bin/edge-tts',
+    '/root/.venv/bin/edge-tts',
+    'edge-tts',
+  ];
+  for (const c of candidates) {
+    if (c.startsWith('/') && existsSync(c)) return c;
+  }
+  return 'edge-tts';
+}
+
 const MAX_CHARS = 1500;
 
 // Microsoft Edge TTS — free, high-fidelity neural streaming.
@@ -26,7 +41,7 @@ async function synthEdge(text: string, personaKey = 'mama'): Promise<Buffer> {
   const file = join(tmpdir(), `tts_${randomUUID()}.mp3`);
   
   await new Promise<void>((resolve, reject) => {
-    const proc = spawn(EDGE_BIN, [
+    const proc = spawn(resolveEdgeBin(), [
       '--voice', p.voice,
       '--pitch', p.pitch,
       '--rate', p.rate,

@@ -17,6 +17,7 @@ import ttsRouter from './routes/tts';
 import ollamaRouter from './routes/ollama';
 import openrouterRouter from './routes/openrouter';
 import deepseekRouter from './routes/deepseek';
+import omnirouteRouter from './routes/omniroute';
 import journalRouter from './routes/journal';
 import inboxRouter from './routes/inbox';
 import selfImproveRouter from './routes/self-improve';
@@ -81,6 +82,7 @@ export async function startServer() {
   app.use('/api/ollama', ollamaRouter);
   app.use('/api/openrouter', openrouterRouter);
   app.use('/api/deepseek', deepseekRouter);
+  app.use('/api/omniroute', omnirouteRouter);
   app.use('/api/journal', journalRouter);
   app.use('/api/inbox', inboxRouter);
   app.use('/api/self-improve', selfImproveRouter);

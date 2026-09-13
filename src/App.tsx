@@ -61,6 +61,11 @@ const App: React.FC = () => {
     { id: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash (OpenRouter)', provider: 'openrouter' },
     { id: 'openrouter/free', label: 'OpenRouter Auto (Free)', provider: 'openrouter' },
     { id: 'gemini-3.6-flash', label: 'Gemini 3.6 Flash (Direct API)', provider: 'gemini' },
+    { id: 'omniroute/openrouter/deepseek/deepseek-chat', label: 'OmniRoute — DeepSeek Chat (Routed)', provider: 'omniroute' },
+    { id: 'omniroute/openrouter/meta-llama/llama-3.3-70b-instruct', label: 'OmniRoute — Llama 3.3 70B', provider: 'omniroute' },
+    { id: 'omniroute/auto/best-fast', label: 'OmniRoute — Auto Best Fast', provider: 'omniroute' },
+    { id: 'omniroute/auto/best-coding', label: 'OmniRoute — Auto Best Coding', provider: 'omniroute' },
+    { id: 'omniroute/auto/best-reasoning', label: 'OmniRoute — Auto Best Reasoning', provider: 'omniroute' },
   ];
 
   const MODELS = useMemo(() => {
@@ -387,15 +392,21 @@ const App: React.FC = () => {
     if (window.innerWidth < 768) setIsSidebarOpen(false);
 
     try {
+      const isOmniRoute = model.startsWith('omniroute/') || MODELS.find((m) => m.id === model)?.provider === 'omniroute';
       const isDeepseekDirect = model === 'deepseek-chat' || model === 'deepseek-reasoner';
       const isGeminiDirect = model.startsWith('gemini');
       const isOllama =
+        !isOmniRoute &&
         !isDeepseekDirect &&
         !isGeminiDirect &&
         (model.startsWith('gemma') ||
           localOllamaModels.some((m) => m.id === model) ||
           !model.includes('/'));
-      const provider: AIProvider = isOllama ? 'ollama' : (MODELS.find((m) => m.id === model)?.provider ?? (model.includes('/') ? 'openrouter' : 'ollama'));
+      const provider: AIProvider = isOmniRoute
+        ? 'omniroute'
+        : isOllama
+          ? 'ollama'
+          : (MODELS.find((m) => m.id === model)?.provider ?? (model.includes('/') ? 'openrouter' : 'ollama'));
       const history = messages
         .slice(-15)
         .filter((m) => m.role !== 'system')
@@ -412,7 +423,23 @@ const App: React.FC = () => {
       const fullPrompt = userMessage + docContext + mediaNote;
 
       let response: Response;
-      if (provider === 'ollama') {
+      if (provider === 'omniroute') {
+        const omniModel = model.startsWith('omniroute/') ? model.slice(10) : model;
+        const omniAttachments = userAttachments
+          .filter((a) => a.type !== 'document' && a.data && a.mimeType)
+          .map((a) => ({ mimeType: a.mimeType, data: a.data }));
+        response = await fetch('/api/omniroute/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(120000),
+          body: JSON.stringify({
+            model: omniModel,
+            containerTag: 'shared',
+            messages: [...history, { role: 'user', text: fullPrompt }],
+            attachments: omniAttachments.length > 0 ? omniAttachments : undefined,
+          }),
+        });
+      } else if (provider === 'ollama') {
         const imageAttachments = userAttachments
           .filter((a) => a.type === 'image' && a.data)
           .map((a) => a.data as string);

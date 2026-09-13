@@ -61,7 +61,7 @@ export function useChat({
   const [provider, setProvider] = useState<AIProvider>(() => {
     try {
       const saved = localStorage.getItem('adhd_sage_provider');
-      if (saved === 'ollama' || saved === 'openrouter' || saved === 'gemini') return saved as AIProvider;
+      if (saved === 'ollama' || saved === 'openrouter' || saved === 'gemini' || saved === 'deepseek' || saved === 'omniroute') return saved as AIProvider;
     } catch {
       /* ignore */
     }
@@ -411,6 +411,24 @@ export function useChat({
           }),
         });
         data = await geminiRes.json();
+      } else if (provider === 'omniroute') {
+        const omniApiKey = localStorage.getItem('omniroute_api_key') || undefined;
+        const omniRes = await fetch('/api/omniroute/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(120000),
+          body: JSON.stringify({
+            apiKey: omniApiKey,
+            model: orModel.startsWith('omniroute/') ? orModel.slice(10) : orModel,
+            containerTag: 'shared',
+            systemInstruction: liveSensorContext || undefined,
+            messages: [...recentHistory, { role: 'user', text: fullPrompt }],
+            attachments: userAttachments
+              .filter((a) => a.type !== 'document' && a.data && a.mimeType)
+              .map((a) => ({ mimeType: a.mimeType, data: a.data })),
+          }),
+        });
+        data = await omniRes.json();
       } else {
         const orApiKey = localStorage.getItem('openrouter_api_key') || localStorage.getItem('OPENROUTER_API_KEY') || undefined;
         const orRes = await fetch('/api/openrouter/chat', {

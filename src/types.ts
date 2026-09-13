@@ -19,7 +19,7 @@ export interface ChatMessage {
 
 export type AppView = 'chat' | 'lattice' | 'vault' | 'capabilities' | 'labyrinth' | 'anomalies' | 'surprise' | 'coding-lab' | 'memory-workspace';
 
-export type AIProvider = 'ollama' | 'openrouter' | 'gemini' | 'deepseek';
+export type AIProvider = 'ollama' | 'openrouter' | 'gemini' | 'deepseek' | 'omniroute';
 
 export const APP_VIEWS: readonly AppView[] = [
   'chat',

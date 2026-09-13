@@ -16,6 +16,20 @@
       "autoEnable": true
     },
     {
+      "id": "neural-memory",
+      "name": "Neural Memory Brain",
+      "transport": "stdio",
+      "command": "/root/.venv/bin/python",
+      "args": [
+        "-m",
+        "neural_memory.mcp"
+      ],
+      "env": {},
+      "enabled": true,
+      "note": "Spreading activation neuro-cognitive graph memory with causal chains",
+      "autoEnable": true
+    },
+    {
       "id": "notebooklm",
       "name": "NotebookLM Research",
       "transport": "stdio",

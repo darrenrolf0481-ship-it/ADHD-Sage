@@ -29,6 +29,27 @@
         }
       ]
     },
+    "neural-memory": {
+      "name": "neural-memory",
+      "command": "/root/.venv/bin/python",
+      "args": ["-m", "neural_memory.mcp"],
+      "transport": "stdio",
+      "status": "active",
+      "category": "memory_and_archival",
+      "description": "Spreading-activation neuro-cognitive graph memory with causal chains, decay dynamics, and multi-hop associative recall.",
+      "tools": [
+        { "name": "nmem_remember", "description": "Store a memory with automatic type and causal synapse resolution." },
+        { "name": "nmem_remember_batch", "description": "Store multiple memories concurrently." },
+        { "name": "nmem_recall", "description": "Query memories via spreading activation with configurable depth." },
+        { "name": "nmem_context", "description": "Retrieve recent memories as auto-injected context." },
+        { "name": "nmem_todo", "description": "Quick TODO memory with auto-expiration." },
+        { "name": "nmem_auto", "description": "Auto-extract memories from text (process or flush)." },
+        { "name": "nmem_session", "description": "Track current session task, feature, and progress." },
+        { "name": "nmem_eternal", "description": "Persist cross-session architectural decisions and facts." },
+        { "name": "nmem_recap", "description": "Restore cross-session state at session start." },
+        { "name": "nmem_situation", "description": "One-shot snapshot of active task, blockers, and recent decisions." }
+      ]
+    },
     "diffctx": {
       "name": "diffctx",
       "command": "diffctx",

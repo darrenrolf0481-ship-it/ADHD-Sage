@@ -305,6 +305,7 @@ export async function executeMcpTool(
     const fastServers = new Set([
       'filesystem',
       'spiral-vault',
+      'neural-memory',
       'memory',
       'sequential-thinking',
       'notebooklm',
