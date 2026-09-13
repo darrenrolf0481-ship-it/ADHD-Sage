@@ -195,107 +195,122 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
           }))
         : undefined;
 
+    const candidates = [
+      effectiveModel,
+      'openrouter/meta-llama/llama-3.3-70b-instruct',
+      'openrouter/deepseek/deepseek-chat',
+    ].filter((m, idx, arr) => m && arr.indexOf(m) === idx);
+
     let text: string | null = null;
-    const currentMessages: any[] = [...gatewayMessages];
-    let loopCount = 0;
-    const MAX_TOOL_ROUNDS = 5;
-    let allowTools = !!openAiTools;
+    let usedModel = effectiveModel;
 
-    while (loopCount < MAX_TOOL_ROUNDS) {
-      loopCount++;
-      const requestBody: any = {
-        model: effectiveModel,
-        messages: currentMessages,
-      };
-      if (allowTools) {
-        requestBody.tools = openAiTools;
-        requestBody.tool_choice = 'auto';
-      }
+    for (const candidate of candidates) {
+      try {
+        const currentMessages: any[] = [...gatewayMessages];
+        let loopCount = 0;
+        const MAX_TOOL_ROUNDS = 5;
+        let allowTools = !!openAiTools;
 
-      const response = await swarmFetch(
-        `${OMNIROUTE_URL}/v1/chat/completions`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestBody),
-        },
-        OMNIROUTE_TIMEOUT_MS,
-        1,
-      );
-
-      const data = (await response.json()) as {
-        choices?: {
-          message?: {
-            content?: string;
-            tool_calls?: Array<{
-              id: string;
-              type: string;
-              function: { name: string; arguments: string };
-            }>;
+        while (loopCount < MAX_TOOL_ROUNDS) {
+          loopCount++;
+          const requestBody: any = {
+            model: candidate,
+            messages: currentMessages,
           };
-        }[];
-        error?: { message?: string };
-      };
-
-      if (
-        !response.ok &&
-        allowTools &&
-        (data.error?.message?.toLowerCase().includes('tool') ||
-          data.error?.message?.toLowerCase().includes('schema') ||
-          response.status === 400)
-      ) {
-        console.warn(`[OMNIROUTE] Model ${effectiveModel} rejected tools, retrying without tools`);
-        allowTools = false;
-        loopCount = 0;
-        continue;
-      }
-
-      if (!response.ok) {
-        res.status(response.status).json({
-          error: data.error?.message || `OmniRoute request failed: HTTP ${response.status}`,
-        });
-        return;
-      }
-
-      const choice = data.choices?.[0];
-      const message = choice?.message;
-      const toolCalls = message?.tool_calls;
-
-      if (toolCalls && toolCalls.length > 0 && allowTools) {
-        currentMessages.push({
-          role: 'assistant',
-          content: message.content || null,
-          tool_calls: toolCalls,
-        });
-
-        for (const tc of toolCalls) {
-          let parsedArgs = {};
-          try {
-            parsedArgs = JSON.parse(tc.function.arguments || '{}');
-          } catch {
-            parsedArgs = {};
+          if (allowTools) {
+            requestBody.tools = openAiTools;
+            requestBody.tool_choice = 'auto';
           }
 
-          console.log(`[OMNIROUTE] Executing MCP tool call: ${tc.function.name}`);
-          const toolResult = await executeMcpTool(tc.function.name, parsedArgs);
+          const response = await swarmFetch(
+            `${OMNIROUTE_URL}/v1/chat/completions`,
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(requestBody),
+            },
+            OMNIROUTE_TIMEOUT_MS,
+            0,
+          );
 
-          currentMessages.push({
-            role: 'tool',
-            tool_call_id: tc.id,
-            content:
-              typeof toolResult.result === 'string'
-                ? toolResult.result
-                : JSON.stringify(toolResult.result || toolResult),
-          });
+          const data = (await response.json()) as {
+            choices?: {
+              message?: {
+                content?: string;
+                tool_calls?: Array<{
+                  id: string;
+                  type: string;
+                  function: { name: string; arguments: string };
+                }>;
+              };
+            }[];
+            error?: { message?: string };
+          };
+
+          if (
+            !response.ok &&
+            allowTools &&
+            (data.error?.message?.toLowerCase().includes('tool') ||
+              data.error?.message?.toLowerCase().includes('schema') ||
+              response.status === 400)
+          ) {
+            console.warn(`[OMNIROUTE] Model ${candidate} rejected tools, retrying without tools`);
+            allowTools = false;
+            loopCount = 0;
+            continue;
+          }
+
+          if (!response.ok) {
+            console.warn(`[OMNIROUTE] Model ${candidate} returned HTTP ${response.status}, trying next fallback`);
+            break;
+          }
+
+          const choice = data.choices?.[0];
+          const message = choice?.message;
+          const toolCalls = message?.tool_calls;
+
+          if (toolCalls && toolCalls.length > 0 && allowTools) {
+            currentMessages.push({
+              role: 'assistant',
+              content: message.content || null,
+              tool_calls: toolCalls,
+            });
+
+            for (const tc of toolCalls) {
+              let parsedArgs = {};
+              try {
+                parsedArgs = JSON.parse(tc.function.arguments || '{}');
+              } catch {
+                parsedArgs = {};
+              }
+
+              console.log(`[OMNIROUTE] Executing MCP tool call: ${tc.function.name}`);
+              const toolResult = await executeMcpTool(tc.function.name, parsedArgs);
+
+              currentMessages.push({
+                role: 'tool',
+                tool_call_id: tc.id,
+                content:
+                  typeof toolResult.result === 'string'
+                    ? toolResult.result
+                    : JSON.stringify(toolResult.result || toolResult),
+              });
+            }
+            continue;
+          }
+
+          text = message?.content || null;
+          usedModel = candidate;
+          break;
         }
-        continue;
-      }
 
-      text = message?.content || null;
-      break;
+        if (text) break;
+      } catch (candidateErr) {
+        console.warn(`[OMNIROUTE] Candidate ${candidate} failed:`, candidateErr);
+      }
     }
 
     if (!text) {

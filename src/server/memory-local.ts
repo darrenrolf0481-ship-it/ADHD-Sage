@@ -98,7 +98,7 @@ export function stripForeignFossils(memories: string[]): string[] {
 function ftsSanitize(query: string): string {
   // Expand standalone '7' to 'Seven' so trigram tokenizer and keyword search match Seven and SAGE-7
   const expanded = (query || '').replace(/\b7\b/gi, 'Seven');
-  const cleaned = expanded.replace(/["'()*+\-^!:?~.\/\\@#$%&]/g, ' ');
+  const cleaned = expanded.replace(/["'()*+\-^!:?~.\/\\@#$%&,;_{}\[\]<>]/g, ' ');
   return cleaned
     .split(/\s+/)
     .filter((t) => t.length >= 3) // trigram requires >= 3 chars
