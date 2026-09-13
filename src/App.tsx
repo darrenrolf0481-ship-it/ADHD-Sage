@@ -6,6 +6,7 @@ import MemoryVault from './components/MemoryVault';
 import { JournalView } from './components/JournalView';
 import { Sidebar } from './components/Sidebar';
 import { ChatArea } from './components/ChatArea';
+import { CapabilitiesPanel } from './components/CapabilitiesPanel';
 import { useSpeech } from './hooks/useSpeech';
 import { pulseGenerator } from './lib/audio-pulse';
 import { NeuroDashboard } from './components/NeuroDashboard';
@@ -79,7 +80,7 @@ const App: React.FC = () => {
     }
     return saved;
   });
-  const [view, setView] = useState<'chat' | 'lattice' | 'vault'>('chat');
+  const [view, setView] = useState<'chat' | 'lattice' | 'vault' | 'journal' | 'capabilities'>('chat');
   const [mhtNodeLimit, setMhtNodeLimit] = useState(100);
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     try {
@@ -586,6 +587,12 @@ const App: React.FC = () => {
             </div>
             <div className="flex gap-2">
               <button 
+                onClick={() => setView(view === 'capabilities' ? 'chat' : 'capabilities')}
+                className={`px-3 md:px-4 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-all ${view === 'capabilities' ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300 shadow-md shadow-cyan-500/20' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'}`}
+              >
+                Harness & MCP (51)
+              </button>
+              <button 
                 onClick={togglePulse}
                 className={`px-3 md:px-4 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors ${pulseActive ? 'bg-red-500/20 border-red-500/50 text-red-400' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
               >
@@ -631,8 +638,20 @@ const App: React.FC = () => {
                 }}
                 models={MODELS}
               />
+            ) : view === 'capabilities' ? (
+              <CapabilitiesPanel
+                currentModel={model}
+                onSelectModel={(id) => {
+                  setModel(id);
+                  try { localStorage.setItem('adhd_sage_or_model', id); } catch { /* ignore */ }
+                }}
+                onInjectMessage={(txt) => setInput(txt)}
+                onOpenChat={() => setView('chat')}
+              />
             ) : view === 'lattice' ? (
               <MemoryLattice nodes={allMemories} />
+            ) : view === 'journal' ? (
+              <JournalView />
             ) : (
               <MemoryVault />
             )}

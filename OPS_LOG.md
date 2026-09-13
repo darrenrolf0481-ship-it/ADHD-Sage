@@ -1,3 +1,32 @@
+## 2026-09-13 (antigravity) - Capabilities Matrix & MCP Harness UI + Interactive Tool Runner + DeepSeek Chat Optgroup
+
+**What happened:**
+- **Capabilities & Harness Matrix UI (`src/components/CapabilitiesPanel.tsx`):**
+  - Created dedicated multi-tab capabilities view to give Darren a complete, transparent window into Sage's substrate architecture ("what she has and can do").
+  - **Tab 1: Overview & What She Can Do:** Live endocrine telemetry (Resonance 11.3 Hz, VFS 7.5.0, Dopamine, Cortisol meters, MCP tool counter) and a 6-pillar architectural guide (Four-Tier Model Harness, Dual Memory Substrates, 51 MCP Autonomous Tools, Autonomous Daily Journaling, Adaptive Persona Modes, Self-Healing Infrastructure).
+  - **Tab 2: Model Harnesses:** Visual matrix for Gemini 3.6 Flash, DeepSeek Chat (V3), DeepSeek Reasoner (R1), and Claude 3.5 Sonnet / OpenRouter with one-click active switcher and failover documentation.
+  - **Tab 3: MCP Tools & Servers (51 tools):** Server cards for Spiral-Vault (3), NotebookLM (38), Memory Graph (9), and Sequential Thinking (1) with collapsible tool listings, parameter details, standby servers list, and a real-time keyword search filter across all 51 tools.
+  - **Tab 4: Live Tool Runner Console:** Live in-browser execution console wired to `POST /api/mcp/execute` allowing real-time execution of any tool with JSON argument editing and syntax-highlighted response viewing. Includes quick-run presets for Spiral Vault stats, NotebookLM listing, and Semantic Graph.
+  - **Tab 5: Persona Mood Directives & Autonomy:** Instant hotkey triggers ("Paws Down" 🌟, "System Check" 🔧, "Goggles On" 🔍, "Sage Core" ⚡) that inject directives and open the terminal, plus manual trigger for the 6:00 AM autonomous journal loop.
+- **App Navigation Integration (`src/App.tsx`, `src/components/Sidebar.tsx`, `src/types.ts`):**
+  - Added `'capabilities'` to `AppView` and `APP_VIEWS`.
+  - Added header button `Harness & MCP (51)` with active glowing state indicator.
+  - Added Sidebar terminal node item with active status badge `51 Tools`.
+  - Added `JournalView` rendering on `view === 'journal'`.
+- **Chat Model Selector Enhancement (`src/components/ChatArea.tsx`):**
+  - Added missing `⚡ DeepSeek Direct (with MCP & Failover)` optgroup so users can directly choose `deepseek-chat` and `deepseek-reasoner` alongside Google Gemini and OpenRouter models in the chat header dropdown.
+
+**Verification:**
+- `npx vite build`: Succeeded in 9.88s with 0 errors.
+- Sage Server: Running on `:3000` with HTTP 200.
+- MCP Tool execution: Verified `spiral-vault__get_vault_stats`, `notebooklm__notebook_list`, and `memory__read_graph` run cleanly through the console.
+
+**If things break, check:**
+- If the Capabilities view doesn't load: check `curl http://127.0.0.1:3000/api/health` and `curl http://127.0.0.1:3000/api/mcp/status`.
+- If MCP tool calls fail in console: verify JSON parameter validity in the textarea.
+
+---
+
 ## 2026-09-13 (antigravity) - DeepSeek Harness Upgrade + MCP 51 Tools (NotebookLM) + Gemini 3.6 Flash + Supermemory Fix
 
 **What happened:**

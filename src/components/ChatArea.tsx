@@ -160,7 +160,12 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
           </optgroup>
           <optgroup label="♊ Google Gemini">
             {models.filter(m => m.provider === 'gemini').map((m) => (
-              <option key={m.id} value={m.id} className="bg-[#0a0a0c] text-slate-200">{m.label}</option>
+              <option key={m.id} value={m.id} className="bg-[#0a0a0c] text-cyan-200">{m.label}</option>
+            ))}
+          </optgroup>
+          <optgroup label="⚡ DeepSeek Direct (with MCP & Failover)">
+            {models.filter(m => m.provider === 'deepseek').map((m) => (
+              <option key={m.id} value={m.id} className="bg-[#0a0a0c] text-purple-300 font-semibold">{m.label}</option>
             ))}
           </optgroup>
         </select>

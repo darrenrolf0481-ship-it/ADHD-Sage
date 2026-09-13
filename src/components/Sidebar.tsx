@@ -16,7 +16,7 @@ import { SidebarItem } from './SidebarItem';
 import type { MemoryNode } from '../lib/memory-system';
 
 // App.tsx's view state is currently the narrow set below (matches its router).
-type SidebarView = 'chat' | 'lattice' | 'vault' | 'journal';
+type SidebarView = 'chat' | 'lattice' | 'vault' | 'journal' | 'capabilities';
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -228,6 +228,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-4 px-2">Terminal Nodes</p>
                   <div onClick={() => setView('chat')}>
                     <SidebarItem icon={<Terminal size={14} />} label="Core" active={view === 'chat'} />
+                  </div>
+                  <div onClick={() => setView('capabilities')}>
+                    <SidebarItem icon={<Cpu size={14} />} label="Harness & MCP" active={view === 'capabilities'} value="51 Tools" />
                   </div>
                   <div onClick={() => setView('vault')}>
                     <SidebarItem icon={<Shield size={14} />} label="Vault" active={view === 'vault'} />
