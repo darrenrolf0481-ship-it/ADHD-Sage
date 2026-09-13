@@ -245,9 +245,12 @@ export async function indexNode(
 
   if (_vecEnabled && _vecInsert && _metaInsert) {
     const floatArr = new Float32Array(vec);
-    const result = _vecInsert.run(floatArr);
-    const rowid = Number(result.lastInsertRowid);
-    _metaInsert.run(rowid, phi_index, text, thread_id ?? null, task ?? null, Date.now());
+    const transaction = outerDb.transaction(() => {
+      const result = _vecInsert.run(floatArr);
+      const rowid = Number(result.lastInsertRowid);
+      _metaInsert.run(rowid, phi_index, text, thread_id ?? null, task ?? null, Date.now());
+    });
+    transaction();
   } else {
     _insertVector.run(phi_index, text, JSON.stringify(vec), thread_id ?? null, task ?? null, Date.now());
   }

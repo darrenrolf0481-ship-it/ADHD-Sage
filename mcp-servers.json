@@ -4,21 +4,29 @@
       "id": "spiral-vault",
       "name": "Spiral Vault",
       "transport": "stdio",
-      "command": "tsx",
-      "args": ["/root/Spiral/scripts/vault_mcp_server.ts"],
+      "command": "npx",
+      "args": [
+        "-y",
+        "tsx",
+        "${SPIRAL_VAULT_PATH}"
+      ],
       "env": {},
       "enabled": true,
-      "note": "Hermes-Spiral SQLite FTS5 Cold Memory Vault (~/.hermes/vault.db)"
+      "note": "Hermes-Spiral SQLite FTS5 Cold Memory Vault (~/.hermes/vault.db)",
+      "autoEnable": true
     },
     {
       "id": "diffctx",
       "name": "DiffCtx Codebase Analyzer",
       "transport": "stdio",
       "command": "diffctx",
-      "args": ["--mcp"],
+      "args": [
+        "--mcp"
+      ],
       "env": {},
       "enabled": true,
-      "note": "AST and import-graph codebase intelligence engine"
+      "note": "AST and import-graph codebase intelligence engine",
+      "autoEnable": true
     },
     {
       "id": "git-context",
@@ -28,7 +36,8 @@
       "args": [],
       "env": {},
       "enabled": true,
-      "note": "Git commit forensics, blame tracking, and commit story narratives"
+      "note": "Git commit forensics, blame tracking, and commit story narratives",
+      "autoEnable": true
     },
     {
       "id": "large-file",
@@ -38,7 +47,8 @@
       "args": [],
       "env": {},
       "enabled": true,
-      "note": "Token-safe inspector for gigabyte-scale logs and transcripts"
+      "note": "Token-safe inspector for gigabyte-scale logs and transcripts",
+      "autoEnable": true
     },
     {
       "id": "safe-docx",
@@ -48,7 +58,8 @@
       "args": [],
       "env": {},
       "enabled": true,
-      "note": "Word document editing, comments, and inspection"
+      "note": "Word document editing, comments, and inspection",
+      "autoEnable": true
     },
     {
       "id": "md-to-pdf",
@@ -58,7 +69,8 @@
       "args": [],
       "env": {},
       "enabled": true,
-      "note": "Publication-grade PDF renderer for reports"
+      "note": "Publication-grade PDF renderer for reports",
+      "autoEnable": true
     },
     {
       "id": "trinity-bridge",
@@ -68,27 +80,36 @@
       "args": [],
       "env": {},
       "enabled": true,
-      "note": "Multi-agent coordination and message broadcast"
+      "note": "Multi-agent coordination and message broadcast",
+      "autoEnable": true
     },
     {
       "id": "memory",
       "name": "Persistent Knowledge Graph",
       "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
       "env": {},
       "enabled": true,
-      "note": "Persistent semantic graph memory for entities and relations"
+      "note": "Persistent semantic graph memory for entities and relations",
+      "autoEnable": true
     },
     {
       "id": "sequential-thinking",
       "name": "Sequential Thinking",
       "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
       "env": {},
       "enabled": true,
-      "note": "Dynamic multi-step reasoning and hypothesis verification"
+      "note": "Dynamic multi-step reasoning and hypothesis verification",
+      "autoEnable": true
     },
     {
       "id": "context7",
@@ -98,7 +119,8 @@
       "args": [],
       "env": {},
       "enabled": true,
-      "note": "Real-time vector documentation search for libraries and frameworks"
+      "note": "Real-time vector documentation search for libraries and frameworks",
+      "autoEnable": true
     }
   ]
 }

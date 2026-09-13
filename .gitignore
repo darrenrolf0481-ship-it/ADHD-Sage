@@ -44,3 +44,10 @@ data/sages_constellations.db-wal
 
 # Local DB backups (corruption recovery artifacts — keep out of git)
 data/sages_constellations.db.bak.*
+
+# Video/Media analysis temporary artifacts
+data/tmp/
+*.webm
+*.mp4
+*.m4a
+*.wav

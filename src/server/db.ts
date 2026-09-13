@@ -30,6 +30,7 @@ innerDb.exec(`
 // outer_sweep: file — durable, zstd-compressed blobs
 mkdirSync('data', { recursive: true });
 export const outerDb = new Database('data/sages_constellations.db');
+outerDb.pragma('journal_mode = WAL');
 outerDb.pragma('synchronous = NORMAL');
 outerDb.exec(`
   CREATE TABLE IF NOT EXISTS sages_constellations (

@@ -41,15 +41,17 @@ function createSummary(entries: Array<{ phi_index: number; text: string; timesta
 }
 
 function deleteThread(thread_id: string): void {
-  if (isVecEnabled()) {
-    // Delete from resonance_vec by rowid, then metadata
-    outerDb.prepare(
-      'DELETE FROM resonance_vec WHERE rowid IN (SELECT rowid FROM resonance_metadata WHERE thread_id = ?)',
-    ).run(thread_id);
-    outerDb.prepare('DELETE FROM resonance_metadata WHERE thread_id = ?').run(thread_id);
-  } else {
-    outerDb.prepare('DELETE FROM resonance_vectors WHERE thread_id = ?').run(thread_id);
-  }
+  const transaction = outerDb.transaction(() => {
+    if (isVecEnabled()) {
+      outerDb.prepare(
+        'DELETE FROM resonance_vec WHERE rowid IN (SELECT rowid FROM resonance_metadata WHERE thread_id = ?)',
+      ).run(thread_id);
+      outerDb.prepare('DELETE FROM resonance_metadata WHERE thread_id = ?').run(thread_id);
+    } else {
+      outerDb.prepare('DELETE FROM resonance_vectors WHERE thread_id = ?').run(thread_id);
+    }
+  });
+  transaction();
 }
 
 export async function runConsolidation(options: {

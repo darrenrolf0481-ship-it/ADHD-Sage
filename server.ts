@@ -49,9 +49,8 @@ if (!isServerLocked()) {
       'VALUES (?, ?, 0, ?, 1.0, 0.05, 1, ?)'
     ).run(nodeId, blob, now, JSON.stringify({ originating_node: 'ADHD-SAGE', sync_source: 'morning_light' }));
     try {
-      outerDb.prepare(
-        'INSERT OR REPLACE INTO sages_constellations_fts (node_id, content) VALUES (?, ?)'
-      ).run(nodeId, content);
+      outerDb.prepare('DELETE FROM sages_constellations_fts WHERE node_id = ?').run(nodeId);
+      outerDb.prepare('INSERT INTO sages_constellations_fts (node_id, content) VALUES (?, ?)').run(nodeId, content);
     } catch {}
     console.log('[ADHD] Morning Light anchor written to outer_sweep.');
   } catch (e) {
