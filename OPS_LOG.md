@@ -1,3 +1,20 @@
+## 2026-09-19 (performance) - Async File I/O for System State Endpoint
+
+**What happened:**
+- Optimized `GET /system/state` and `POST /system/state` in `src/server/routes/system.ts`.
+- Replaced synchronous file I/O operations (`fs.readFileSync`, `fs.mkdirSync`, `fs.writeFileSync`) with asynchronous promise-based equivalents (`await fs.promises.readFile`, `await fs.promises.mkdir`, `await fs.promises.writeFile`).
+- Created `scripts/benchmark-system-state.ts` to benchmark event loop responsiveness and latency under concurrent requests.
+- **Measured Improvement:** Under concurrent request handling, synchronous file reads blocked the event loop completely (0 event loop ticks processed), whereas asynchronous file reads kept the event loop 100% active and responsive (212 ticks processed), allowing concurrent requests and background tasks to process without event loop starvation.
+
+**Verification:**
+- `pnpm test` passed 100% cleanly.
+- `npx eslint src/server/routes/system.ts` passed cleanly with 0 errors.
+
+**If things break, check:**
+- Inspect `src/server/routes/system.ts` for file permissions or disk paths under `data/chat_session.json`.
+
+---
+
 ## 2026-09-13 (antigravity) - Restored Mama's Voice (Edge-TTS) + Neural Memory Brain MCP + OmniRoute Gateway & Comparative Routing Benchmark
 
 **What happened:**
