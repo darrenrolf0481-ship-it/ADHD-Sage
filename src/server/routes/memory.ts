@@ -123,23 +123,33 @@ router.get('/profile', lockGuard, asyncHandler(async (req, res) => {
   res.json(profile ?? {});
 }));
 
-import { execSync } from 'child_process';
-import fs from 'fs';
+import { exec } from 'child_process';
+import fsPromises from 'fs/promises';
 import path from 'path';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 /**
  * GET /api/memory/graph
  * Exports the current Neural Memory brain graph to JSON and returns it for the UI.
  */
-router.get('/graph', lockGuard, asyncHandler(async (req, res) => {
+router.get('/graph', lockGuard, asyncHandler(async (_req, res) => {
+  const tmpPath = path.join('/tmp', `brain_export_${Date.now()}.json`);
   try {
-    const tmpPath = path.join('/tmp', `brain_export_${Date.now()}.json`);
-    execSync(`nmem export ${tmpPath}`, { stdio: 'pipe' });
-    const data = JSON.parse(fs.readFileSync(tmpPath, 'utf8'));
-    fs.unlinkSync(tmpPath);
+    await execAsync(`nmem export ${tmpPath}`);
+    const fileContent = await fsPromises.readFile(tmpPath, 'utf8');
+    const data = JSON.parse(fileContent);
     res.json(data);
-  } catch (err: any) {
-    res.status(500).json({ error: 'Failed to export Neural Memory graph', details: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: 'Failed to export Neural Memory graph', details: message });
+  } finally {
+    try {
+      await fsPromises.unlink(tmpPath);
+    } catch {
+      // Ignore cleanup error if temp file was not created or already unlinked
+    }
   }
 }));
 
