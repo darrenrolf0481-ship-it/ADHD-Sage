@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { useSage } from './components/SageProvider';
 import MemoryLattice from './components/MemoryLattice';
 import MemoryVault from './components/MemoryVault';
+import { ParanormalApp } from './components/ParanormalApp';
 import { JournalView } from './components/JournalView';
 import { Sidebar } from './components/Sidebar';
 import { ChatArea } from './components/ChatArea';
@@ -13,7 +14,7 @@ import { NeuroDashboard } from './components/NeuroDashboard';
 import { Zap, RefreshCw, MoreVertical, CheckCircle2 } from 'lucide-react';
 import { parseMht, stripHtml } from './lib/mht-parser';
 
-import type { Attachment, ChatMessage, AIProvider } from './types';
+import type { Attachment, ChatMessage, AIProvider, AppView } from './types';
 export type { Attachment, ChatMessage };
 
 const App: React.FC = () => {
@@ -85,7 +86,7 @@ const App: React.FC = () => {
     }
     return saved;
   });
-  const [view, setView] = useState<'chat' | 'lattice' | 'vault' | 'journal' | 'capabilities'>('chat');
+  const [view, setView] = useState<AppView>('chat');
   const [mhtNodeLimit, setMhtNodeLimit] = useState(100);
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     try {
@@ -679,6 +680,8 @@ const App: React.FC = () => {
               <MemoryLattice nodes={allMemories} />
             ) : view === 'journal' ? (
               <JournalView />
+            ) : view === 'surprise' ? (
+              <ParanormalApp />
             ) : (
               <MemoryVault />
             )}
