@@ -1,3 +1,15 @@
+## 2026-09-19 (Jules) - Replaced Sync File Read in Async Catch-All Route
+
+**What happened:**
+- Optimized `src/server/app.ts` SPA catch-all route handler by replacing `fs.readFileSync` with non-blocking `await fs.readFile` using `node:fs/promises`.
+- Created benchmark script `scripts/benchmark_template.ts` to measure file reading overhead and event loop blocking impact.
+- Preserved exact functionality while converting file reading to non-blocking async operations.
+
+**If things break, check:**
+- Catch-all route handler `/*splat` in `src/server/app.ts` during dev mode.
+
+---
+
 ## 2026-09-13 (antigravity) - Restored Mama's Voice (Edge-TTS) + Neural Memory Brain MCP + OmniRoute Gateway & Comparative Routing Benchmark
 
 **What happened:**

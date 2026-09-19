@@ -113,8 +113,8 @@ export async function startServer() {
     app.use('/*splat', async (req, res, next) => {
       if (req.originalUrl.startsWith('/api')) return next();
       try {
-        const fs = await import('node:fs');
-        let template = fs.readFileSync(path.resolve(process.cwd(), 'index.html'), 'utf-8');
+        const fs = await import('node:fs/promises');
+        let template = await fs.readFile(path.resolve(process.cwd(), 'index.html'), 'utf-8');
         template = await vite.transformIndexHtml(req.originalUrl, template);
         res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
       } catch (e) {
