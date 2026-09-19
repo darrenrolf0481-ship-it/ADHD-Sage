@@ -66,6 +66,62 @@ const Starfield = React.forwardRef<HTMLDivElement, Record<string, never>>((props
 
 interface LocalAttachment { type: string, url: string, name: string }
 
+const ParanormalCopyButton: React.FC<{ text: string }> = ({ text }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="absolute top-2 right-2 p-1 rounded bg-[#c084fc]/10 border border-[#c084fc]/20 text-[#c084fc]/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:text-[#c084fc] transition-all focus:outline-none"
+      title="Copy message"
+      aria-label="Copy message"
+    >
+      {copied ? (
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+      )}
+    </button>
+  );
+};
+
+
+const ParanormalCopyButton: React.FC<{ text: string }> = ({ text }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="absolute top-2 right-2 p-1 rounded bg-[#c084fc]/10 border border-[#c084fc]/20 text-[#c084fc]/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:text-[#c084fc] transition-all focus:outline-none"
+      title="Copy message"
+      aria-label="Copy message"
+    >
+      {copied ? (
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+      )}
+    </button>
+  );
+};
+
+
 // ---- Core View ----
 function CoreTab() {
   const [pulseData, setPulseData] = useState({
@@ -270,23 +326,7 @@ function ChatTab({ settings }: { settings: Settings }) {
               {isDecrypted ? entry.role : `NODE_${i.toString(16).padStart(4, '0')}`}
             </span>
             {entry.role !== 'user' && entry.role !== 'sys' && entry.text && (
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(entry.text);
-                  const btn = document.getElementById(`paranormal-copy-btn-${i}`);
-                  if (btn) {
-                    const originalHtml = btn.innerHTML;
-                    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-                    setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
-                  }
-                }}
-                id={`paranormal-copy-btn-${i}`}
-                className="absolute top-2 right-2 p-1 rounded bg-[#c084fc]/10 border border-[#c084fc]/20 text-[#c084fc]/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:text-[#c084fc] transition-all focus:outline-none"
-                title="Copy message"
-                aria-label="Copy message"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              </button>
+              <ParanormalCopyButton text={entry.text} />
             )}
             <div className={`whitespace-pre-wrap ${!isDecrypted ? 'font-mono text-[10px] opacity-70 break-all' : ''}`}>
               {!isDecrypted ? `[DATA_PACKET_0x${(i+1).toString(16).toUpperCase()}]\n${encodeHex(entry.text)}` : entry.text}
