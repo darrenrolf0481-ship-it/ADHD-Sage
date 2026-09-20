@@ -88,7 +88,16 @@ if (_vecEnabled) {
 
 // ─── Embedding ────────────────────────────────────────────────────────────────
 
+// Performance Optimization: Cache computed hash embeddings for frequent/repeated queries.
+// Prevents redundant token splitting, Math.imul loop, array allocations, and norm reduction.
+// Max cache size set to 1000 entries to prevent memory leak.
+const HASH_EMBED_CACHE_LIMIT = 1000;
+const hashEmbedCache = new Map<string, number[]>();
+
 function hashEmbed(text: string): number[] {
+  const cached = hashEmbedCache.get(text);
+  if (cached) return cached;
+
   const vec = new Array<number>(EMBED_DIM).fill(0);
   const tokens = text.toLowerCase().split(/\s+/);
   for (const token of tokens) {
@@ -99,7 +108,20 @@ function hashEmbed(text: string): number[] {
     vec[Math.abs(h) % EMBED_DIM] += 1;
   }
   const norm = Math.sqrt(vec.reduce((s, v) => s + v * v, 0)) || 1;
-  return vec.map((v) => v / norm);
+  const result = vec.map((v) => v / norm);
+
+  Object.freeze(result);
+
+  if (hashEmbedCache.size >= HASH_EMBED_CACHE_LIMIT) {
+    // Delete oldest entry to maintain LRU-like capacity
+    const firstKey = hashEmbedCache.keys().next().value;
+    if (firstKey !== undefined) {
+      hashEmbedCache.delete(firstKey);
+    }
+  }
+  hashEmbedCache.set(text, result);
+
+  return result;
 }
 
 // Truncate or pad to EMBED_DIM and re-normalize (handles variable-dim Ollama models)

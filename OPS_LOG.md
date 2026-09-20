@@ -1,3 +1,19 @@
+## 2026-09-20 (Bolt) - Memoized `hashEmbed` in `src/server/resonance-index.ts`
+
+**What happened:**
+- Added a bounded FIFO/LRU cache (`hashEmbedCache`, limit 1,000 entries) to `hashEmbed` in `src/server/resonance-index.ts`.
+- `Object.freeze(result)` is applied to cached vectors so downstream callers cannot mutate the vector in-place.
+- Prevents redundant token splitting, string hashing (`Math.imul`), vector array allocation, and Euclidean norm computation for repeated text queries during search and backfill.
+
+**Verification:**
+- Ran full test suite (`pnpm test`) — all identity, API, worker pool, and production worker tests passed cleanly.
+- Ran full build (`pnpm run build`) — succeeded in ~3s.
+
+**If things break, check:**
+- If vector embeddings return unexpected frozen object errors when modified downstream, check `src/server/resonance-index.ts` lines 91-125.
+
+---
+
 ## 2026-09-13 (antigravity) - Restored Mama's Voice (Edge-TTS) + Neural Memory Brain MCP + OmniRoute Gateway & Comparative Routing Benchmark
 
 **What happened:**
