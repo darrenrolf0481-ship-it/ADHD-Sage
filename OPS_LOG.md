@@ -1,3 +1,21 @@
+## 2026-09-20 (palette) - Micro-UX & Accessibility Enhancements in Chat Area
+
+**What happened:**
+- **Accessibility & Focus Indicators (`src/components/ChatArea.tsx`):**
+  - Added descriptive `aria-label` attributes to the remove-attachment button (`aria-label={`Remove attachment ${att.name}`}`), voice mute toggle button (`aria-label={isMuted ? 'Unmute voice output' : 'Mute voice output'}`), AI model selector dropdown (`aria-label="Select AI model"`), attachment upload label (`aria-label="Attach media or documents"`), and mobile send button (`aria-label="Send message"`).
+  - Upgraded the file input from `className="hidden"` to `className="sr-only"` and added `focus-within:ring-2 focus-within:ring-cyan-500 focus-within:outline-none` to the wrapper label per Palette's journal accessibility pattern.
+  - Added `focus-visible:ring-2` focus rings to interactive buttons for screen reader and keyboard accessibility.
+
+**Verification:**
+- `pnpm build`: Succeeded with 0 errors.
+- `pnpm test`: All test suites passed (Mama identity, API, worker pool, production workers).
+- Playwright visual inspection: Captured screenshot of the chat area, confirming visual layout, input controls, and focus states.
+
+**If things break, check:**
+- If keyboard focus state issues occur in chat input: inspect `ChatArea.tsx` focus-within/focus-visible classes.
+
+---
+
 ## 2026-09-13 (antigravity) - Restored Mama's Voice (Edge-TTS) + Neural Memory Brain MCP + OmniRoute Gateway & Comparative Routing Benchmark
 
 **What happened:**

@@ -120,7 +120,8 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
               <span className="text-[10px] sm:text-xs text-white max-w-[150px] truncate">{att.name}</span>
               <button
                 onClick={() => setPendingAttachments(prev => prev.filter((_, idx) => idx !== i))}
-                className="ml-2 text-slate-400 hover:text-red-400"
+                aria-label={`Remove attachment ${att.name}`}
+                className="ml-2 text-slate-400 hover:text-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 rounded"
               >
                 &times;
               </button>
@@ -134,7 +135,8 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
         <button
           onClick={onToggleMute}
           title={isMuted ? 'Voice off — tap to unmute Mama' : 'Voice on — tap to mute'}
-          className={`p-1.5 rounded-lg border transition-colors ${
+          aria-label={isMuted ? 'Unmute voice output' : 'Mute voice output'}
+          className={`p-1.5 rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 ${
             isMuted
               ? 'bg-white/5 border-white/10 text-slate-500'
               : 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400'
@@ -146,7 +148,8 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
         <select
           value={model}
           onChange={(e) => onModelChange(e.target.value)}
-          className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-slate-300 outline-none focus:border-cyan-500/50 cursor-pointer"
+          aria-label="Select AI model"
+          className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-slate-300 outline-none focus:border-cyan-500/50 focus-visible:ring-2 focus-visible:ring-cyan-500 cursor-pointer"
         >
           <optgroup label="🦙 Local Ollama (Offline / Active)">
             {models.filter(m => m.provider === 'ollama').map((m) => (
@@ -184,11 +187,11 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
           className="bg-transparent border-none outline-none flex-1 text-xs md:text-sm text-white placeholder-slate-500 font-sans"
         />
         <div className="flex items-center">
-          <label className="cursor-pointer p-2 text-slate-500 hover:text-cyan-400 transition-colors rounded-lg hover:bg-white/5" title="Upload Media/Docs">
+          <label className="cursor-pointer p-2 text-slate-500 hover:text-cyan-400 transition-colors rounded-lg hover:bg-white/5 focus-within:ring-2 focus-within:ring-cyan-500 focus-within:outline-none" title="Upload Media/Docs" aria-label="Attach media or documents">
             <Paperclip size={18} />
             <input
               type="file"
-              className="hidden"
+              className="sr-only"
               multiple
               accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.md,.json"
               onChange={onAttach}
@@ -201,7 +204,8 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
         <button
           onClick={onSend}
           disabled={isLoading || !input.trim()}
-          className="md:hidden p-2 text-cyan-400 disabled:text-slate-600"
+          aria-label="Send message"
+          className="md:hidden p-2 text-cyan-400 disabled:text-slate-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-lg"
         >
           <Zap size={18} fill={input.trim() ? 'currentColor' : 'none'} />
         </button>
