@@ -1,3 +1,20 @@
+## 2026-09-21 (Palette) - Enhanced Sidebar Navigation & File Input Accessibility
+
+**What happened:**
+- Converted `SidebarItem` component into an accessible semantic `<button>` with `focus-visible:ring-2 focus-visible:ring-cyan-500` outline styling for full keyboard navigation and screen reader compatibility.
+- Updated `Sidebar.tsx` terminal node items to pass `onClick` directly to `SidebarItem` rather than using non-interactive wrapping `<div>` elements.
+- Replaced `className="hidden"` on the "Import MHT" file input in `Sidebar.tsx` with `className="sr-only"` and added `focus-within:ring-2 focus-within:ring-cyan-500` to its label wrapper, preserving screen reader accessibility and visible focus indicators.
+
+**Verification:**
+- Ran Vite build (`pnpm build`) successfully.
+- Conducted Playwright visual and video verification using `read_media_file` and `frontend_verification_complete`.
+- Verified clean `git status` after restoring unneeded lockfile changes.
+
+**If things break, check:**
+- `src/components/SidebarItem.tsx` and `src/components/Sidebar.tsx` for sidebar rendering or keyboard focus states.
+
+---
+
 ## 2026-09-20 (Bolt) - Memoized `hashEmbed` in `src/server/resonance-index.ts`
 
 **What happened:**
