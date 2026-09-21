@@ -170,7 +170,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <SidebarItem icon={<Database size={14} />} label="VFS-Bridge" value="ACTIVE" />
 
                   <div className="pt-2">
-                    <label className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-cyan-400/30 transition-all cursor-pointer group">
+                    <label className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-cyan-400/30 focus-within:ring-2 focus-within:ring-cyan-500 transition-all cursor-pointer group">
                       <div className="flex items-center gap-3">
                         <FileUp size={14} className="text-slate-500 group-hover:text-cyan-400 transition-colors" />
                         <span className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors">Import MHT</span>
@@ -180,7 +180,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         type="file"
                         accept=".mht"
                         onChange={onImportMht}
-                        className="hidden"
+                        className="sr-only"
+                        aria-label="Import MHT file"
                       />
                     </label>
                     <div className="px-3 mt-4">
@@ -226,21 +227,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                 <div className="space-y-1">
                   <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-4 px-2">Terminal Nodes</p>
-                  <div onClick={() => setView('chat')}>
-                    <SidebarItem icon={<Terminal size={14} />} label="Core" active={view === 'chat'} />
-                  </div>
-                  <div onClick={() => setView('capabilities')}>
-                    <SidebarItem icon={<Cpu size={14} />} label="Harness & MCP" active={view === 'capabilities'} value="51 Tools" />
-                  </div>
-                  <div onClick={() => setView('vault')}>
-                    <SidebarItem icon={<Shield size={14} />} label="Vault" active={view === 'vault'} />
-                  </div>
-                  <div onClick={() => setView('lattice')}>
-                    <SidebarItem icon={<Network size={14} />} label="Lattice" active={view === 'lattice'} value={`${innerSpiralCount}/8`} />
-                  </div>
-                  <div onClick={() => setView('journal')}>
-                    <SidebarItem icon={<BookOpen size={14} />} label="Journal" active={view === 'journal'} />
-                  </div>
+                  <SidebarItem icon={<Terminal size={14} />} label="Core" active={view === 'chat'} onClick={() => setView('chat')} />
+                  <SidebarItem icon={<Cpu size={14} />} label="Harness & MCP" active={view === 'capabilities'} value="51 Tools" onClick={() => setView('capabilities')} />
+                  <SidebarItem icon={<Shield size={14} />} label="Vault" active={view === 'vault'} onClick={() => setView('vault')} />
+                  <SidebarItem icon={<Network size={14} />} label="Lattice" active={view === 'lattice'} value={`${innerSpiralCount}/8`} onClick={() => setView('lattice')} />
+                  <SidebarItem icon={<BookOpen size={14} />} label="Journal" active={view === 'journal'} onClick={() => setView('journal')} />
                 </div>
               </div>
             )}
