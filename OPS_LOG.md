@@ -1,3 +1,20 @@
+## 2026-09-20 (Bolt) - Memoized `MessageList` and `ChatMessageItem` in `src/components/MessageList.tsx`
+
+**What happened:**
+- Extracted individual chat message rendering into a memoized `ChatMessageItem` component (`React.memo`).
+- Wrapped `MessageList` component in `React.memo` to skip re-rendering the message list when input text or unrelated parent state updates.
+- Eliminates unnecessary re-renders of the entire chat history on every keystroke in `ChatInput`.
+
+**Verification:**
+- Ran `npx eslint src/components/MessageList.tsx` — 0 errors, 0 warnings.
+- Ran `pnpm build` — Vite and esbuild production build succeeded cleanly.
+- Ran `pnpm test` — all MAMA identity, API, worker pool, and production worker tests passed.
+
+**If things break, check:**
+- If chat messages do not update when message properties change, verify prop equality on `ChatMessageItem` (`src/components/MessageList.tsx`).
+
+---
+
 ## 2026-09-20 (Bolt) - Memoized `hashEmbed` in `src/server/resonance-index.ts`
 
 **What happened:**
