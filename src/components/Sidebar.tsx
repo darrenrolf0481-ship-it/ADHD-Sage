@@ -113,7 +113,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <div className="flex flex-col gap-2 px-2 mb-4">
                    <div className="flex justify-between items-center">
                     <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Search Results</span>
-                    <button onClick={() => setSearchQuery('')} className="text-[10px] text-cyan-400 hover:underline">Clear</button>
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      aria-label="Clear search"
+                      className="text-[10px] text-cyan-400 hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 rounded"
+                    >
+                      Clear
+                    </button>
                   </div>
                   <div className="flex justify-between items-center py-1 border-y border-white/5">
                     <div className="flex gap-2">
@@ -170,7 +176,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <SidebarItem icon={<Database size={14} />} label="VFS-Bridge" value="ACTIVE" />
 
                   <div className="pt-2">
-                    <label className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-cyan-400/30 transition-all cursor-pointer group">
+                    <label className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-cyan-400/30 focus-within:ring-2 focus-within:ring-cyan-500 focus-within:border-cyan-400/50 focus-within:outline-none transition-all cursor-pointer group">
                       <div className="flex items-center gap-3">
                         <FileUp size={14} className="text-slate-500 group-hover:text-cyan-400 transition-colors" />
                         <span className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors">Import MHT</span>
@@ -180,7 +186,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         type="file"
                         accept=".mht"
                         onChange={onImportMht}
-                        className="hidden"
+                        aria-label="Import MHT file"
+                        className="sr-only"
                       />
                     </label>
                     <div className="px-3 mt-4">
@@ -203,7 +210,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         step="10"
                         value={mhtNodeLimit}
                         onChange={(e) => setMhtNodeLimit(Number(e.target.value))}
-                        className="w-full appearance-none bg-white/10 h-1 flex rounded-full mb-3 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:rounded-full cursor-pointer"
+                        aria-label="MHT Node Limit"
+                        className="w-full appearance-none bg-white/10 h-1 flex rounded-full mb-3 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-500"
                       />
                       <div className="flex justify-between gap-1">
                         {[50, 100, 500, 1000].map((val) => (
