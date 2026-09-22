@@ -1,5 +1,5 @@
 import React from 'react';
-import { Code2, Database, Network, Radio, Shield, Terminal } from 'lucide-react';
+import { Code2, Database, Radio, Shield, Terminal } from 'lucide-react';
 import type { AppView } from '../types';
 
 interface MobileNavProps {
@@ -26,7 +26,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ view, setView, setIsSideba
             setView(v);
             setIsSidebarOpen(false);
           }}
-          className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition-all ${
+          className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 ${
             view === v ? 'text-cyan-400' : 'text-slate-600 hover:text-slate-400'
           }`}
         >

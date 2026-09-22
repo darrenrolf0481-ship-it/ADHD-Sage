@@ -1,3 +1,22 @@
+## 2026-09-21 (Palette) - Improved accessibility & focus handling in Sidebar & MobileNav
+
+**What happened:**
+- Fixed file input accessibility in `Sidebar.tsx`: replaced `className="hidden"` with `className="sr-only"` on the MHT file upload input, added `aria-label="Import MHT file"`, and applied `focus-within` styles on the parent label so keyboard users get a visible focus indicator.
+- Added `aria-label="MHT Node Limit"` and focus ring to the MHT node limit range slider.
+- Added `aria-label="Clear search"` and focus-visible styling to the clear search button.
+- Added `focus-visible` ring styling to navigation buttons in `MobileNav.tsx` and removed unused `Network` import.
+
+**Verification:**
+- Ran `pnpm test` (Mama identity, generateResponse API, worker pool smoke tests, production worker smoke tests) — all tests passed cleanly.
+- Ran `pnpm build` — succeeded in ~3s.
+- Ran `npx eslint` on modified components — 0 errors.
+- Visual inspection via Playwright screenshot confirmed clean UI rendering.
+
+**If things break, check:**
+- Check `src/components/Sidebar.tsx` and `src/components/MobileNav.tsx`.
+
+---
+
 ## 2026-09-20 (Bolt) - Memoized `hashEmbed` in `src/server/resonance-index.ts`
 
 **What happened:**
