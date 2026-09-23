@@ -1,3 +1,20 @@
+## 2026-09-22 (Palette) - Accessibility fix for MHT file import in Sidebar (`src/components/Sidebar.tsx`)
+
+**What happened:**
+- Fixed file input accessibility issue in `src/components/Sidebar.tsx` where `<input type="file" className="hidden" />` rendered the element hidden from screen readers and keyboard navigation.
+- Replaced `className="hidden"` with `className="sr-only"`, added `aria-label="Import MHT file"`, and added focus styling (`focus-within:ring-2 focus-within:ring-cyan-400/50 focus-within:border-cyan-400`) to the parent `<label>` element.
+- Verified visual focus indicator via Playwright headless screenshot verification (`/home/jules/verification/focus.png`).
+
+**Verification:**
+- Ran `pnpm test` (Mama identity, API, worker pool, production worker smoke tests passed cleanly).
+- Ran `npx eslint src/components/Sidebar.tsx` (0 errors).
+- Ran `pnpm build` (production build succeeded in ~3s).
+
+**If things break, check:**
+- If the import file input focus styling is missing or misplaced, check `src/components/Sidebar.tsx` around line 173.
+
+---
+
 ## 2026-09-20 (Bolt) - Memoized `hashEmbed` in `src/server/resonance-index.ts`
 
 **What happened:**
