@@ -30,14 +30,43 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
 
   const [is3D, setIs3D] = useState(false);
 
-  const [nmemGraph, setNmemGraph] = useState<any>(null);
+  interface NeuralNeuron {
+    id: string;
+    content?: string;
+    type?: string;
+    created_at?: string;
+  }
+
+  interface NeuralFiber {
+    id: string;
+    summary?: string;
+    tags?: string[];
+    salience?: number;
+    metadata?: { _arousal?: number };
+    created_at?: string;
+    neuron_ids?: string[];
+  }
+
+  interface NeuralSynapse {
+    source_id: string;
+    target_id: string;
+    weight: number;
+  }
+
+  interface NeuralMemoryGraph {
+    neurons?: NeuralNeuron[];
+    fibers?: NeuralFiber[];
+    synapses?: NeuralSynapse[];
+  }
+
+  const [nmemGraph, setNmemGraph] = useState<NeuralMemoryGraph | null>(null);
 
   useEffect(() => {
     fetch('/api/memory/graph')
       .then(r => r.json())
       .then(data => {
         if (data && data.neurons && data.synapses) {
-          setNmemGraph(data);
+          setNmemGraph(data as NeuralMemoryGraph);
         }
       })
       .catch(console.error);
@@ -51,14 +80,14 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
     if (nmemGraph) {
       // Build graph from Neural Memory
       let gNodes: GraphNode[] = [
-        ...nmemGraph.neurons.map((n: any) => ({
+        ...(nmemGraph.neurons || []).map((n) => ({
           id: n.id,
-          data: n.content || n.type,
+          data: n.content || n.type || 'Neuron',
           dopamine: 0.4,
           cortisol: 0.1,
           createdAt: n.created_at
         })),
-        ...(nmemGraph.fibers || []).map((f: any) => ({
+        ...(nmemGraph.fibers || []).map((f) => ({
           id: f.id,
           data: f.summary || (f.tags ? f.tags.join(', ') : 'Fragment'),
           dopamine: f.salience || 0.6,
@@ -74,14 +103,14 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
       const links: GraphLink[] = [
         // Synapse links between neurons
         ...(nmemGraph.synapses || [])
-          .filter((s: any) => nodeIds.has(s.source_id) && nodeIds.has(s.target_id))
-          .map((s: any) => ({
+          .filter((s) => nodeIds.has(s.source_id) && nodeIds.has(s.target_id))
+          .map((s) => ({
             source: s.source_id,
             target: s.target_id,
             value: s.weight * 5
           })),
         // Fiber hyper-edges to neurons
-        ...(nmemGraph.fibers || []).flatMap((f: any) => 
+        ...(nmemGraph.fibers || []).flatMap((f) =>
           (f.neuron_ids || [])
             .filter((nid: string) => nodeIds.has(f.id) && nodeIds.has(nid))
             .map((nid: string) => ({
@@ -136,18 +165,33 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
 
     const links: GraphLink[] = [];
     
-    // Similarity based on shared tokens
+    // Performance Optimization: Pre-tokenize nodes into Sets once prior to the O(N^2) loop.
+    // Avoids re-splitting and filtering text N*(N-1) times (e.g. 100 nodes = 9,900 re-tokenizations reduced to 100).
+    // Replaces O(|A|*|B|) array scans with O(|A|) set lookups.
+    const nodeTokenSets = filteredNodes.map(n =>
+      new Set(String(n.data).toLowerCase().split(/\W+/).filter(t => t.length > 3))
+    );
+
     for (let i = 0; i < filteredNodes.length; i++) {
+      const setA = nodeTokenSets[i];
+      if (setA.size === 0) continue;
+
       for (let j = i + 1; j < filteredNodes.length; j++) {
-        const tokensA = String(filteredNodes[i].data).toLowerCase().split(/\W+/).filter(t => t.length > 3);
-        const tokensB = String(filteredNodes[j].data).toLowerCase().split(/\W+/).filter(t => t.length > 3);
-        
-        const shared = tokensA.filter(t => tokensB.includes(t));
-        if (shared.length > 0) {
+        const setB = nodeTokenSets[j];
+        if (setB.size === 0) continue;
+
+        let sharedCount = 0;
+        for (const token of setA) {
+          if (setB.has(token)) {
+            sharedCount++;
+          }
+        }
+
+        if (sharedCount > 0) {
           links.push({
             source: filteredNodes[i].id,
             target: filteredNodes[j].id,
-            value: shared.length
+            value: sharedCount
           });
         }
       }
@@ -185,7 +229,7 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
     });
     
     return { nodes: gNodes, links, clusterCount };
-  }, [filteredNodes, nmemGraph]);
+  }, [filteredNodes, nmemGraph, minDopamine, maxCortisol]);
 
   // Store the active zoom transform to preserve it across graph redraws
   const zoomStateRef = useRef<d3.ZoomTransform>(d3.zoomIdentity);

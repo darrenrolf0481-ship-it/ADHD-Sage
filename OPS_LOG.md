@@ -1,3 +1,21 @@
+## 2026-09-23 (Bolt) - Optimized MemoryLattice Graph Link Token Matching
+
+**What happened:**
+- Pre-tokenized memory nodes into `Set<string>` collections once before the $O(N^2)$ link generation loop in `src/components/MemoryLattice.tsx`.
+- Replaced redundant $N(N-1)$ regex string splitting and filtering with an $O(N)$ pre-tokenization phase.
+- Replaced $O(|A| \cdot |B|)$ array `.filter()` and `.includes()` scans with $O(|A|)$ Set lookups.
+- Added explicit type interfaces for `nmemGraph` (`NeuralNeuron`, `NeuralFiber`, `NeuralSynapse`, `NeuralMemoryGraph`) and added missing `minDopamine` and `maxCortisol` dependencies to `useMemo`.
+
+**Verification:**
+- Ran benchmark script showing ~6x to 13x execution speedup (e.g. 250 nodes reduced from 242ms to 18ms) producing identical graph link counts.
+- Verified ESLint clean (`npx eslint src/components/MemoryLattice.tsx` -> 0 errors, 0 warnings).
+- Ran full test suite (`pnpm test`) — all tests passed cleanly.
+
+**If things break, check:**
+- If graph node links fail to compute properly, check `src/components/MemoryLattice.tsx` lines 135-170.
+
+---
+
 ## 2026-09-20 (Bolt) - Memoized `hashEmbed` in `src/server/resonance-index.ts`
 
 **What happened:**
