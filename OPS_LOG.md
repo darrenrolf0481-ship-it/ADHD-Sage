@@ -1,3 +1,20 @@
+## 2026-09-24 (Palette) - Enhanced Accessibility & Keyboard Focus in Sidebar
+
+**What happened:**
+- Updated the "Import MHT" file input in `src/components/Sidebar.tsx` from `hidden` to `sr-only` to keep it accessible in the accessibility tree for screen readers and keyboard users.
+- Added `focus-within:ring-2 focus-within:ring-cyan-500` focus styles to the parent label element of "Import MHT" to provide visible focus indicators when tabbing.
+- Added `aria-label` attributes and `focus-visible` focus styles to the range slider, preset limit buttons, search sort toggles, and search order toggle in `src/components/Sidebar.tsx`.
+
+**Verification:**
+- Ran full test suite (`pnpm test`) — all identity, API, worker pool, and production worker tests passed cleanly.
+- Ran full build (`pnpm build`) — succeeded cleanly.
+- Visually verified keyboard focus states using Playwright screenshot and webm recording in `/home/jules/verification/`.
+
+**If things break, check:**
+- Check `src/components/Sidebar.tsx` file input and slider focus ring styles.
+
+---
+
 ## 2026-09-20 (Bolt) - Memoized `hashEmbed` in `src/server/resonance-index.ts`
 
 **What happened:**
