@@ -1,3 +1,22 @@
+## 2026-09-20 (Bolt) - Extracted and Memoized `ChatMessageItem` & `MessageList` in `src/components/MessageList.tsx`
+
+**What happened:**
+- Extracted individual message item rendering into a memoized `ChatMessageItem` component (`React.memo`) in `src/components/MessageList.tsx`.
+- Wrapped `MessageList` component in `React.memo` to skip re-renders when parent input state changes without message prop changes.
+- Prevents re-rendering all previously rendered chat messages during typing or response streaming.
+- Reverted lockfile modifications (`pnpm-lock.yaml`) to ensure package lock history remains clean.
+
+**Verification:**
+- Ran full test suite (`pnpm test`) — all identity, API, worker pool, and production worker tests passed cleanly.
+- Ran full build (`pnpm run build`) — succeeded in ~3s.
+- Executed Playwright video & screenshot verification (`verify_chat.py`) and verified visual rendering with `read_media_file`.
+- Ran ESLint on `src/components/MessageList.tsx` — 0 errors.
+
+**If things break, check:**
+- Inspect `src/components/MessageList.tsx` if message rendering or copy button interactions do not update correctly.
+
+---
+
 ## 2026-09-20 (Bolt) - Memoized `hashEmbed` in `src/server/resonance-index.ts`
 
 **What happened:**
