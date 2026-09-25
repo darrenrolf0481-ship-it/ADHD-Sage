@@ -1,3 +1,22 @@
+## 2026-09-23 (Palette) - Accessibility & Micro-UX Refactoring (Sidebar & Chat UI)
+
+**What happened:**
+- Refactored `SidebarItem.tsx` to render a semantic `<button type="button">` when interactive with keyboard focus rings (`focus-visible:ring-2 focus-visible:ring-cyan-500`) and `aria-current="page"` support.
+- Updated `Sidebar.tsx` navigation items to pass `onClick` directly to `SidebarItem` for full keyboard accessibility.
+- Fixed custom file input uploads in `Sidebar.tsx` and `ChatArea.tsx` by replacing `className="hidden"` with `sr-only` and adding `focus-within` styling on parent labels.
+- Added missing `aria-label` attributes to mute toggle and mobile send buttons in `ChatArea.tsx`.
+- Recorded UX learnings in `.Jules/palette.md`.
+
+**Verification:**
+- Ran full test suite (`pnpm test`) — all tests passed cleanly.
+- Ran production build (`pnpm build`) — succeeded without errors.
+- Verified visual and keyboard interaction via Playwright script and media inspection.
+
+**If things break, check:**
+- Check `SidebarItem.tsx`, `Sidebar.tsx`, and `ChatArea.tsx`.
+
+---
+
 ## 2026-09-20 (Bolt) - Memoized `hashEmbed` in `src/server/resonance-index.ts`
 
 **What happened:**
