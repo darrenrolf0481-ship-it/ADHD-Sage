@@ -1,3 +1,19 @@
+## 2026-09-21 (Bolt) - Pre-tokenized token similarity computation in `src/components/MemoryLattice.tsx`
+
+**What happened:**
+- Pre-tokenized memory node text into `Set<string>` once ($O(N)$) in `src/components/MemoryLattice.tsx` fallback graph calculation.
+- Replaced nested $O(N^2)$ repeated string splits and $O(|A| \times |B|)$ array `.includes()` searches with $O(1)$ `Set.has()` lookups.
+- Included `minDopamine` and `maxCortisol` in `graphData`'s `useMemo` dependency array to resolve React Hook dependency warnings.
+
+**Verification:**
+- Ran full test suite (`pnpm test`) — all identity, API, worker pool, production worker smoke tests passed cleanly.
+- Verified build (`pnpm build`) — succeeded with zero errors.
+
+**If things break, check:**
+- If memory lattice fallback graph fails to render similarity links between nodes, check fallback token logic in `src/components/MemoryLattice.tsx` lines 135-165.
+
+---
+
 ## 2026-09-20 (Bolt) - Memoized `hashEmbed` in `src/server/resonance-index.ts`
 
 **What happened:**

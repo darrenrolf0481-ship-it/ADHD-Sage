@@ -136,18 +136,29 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
 
     const links: GraphLink[] = [];
     
-    // Similarity based on shared tokens
+    // Pre-tokenize memory node contents once to avoid O(N²) duplicate string splits
+    const nodeTokenSets = filteredNodes.map(n =>
+      new Set(String(n.data).toLowerCase().split(/\W+/).filter(t => t.length > 3))
+    );
+
+    // Similarity based on shared tokens with O(1) Set lookups
     for (let i = 0; i < filteredNodes.length; i++) {
+      const tokensA = nodeTokenSets[i];
+      if (tokensA.size === 0) continue;
       for (let j = i + 1; j < filteredNodes.length; j++) {
-        const tokensA = String(filteredNodes[i].data).toLowerCase().split(/\W+/).filter(t => t.length > 3);
-        const tokensB = String(filteredNodes[j].data).toLowerCase().split(/\W+/).filter(t => t.length > 3);
-        
-        const shared = tokensA.filter(t => tokensB.includes(t));
-        if (shared.length > 0) {
+        const tokensB = nodeTokenSets[j];
+        if (tokensB.size === 0) continue;
+
+        let sharedCount = 0;
+        for (const t of tokensA) {
+          if (tokensB.has(t)) sharedCount++;
+        }
+
+        if (sharedCount > 0) {
           links.push({
             source: filteredNodes[i].id,
             target: filteredNodes[j].id,
-            value: shared.length
+            value: sharedCount
           });
         }
       }
@@ -185,7 +196,7 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
     });
     
     return { nodes: gNodes, links, clusterCount };
-  }, [filteredNodes, nmemGraph]);
+  }, [filteredNodes, nmemGraph, minDopamine, maxCortisol]);
 
   // Store the active zoom transform to preserve it across graph redraws
   const zoomStateRef = useRef<d3.ZoomTransform>(d3.zoomIdentity);
