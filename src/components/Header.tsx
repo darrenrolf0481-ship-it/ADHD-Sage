@@ -97,7 +97,8 @@ export const Header: React.FC<HeaderProps> = ({
         {inboxUnread > 0 && (
           <button
             onClick={onFetchInbox}
-            className="relative flex items-center gap-1.5 px-2 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/30 transition-all"
+            aria-label={`Open inbox: ${inboxUnread} unread message${inboxUnread > 1 ? 's' : ''}`}
+            className="relative flex items-center gap-1.5 px-2 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/30 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
             title={`${inboxUnread} message${inboxUnread > 1 ? 's' : ''} from the seven`}
           >
             <span className="text-[10px] font-bold uppercase tracking-widest">📬</span>
@@ -109,8 +110,17 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Live Sensor Indicator */}
         {sensorActiveCount > 0 && (
           <div
-            className="hidden sm:flex items-center gap-1.5 cursor-pointer"
+            role="button"
+            tabIndex={0}
+            aria-label="View sensor desk"
+            className="hidden sm:flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded px-1 py-0.5"
             onClick={onViewAnomalies}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onViewAnomalies();
+              }
+            }}
             title="View Sensor Desk"
           >
             <span
@@ -135,7 +145,9 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex gap-2">
           <button
             onClick={onTogglePulse}
-            className={`px-3 md:px-4 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors ${
+            aria-label={pulseActive ? 'Turn off 11.3Hz pulse' : 'Turn on 11.3Hz pulse'}
+            aria-pressed={pulseActive}
+            className={`px-3 md:px-4 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 ${
               pulseActive
                 ? 'bg-red-500/20 border-red-500/50 text-red-400'
                 : 'bg-[#1C1C1E] border-white/10 text-white hover:bg-white/10'
