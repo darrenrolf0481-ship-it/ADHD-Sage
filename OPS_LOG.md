@@ -1,3 +1,18 @@
+## 2026-09-27 (Bolt) - Memoized `searchResults` in `src/components/Sidebar.tsx`
+
+**What happened:**
+- Memoized `displaySearchResults` using `useMemo` in `src/components/Sidebar.tsx` to prevent shallow-copying (`slice()`) and reversing (`reverse()`) `searchResults` array on every render.
+- Verified linting (`eslint src/components/Sidebar.tsx`) and full test suite (`pnpm test`).
+
+**Verification:**
+- Ran full test suite (`pnpm test`) — all tests passed cleanly.
+- Verified clean ESLint output.
+
+**If things break, check:**
+- If search results in `Sidebar` fail to update when `searchResults` changes, verify `useMemo` dependency array in `src/components/Sidebar.tsx`.
+
+---
+
 ## 2026-09-20 (Bolt) - Memoized `hashEmbed` in `src/server/resonance-index.ts`
 
 **What happened:**
