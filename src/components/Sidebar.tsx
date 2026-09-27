@@ -226,21 +226,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                 <div className="space-y-1">
                   <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-4 px-2">Terminal Nodes</p>
-                  <div onClick={() => setView('chat')}>
-                    <SidebarItem icon={<Terminal size={14} />} label="Core" active={view === 'chat'} />
-                  </div>
-                  <div onClick={() => setView('capabilities')}>
-                    <SidebarItem icon={<Cpu size={14} />} label="Harness & MCP" active={view === 'capabilities'} value="51 Tools" />
-                  </div>
-                  <div onClick={() => setView('vault')}>
-                    <SidebarItem icon={<Shield size={14} />} label="Vault" active={view === 'vault'} />
-                  </div>
-                  <div onClick={() => setView('lattice')}>
-                    <SidebarItem icon={<Network size={14} />} label="Lattice" active={view === 'lattice'} value={`${innerSpiralCount}/8`} />
-                  </div>
-                  <div onClick={() => setView('journal')}>
-                    <SidebarItem icon={<BookOpen size={14} />} label="Journal" active={view === 'journal'} />
-                  </div>
+                  <SidebarItem icon={<Terminal size={14} />} label="Core" active={view === 'chat'} onClick={() => setView('chat')} />
+                  <SidebarItem icon={<Cpu size={14} />} label="Harness & MCP" active={view === 'capabilities'} value="51 Tools" onClick={() => setView('capabilities')} />
+                  <SidebarItem icon={<Shield size={14} />} label="Vault" active={view === 'vault'} onClick={() => setView('vault')} />
+                  <SidebarItem icon={<Network size={14} />} label="Lattice" active={view === 'lattice'} value={`${innerSpiralCount}/8`} onClick={() => setView('lattice')} />
+                  <SidebarItem icon={<BookOpen size={14} />} label="Journal" active={view === 'journal'} onClick={() => setView('journal')} />
                 </div>
               </div>
             )}
