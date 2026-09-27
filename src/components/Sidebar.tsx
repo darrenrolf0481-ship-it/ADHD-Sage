@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Zap,
@@ -57,6 +57,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   searchResults,
   innerSpiralCount,
 }) => {
+  // Memoize search result reversal to avoid shallow-copying and reversing on every render
+  const displaySearchResults = useMemo(
+    () => searchResults.slice().reverse(),
+    [searchResults]
+  );
+
   return (
     <>
       {/* Mobile Sidebar Overlay */}
@@ -129,7 +135,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {searchResults.length === 0 ? (
                   <div className="text-[10px] text-slate-600 italic px-2">No matching synapses found.</div>
                 ) : (
-                  searchResults.slice().reverse().map((node) => (
+                  displaySearchResults.map((node) => (
                     <div key={node.id} className="p-3 rounded-xl bg-white/5 border border-white/5 text-[10px] hover:bg-white/10 transition-colors cursor-pointer group">
                       <div className="flex justify-between items-start mb-1">
                         <span className="text-cyan-400 font-mono">#{node.id.split('_')[1].slice(-4)}</span>
