@@ -1,3 +1,20 @@
+## 2026-09-20 (Palette) - Made SidebarItem accessible with keyboard focus and ARIA attributes
+
+**What happened:**
+- Refactored `src/components/SidebarItem.tsx` to render an accessible `<button type="button">` instead of a non-interactive `<div>`.
+- Added focus-visible indicator ring (`focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500`), disabled state styling, and proper ARIA state attributes (`aria-current={active ? 'page' : undefined}`, `aria-label`).
+- Updated `src/components/Sidebar.tsx` to pass `onClick` directly to `SidebarItem` and removed non-semantic wrapper `<div>` elements.
+
+**Verification:**
+- Ran `pnpm build` to verify clean build and bundle generation.
+- Ran `pnpm exec eslint` on modified files.
+- Performed Playwright frontend verification (`/tmp/verify_sidebar.py`) capturing screenshots and webm video proving navigation, focus rings, and proper ARIA tree rendering.
+
+**If things break, check:**
+- If sidebar navigation clicks fail to register, verify `SidebarItem` props in `src/components/Sidebar.tsx` and click handler binding in `src/components/SidebarItem.tsx`.
+
+---
+
 ## 2026-09-20 (Bolt) - Memoized `hashEmbed` in `src/server/resonance-index.ts`
 
 **What happened:**
