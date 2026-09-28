@@ -136,18 +136,35 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
 
     const links: GraphLink[] = [];
     
+    // OPTIMIZATION (⚡ Bolt):
+    // Precompute token sets once per node in O(N) instead of tokenizing repeatedly in the nested loop O(N^2).
+    // Using Set.has() turns token lookup from O(K) array search into O(1).
+    const nodeTokenSets = filteredNodes.map(node => {
+      const tokens = String(node.data).toLowerCase().split(/\W+/).filter(t => t.length > 3);
+      return { tokens, set: new Set(tokens) };
+    });
+
     // Similarity based on shared tokens
     for (let i = 0; i < filteredNodes.length; i++) {
+      const { tokens: tokensA } = nodeTokenSets[i];
+      if (tokensA.length === 0) continue;
+
       for (let j = i + 1; j < filteredNodes.length; j++) {
-        const tokensA = String(filteredNodes[i].data).toLowerCase().split(/\W+/).filter(t => t.length > 3);
-        const tokensB = String(filteredNodes[j].data).toLowerCase().split(/\W+/).filter(t => t.length > 3);
-        
-        const shared = tokensA.filter(t => tokensB.includes(t));
-        if (shared.length > 0) {
+        const { set: setB } = nodeTokenSets[j];
+        if (setB.size === 0) continue;
+
+        let sharedCount = 0;
+        for (let k = 0; k < tokensA.length; k++) {
+          if (setB.has(tokensA[k])) {
+            sharedCount++;
+          }
+        }
+
+        if (sharedCount > 0) {
           links.push({
             source: filteredNodes[i].id,
             target: filteredNodes[j].id,
-            value: shared.length
+            value: sharedCount
           });
         }
       }
