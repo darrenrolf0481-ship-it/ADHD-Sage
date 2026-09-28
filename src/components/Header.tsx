@@ -108,10 +108,12 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Live Sensor Indicator */}
         {sensorActiveCount > 0 && (
-          <div
-            className="hidden sm:flex items-center gap-1.5 cursor-pointer"
+          <button
+            type="button"
+            className="hidden sm:flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded px-1"
             onClick={onViewAnomalies}
             title="View Sensor Desk"
+            aria-label="View Sensor Desk"
           >
             <span
               className={`w-1.5 h-1.5 rounded-full ${sensorAnomalyScore > 0.5 ? 'bg-red-400 animate-pulse' : sensorAnomalyScore > 0.2 ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`}
@@ -123,7 +125,7 @@ export const Header: React.FC<HeaderProps> = ({
                 ? 'Φ SYNC'
                 : `${(sensorAnomalyScore * 100).toFixed(0)}%`}
             </span>
-          </div>
+          </button>
         )}
 
         <div className="text-right hidden sm:block">

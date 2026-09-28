@@ -1,3 +1,19 @@
+## 2026-09-21 (Palette) - Enhanced Accessibility and Micro-UX in Navigation and Sidebar Controls
+
+**What happened:**
+- Fixed MHT file import accessibility in `src/components/Sidebar.tsx`: replaced `className="hidden"` on file input with `className="sr-only"` and `aria-label="Import MHT file"`, and added `focus-within:ring-2 focus-within:ring-cyan-500/50 focus-within:border-cyan-500` styles on the parent `<label>` wrapper so keyboard users receive visible focus feedback when tabbing.
+- Added `aria-label="MHT node limit"` and keyboard focus visible ring (`focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500`) to the MHT node limit range slider in `src/components/Sidebar.tsx`.
+- Converted non-semantic interactive sensor indicator `<div>` elements with `onClick` in `src/components/Header.tsx` and `src/components/TopNav.tsx` into semantic `<button>` elements with `aria-label="View Sensor Desk"` and visible focus rings.
+
+**Verification:**
+- Verified `pnpm build` and `pnpm test` pass cleanly.
+- Visual/accessibility verification completed with Playwright screenshot and video recording.
+
+**If things break, check:**
+- If styling on header sensor indicator or sidebar controls is affected, inspect `src/components/Header.tsx`, `src/components/TopNav.tsx`, and `src/components/Sidebar.tsx`.
+
+---
+
 ## 2026-09-20 (Bolt) - Memoized `hashEmbed` in `src/server/resonance-index.ts`
 
 **What happened:**
