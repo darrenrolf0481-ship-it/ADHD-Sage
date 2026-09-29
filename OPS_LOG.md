@@ -1,3 +1,18 @@
+## 2026-09-29 (Claude Opus 5.5) - Committed + pushed all pending work to origin/main (f0eac88)
+
+**What happened:** Darren OK'd committing everything beneficial. Reviewed every uncommitted diff before staging. 7 commits went up (`f3724bc..f0eac88`), including 2 earlier unpushed ones (`0ef9a35`, `b504cb3`, Buffy's network/fallback fixes):
+- `5626299` unified recallForTurn + recall eval + LLM call log
+- `ed7e675` memory repair from the earlier sessions (resonance drift heal, Morning Light upsert, provenance parse, rebuild endpoint)
+- `79945d4` NotebookLM MCP-repo grounding + MCP stderr drain / tool timeout / Gemini schema fix
+- `2270148` OmniRoute models in the model picker
+- `f0eac88` 2026-09-29 inbox notices; `.neuralmemory/` gitignored (private local tool state)
+
+**Checks (Rule 4/5):** strict secret scan over the full outgoing range = 0 hits (loose scan: 16 hits, all prose/var names). No `.env`, `seed_core.json`, or memory dumps in the range. Whole-project tsc: no new errors (remaining ones pre-exist in HEAD, e.g. routes/mcp.ts:58, tts.ts:115, worker .ts-extension imports). Sage still HTTP 200 on :3000.
+
+**If things break, check:** backup branch `backup/pre-unified-recall-20260929` = pre-session `main` (b504cb3). Feature branch `memory/unified-recall` (local) = same as main now.
+
+---
+
 ## 2026-09-29 (Claude Opus 5.5) - Persistent LLM call timing log (to find the real timeout cause)
 
 **Why:** Timeout cause is unproven (memory claim retracted — see entry below). The existing telemetry (performance.ts spans, metrics.ts) is in-memory and wiped on every watchdog restart, so there was no history to look at.
