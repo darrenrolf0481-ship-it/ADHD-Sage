@@ -54,3 +54,6 @@ data/tmp/
 
 # LLM call timing log (src/server/call-log.ts) — runtime data, never commit
 data/logs/
+
+# neural-memory tool local state (private, per-machine)
+.neuralmemory/
