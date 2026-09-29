@@ -18,6 +18,17 @@
  * but is never the assumed-alive choice.
  */
 
+import dns from 'node:dns';
+
+// IPv4-first DNS — see src/server/config.ts for the rationale (no IPv6 on this
+// host; default ordering cost 1.4s per fresh connection). Worker threads don't
+// import config.ts, so set it here as well. Idempotent, per-thread.
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch {
+  /* older Node — ordering default is acceptable */
+}
+
 /** Small delay helper for retry backoff. */
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

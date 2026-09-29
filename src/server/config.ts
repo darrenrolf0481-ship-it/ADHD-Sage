@@ -1,6 +1,19 @@
 import dotenv from 'dotenv';
 import { watch } from 'node:fs';
 import path from 'node:path';
+import dns from 'node:dns';
+
+// ─── DNS: IPv4-first ─────────────────────────────────────────────────────
+// This box has NO IPv6 connectivity, but public APIs (openrouter.ai etc.)
+// resolve to IPv6 addresses first. Node's fetch does not Happy-Eyeballs like
+// curl, so every fresh connection waited on a dead IPv6 attempt before
+// falling back — measured 1,419ms vs 83ms per connection (2026-09-29).
+// Must run before any module dials out; config.ts is imported first everywhere.
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch {
+  /* older Node — ordering default is acceptable */
+}
 
 // Load environment variables before any module reads process.env at import time.
 const initialPort = process.env.PORT;
@@ -80,6 +93,12 @@ export const OLLAMA_TAGS_TIMEOUT_MS = num(process.env.OLLAMA_TAGS_TIMEOUT_MS, 6_
 export const OLLAMA_GEN_TIMEOUT_MS = num(process.env.OLLAMA_GEN_TIMEOUT_MS, 180_000);
 // Cloud generation (OpenRouter free tier can queue) — default 2 min.
 export const OPENROUTER_TIMEOUT_MS = num(process.env.OPENROUTER_TIMEOUT_MS, 120_000);
+
+// OmniRoute is a LOCAL gateway that internally fails over across upstream
+// candidates — one generation can legitimately take a while, and this host
+// has been swap-thrashing (5.6GB swap in use), which pages the gateway out
+// mid-request. 25s aborted healthy requests; make it tunable, raise default.
+export const OMNIROUTE_TIMEOUT_MS = num(process.env.OMNIROUTE_TIMEOUT_MS, 45_000);
 
 // OpenRouter free-tier models are heavily rate-limited and flap between 200 and
 // 429 by the minute. Committing to a single model means one 429 takes the whole

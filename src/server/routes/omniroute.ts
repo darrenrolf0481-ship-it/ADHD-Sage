@@ -14,7 +14,8 @@ import { spoolExchangeToSpiral } from '../spiral-spool';
 
 const router = Router();
 const OMNIROUTE_URL = process.env.OMNIROUTE_URL || 'http://127.0.0.1:20128';
-const OMNIROUTE_TIMEOUT_MS = 25000;
+// Tunable via .env — see src/server/config.ts (local gateway + swap-thrash host).
+const OMNIROUTE_TIMEOUT_MS = parseInt(process.env.OMNIROUTE_TIMEOUT_MS || '45000', 10);
 
 /**
  * Resolve the OmniRoute API key from environment or local storage.sqlite

@@ -11,7 +11,10 @@ export async function swarmFetch(
   timeoutMs: number,
   maxRetries: number = SWARM_MAX_RETRIES,
 ): Promise<Response> {
-  let delay = timeoutMs;
+  // Backoff starts small and grows by φ. It must NEVER be the request timeout:
+  // the old `delay = timeoutMs` meant a 25s-timeout call slept 25s before its
+  // second attempt — one hiccup cost ~50s and read as a hard timeout.
+  let delay = 500;
   let elapsed = 0;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -43,7 +46,7 @@ export async function swarmFetch(
     const jittered = delay + Math.random() * SWARM_JITTER_MS;
     await new Promise((r) => setTimeout(r, jittered));
     elapsed += jittered;
-    delay = Math.min(delay * PHI, SWARM_MAX_TOTAL_MS - elapsed);
+    delay = Math.min(delay * PHI, SWARM_MAX_TOTAL_MS - elapsed); // 500ms → 805ms → 1.3s → …
   }
 
   // Node 13: The Void — Defer & Log

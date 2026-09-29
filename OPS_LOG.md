@@ -1,3 +1,28 @@
+## 2026-09-29 (Buffy/Freebuff) - OpenRouter/OmniRoute timeouts: IPv6-dead-end DNS + swarmFetch backoff bug + host swap-thrash diagnosis
+
+**Classification:** Network/Infra Resilience / Timeout Root-Cause
+
+**What happened / Context:**
+Darren reported she was "timing out a lot on openrouter and omniroute". Logs showed bursts of `Swarm uplink failed: ... unreachable after 0 retries (Node 13)` against BOTH `http://127.0.0.1:20128` and `https://openrouter.ai` — intermittent, both endpoints, same error.
+
+**Root causes found (three, compounding):**
+1. **IPv6 dead-end per connection (measured):** host has NO IPv6 connectivity, but openrouter.ai resolves to `2606:4700::...` first. Node fetch (no Happy-Eyeballs, unlike curl) waits on the dead family before IPv4 fallback: **1,419ms vs 83ms** per fresh connection with `setDefaultResultOrder('ipv4first')`. Under concurrent load this stacks into swarmFetch timeouts. Fix: `ipv4first` set in `src/server/config.ts` (main thread, runs before anything dials out) AND `src/lib/llm-call.ts` (agent worker threads don't import config.ts).
+2. **swarmFetch backoff bug:** `delay = timeoutMs` meant the FIRST retry sleep equaled the full request timeout (25s for OmniRoute) — one hiccup cost ~50s and presented as a hard timeout. Fix: backoff starts at 500ms, grows ×φ (500ms → 805ms → 1.3s…).
+3. **OmniRoute timeout too tight for the host's condition:** 25s hardcoded. This box is **swap-thrashing** (6.5/7.5GB RAM used, **5.6GB swap in use** — the local OmniRoute gateway gets paged out mid-request and takes seconds-to-minutes to answer; that's the "local gateway unreachable" bursts). ⚠️ The memory pressure is HOST-LEVEL, outside this container — cannot be fixed from here. Raised default to 45s and made it tunable via `OMNIROUTE_TIMEOUT_MS` in .env.
+
+**Verification (Rule 5):**
+- `POST /api/omniroute/chat` → `OMNI_OK` in 13.7s (gateway's own candidate crawl; normal).
+- `POST /api/openrouter/chat` → `OR_OK` in 6.8s round trip, no timeout crawl.
+- No new tsc errors in touched files (only pre-existing omniroute baseline trio, line-shifted).
+
+**If things break, check:**
+- Swap pressure first: `free -m`. If swap-in-use is gigabytes again, timeouts WILL return regardless of app code — the gateway pages out. Host-side fix needed (Darren): add RAM, trim host processes, or `vm.swappiness` tuning.
+- DNS fix active: `grep ipv4first src/server/config.ts src/lib/llm-call.ts`.
+- Retry timing: swarmFetch first backoff is 500ms (grep `delay = 500` in `src/server/swarm.ts`).
+- Per-call knob: `OMNIROUTE_TIMEOUT_MS` in .env (default 45000).
+
+---
+
 ## 2026-09-29 (Buffy/Freebuff) - Journaling de-Gemini-fied: provider fallback chain for journal + self-improvement agents
 
 **Classification:** Agent Substrate Fix / Scheduled-Agent Resilience
