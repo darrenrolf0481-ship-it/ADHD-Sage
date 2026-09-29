@@ -78,4 +78,35 @@ router.post('/execute', lockGuard, asyncHandler(async (req, res) => {
   res.json(result);
 }));
 
+const TARGET_NOTEBOOK_ID = 'af3491b4-352a-49dd-99fe-d3a95893e644';
+const TARGET_NOTEBOOK_NAME = 'Model Context Protocol Repository and Resource Directory';
+const TARGET_NOTEBOOK_ALIAS = 'mcp-repo';
+
+// GET /api/mcp/notebook - get connected research notebook details
+router.get('/notebook', asyncHandler(async (_req, res) => {
+  res.json({
+    status: 'connected',
+    notebook_id: TARGET_NOTEBOOK_ID,
+    name: TARGET_NOTEBOOK_NAME,
+    alias: TARGET_NOTEBOOK_ALIAS,
+    source_count: 51,
+    tool: 'notebooklm__notebook_query',
+  });
+}));
+
+// POST /api/mcp/notebook/query - query the target research notebook directly
+router.post('/notebook/query', lockGuard, asyncHandler(async (req, res) => {
+  const { query, notebook_id = TARGET_NOTEBOOK_ID } = req.body ?? {};
+  if (!query) {
+    res.status(400).json({ error: 'query string is required' });
+    return;
+  }
+  const { executeMcpTool } = await import('../../core/mcp');
+  const result = await executeMcpTool('notebooklm__notebook_query', {
+    notebook_id,
+    query,
+  });
+  res.json(result);
+}));
+
 export default router;

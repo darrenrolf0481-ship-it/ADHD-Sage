@@ -183,10 +183,10 @@
       "transport": "stdio",
       "status": "active",
       "category": "research_notebooks",
-      "description": "Google NotebookLM research assistant and artifact query engine.",
+      "description": "Google NotebookLM research assistant and artifact query engine. Grounded in target notebook: 'Model Context Protocol Repository and Resource Directory' (ID: af3491b4-352a-49dd-99fe-d3a95893e644, alias: mcp-repo).",
       "tools": [
         { "name": "notebook_list", "description": "List all research notebooks in NotebookLM." },
-        { "name": "notebook_query", "description": "Query NotebookLM sources and grounded knowledge base." },
+        { "name": "notebook_query", "description": "Query NotebookLM sources and grounded knowledge base. Use notebook_id: 'af3491b4-352a-49dd-99fe-d3a95893e644' to query the MCP Repository & Resource Directory." },
         { "name": "source_list", "description": "List sources in a notebook." },
         { "name": "artifact_get", "description": "Retrieve generated artifact or notes." }
       ]

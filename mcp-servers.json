@@ -35,11 +35,9 @@
       "transport": "stdio",
       "command": "/root/.local/bin/notebooklm-mcp",
       "args": [],
-      "env": {
-        "NOTEBOOKLM_SERVER_TOKEN_FILE": "/root/.notebooklm/server-token.txt"
-      },
+      "env": {},
       "enabled": true,
-      "note": "Google NotebookLM research and artifact queries",
+      "note": "Google NotebookLM research and artifact queries (connected to MCP Repository & Resource Directory af3491b4-352a-49dd-99fe-d3a95893e644)",
       "autoEnable": true
     },
     {

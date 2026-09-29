@@ -158,6 +158,10 @@ function sanitizeSchema(obj: unknown, isRoot = false): unknown {
           : {};
       out.required = (out.required as unknown[]).filter((k) => typeof k === 'string' && k in props);
     }
+    // Gemini rejects the whole tool list if `items` is present when `type` is not 'array'
+    if (out.items && out.type !== 'array') {
+      delete out.items;
+    }
     return out;
   }
   return obj;
@@ -192,6 +196,13 @@ async function connectServer(config: McpServerConfig): Promise<ConnectedServer |
         env: config.env ? ({ ...process.env, ...config.env } as Record<string, string>) : undefined,
         cwd: config.cwd ? resolve(config.cwd) : undefined,
         stderr: 'pipe',
+      });
+      // Drain stderr to prevent child processes from blocking on OS pipe buffer saturation
+      transport.stderr?.on('data', (data: Buffer | string) => {
+        const text = data.toString().trim();
+        if (text && (process.env.DEBUG_MCP === 'true' || text.includes('ERROR') || text.includes('Error'))) {
+          console.error(`[mcp:${config.id}:stderr] ${text}`);
+        }
       });
       await client.connect(transport);
     } else if (config.transport === 'sse' && config.url) {
@@ -326,7 +337,8 @@ export async function executeMcpTool(
     }
 
     try {
-      const result = await server.client.callTool({ name: toolName, arguments: args });
+      const timeoutMs = Number(process.env.MCP_TIMEOUT_MS) || 180000;
+      const result = await server.client.callTool({ name: toolName, arguments: args }, undefined, { timeout: timeoutMs });
 
       // Extract text content from tool result
       const textParts = (result.content as Array<{ type: string; text?: string }>)
