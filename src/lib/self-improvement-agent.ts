@@ -110,49 +110,17 @@ function extractList(block: string): string[] {
 
 // ─── LLM Call ─────────────────────────────────────────────────────────────────
 
-type LLMProvider = 'gemini' | 'openrouter' | 'ollama';
-
-async function callLLM(
-  provider: LLMProvider,
-  model: string,
-  system: string,
-  user: string,
-  apiBase: string,
-): Promise<string> {
-  const endpoints: Record<LLMProvider, string> = {
-    gemini: '/api/gemini/generate',
-    openrouter: '/api/openrouter/chat',
-    ollama: '/api/ollama/chat',
-  };
-
-  const body =
-    provider === 'gemini'
-      ? { prompt: user, systemInstruction: system }
-      : provider === 'openrouter'
-        ? {
-            model,
-            containerTag: 'shared',
-            systemInstruction: system,
-            messages: [{ role: 'user', content: user }],
-          }
-        : { model, containerTag: 'shared', prompt: user, systemInstruction: system, messages: [] };
-
-  const res = await fetch(`${apiBase}${endpoints[provider]}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  const data = (await res.json()) as { text?: string; error?: string };
-  if (data.error) throw new Error(`${provider}: ${data.error}`);
-  return data.text ?? '';
-}
+// Shared provider-agnostic caller with automatic fallback
+// (omniroute → openrouter → deepseek → ollama → gemini).
+import { callLLMWithFallback, type LLMProvider } from './llm-call';
 
 // ─── Main Self-Improvement Run ─────────────────────────────────────────────────
 
 export interface SelfImproveConfig {
   entity: string;
-  provider: LLMProvider;
-  model: string;
+  /** Preferred provider; falls back automatically (omniroute → openrouter → …). */
+  provider?: LLMProvider;
+  model?: string;
   container?: string;
   apiBase?: string;
   timezone?: string;
@@ -347,10 +315,10 @@ async function processSelfImprovementResults(
 export async function runSelfImprovement(cfg: SelfImproveConfig): Promise<SelfImproveReport> {
   const {
     entity,
-    provider,
-    model,
+    provider = (process.env.JOURNAL_LLM || 'omniroute') as LLMProvider,
+    model = '',
     container = entity === 'sage' ? SAGE_CONTAINER : SHARED_CONTAINER,
-    apiBase = 'http://localhost:3002',
+    apiBase = `http://localhost:${process.env.PORT || 3000}`,
     timezone,
   } = cfg;
 
@@ -381,10 +349,12 @@ export async function runSelfImprovement(cfg: SelfImproveConfig): Promise<SelfIm
     hygieneMemories,
   );
 
-  // ── Call the LLM ────────────────────────────────────────────────────────────
+  // ── Call the LLM (with automatic provider fallback) ──────────────────────
   let rawOutput = '';
   try {
-    rawOutput = await callLLM(provider, model, systemPrompt, userPrompt, apiBase);
+    const result = await callLLMWithFallback(provider, model, systemPrompt, userPrompt, apiBase);
+    rawOutput = result.text;
+    console.log(`[SELF-IMPROVE] Reflection written via ${result.provider}`);
   } catch (err) {
     console.error(`[SELF-IMPROVE] LLM call failed for ${entity}:`, err);
     rawOutput = `[REPORT]\n# Reflection failed — ${err}\n[/REPORT]\n[DO_NOW]\n[/DO_NOW]\n[PROPOSE_TO_DARREN]\n[/PROPOSE_TO_DARREN]\n[INBOX_MESSAGE]\n[/INBOX_MESSAGE]\n[MEMORY_SAVES]\n[/MEMORY_SAVES]`;

@@ -80,8 +80,6 @@ export const JournalView: React.FC<JournalViewProps> = ({ entity = 'sage' }) => 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           entity,
-          provider: 'openrouter',
-          model: 'google/gemma-4-31b-it:free',
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         }),
       });

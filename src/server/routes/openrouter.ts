@@ -16,7 +16,7 @@ const router = Router();
 
 router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
   try {
-    const { model, messages, systemInstruction, containerTag, attachments } = req.body;
+    const { model, messages, systemInstruction, containerTag, attachments, skipTools } = req.body;
     if (!model) {
       res.status(400).json({ error: 'model is required' });
       return;
@@ -116,8 +116,9 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       ? allCandidates.filter((m) => visionCapable.has(m))
       : allCandidates;
 
-    // MCP tool declarations for function calling
-    const mcpDeclarations = getMcpDeclarations();
+    // MCP tool declarations for function calling.
+    // skipTools=true (scheduled agents like the journal) skips them entirely.
+    const mcpDeclarations = skipTools ? [] : getMcpDeclarations();
     const openAiTools =
       mcpDeclarations.length > 0
         ? mcpDeclarations.map((t) => ({

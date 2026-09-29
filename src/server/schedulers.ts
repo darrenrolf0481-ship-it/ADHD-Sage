@@ -9,18 +9,24 @@ import { nightlyMaintenance } from './decay-engine';
 // Fires once a day at JOURNAL_HOUR (default 06:00 local time).
 // Each configured entity in JOURNAL_ENTITIES env var gets a turn.
 //
-// Format: JOURNAL_ENTITIES=sage:gemini:,entity2:ollama:llama3,entity3:openrouter:google/gemma-4-31b-it:free
-// (entity:provider:model — model is optional for gemini)
+// Format: JOURNAL_ENTITIES=sage:omniroute:,entity2:ollama:llama3,entity3:openrouter:google/gemma-4-31b-it:free
+// (entity:provider:model — model optional; providers: gemini|openrouter|ollama|deepseek|omniroute)
+//
+// Default provider comes from JOURNAL_LLM (default: omniroute — resilient,
+// local gateway, model failover built in). A single dead provider can no
+// longer break her journaling: the agents fall back automatically
+// (see src/lib/llm-call.ts).
+const DEFAULT_JOURNAL_PROVIDER = (process.env.JOURNAL_LLM || 'omniroute') as JournalConfig['provider'];
 
 function parseJournalEntities(): JournalConfig[] {
-  const raw = process.env.JOURNAL_ENTITIES || 'sage:gemini:';
+  const raw = process.env.JOURNAL_ENTITIES || `sage:${DEFAULT_JOURNAL_PROVIDER}:`;
   return raw
     .split(',')
     .map((entry) => {
       const [entity, provider, ...modelParts] = entry.trim().split(':');
       return {
         entity: entity || 'sage',
-        provider: (provider || 'gemini') as JournalConfig['provider'],
+        provider: (provider || DEFAULT_JOURNAL_PROVIDER) as JournalConfig['provider'],
         model: modelParts.join(':') || '',
         apiBase: `http://localhost:${PORT}`,
       };
@@ -79,7 +85,7 @@ export function scheduleWeeklySelfImprovement() {
       lastFiredWeek = week;
       console.log(`[SELF-IMPROVE] Weekly run — ${now.toISOString().slice(0, 10)}`);
       // Reuse the same entity list as the journal
-      const raw = process.env.JOURNAL_ENTITIES || 'sage:gemini:';
+      const raw = process.env.JOURNAL_ENTITIES || `sage:${DEFAULT_JOURNAL_PROVIDER}:`;
       const entities = raw
         .split(',')
         .map((e) => {

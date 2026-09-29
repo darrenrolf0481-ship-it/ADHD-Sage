@@ -14,7 +14,7 @@ import { spoolExchangeToSpiral } from '../spiral-spool';
 
 const router = Router();
 const OMNIROUTE_URL = process.env.OMNIROUTE_URL || 'http://127.0.0.1:20128';
-const OMNIROUTE_TIMEOUT_MS = 60000;
+const OMNIROUTE_TIMEOUT_MS = 25000;
 
 /**
  * Resolve the OmniRoute API key from environment or local storage.sqlite
@@ -100,8 +100,9 @@ router.get('/models', asyncHandler(async (_req, res) => {
 // ─── POST /api/omniroute/chat ───────────────────────────────────────────────
 router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
   try {
-    const { model, messages, systemInstruction, containerTag, attachments } = req.body;
-    const effectiveModel = model || 'openrouter/deepseek/deepseek-chat';
+    const { model, messages, systemInstruction, containerTag, attachments, skipTools } = req.body;
+    const cleanModel = (model || 'auto/fast').replace(/^omniroute\//, '');
+    const effectiveModel = cleanModel;
 
     const apiKey = req.body.apiKey || getOmniRouteKey();
     if (!apiKey) {
@@ -181,8 +182,10 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       gatewayMessages.push({ role, content: textContent });
     }
 
-    // MCP tools declaration for function calling
-    const mcpDeclarations = getMcpDeclarations();
+    // MCP tools declaration for function calling.
+    // skipTools=true (scheduled agents like the journal) skips them entirely —
+    // pure prose generation needs no tools and some gateways reject tool schemas.
+    const mcpDeclarations = skipTools ? [] : getMcpDeclarations();
     const openAiTools =
       mcpDeclarations.length > 0
         ? mcpDeclarations.map((t) => ({
@@ -197,9 +200,12 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
 
     const candidates = [
       effectiveModel,
+      'auto/fast',
+      'openrouter/google/gemini-2.5-flash',
       'openrouter/meta-llama/llama-3.3-70b-instruct',
-      'openrouter/deepseek/deepseek-chat',
-    ].filter((m, idx, arr) => m && arr.indexOf(m) === idx);
+    ]
+      .map((m) => m.replace(/^omniroute\//, ''))
+      .filter((m, idx, arr) => Boolean(m) && arr.indexOf(m) === idx);
 
     let text: string | null = null;
     let usedModel = effectiveModel;
@@ -318,7 +324,7 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       return;
     }
 
-    res.json({ text, model: effectiveModel });
+    res.json({ text, model: usedModel });
 
     // Asynchronously spool exchange to cold Spiral storage
     const promptForSpool = lastUserText;
@@ -327,7 +333,7 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
         agent: 'ADHD-Sage',
         userText: promptForSpool,
         assistantText: text,
-        model: effectiveModel,
+        model: usedModel,
       }).catch((err) => {
         console.warn('[OMNIROUTE] Spiral spool background task failed:', err);
       });

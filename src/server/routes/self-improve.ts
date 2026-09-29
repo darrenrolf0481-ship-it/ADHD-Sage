@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { runSelfImprovement, type SelfImproveConfig } from '../../lib/self-improvement-agent';
+import { isLLMProvider } from '../../lib/llm-call';
 import { PORT } from '../config';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
@@ -15,7 +16,8 @@ const REFLECTIONS_DIR = path.resolve(process.cwd(), 'data', 'reflections');
 /**
  * POST /api/self-improve/run
  * Trigger a self-improvement loop for one entity immediately.
- * Body: { entity: string; provider: 'gemini'|'openrouter'|'ollama'; model?: string }
+ * Body: { entity: string; provider?: 'gemini'|'openrouter'|'ollama'|'deepseek'|'omniroute'; model?: string }
+ * Provider optional — defaults to JOURNAL_LLM env (or 'omniroute'); falls back automatically.
  */
 router.post('/run', lockGuard, asyncHandler(async (req, res) => {
   const { entity, provider, model, timezone } = req.body as Partial<SelfImproveConfig>;
@@ -23,8 +25,8 @@ router.post('/run', lockGuard, asyncHandler(async (req, res) => {
     res.status(400).json({ error: 'entity (string) required' });
     return;
   }
-  if (!provider || !['gemini', 'openrouter', 'ollama'].includes(provider)) {
-    res.status(400).json({ error: 'provider must be gemini|openrouter|ollama' });
+  if (provider !== undefined && !isLLMProvider(provider)) {
+    res.status(400).json({ error: 'provider must be gemini|openrouter|ollama|deepseek|omniroute' });
     return;
   }
   try {

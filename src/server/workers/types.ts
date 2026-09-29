@@ -44,7 +44,7 @@ export interface BridgeSyncPayload {
 
 export interface AgentJournalPayload {
   entity: string;
-  provider: 'gemini' | 'ollama' | 'openrouter';
+  provider: 'gemini' | 'ollama' | 'openrouter' | 'deepseek' | 'omniroute';
   model: string;
   apiBase: string;
 }

@@ -21,7 +21,7 @@ const DEEPSEEK_TIMEOUT_MS = parseInt(process.env.DEEPSEEK_TIMEOUT_MS || '120000'
 
 router.post('/chat', lockGuard, asyncHandler(async (req: any, res) => {
   try {
-    const { model, messages, systemInstruction, containerTag, attachments } = req.body as any;
+    const { model, messages, systemInstruction, containerTag, attachments, skipTools } = req.body as any;
     if (!model) {
       res.status(400).json({ error: 'model is required' });
       return;
@@ -103,8 +103,9 @@ router.post('/chat', lockGuard, asyncHandler(async (req: any, res) => {
 
     // Tools: DeepSeek-Chat (V3) supports OpenAI-compatible function calling.
     // DeepSeek-Reasoner (R1) does NOT support function calling.
+    // skipTools=true (scheduled agents like the journal) disables them entirely.
     const isReasoner = model.includes('reasoner') || model.includes('-r1');
-    const mcpDeclarations = !isReasoner ? getMcpDeclarations() : [];
+    const mcpDeclarations = !isReasoner && !skipTools ? getMcpDeclarations() : [];
     const openAiTools =
       mcpDeclarations.length > 0
         ? mcpDeclarations.map((t) => ({

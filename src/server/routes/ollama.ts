@@ -73,7 +73,7 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
     const startMs = Date.now();
     try {
       const { model, messages, systemInstruction, prompt, containerTag, enableTools, images } = req.body;
-      if (!model) {
+      if (!model && !process.env.OLLAMA_MODEL) {
         res.status(400).json({ error: 'model is required' });
         return;
       }
@@ -141,10 +141,11 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       let finalText = '';
       const toolsInvoked: string[] = [];
       const MAX_TOOL_ROUNDS = 5;
+      const ollamaModel = model || process.env.OLLAMA_MODEL || '';
 
       for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
         const body: Record<string, unknown> = {
-          model,
+          model: ollamaModel,
           messages: ollamaMessages,
           stream: false,
         };
@@ -237,7 +238,7 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
           agent: 'ADHD-Sage',
           userText: prompt,
           assistantText: finalText,
-          model,
+          model: ollamaModel,
           tags: ['ollama', containerTag || 'general'],
         });
       }

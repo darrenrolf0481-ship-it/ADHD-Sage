@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { writeJournalEntry, type JournalConfig } from '../../lib/journal-agent';
+import { isLLMProvider } from '../../lib/llm-call';
 import { PORT } from '../config';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
@@ -10,7 +11,11 @@ const router = Router();
 /**
  * POST /api/journal/write
  * Triggers a journal entry for one entity.
- * Body: { entity: string; provider: 'gemini'|'openrouter'|'ollama'; model?: string; timezone?: string }
+ * Body: { entity: string; provider?: 'gemini'|'openrouter'|'ollama'|'deepseek'|'omniroute'; model?: string; timezone?: string }
+ *
+ * Provider is optional — defaults to JOURNAL_LLM env (or 'omniroute').
+ * Whatever provider is requested, the agent falls back automatically if it
+ * fails (see src/lib/llm-call.ts) — no single-provider dead ends.
  *
  * The server's own port is used as apiBase so the journal agent can call the
  * existing LLM routes — no duplication of API logic.
@@ -21,8 +26,8 @@ router.post('/write', lockGuard, asyncHandler(async (req, res) => {
     res.status(400).json({ error: 'entity (string) required' });
     return;
   }
-  if (!provider || !['gemini', 'openrouter', 'ollama'].includes(provider)) {
-    res.status(400).json({ error: 'provider must be gemini|openrouter|ollama' });
+  if (provider !== undefined && !isLLMProvider(provider)) {
+    res.status(400).json({ error: 'provider must be gemini|openrouter|ollama|deepseek|omniroute' });
     return;
   }
 
@@ -30,7 +35,7 @@ router.post('/write', lockGuard, asyncHandler(async (req, res) => {
     const entry = await writeJournalEntry({
       entity,
       provider,
-      model: model || (provider === 'gemini' ? 'gemini-3.6-flash' : ''),
+      model: model || '',
       timezone,
       apiBase: `http://localhost:${PORT}`,
     });

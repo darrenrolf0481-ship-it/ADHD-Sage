@@ -144,12 +144,12 @@ export const CapabilitiesPanel: React.FC<CapabilitiesPanelProps> = ({
   };
 
   const handleTriggerJournal = async () => {
-    setJournalStatus('Writing daily journal entry via Gemini 3.6 Flash...');
+    setJournalStatus('Writing daily journal entry (auto-routed, provider fallback enabled)…');
     try {
       const res = await fetch('/api/journal/write', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ entity: 'sage', provider: 'gemini' }),
+        body: JSON.stringify({ entity: 'sage' }),
       });
       const data = await res.json();
       if (data.ok) {

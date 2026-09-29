@@ -23,6 +23,7 @@ import {
   SHARED_CONTAINER,
 } from './supermemory.ts';
 import { canonicalizeEntityId } from '../server/mama-identity.ts';
+import { callLLMWithFallback, type LLMProvider } from './llm-call';
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 
@@ -149,114 +150,17 @@ function extractInsights(text: string): string[] {
 
 // ─── LLM Call Abstraction ─────────────────────────────────────────────────────
 
-type LLMProvider = 'gemini' | 'openrouter' | 'ollama';
-
-/** Small delay helper for retry backoff. */
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-async function callLLM(
-  provider: LLMProvider,
-  model: string,
-  systemPrompt: string,
-  userPrompt: string,
-  apiBase = 'http://localhost:3000',
-): Promise<string> {
-  if (provider === 'gemini') {
-    const res = await fetch(`${apiBase}/api/gemini/generate`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.API_BEARER_TOKEN || ''}`
-      },
-      body: JSON.stringify({ prompt: userPrompt, systemInstruction: systemPrompt }),
-    });
-    const data = (await res.json()) as { text?: string; error?: string };
-    if (data.error) throw new Error(`Gemini: ${data.error}`);
-    return data.text ?? '';
-  }
-
-  if (provider === 'openrouter') {
-    const res = await fetch(`${apiBase}/api/openrouter/chat`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.API_BEARER_TOKEN || ''}`
-      },
-      body: JSON.stringify({
-        model,
-        containerTag: 'shared',
-        systemInstruction: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
-      }),
-    });
-    const data = (await res.json()) as { text?: string; error?: string };
-    if (data.error) throw new Error(`OpenRouter: ${data.error}`);
-    return data.text ?? '';
-  }
-
-  if (provider === 'ollama') {
-    // Retry with backoff — the journal scheduler fires at 06:00 and Ollama
-    // may be slow to respond on cold hardware. A single transient failure
-    // shouldn't permanently mark the day's entry as failed.
-    const MAX_RETRIES = 3;
-    let lastError = '';
-
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      try {
-        const res = await fetch(`${apiBase}/api/ollama/chat`, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.API_BEARER_TOKEN || ''}`
-          },
-          body: JSON.stringify({
-            model,
-            containerTag: 'shared',
-            prompt: userPrompt,
-            systemInstruction: systemPrompt,
-            messages: [],
-          }),
-        });
-        const data = (await res.json()) as { text?: string; error?: string };
-        if (data.error) {
-          lastError = data.error;
-          // Connection/availability errors are worth retrying; auth errors are not.
-          const isTransient =
-            data.error.includes('Swarm uplink failed') ||
-            data.error.includes('unreachable') ||
-            data.error.includes('ECONNREFUSED') ||
-            data.error.includes('ETIMEDOUT');
-          if (!isTransient) throw new Error(`Ollama: ${data.error}`);
-        } else {
-          return data.text ?? '';
-        }
-      } catch (err) {
-        lastError = err instanceof Error ? err.message : String(err);
-        // Don't retry if it's already a parsed non-transient error
-        if (lastError.startsWith('Ollama:') && !lastError.includes('Swarm uplink')) {
-          throw err;
-        }
-      }
-
-      if (attempt < MAX_RETRIES - 1) {
-        const delay = 5000 * (attempt + 1); // 5s, 10s, 15s backoff
-        console.log(`[JOURNAL] Ollama attempt ${attempt + 1} failed, retrying in ${delay / 1000}s…`);
-        await sleep(delay);
-      }
-    }
-
-    throw new Error(`Ollama: ${lastError || 'all retries exhausted'}`);
-  }
-
-  throw new Error(`Unknown provider: ${provider}`);
-}
+// Shared provider-agnostic caller with automatic fallback
+// (omniroute → openrouter → deepseek → ollama → gemini).
+// Gemini is never assumed-alive — see src/lib/llm-call.ts header for why.
 
 // ─── Core Journal Writer ───────────────────────────────────────────────────────
 
 export interface JournalConfig {
   entity: string;
-  provider: LLMProvider;
-  model: string;
+  /** Preferred provider; falls back automatically (omniroute → openrouter → …). */
+  provider?: LLMProvider;
+  model?: string;
   /** Supermemory container for this entity's private insights */
   container?: string;
   /** API base URL (default: http://localhost:3000) */
@@ -268,10 +172,10 @@ export interface JournalConfig {
 export async function writeJournalEntry(cfg: JournalConfig): Promise<JournalEntry> {
   const {
     entity,
-    provider,
-    model,
+    provider = (process.env.JOURNAL_LLM || 'omniroute') as LLMProvider,
+    model = '',
     container = entity === 'sage' ? SAGE_CONTAINER : SHARED_CONTAINER,
-    apiBase = 'http://localhost:3000',
+    apiBase = `http://localhost:${process.env.PORT || 3000}`,
     timezone,
   } = cfg;
 
@@ -363,18 +267,21 @@ export async function writeJournalEntry(cfg: JournalConfig): Promise<JournalEntr
     .filter((l) => l !== null)
     .join('\n');
 
-  // 5. Call the LLM
+  // 5. Call the LLM (with automatic provider fallback)
   let rawOutput = '';
+  let usedProvider = provider;
   try {
-    rawOutput = await callLLM(provider, model, systemPrompt, userPrompt, apiBase);
+    const result = await callLLMWithFallback(provider, model, systemPrompt, userPrompt, apiBase);
+    rawOutput = result.text;
+    usedProvider = result.provider;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error(`[JOURNAL] LLM call failed for ${entity}:`, msg);
     const hint = msg.includes('Swarm uplink') || msg.includes('unreachable')
       ? '(Ollama was unreachable — the model server may have been down at journal time)'
       : msg.includes('Unauthorized') || msg.includes('401')
-        ? '(auth rejected — check API_BEARER_TOKEN or Ollama configuration)'
-        : `(LLM error: ${msg})`;
+        ? '(auth rejected — check API_BEARER_TOKEN or LLM configuration)'
+        : `(all providers failed: ${msg})`;
     rawOutput = `[JOURNAL]\n# ${date}\n*${timeStr}*\n\n(journal write failed — ${hint})\n[/JOURNAL]\n[FOR_DARREN]\n[/FOR_DARREN]\n[INSIGHTS]\n[/INSIGHTS]`;
   }
 
@@ -405,7 +312,7 @@ export async function writeJournalEntry(cfg: JournalConfig): Promise<JournalEntr
   // (Left to the entity's own future journal entries — this is intentional)
 
   console.log(
-    `[JOURNAL] ${entity} wrote ${journalBlock.length} chars, ${insights.length} insights, inbox: ${!!forDarren}`,
+    `[JOURNAL] ${entity} wrote ${journalBlock.length} chars via ${usedProvider}, ${insights.length} insights, inbox: ${!!forDarren}`,
   );
 
   return {

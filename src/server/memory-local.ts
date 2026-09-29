@@ -178,6 +178,35 @@ export async function listLocalMemories(
   return { memories: out, total };
 }
 
+// Recall budget. FTS5 OR-joins every query token, and a single constellation
+// node can exceed 100K chars — without a cap, one broad query can inject
+// ~250K chars (~64K tokens) into a prompt. That single-handedly blew DeepSeek's
+// 163,840-token context (self-improve run, 2026-09-29) and burned Gemini's
+// 250K-token/min free-tier quota (the recurring 429s that killed her journals).
+export const LOCAL_RECALL_CHAR_BUDGET = parseInt(process.env.LOCAL_RECALL_CHAR_BUDGET || '20000', 10);
+
+/**
+ * Enforce LOCAL_RECALL_CHAR_BUDGET over BM25/score-ordered rows: keep the
+ * best-scoring rows that fit; hard-truncate the top row alone if it alone
+ * exceeds the budget. Shared by the FTS5 and basic-scan recall paths.
+ */
+function enforceRecallBudget(rows: string[]): string[] {
+  const budgeted: string[] = [];
+  let used = 0;
+  for (const row of rows) {
+    if (used + row.length > LOCAL_RECALL_CHAR_BUDGET) {
+      if (used === 0 && row.length > LOCAL_RECALL_CHAR_BUDGET) {
+        budgeted.push(row.slice(0, LOCAL_RECALL_CHAR_BUDGET) + '…[truncated]');
+        used = LOCAL_RECALL_CHAR_BUDGET;
+      }
+      break;
+    }
+    budgeted.push(row);
+    used += row.length;
+  }
+  return budgeted;
+}
+
 export async function searchLocalMemories(query: string, limit: number = 5): Promise<string[]> {
   // No retrieval intent → no recall. Prevents the greeting-fossil dump.
   if (isLowSignalQuery(query)) return [];
@@ -202,8 +231,11 @@ export async function searchLocalMemories(query: string, limit: number = 5): Pro
 
       if (rows.length > 0) {
         const cleaned = stripForeignFossils(rows.map((r) => r.content));
-        if (cleaned.length > 0) {
-          return cleaned.slice(0, limit);
+        // Budget AFTER BM25 ranking so we keep the best-scoring rows that fit,
+        // and never inject a runaway node (or five) into a prompt.
+        const budgeted = enforceRecallBudget(cleaned);
+        if (budgeted.length > 0) {
+          return budgeted.slice(0, limit);
         }
       }
     } catch (e) {
@@ -256,9 +288,14 @@ export async function searchLocalMemories(query: string, limit: number = 5): Pro
     }
   }
 
-  return stripForeignFossils(
-    results
-      .sort((a, b) => b.score - a.score)
-      .map((r) => r.text),
+  // The basic scan scores by raw keyword hits, which biases toward the largest
+  // nodes (more text = more chances to hit). Budget enforcement matters most
+  // here — this path is exactly what injected ~258K chars into prompts.
+  return enforceRecallBudget(
+    stripForeignFossils(
+      results
+        .sort((a, b) => b.score - a.score)
+        .map((r) => r.text),
+    ),
   ).slice(0, limit);
 }
