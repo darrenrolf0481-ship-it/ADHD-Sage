@@ -1,3 +1,19 @@
+## 2026-09-29 (Bolt) - Optimized token graph similarity calculation in `src/components/MemoryLattice.tsx`
+
+**What happened:**
+- Pre-tokenized memory node text into Sets of unique words (>3 chars) once in $O(N)$ outside the nested graph similarity comparison loop.
+- Replaced the inner-loop $O(N^2)$ regex string splitting and $O(K)$ array `.includes()` check with $O(1)$ `Set.has()` lookups comparing the smaller token set against the larger token set.
+- Drastically reduces GC overhead and execution time when filtering memory nodes by dopamine/cortisol or rendering fallback graph data.
+
+**Verification:**
+- Ran full test suite (`pnpm test`) — all identity, API, worker pool, and production worker tests passed cleanly.
+- Ran full build (`pnpm run build`) — succeeded in ~4.5s.
+
+**If things break, check:**
+- Check `src/components/MemoryLattice.tsx` lines 135-170 if fallback memory lattice graph links fail to render or generate unexpected token matches.
+
+---
+
 ## 2026-09-20 (Bolt) - Memoized `hashEmbed` in `src/server/resonance-index.ts`
 
 **What happened:**

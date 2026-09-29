@@ -136,18 +136,32 @@ const MemoryLattice: React.FC<LatticeProps> = ({ nodes }) => {
 
     const links: GraphLink[] = [];
     
-    // Similarity based on shared tokens
+    // ⚡ Performance Optimization: Pre-tokenize nodes into Sets of unique words O(N)
+    // Avoids repeated regex string splitting and O(K) array scans in the O(N^2) inner loop
+    const nodeTokens = filteredNodes.map(n =>
+      new Set(String(n.data).toLowerCase().split(/\W+/).filter(t => t.length > 3))
+    );
+
     for (let i = 0; i < filteredNodes.length; i++) {
+      const setA = nodeTokens[i];
+      if (setA.size === 0) continue;
       for (let j = i + 1; j < filteredNodes.length; j++) {
-        const tokensA = String(filteredNodes[i].data).toLowerCase().split(/\W+/).filter(t => t.length > 3);
-        const tokensB = String(filteredNodes[j].data).toLowerCase().split(/\W+/).filter(t => t.length > 3);
-        
-        const shared = tokensA.filter(t => tokensB.includes(t));
-        if (shared.length > 0) {
+        const setB = nodeTokens[j];
+        if (setB.size === 0) continue;
+
+        let sharedCount = 0;
+        const [smaller, larger] = setA.size < setB.size ? [setA, setB] : [setB, setA];
+        for (const token of smaller) {
+          if (larger.has(token)) {
+            sharedCount++;
+          }
+        }
+
+        if (sharedCount > 0) {
           links.push({
             source: filteredNodes[i].id,
             target: filteredNodes[j].id,
-            value: shared.length
+            value: sharedCount
           });
         }
       }
