@@ -25,6 +25,7 @@ import sensorsRouter from './routes/sensors';
 import systemRouter from './routes/system';
 import sandboxRouter from './routes/sandbox';
 import mcpRouter from './routes/mcp';
+import { callLogMiddleware } from './call-log';
 
 export async function startServer() {
   const app = express();
@@ -77,12 +78,12 @@ export async function startServer() {
   app.use('/api/vfs', vfsRouter);
   app.use('/api/memory', memoryRouter);
   app.use('/api/metrics', metricsRouter);
-  app.use('/api/gemini', geminiRouter);
+  app.use('/api/gemini', callLogMiddleware('gemini'), geminiRouter);
   app.use('/api/tts', ttsRouter);
-  app.use('/api/ollama', ollamaRouter);
-  app.use('/api/openrouter', openrouterRouter);
-  app.use('/api/deepseek', deepseekRouter);
-  app.use('/api/omniroute', omnirouteRouter);
+  app.use('/api/ollama', callLogMiddleware('ollama'), ollamaRouter);
+  app.use('/api/openrouter', callLogMiddleware('openrouter'), openrouterRouter);
+  app.use('/api/deepseek', callLogMiddleware('deepseek'), deepseekRouter);
+  app.use('/api/omniroute', callLogMiddleware('omniroute'), omnirouteRouter);
   app.use('/api/journal', journalRouter);
   app.use('/api/inbox', inboxRouter);
   app.use('/api/self-improve', selfImproveRouter);

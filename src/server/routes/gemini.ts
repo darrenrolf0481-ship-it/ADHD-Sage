@@ -5,8 +5,8 @@ import { tmpdir } from 'node:os';
 import { FunctionCallingConfigMode } from '@google/genai';
 import { getGenAI } from '../gemini-client';
 import { buildSystemPrompt } from '../prompt';
-import { searchMemories, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
-import { searchLocalMemories, isLowSignalQuery, stripForeignFossils } from '../memory-local';
+import { SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
+import { recallForTurn } from '../recall';
 import { getMcpDeclarations } from '../../core/mcp';
 import { gemTools, executeTool, cleanResponse, type ToolEffect } from '../tools';
 import { recordMetric } from '../metrics';
@@ -42,22 +42,14 @@ router.post('/generate', lockGuard, asyncHandler(async (req, res) => {
       // the shared broadcast channel so she knows what the seven are up to.
       // Greetings/low-signal turns skip recall — otherwise a bare "hello"
       // surfaces greeting fossils the model then parrots (the dump bug).
-      if (prompt && !isLowSignalQuery(prompt)) {
-        const [cloudMemoriesRaw, localMemories] = await Promise.all([
-          searchMemories(prompt, [SAGE_CONTAINER, SHARED_CONTAINER], 6),
-          searchLocalMemories(prompt, 6),
-        ]);
-        const cloudMemories = stripForeignFossils(cloudMemoriesRaw);
-
-        if (localMemories.length > 0) {
+      if (prompt) {
+        const { lines } = await recallForTurn(prompt, {
+          cloudTags: [SAGE_CONTAINER, SHARED_CONTAINER],
+        });
+        if (lines.length > 0) {
           fullSystemPrompt +=
-            '\n\n---\n## LOCAL MEMORIES (SQLite)\n' + localMemories.map((m) => `• ${m}`).join('\n');
-        }
-
-        if (cloudMemories.length > 0) {
-          fullSystemPrompt +=
-            '\n\n---\n## CLOUD MEMORIES (Supermemory)\n' +
-            cloudMemories.map((m) => `• ${m}`).join('\n');
+            '\n\n---\n## RECALLED MEMORIES (each line: [whose memory · date])\n' +
+            lines.map((m) => `• ${m}`).join('\n');
         }
       }
 

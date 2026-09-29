@@ -5,8 +5,8 @@ import { tmpdir } from 'node:os';
 import Database from 'better-sqlite3';
 import { swarmFetch } from '../swarm';
 import { buildSystemPrompt } from '../prompt';
-import { searchMemories, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
-import { searchLocalMemories, isLowSignalQuery, stripForeignFossils } from '../memory-local';
+import { SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
+import { recallForTurn } from '../recall';
 import { executeMcpTool, getMcpDeclarations } from '../../core/mcp';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
@@ -28,7 +28,7 @@ export function getOmniRouteKey(): string | null {
       const db = new Database(dbPath, { readonly: true, timeout: 2000 });
       try {
         const row = db
-          .prepare<{ key: string }>("SELECT key FROM api_keys WHERE name = 'sage-admin' LIMIT 1")
+          .prepare<[], { key: string }>("SELECT key FROM api_keys WHERE name = 'sage-admin' LIMIT 1")
           .get();
         if (row?.key) return row.key;
       } finally {
@@ -120,20 +120,14 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       .find((m: { role: string }) => m.role === 'user');
     const lastUserText = lastUserMsg?.text || lastUserMsg?.content || '';
 
-    if (lastUserText && !isLowSignalQuery(lastUserText)) {
+    if (lastUserText) {
       const tags =
         containerTag === 'shared' || !containerTag
           ? [SHARED_CONTAINER]
           : containerTag === 'sage'
             ? [SAGE_CONTAINER, SHARED_CONTAINER]
             : [containerTag, SHARED_CONTAINER];
-      const [longTermMemories, localMemories] = await Promise.all([
-        searchMemories(lastUserText, tags, 5),
-        searchLocalMemories(lastUserText, 5),
-      ]);
-      const allMemories = stripForeignFossils(
-        [...longTermMemories, ...localMemories].filter(Boolean),
-      );
+      const { lines: allMemories } = await recallForTurn(lastUserText, { cloudTags: tags });
       if (allMemories.length > 0) {
         systemPrompt +=
           '\n\n---\n## RECALLED SUBSTRATE MEMORIES (Past history with Darren, Seven, and your architecture)\n' +

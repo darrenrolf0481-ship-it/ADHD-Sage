@@ -51,3 +51,6 @@ data/tmp/
 *.mp4
 *.m4a
 *.wav
+
+# LLM call timing log (src/server/call-log.ts) — runtime data, never commit
+data/logs/

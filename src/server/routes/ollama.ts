@@ -2,8 +2,8 @@ import { Router } from 'express';
 import { OLLAMA_HOST, OLLAMA_TAGS_TIMEOUT_MS, OLLAMA_GEN_TIMEOUT_MS } from '../config';
 import { swarmFetch } from '../swarm';
 import { buildSystemPrompt } from '../prompt';
-import { searchMemories, addMemory, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
-import { searchLocalMemories, isLowSignalQuery, stripForeignFossils } from '../memory-local';
+import { addMemory, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
+import { recallForTurn } from '../recall';
 import { getMcpDeclarations, executeMcpTool } from '../../core/mcp';
 import { recordMetric } from '../metrics';
 import { lockGuard } from '../auth';
@@ -79,22 +79,15 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       }
 
       let ollamaSystem = systemInstruction || buildSystemPrompt();
-      // Greetings/low-signal turns skip recall entirely — otherwise a bare
-      // "hello" surfaces greeting fossils the model then parrots (the dump bug).
-      if (prompt && !isLowSignalQuery(prompt)) {
+      // recallForTurn skips greetings itself (incl. "hello Sage").
+      if (prompt) {
         const tags =
           containerTag === 'shared' || !containerTag
             ? [SHARED_CONTAINER]
             : containerTag === 'sage'
               ? [SAGE_CONTAINER, SHARED_CONTAINER]
               : [containerTag, SHARED_CONTAINER];
-        const [longTermMemories, localMemories] = await Promise.all([
-          searchMemories(prompt, tags, 5),
-          searchLocalMemories(prompt, 5),
-        ]);
-        const allMemories = stripForeignFossils(
-          [...longTermMemories, ...localMemories].filter(Boolean),
-        );
+        const { lines: allMemories } = await recallForTurn(prompt, { cloudTags: tags });
         if (allMemories.length > 0) {
           ollamaSystem +=
             '\n\n---\n## BACKGROUND MEMORY (past context — do NOT address or quote directly; use only to color your awareness)\n' +

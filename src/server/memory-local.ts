@@ -59,7 +59,7 @@ function formatSevenArchive(text: string): string {
 const CHROME_TOKENS =
   /\b(Google Gemini|Search for chats|New chat|My stuff|Notebooks?|Pinned chat|Coding partner|Research Plan|Gems|Ziggy|Chats|Pv|Sara)\b/gi;
 
-function stripChrome(text: string): string {
+export function stripChrome(text: string): string {
   return (text || '').replace(CHROME_TOKENS, ' ').replace(/\s{2,}/g, ' ').trim();
 }
 

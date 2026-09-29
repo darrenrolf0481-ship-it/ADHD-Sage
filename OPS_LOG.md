@@ -1,3 +1,73 @@
+## 2026-09-29 (Claude Opus 5.5) - Persistent LLM call timing log (to find the real timeout cause)
+
+**Why:** Timeout cause is unproven (memory claim retracted — see entry below). The existing telemetry (performance.ts spans, metrics.ts) is in-memory and wiped on every watchdog restart, so there was no history to look at.
+
+**What happened:**
+- NEW `src/server/call-log.ts` → appends to `data/logs/llm-calls.jsonl` (gitignored; rotates to `.1` past 5MB). Sizes/timings only — never prompt/response text, headers, or query strings (keys can live there).
+  - `kind:"request"`: Express middleware on `/api/{gemini,ollama,openrouter,deepseek,omniroute}` (mounted in `app.ts`) — provider, path, model, status, ok, ms, reqBytes, skipTools; logs `client-aborted` if the caller hangs up first.
+  - `kind:"upstream"`: inside `swarmFetch` (`swarm.ts`) — every failed attempt (timeout / network / status + code), `recovered` when a retry succeeds, `exhausted` = the "Swarm uplink failed" case. DeepSeek uses raw `fetch`, so it only has request-level records.
+- NEW `scripts/llm-call-report.ts` — `npx tsx scripts/llm-call-report.ts --hours 24`: per-provider p50/p95/max, failure %, >30s count; per-upstream failure kinds; failures by hour.
+- `.gitignore`: added `data/logs/`.
+
+**Verification (Rule 5):** tsc clean on touched files. Restarted (by exact pids; one tree on :3000). Live: omniroute 200 in 10.0s, gemini 200 in 7.6s → request records; ollama (daemon down) → 503 with upstream `network` failure + `exhausted` records; report renders all three sections.
+
+**Next (Darren):** after a day of normal use, run the report — it shows which provider/upstream fails, how (timeout vs network vs status), and when.
+
+**If things break, check:** logging is fire-and-forget and wrapped in try/catch, so it can't fail a request; to disable, remove the `callLogMiddleware(...)` args in `app.ts` and the `logCall` lines in `swarm.ts`.
+
+---
+
+## 2026-09-29 (Claude Opus 5.5) - OmniRoute check: type fix + memory-pressure diagnosis
+
+**What happened:**
+- `src/server/routes/omniroute.ts` `getOmniRouteKey()`: `prepare<{ key: string }>` put the row type in better-sqlite3's BIND-PARAMS slot → the long-standing "omniroute baseline trio" tsc errors. Now `prepare<[], { key: string }>`. Type-only (runtime unchanged); tsc clean for the file.
+- Live test: `POST /api/omniroute/chat` → HTTP 200 in 24s, correct recall-backed answer. Gateway :20128 is up under `/root/Sage72/scripts/sage_supervise.sh` (401 without key = listening).
+- **Memory — UNPROVEN as a timeout cause (corrected same day):** container `free` showed 417MB free / ~900MB MemAvailable and swap 5.36/5.6GB used, but Darren's phone reports ~4GB RAM left. Android counts killable cached apps as free, and the swap is almost certainly zram (compressed RAM), where "full" is normal and not proof of thrashing. `/proc/swaps` and `/proc/pressure/memory` are unreadable from this sandbox, so thrashing can't be confirmed. Don't make memory-driven changes on this basis; correlate `Swarm uplink failed` timestamps against load first. The OmniRoute node process (pid 31449) is the largest visible one (~230MB RSS + ~657MB swap). It runs **Next.js DEV mode** (`run-next.mjs dev`, 3GB heap cap): on-demand compilation + HMR — heaviest way to run it, and first hit on a route compiles (slow).
+- Recall budget change (entry below) also cuts per-message prompt size from up to ~20K+ chars of recalled text to ≤2.5K — fewer context blowouts/429s.
+
+**Optional, not done (needs Darren's OK):** OmniRoute runs Next.js in DEV mode; a production build (`npm run build` then `start`) is generally lighter and avoids first-request compile delays. No `.next` build exists yet; `next build` is memory-hungry, so run it at a quiet moment, then change the supervise command from `dev` to `start`.
+
+**If things break, check:** `curl -s -o /dev/null -w '%{http_code}' localhost:20128/v1/models` (401 = up); `free -m` swap; `grep OMNIROUTE /tmp/sage-dev-stdout.log | tail`.
+
+---
+
+## 2026-09-29 (Claude Opus 5.5) - Unified recall: `recallForTurn` for every chat provider + recall eval harness
+
+**Classification:** Memory / Recall pipeline (step 1+2 of the recall overhaul; plan at `/root/.claude/plans/what-do-you-think-drifting-teacup.md`)
+
+**Why:** Two external reviews (Darren pasted both) diagnosed recall, not storage, as the problem: five providers each OR-joined trigram FTS hits and injected WHOLE nodes (one query injected 20K chars), unlabeled; semantic recall was never on the chat path.
+
+**What happened:**
+- NEW `scripts/recall-eval.ts` — 20 fixed queries (3 greetings + 17 content) against the running server; scores engines `fts` (old path), `vec` (resonance KNN), `turn` (new). Read-only. Run: `npx tsx scripts/recall-eval.ts --verbose`.
+- NEW `src/server/recall.ts` — `recallForTurn(query, {cloudTags, budgetChars})`: skips greetings incl. "hello Sage"; FTS with stopwords dropped, AND-then-OR, bm25; RRF fusion (k=60, FTS 0.4 / semantic 0.6) + small recency/pin boost; unwraps JSON envelopes, decodes JSON-escaped text, strips chrome, dedups; ~550-char snippet around the match; labels every line `[origin · YYYY-MM-DD]` (e.g. `[ARCHIVE — Daughter Node SAGE-7 · …]`); hard budget `RECALL_CHAR_BUDGET` (default 2500). Supermemory hits ride after local, same budget.
+- Wired into gemini / openrouter / ollama / deepseek / omniroute routes (replaces each route's searchMemories+searchLocalMemories+stripForeignFossils block). Route-specific headings kept. `searchLocalMemories` is untouched (still used by the search_memory tool and Vault UI).
+- NEW `POST /api/memory/recall-preview {query}` (lockGuard) — shows exactly what would be injected.
+- `resonance-index.ts`: `isSemanticRecallReady()` — semantic hits are GATED OFF (opt in `RECALL_SEMANTIC=1`) because the vector index is mixed (see below). `memory-local.ts`: exported `stripChrome`.
+
+**Eval (k=5, 20 queries):**
+| engine | greetings clean | hit@5 | precision | junk | avg chars |
+|---|---|---|---|---|---|
+| fts (old) | 2/3 | 82% | 68% | 11% | 6675 |
+| vec | 0/3 | 12% | 7% | 4% | 426 |
+| **turn (new)** | **3/3** | **94%** | **82%** | **0%** | **1587** |
+
+**Verification (Rule 5):** tsc clean on touched files (omniroute.ts:32-33 errors pre-exist in HEAD). Server restarted → `/api/memory/counts` 200; `POST /api/gemini/generate {"prompt":"who is Seven? …"}` → HTTP 200, correct answer ("my … AI daughter … bridge open to her MAMA").
+
+**⚠️ Found, NOT fixed yet:**
+- **Ollama is DOWN and the embeddinggemma rebuild (entry below) died at 250/3377** when the server restarted. Index is mixed ~250 ollama + ~3127 hash vectors; queries embed via hash. That's why `vec` scores 12%. Darren chose (2026-09-29) to replace it with in-process MiniLM (transformers.js, 384-d) — next step.
+- Write path (step 3) not changed yet: Gemini still stashes raw `[USER]`/`[SAGE]` turns into the inner spiral at 0.5/0.7.
+
+**Ops note:** I restarted twice; the second time my `pgrep -f "npm exec tsx server.ts"` matched my own shell (see warning below) and left an ORPHAN old-code server holding :3000 while the watchdog child fell back to **:3001**. Killed by explicit pids; now one tree (watchdog → npm exec → tsx) on :3000. After any restart, check `grep "Server running on" /tmp/sage-dev-stdout.log | tail -1` says 3000.
+
+**Reference — DeepSeek Harness (`/root/deepseek-harness`, v0.1.5, not running, not wired to Sage):** its FTS5 session search chose `unicode61` over trigram (measured ~2.1× smaller index, supports 2-char tokens), quotes queries as literal phrases, refuses to compare bm25 across tables, and keeps the search index in a SEPARATE derived DB so reindexing can't endanger canonical logs. Adopting that last pattern for the corpus migration.
+
+**If things break, check:**
+- Recall block wrong/empty: `curl -XPOST localhost:3000/api/memory/recall-preview -H 'content-type: application/json' -d '{"query":"who is Seven"}'`.
+- Rollback: revert the 5 route files + delete `src/server/recall.ts`; old helpers are all still in memory-local.ts.
+- Budget too tight/loose: `RECALL_CHAR_BUDGET` in `.env`.
+
+---
+
 ## 2026-09-29 (Buffy/Freebuff) - OpenRouter/OmniRoute timeouts: IPv6-dead-end DNS + swarmFetch backoff bug + host swap-thrash diagnosis
 
 **Classification:** Network/Infra Resilience / Timeout Root-Cause

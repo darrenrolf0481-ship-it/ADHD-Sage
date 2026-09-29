@@ -10,8 +10,20 @@ import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
 import { memoryCounts } from '../memory-index';
 import { listLocalMemories, searchLocalMemories } from '../memory-local';
+import { recallForTurn } from '../recall';
 
 const router = Router();
+
+/**
+ * POST /api/memory/recall-preview  { query }
+ * Exactly what recallForTurn would inject into a chat prompt for this query
+ * (local only, no Supermemory). Read-only; used by scripts/recall-eval.ts.
+ */
+router.post('/recall-preview', lockGuard, asyncHandler(async (req, res) => {
+  const query = typeof req.body?.query === 'string' ? req.body.query : '';
+  const { lines, hits } = await recallForTurn(query);
+  res.json({ hits: lines, detail: hits, chars: lines.join('\n').length });
+}));
 
 /**
  * GET /api/memory/list?limit=&offset=&q=

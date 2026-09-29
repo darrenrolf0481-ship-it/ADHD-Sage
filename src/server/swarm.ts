@@ -1,5 +1,17 @@
 // ─── Swarm Uplink — Golden-Ratio Retry Wrapper ──────────────────────────────
 
+import { logCall, errorKind } from './call-log';
+
+/** Host + path only — query strings can carry API keys. */
+function target(url: string): string {
+  try {
+    const u = new URL(url);
+    return `${u.host}${u.pathname}`;
+  } catch {
+    return 'invalid-url';
+  }
+}
+
 const PHI = 1.618;
 const SWARM_JITTER_MS = 250;
 const SWARM_MAX_TOTAL_MS = 60_000;
@@ -16,14 +28,24 @@ export async function swarmFetch(
   // second attempt — one hiccup cost ~50s and read as a hard timeout.
   let delay = 500;
   let elapsed = 0;
+  const started = Date.now();
+  const where = target(url);
+  let attempts = 0;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const attemptStart = Date.now();
+    attempts++;
     try {
       const res = await fetch(url, { ...opts, signal: controller.signal });
       clearTimeout(timer);
-      if (res.ok) return res;
+      if (res.ok) {
+        if (attempt > 0)
+          logCall({ kind: 'upstream', target: where, outcome: 'recovered', attempts: attempt + 1, ms: Date.now() - started });
+        return res;
+      }
+      logCall({ kind: 'upstream', target: where, outcome: 'attempt-failed', attempt: attempt + 1, error: 'status', status: res.status, ms: Date.now() - attemptStart, timeoutMs });
       // Non-2xx: fall through to retry
       const isLocalOptional = url.includes('127.0.0.1') || url.includes('localhost');
       if (!isLocalOptional || attempt === SWARM_MAX_RETRIES) {
@@ -31,6 +53,7 @@ export async function swarmFetch(
       }
     } catch (e) {
       clearTimeout(timer);
+      logCall({ kind: 'upstream', target: where, outcome: 'attempt-failed', attempt: attempt + 1, error: errorKind(e), ms: Date.now() - attemptStart, timeoutMs });
       // Quiet warnings for common local optional services
       const isLocalOptional = url.includes('127.0.0.1') || url.includes('localhost');
       if (isLocalOptional) {
@@ -50,6 +73,7 @@ export async function swarmFetch(
   }
 
   // Node 13: The Void — Defer & Log
+  logCall({ kind: 'upstream', target: where, outcome: 'exhausted', attempts, ms: Date.now() - started });
   console.warn(`[SWARM] All retries exhausted → Node 13 (The Void). URL: ${url}`);
   throw new Error(
     `Swarm uplink failed: ${url} unreachable after ${maxRetries} retries (Node 13 / Defer & Log)`,

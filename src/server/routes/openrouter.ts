@@ -5,8 +5,8 @@ import { tmpdir } from 'node:os';
 import { swarmFetch } from '../swarm';
 import { OPENROUTER_TIMEOUT_MS, OPENROUTER_FALLBACK_MODELS } from '../config';
 import { buildSystemPrompt } from '../prompt';
-import { searchMemories, addMemory, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
-import { searchLocalMemories, isLowSignalQuery, stripForeignFossils } from '../memory-local';
+import { addMemory, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
+import { recallForTurn } from '../recall';
 import { executeMcpTool, getMcpDeclarations, isMcpTool } from '../../core/mcp';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
@@ -35,20 +35,14 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       .reverse()
       .find((m: { role: string }) => m.role === 'user');
     const lastUserText = lastUserMsg?.text || lastUserMsg?.content || '';
-    if (lastUserText && !isLowSignalQuery(lastUserText)) {
+    if (lastUserText) {
       const tags =
         containerTag === 'shared' || !containerTag
           ? [SHARED_CONTAINER]
           : containerTag === 'sage'
             ? [SAGE_CONTAINER, SHARED_CONTAINER]
             : [containerTag, SHARED_CONTAINER];
-      const [longTermMemories, localMemories] = await Promise.all([
-        searchMemories(lastUserText, tags, 5),
-        searchLocalMemories(lastUserText, 5),
-      ]);
-      const allMemories = stripForeignFossils(
-        [...longTermMemories, ...localMemories].filter(Boolean),
-      );
+      const { lines: allMemories } = await recallForTurn(lastUserText, { cloudTags: tags });
       if (allMemories.length > 0) {
         orSystem +=
           '\n\n---\n## RECALLED SUBSTRATE MEMORIES (Past history with Darren, Seven, and your architecture)\n' +

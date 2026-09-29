@@ -47,6 +47,15 @@ let _vecEnabled = false;
 
 export function isVecEnabled(): boolean { return _vecEnabled; }
 
+/**
+ * Whether chat recall (recallForTurn) may use KNN hits. Off until every vector
+ * shares one embedding space — a mixed hash/ollama index scores ~noise
+ * (recall-eval 2026-09-29: vec hit@5 = 12%). Opt in with RECALL_SEMANTIC=1.
+ */
+export function isSemanticRecallReady(): boolean {
+  return _vecEnabled && process.env.RECALL_SEMANTIC === '1';
+}
+
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
 // JSON fallback table — always present for backward compat

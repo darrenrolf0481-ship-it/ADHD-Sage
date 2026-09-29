@@ -5,8 +5,8 @@ import { tmpdir } from 'node:os';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
 import { buildSystemPrompt } from '../prompt';
-import { searchMemories, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
-import { searchLocalMemories, isLowSignalQuery, stripForeignFossils } from '../memory-local';
+import { SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
+import { recallForTurn } from '../recall';
 import { addMemory } from '../../lib/supermemory';
 import { spoolExchangeToSpiral } from '../spiral-spool';
 import { getMcpDeclarations, executeMcpTool, isMcpTool } from '../../core/mcp';
@@ -63,18 +63,14 @@ router.post('/chat', lockGuard, asyncHandler(async (req: any, res) => {
       }
     }
 
-    if (lastUserText && !isLowSignalQuery(lastUserText)) {
+    if (lastUserText) {
       const tags =
         containerTag === 'shared' || !containerTag
           ? [SHARED_CONTAINER]
           : containerTag === 'sage'
             ? [SAGE_CONTAINER, SHARED_CONTAINER]
             : [containerTag, SHARED_CONTAINER];
-      const [longTerm, local] = await Promise.all([
-        searchMemories(lastUserText, tags, 5),
-        searchLocalMemories(lastUserText, 5),
-      ]);
-      const all = stripForeignFossils([...longTerm, ...local].filter(Boolean));
+      const { lines: all } = await recallForTurn(lastUserText, { cloudTags: tags });
       if (all.length > 0) {
         dsSystem +=
           '\n\n---\n## RECALLED SUBSTRATE MEMORIES (Past history with Darren, Seven, and your architecture)\n' +
