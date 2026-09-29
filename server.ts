@@ -2,7 +2,7 @@ import './src/server/config'; // load env before anything reads process.env
 import { validateEnv } from './src/server/env';
 import { initSeedCore, isServerLocked } from './src/server/seed-core';
 import { syncFts, outerDb } from './src/server/db';
-import { syncResonance } from './src/server/resonance-index';
+import { syncResonance, indexNode } from './src/server/resonance-index';
 import { startServer } from './src/server/app';
 import { assertMamaIdentity, MAMA_IDENTITY } from './src/server/mama-identity';
 import { initWorkerPool, shutdownWorkerPool } from './src/server/workers/pool';
@@ -43,11 +43,22 @@ if (!isServerLocked()) {
       source: 'MorningLightProtocol',
     });
     const blob = Buffer.from(content, 'utf8');
+    // Upsert (not INSERT OR REPLACE): REPLACE deletes the row and mints a new
+    // phi_index on every same-day restart, orphaning the old resonance vector.
     outerDb.prepare(
-      'INSERT OR REPLACE INTO sages_constellations ' +
+      'INSERT INTO sages_constellations ' +
       '(node_id, data, compressed, timestamp, dopamine, cortisol, pinned, provenance) ' +
-      'VALUES (?, ?, 0, ?, 1.0, 0.05, 1, ?)'
+      'VALUES (?, ?, 0, ?, 1.0, 0.05, 1, ?) ' +
+      'ON CONFLICT(node_id) DO UPDATE SET data = excluded.data, compressed = 0, timestamp = excluded.timestamp'
     ).run(nodeId, blob, now, JSON.stringify({ originating_node: 'ADHD-SAGE', sync_source: 'morning_light' }));
+    const anchor = outerDb
+      .prepare('SELECT phi_index FROM sages_constellations WHERE node_id = ?')
+      .get(nodeId) as { phi_index: number } | undefined;
+    if (anchor) {
+      indexNode(anchor.phi_index, JSON.parse(content).data as string).catch((e) =>
+        console.warn('[ADHD] Morning Light resonance index failed (non-fatal):', e),
+      );
+    }
     try {
       outerDb.prepare('DELETE FROM sages_constellations_fts WHERE node_id = ?').run(nodeId);
       outerDb.prepare('INSERT INTO sages_constellations_fts (node_id, content) VALUES (?, ?)').run(nodeId, content);

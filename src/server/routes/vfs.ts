@@ -15,7 +15,7 @@ import {
 import { timed } from '../performance';
 import { getWorkerPool } from '../workers/pool';
 import { asyncHandler } from '../async-handler';
-import { recall, recallThread, indexNode } from '../resonance-index';
+import { recall, recallThread, indexNode, rebuildAllResonance, getRebuildProgress } from '../resonance-index';
 
 const router = Router();
 
@@ -315,5 +315,33 @@ router.post('/resonance/index', lockGuard, asyncHandler(async (req, res) => {
   await indexNode(phi_index, text, thread_id, task);
   res.json({ ok: true, phi_index });
 }));
+
+/**
+ * POST /api/vfs/resonance/rebuild
+ * Re-embed every node so all vectors share one embedding space (run after
+ * switching embedding backend). Kicks off in the background; poll GET below.
+ * Body: { forceHash?: boolean }
+ */
+router.post('/resonance/rebuild', lockGuard, asyncHandler(async (req, res) => {
+  const { forceHash } = req.body as { forceHash?: boolean };
+  const current = getRebuildProgress();
+  if (current.running) {
+    res.status(409).json({ error: 'rebuild already running', progress: current });
+    return;
+  }
+  // Fire-and-forget: the rebuild can take many minutes on CPU embeddings.
+  void rebuildAllResonance({ forceHash }).catch((e) =>
+    console.error('[RESONANCE] Rebuild failed:', e),
+  );
+  res.status(202).json({ started: true, progress: getRebuildProgress() });
+}));
+
+/**
+ * GET /api/vfs/resonance/rebuild
+ * Progress of the current/last full rebuild.
+ */
+router.get('/resonance/rebuild', lockGuard, (req, res) => {
+  res.json(getRebuildProgress());
+});
 
 export default router;

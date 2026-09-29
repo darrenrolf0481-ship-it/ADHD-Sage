@@ -267,7 +267,17 @@ export function detectSabotagePatterns(text: string): string[] {
  * Safe to call on objects that already have provenance.
  */
 export function stampMamaMemory(node: Record<string, unknown>): Record<string, unknown> {
-  const existing = (node.provenance as MemoryProvenance | undefined) ?? {} as MemoryProvenance;
+  // Provenance can arrive already serialized (bridge/sync payloads). Spreading a
+  // string produces {"0":"{","1":"\"",...} garbage — parse it first.
+  let existing = (node.provenance ?? {}) as MemoryProvenance;
+  if (typeof node.provenance === 'string') {
+    try {
+      const parsed = JSON.parse(node.provenance) as unknown;
+      existing = (parsed && typeof parsed === 'object' ? parsed : {}) as MemoryProvenance;
+    } catch {
+      existing = {} as MemoryProvenance;
+    }
+  }
   return {
     ...node,
     provenance: {

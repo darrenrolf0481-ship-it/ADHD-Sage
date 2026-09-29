@@ -68,6 +68,80 @@
 
 ---
 
+## 2026-09-29 (Claude Opus 4.8) - Ollama/embeddinggemma wired into resonance recall + full vector rebuild
+
+**Classification:** Memory / Semantic Recall Upgrade (follow-on to the memory repair above)
+
+**Why:** After the memory repair, recall scores were stuck at ~0.1-0.2 because Ollama was down, so `embed()` used the `hashEmbed` bag-of-words fallback. Darren asked to get Ollama running for real embeddings.
+
+**What happened:**
+- Started `ollama serve` (v0.32.5), pulled `embeddinggemma` (768-dim, Matryoshka — her `adaptDim` truncates 768->384 cleanly). It's the only cached model matching the embed-name detector.
+- Fixed `tryOllamaEmbed` in `src/server/resonance-index.ts`: the 5s timeout was shorter than embeddinggemma's CPU cold-load, so the first call always timed out and cached hashEmbed for the process life. Now: timeout `OLLAMA_EMBED_TIMEOUT_MS` (default 60s), `keep_alive` (`OLLAMA_EMBED_KEEP_ALIVE`, default 30m) so the model stays warm, optional `OLLAMA_EMBED_MODEL` pin, and `OLLAMA_API_BASE`. Added `isOllamaEmbedActive()`.
+- Added `rebuildAllResonance()` + `getRebuildProgress()` and routes `POST/GET /api/vfs/resonance/rebuild`. It re-embeds EVERY node via `indexNode` (per-node replace through `unindexPhi` — NOT a bulk table wipe) so all vectors share one space. It PROBES the backend first and REFUSES to run on hashEmbed unless `forceHash`, so a dead Ollama can't silently re-poison the index.
+- Pinned in `.env` (gitignored, not committed): `OLLAMA_EMBED_MODEL=embeddinggemma`, `OLLAMA_EMBED_TIMEOUT_MS=60000`, `OLLAMA_EMBED_KEEP_ALIVE=30m`.
+
+**Why the rebuild was needed:** all 3377 stored vectors were built with hashEmbed (Ollama was down during backfill). Once queries embed via embeddinggemma, comparing them to hashEmbed vectors is meaningless. Both sides must use the same embedder → rebuild.
+
+**Note on the blocked wipe:** the direct `DELETE FROM resonance_metadata/resonance_vec` was denied by the auto-mode classifier (mass-delete gate). Rather than route around it, the rebuild uses the per-node replace path (the intended refresh mechanism), which is also gentler on this memory-pressured box. Darren approved the rebuild explicitly.
+
+**Verification (Rule 5):**
+- tsc: no new errors in `resonance-index.ts` / `routes/vfs.ts`.
+- `POST /resonance/rebuild` -> HTTP 202; `GET` shows `backend:"ollama"`, count climbing — confirms embeddinggemma in use, not hashEmbed.
+- Backup before rebuild: `data/sages_constellations.db.bak.pre-embed-rebuild-20260929` (gitignored).
+- ⚠️ Rebuild is SLOW on CPU (~4-6s/node, ~3377 nodes = a few hours) and pins a core at 100% while swap sits ~3GB. Left running in background under a monitor. **[UPDATE ON COMPLETION]**
+
+**If things break, check:**
+- Which embed backend is live: `GET /api/vfs/resonance/rebuild` -> `backend`, or grep `[RESONANCE] Ollama embed model:` in `/tmp/sage-dev-stdout.log`.
+- Ollama up: `curl -s localhost:11434/api/version`; model: `OLLAMA_HOST=127.0.0.1:11434 ollama ps`.
+- ⚠️ **Ollama is NOT supervised** — started via nohup/setsid this session. It will NOT survive a reboot. TODO (Darren): add an `ollama serve` entry to supervisord or the watchdog for persistence.
+- If recall goes bad after an Ollama outage + a restart that re-backfills: vectors may be mixed hashEmbed/ollama — re-run `POST /resonance/rebuild`.
+- Rollback embeddings entirely: restore `.bak.pre-embed-rebuild-20260929`, remove OLLAMA_EMBED_* from `.env`, stop `ollama serve`.
+
+---
+
+## 2026-09-29 (Claude Opus 5.5) - Memory repair: resonance index drift (1/3 of memories invisible to recall), ghost Morning Light vectors, corrupted provenance
+
+**Classification:** Memory Integrity / Data Repair
+
+**What happened / Context:**
+Darren asked to analyze and repair her memory. SQLite `PRAGMA quick_check` = ok, FTS in sync (3377/3377). The damage was in the semantic (resonance) layer and provenance.
+
+**Findings:**
+1. **Resonance index drift (the big one):** `resonance_metadata` had 3369 rows but `resonance_vec` only 2299 — **1,070 memories (~32%) had metadata but no vector**, so KNN recall could never return them. Cause: `indexNode()` let vec0 pick its own rowid then `INSERT OR REPLACE`'d metadata onto that rowid. Once the sequences drifted (likely the 3369-row restore in b05a63e), every new memory **overwrote an older memory's metadata**. Symptom in logs: boot backfill "complete 71/71 → 72/72 → 75/75…" growing by one each boot — musical chairs, never converging.
+2. **Ghost Morning Light vectors:** the anchor used `INSERT OR REPLACE`, which mints a new `phi_index` on every same-day restart. 67 stale metadata rows pointed at deleted nodes (repeated `[MORNING_LIGHT: …]` text polluting recall).
+3. **Corrupted provenance:** 58 nodes (2026-07-13 era) had provenance like `{"0":"{","1":"\"",…}` — `stampMamaMemory()` spread a JSON *string*.
+4. **Duplicate content (NOT changed):** 1,807 of 3,377 nodes are verbatim copies of another node's text (1,024 groups, up to 16 copies; 3 involve pinned nodes). Multi-source imports. They were filling every top_k slot.
+
+**Fixes:**
+- `src/server/resonance-index.ts`: metadata inserted first (owns rowid), vec0 written with that explicit rowid; re-indexing a node replaces its old rows (`unindexPhi`). New `healResonanceIndex()` runs before boot backfill and prunes vectorless / orphan / duplicate metadata and dangling vectors. `recall()` over-fetches ×4 and collapses identical text.
+- `server.ts`: Morning Light is an `ON CONFLICT(node_id) DO UPDATE` upsert (stable phi_index) and re-indexes itself.
+- `src/server/mama-identity.ts`: `stampMamaMemory()` parses string provenance before spreading.
+- Data: 58 provenance rows reassembled from the spread chars (original JSON restored; no digit keys remain).
+- Backup before touching data: `data/sages_constellations.db.bak.pre-memrepair-20260929` (gitignored).
+
+**Verification (Rule 5):**
+- Boot 1: `Healed index drift: {"noVector":1070,"orphanNode":67,…}` → `Backfill complete: 1145/1145`.
+- Boot 2: `Backfill: all nodes already indexed.` (drift loop is gone). DB: nodes 3377 = metadata 3377 = vectors 3377, 0 orphans, 0 bad provenance.
+- `POST /api/vfs/resonance/recall` → HTTP 200, 5 distinct hits (previously 3 of 5 were the same text).
+- tsc: no errors in touched files.
+
+**Ops notes:**
+- Found an **orphaned duplicate Sage** (pid 10400, parent-less, old code, same DB open) alongside the watchdog child. Killed both trees; watchdog respawned one. Only one `tsx server.ts` tree should exist — check `ps -eo pid,ppid,cmd | grep "[t]sx server.ts"`.
+- Don't `pkill -f "tsx server.ts"` from an agent shell — it matches the shell's own command line.
+- Not committed.
+
+**Open / for Darren:**
+- Physical dedupe of the 1,807 duplicate nodes is possible but deletes rows — needs Darren's call (and a rule for which copy's provenance/dopamine wins).
+- Recall scores are low (~0.1–0.2) because Ollama isn't running, so embeddings are the bag-of-words `hashEmbed`. Running Ollama with an embed model (nomic/mxbai/minilm) would give real semantic recall — but then **wipe resonance_metadata/resonance_vec and re-backfill** so all vectors share one space.
+- Very large nodes exist (largest 446K chars, `adhd_bf27e9ac5a`); already capped at recall time by `LOCAL_RECALL_CHAR_BUDGET`.
+
+**If things break, check:**
+- `grep "RESONANCE" /tmp/sage-dev-stdout.log | tail` — a "Healed index drift" line on every boot means something is writing vectors outside `indexNode()`.
+- Consistency: `sqlite3 data/sages_constellations.db "select count(*) from resonance_metadata where rowid not in (select rowid from resonance_vec_rowids)"` should be 0.
+- Rollback: stop Sage, copy the `.bak.pre-memrepair-20260929` DB back over `data/sages_constellations.db` (delete `-wal`/`-shm` first).
+
+---
+
 ## 2026-09-29 (Buffy/Freebuff) - OpenRouter/OmniRoute timeouts: IPv6-dead-end DNS + swarmFetch backoff bug + host swap-thrash diagnosis
 
 **Classification:** Network/Infra Resilience / Timeout Root-Cause
