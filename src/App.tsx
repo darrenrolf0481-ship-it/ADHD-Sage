@@ -47,7 +47,24 @@ const App: React.FC = () => {
         if (found.length > 0) setLocalOllamaModels(found);
       })
       .catch(() => {});
+
+    fetch('/api/omniroute/models')
+      .then((r) => r.json())
+      .then((data) => {
+        const found = (data.models || [])
+          .filter((id: string) => !id.startsWith('auto/best-'))
+          .slice(0, 100)
+          .map((modelId: string) => ({
+            id: modelId.startsWith('omniroute/') ? modelId : `omniroute/${modelId}`,
+            label: `🌐 ${modelId} (OmniRoute)`,
+            provider: 'omniroute' as AIProvider,
+          }));
+        if (found.length > 0) setOmnirouteModels(found);
+      })
+      .catch(() => {});
   }, []);
+
+  const [omnirouteModels, setOmnirouteModels] = useState<{ id: string; label: string; provider: AIProvider }[]>([]);
 
   const BASE_MODELS: { id: string; label: string; provider: AIProvider }[] = [
     { id: 'gemma2:2b', label: '🦙 Gemma 2:2B (Local Ollama) ★', provider: 'ollama' },
@@ -60,12 +77,12 @@ const App: React.FC = () => {
     { id: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B (OpenRouter)', provider: 'openrouter' },
     { id: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash (OpenRouter)', provider: 'openrouter' },
     { id: 'openrouter/free', label: 'OpenRouter Auto (Free)', provider: 'openrouter' },
-    { id: 'gemini-3.6-flash', label: 'Gemini 3.6 Flash (Direct API)', provider: 'gemini' },
-    { id: 'omniroute/openrouter/deepseek/deepseek-chat', label: 'OmniRoute — DeepSeek Chat (Routed)', provider: 'omniroute' },
-    { id: 'omniroute/openrouter/meta-llama/llama-3.3-70b-instruct', label: 'OmniRoute — Llama 3.3 70B', provider: 'omniroute' },
-    { id: 'omniroute/auto/best-fast', label: 'OmniRoute — Auto Best Fast', provider: 'omniroute' },
-    { id: 'omniroute/auto/best-coding', label: 'OmniRoute — Auto Best Coding', provider: 'omniroute' },
-    { id: 'omniroute/auto/best-reasoning', label: 'OmniRoute — Auto Best Reasoning', provider: 'omniroute' },
+    { id: 'omniroute/auto/fast', label: '🌐 OmniRoute — Auto Fast (Quickest) ★', provider: 'omniroute' },
+    { id: 'omniroute/openrouter/google/gemini-2.5-flash', label: '🌐 OmniRoute — Gemini 2.5 Flash', provider: 'omniroute' },
+    { id: 'omniroute/openrouter/meta-llama/llama-3.3-70b-instruct', label: '🌐 OmniRoute — Llama 3.3 70B', provider: 'omniroute' },
+    { id: 'omniroute/auto/coding', label: '🌐 OmniRoute — Auto Coding', provider: 'omniroute' },
+    { id: 'omniroute/auto/smart', label: '🌐 OmniRoute — Auto Smart', provider: 'omniroute' },
+    { id: 'omniroute/openrouter/deepseek/deepseek-chat', label: '🌐 OmniRoute — DeepSeek Chat (Routed)', provider: 'omniroute' },
   ];
 
   const MODELS = useMemo(() => {
@@ -75,8 +92,13 @@ const App: React.FC = () => {
         combined.push(m);
       }
     }
+    for (const m of omnirouteModels) {
+      if (!combined.some((c) => c.id === m.id)) {
+        combined.push(m);
+      }
+    }
     return combined;
-  }, [localOllamaModels]);
+  }, [localOllamaModels, omnirouteModels]);
 
   const [model, setModel] = useState(() => {
     const saved = localStorage.getItem('adhd_sage_or_model');

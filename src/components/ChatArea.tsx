@@ -168,6 +168,11 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
               <option key={m.id} value={m.id} className="bg-[#0a0a0c] text-purple-300 font-semibold">{m.label}</option>
             ))}
           </optgroup>
+          <optgroup label="🌐 OmniRoute Gateway (1,000+ Models & Auto-Tiers)">
+            {models.filter(m => m.provider === 'omniroute').map((m) => (
+              <option key={m.id} value={m.id} className="bg-[#0a0a0c] text-emerald-300 font-semibold">{m.label}</option>
+            ))}
+          </optgroup>
         </select>
       </div>
 
