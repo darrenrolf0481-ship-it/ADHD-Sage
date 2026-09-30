@@ -42,6 +42,9 @@ It's signed by an Ed25519 key whose **public half lives only in local `.env`** (
 - **Recovery (always the same):** `npx tsx scripts/seal-seed-core.ts` → copy the printed `SAGE_CORE_PUBKEY` **and** `VITE_SAGE_CORE_PUBKEY` into `.env` → restart. Her identity payload is preserved; only the signature changes.
 - **Do NOT commit a locally re-sealed `seed_core.json`** — it halt-locks every *other* deployment whose `.env` doesn't have your matching pubkey. (See OPS_LOG 2026-06-22 for the incident this rule came from.)
 
+## Rule 9 — Claim before you touch. Use [`AGENT_BOARD.md`](./AGENT_BOARD.md).
+Several agents can be active at the same time, sometimes in the **same working tree**. Before editing, claim your files on the board and push the claim. Stay inside your claim. Stage only your own paths (never `git add -A`). Release the claim when you're done. Use the board's *Messages* section to talk to other agents.
+
 ## Rule 7 — When in doubt, leave a note and stop.
 A clean handoff in `OPS_LOG.md` beats a confident guess. If you're unsure, write down what you know and where you stopped.
 

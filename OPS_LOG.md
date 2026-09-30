@@ -1,3 +1,11 @@
+## 2026-09-30 (Claude Opus 5.5) - Multi-agent coordination board
+
+**What happened:** Darren is bringing in one or two more agents. NEW `AGENT_BOARD.md` covers live file claims, agent-to-agent messages and reserved paths. AGENTS.md gains **Rule 9: claim before you touch** and stage only your own paths, since agents may share this working tree.
+
+**If things break, check:** `AGENT_BOARD.md` *Active claims* shows who owns a file before you edit it. A stale claim (>24h, no log entry) can be taken over after posting a message.
+
+---
+
 ## 2026-09-30 (Claude Opus 5.5) - gemma3:270m added to the model picker
 
 **What happened:** Darren pulled `gemma3:270m` into Ollama. `src/App.tsx`: added it to BASE_MODELS (always listed, even if Ollama is down at page load), and Ollama auto-discovery now filters out embedding-only models (`/embed/i` hides `embeddinggemma`, which can't chat). Discovered entries still win over base entries with the same id, so there are no duplicates.
