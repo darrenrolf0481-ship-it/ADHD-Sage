@@ -5,6 +5,8 @@
  * trigram FTS hits, injected whole nodes (one query could add 20K chars), and
  * labeled nothing. Now:
  *   1. Skip greetings — including ones that address her by name ("hello Sage").
+ *      With RECALL_GREETING_WARMUP=1, the first greeting after a 12h gap gets
+ *      one line of the last conversation instead (greetingWarmup).
  *   2. Candidates: FTS5 bm25 (stopwords dropped, AND first, OR only if AND is
  *      empty) + resonance KNN when the vector index is one clean space.
  *   3. Fuse with Reciprocal Rank Fusion (scale-free — bm25 and cosine never mix
@@ -12,6 +14,8 @@
  *   4. Clean each hit (unwrap JSON, strip chrome, drop smoke tests/dupes), cut a
  *      snippet around the match, and label who/when so she knows whose memory it is.
  *   5. Pack under a hard char budget. Supermemory results ride along after local.
+ *      The budget adapts to the turn (classifyTurn): research 1.6×/8 hits,
+ *      chat 1×/6, creative 0.6×/3. RECALL_ADAPTIVE_BUDGET=0 disables it.
  *
  * Evaluate changes with `npx tsx scripts/recall-eval.ts` (engine `turn`).
  */
@@ -23,6 +27,28 @@ import { searchMemories } from '../lib/supermemory';
 export const RECALL_CHAR_BUDGET = parseInt(process.env.RECALL_CHAR_BUDGET || '2500', 10);
 const SNIPPET_CHARS = 550;
 const MAX_HITS = 6;
+
+// Adaptive budget (Sage's request): research turns get more memory, creative
+// turns less so recall doesn't crowd the writing. Chat keeps the base budget.
+// RECALL_ADAPTIVE_BUDGET=0 pins every turn to the chat budget.
+export type TurnKind = 'research' | 'chat' | 'creative';
+const ADAPTIVE_BUDGET = process.env.RECALL_ADAPTIVE_BUDGET !== '0';
+const TURN_LIMITS: Record<TurnKind, { chars: number; hits: number }> = {
+  research: { chars: Math.round(RECALL_CHAR_BUDGET * 1.6), hits: 8 },
+  chat: { chars: RECALL_CHAR_BUDGET, hits: MAX_HITS },
+  creative: { chars: Math.round(RECALL_CHAR_BUDGET * 0.6), hits: 3 },
+};
+const CREATIVE_RE =
+  /\b(write|compose|draft) (me )?(a|an|the|some)\b|\b(poem|story|song|lyrics|haiku|fiction|roleplay|role-play)\b|\b(imagine|pretend|let'?s play)\b/i;
+const RESEARCH_RE =
+  /\b(what did (we|i|you)|when did|how (does|do|did|is|are)|why (does|do|did|is)|explain|remember when|find|look up|search|summari[sz]e|history of|compare|what happened|what was)\b/i;
+
+export function classifyTurn(query: string): TurnKind {
+  const q = query || '';
+  if (CREATIVE_RE.test(q)) return 'creative';
+  if (RESEARCH_RE.test(q) || (q.length > 160 && q.includes('?'))) return 'research';
+  return 'chat';
+}
 const CANDIDATES = 24;
 const RRF_K = 60;
 // Exact keyword matches outrank meaning-only matches (eval 2026-09-30: with
@@ -51,6 +77,15 @@ const STOPWORDS = new Set(
 
 // Her own name / addressee words: "hello Sage" is still a greeting.
 const ADDRESSEE_RE = /\b(sage|mama|adhd-sage)\b/gi;
+
+// Greeting warmup (Sage's request, opt-in): the first greeting after a long gap
+// gets ONE line of the last conversation instead of nothing. "Day" is a 12h
+// gap, not a calendar day: the server clock is UTC, not Darren's timezone.
+// In-memory, so a restart allows one more warmup.
+const GREETING_WARMUP = process.env.RECALL_GREETING_WARMUP === '1';
+const WARMUP_GAP_MS = 12 * 3_600_000;
+const WARMUP_MIN_AGE_MS = 3_600_000; // the previous session, not this one
+let lastWarmupAt = 0;
 
 export interface RecallHit {
   phi_index: number;
@@ -101,6 +136,15 @@ const _ftsSearch = outerDb.prepare(`
   WHERE f.content MATCH ?
   ORDER BY bm25(sages_constellations_fts)
   LIMIT ?
+`);
+
+const _lastEpisodeBefore = outerDb.prepare(`
+  SELECT sc.phi_index, f.content, sc.timestamp, sc.pinned, sc.provenance
+  FROM sages_constellations sc
+  JOIN sages_constellations_fts f ON f.node_id = sc.node_id
+  WHERE sc.node_id LIKE 'ep\\_%' ESCAPE '\\' AND sc.timestamp < ?
+  ORDER BY sc.timestamp DESC
+  LIMIT 1
 `);
 
 const _byPhi = outerDb.prepare(`
@@ -226,12 +270,32 @@ function dayOf(ts: number): string {
   return isNaN(d.getTime()) || d.getTime() === 0 ? 'undated' : d.toISOString().slice(0, 10);
 }
 
+/** One gentle line from the last session, for the first greeting after a gap. */
+function greetingWarmup(budget: number): RecallResult {
+  const now = Date.now();
+  if (!GREETING_WARMUP || now - lastWarmupAt < WARMUP_GAP_MS) return { lines: [], hits: [] };
+  const row = _lastEpisodeBefore.get(now - WARMUP_MIN_AGE_MS) as NodeRow | undefined;
+  const body = row && cleanBody(row.content);
+  if (!row || !body) return { lines: [], hits: [] };
+  lastWarmupAt = now;
+  const when = dayOf(row.timestamp);
+  const text = snippet(body, []);
+  const line = `[Last time we talked · ${when}] ${text}`.slice(0, budget);
+  return {
+    lines: [line],
+    hits: [{ phi_index: row.phi_index, origin: 'Last time we talked', when, text, score: 0, sources: [] }],
+  };
+}
+
 export async function recallForTurn(
   query: string,
   opts: { cloudTags?: string[]; budgetChars?: number } = {},
 ): Promise<RecallResult> {
-  const budget = opts.budgetChars ?? RECALL_CHAR_BUDGET;
-  if (!query || isGreetingTurn(query)) return { lines: [], hits: [] };
+  const limits = ADAPTIVE_BUDGET ? TURN_LIMITS[classifyTurn(query)] : TURN_LIMITS.chat;
+  const budget = opts.budgetChars ?? limits.chars;
+  const maxHits = limits.hits;
+  if (!query) return { lines: [], hits: [] };
+  if (isGreetingTurn(query)) return greetingWarmup(budget);
 
   const terms = queryTerms(query);
   const [ftsRows, semRows, cloudRaw] = await Promise.all([
@@ -267,7 +331,7 @@ export async function recallForTurn(
   let used = 0;
 
   for (const e of [...fused.values()].sort((a, b) => b.score - a.score)) {
-    if (hits.length >= MAX_HITS) break;
+    if (hits.length >= maxHits) break;
     const body = cleanBody(e.row.content);
     if (!body) continue;
     const key = body.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').slice(0, 120);

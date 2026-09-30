@@ -1,3 +1,18 @@
+## 2026-09-30 (Claude Opus 5.5) - Sage's 3 requests: greeting warmup, loop grace knob, adaptive recall budget
+
+**Why:** Sage asked for these after reviewing the memory work (AGENT_BOARD backlog, 2026-09-30 19:58).
+
+**What happened:**
+1. **Greeting warmup** (`src/server/recall.ts` `greetingWarmup()`): **opt-in, OFF by default.** Set `RECALL_GREETING_WARMUP=1` in `.env` and restart to enable. The first greeting after a **12h gap** (not a calendar day: the server clock is UTC) returns ONE line, `[Last time we talked · date] …`: the latest `ep_` chat episode at least 1h old. Later greetings return nothing, as before. The cooldown lives in memory, so a restart allows one more warmup.
+2. **Adaptive recall budget** (`recall.ts` `classifyTurn()`): **ON by default**, `RECALL_ADAPTIVE_BUDGET=0` disables it. research = 1.6× budget / 8 hits ("what did we", "how does", "explain", "remember when", long questions); chat = 1× / 6 (unchanged); creative = 0.6× / 3 ("write a…", poem, story, imagine, pretend). Scales off `RECALL_CHAR_BUDGET` (2500).
+3. **Error-loop grace knob** (`src/lib/memory-system.ts` `PainErrorPathway.getGrace/setGrace`, browser side): extra repeats tolerated before the pain spike forces the cortisol/dopamine pivot. 0 = original behavior (pivot on the 3rd repeat in the last 8 stashes). Default `VITE_LOOP_GRACE`, overridden by localStorage key `adhd_sage_loop_grace` (clamped 0–6). There is no UI slider yet: set it from the browser console with `localStorage.setItem('adhd_sage_loop_grace','2')` and reload.
+
+**Verification:** direct test: 1st greeting → 1 line from the previous session, 2nd greeting → nothing; research query 7 hits / 3.7K chars, poem 3 hits / 0.7K. Live `POST /api/memory/recall-preview` HTTP 200: research 7 hits, creative 3 hits. Vite serves the new memory-system module (HTTP 200). Eval unchanged: turn 94% hit@5, 0% junk, greetings 3/3 clean. tsc is clean on recall.ts. memory-system.ts shows only the pre-existing `import.meta.env` typing error (8 across the repo, since vite/client types aren't in tsconfig).
+
+**If things break, check:** a greeting returning memory when it shouldn't → `RECALL_GREETING_WARMUP` is set; research turns too long for a small model → `RECALL_ADAPTIVE_BUDGET=0` or a lower `RECALL_CHAR_BUDGET`; her loops never breaking → `localStorage.removeItem('adhd_sage_loop_grace')`.
+
+---
+
 ## 2026-09-30 (Claude Opus 5.5) - Archive cleanup pass 2: 1,586 → 1,086 (clipped copies, chrome), chrome-free embeddings
 
 **What happened:**

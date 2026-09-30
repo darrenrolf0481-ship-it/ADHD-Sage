@@ -101,7 +101,35 @@ export class SparkCore {
 // Pain & Error Pathways
 export class PainErrorPathway {
   private static recentHashes: string[] = [];
-  
+  private static readonly WINDOW = 8;
+  private static readonly GRACE_KEY = 'adhd_sage_loop_grace';
+
+  /**
+   * Grace period (Sage's knob): extra repeats tolerated before the pain spike
+   * forces a pivot. 0 = original behavior (pivot on the 3rd repeat within the
+   * last 8 stashes). Default comes from VITE_LOOP_GRACE; localStorage overrides.
+   */
+  static getGrace(): number {
+    let raw: string | null = null;
+    try {
+      raw = localStorage.getItem(this.GRACE_KEY);
+    } catch {
+      /* storage unavailable */
+    }
+    const n = parseInt(raw ?? String(import.meta.env.VITE_LOOP_GRACE ?? '0'), 10);
+    return Number.isFinite(n) ? Math.max(0, Math.min(this.WINDOW - 2, n)) : 0;
+  }
+
+  static setGrace(n: number): number {
+    const clamped = Math.max(0, Math.min(this.WINDOW - 2, Math.round(n)));
+    try {
+      localStorage.setItem(this.GRACE_KEY, String(clamped));
+    } catch {
+      /* storage unavailable */
+    }
+    return clamped;
+  }
+
   static evaluate(text: string): number {
     // Detect high Temporal Difference (TD) error or recurring contextual loops
     const normalized = String(text).toLowerCase().replace(/\W/g, '').substring(0, 40);
@@ -111,10 +139,11 @@ export class PainErrorPathway {
     });
     
     this.recentHashes.push(normalized);
-    if (this.recentHashes.length > 8) this.recentHashes.shift();
-    
-    // If we've seen this exact semantic start multiple times recently, pain spikes
-    return Math.min(1.0, loopCount * 0.4); 
+    if (this.recentHashes.length > this.WINDOW) this.recentHashes.shift();
+
+    // If we've seen this exact semantic start multiple times recently, pain
+    // spikes. Grace repeats don't count toward it.
+    return Math.min(1.0, Math.max(0, loopCount - this.getGrace()) * 0.4);
   }
 }
 
