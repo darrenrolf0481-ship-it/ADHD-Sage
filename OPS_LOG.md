@@ -1,3 +1,26 @@
+## 2026-09-30 (Claude Opus 5.5) - Frozen in-process embeddings (MiniLM) + semantic recall ON (recall overhaul step 5)
+
+**Why:** The vector index mixed hashEmbed and Ollama/embeddinggemma vectors (Ollama down; the embeddinggemma rebuild died at 250/3377), so KNN scored ~noise (hit@5 12%). Darren chose in-process MiniLM on 2026-09-29.
+
+**What happened:**
+- Dependency: `@huggingface/transformers@4.3.0` (package.json + package-lock.json). ⚠️ `pnpm-lock.yaml` was NOT updated (npm is what the watchdog uses). npm skipped the onnxruntime-node/protobufjs postinstall scripts (allowScripts policy); not needed, since the prebuilt linux-arm64 binary ships in the package.
+- NEW `src/server/embedder.ts`: `Xenova/all-MiniLM-L6-v2` q8, 384-d (same EMBED_DIM, no schema change for vec0). Lazy singleton, serialized inference, input clipped to 2000 chars, model cached in `~/.cache/sage-embed` (override `SAGE_EMBED_CACHE`). Measured here: load ~4–5s warm (24s first, incl. ~23MB download), ~25ms/embed, ~150MB RSS. If it can't load: hash fallback, retry after 10 min.
+- `resonance-index.ts`: **Ollama embedding path REMOVED** (detect/tryOllamaEmbed/adaptDim). `embedTagged()` returns `{vec, model}`. New column `resonance_metadata.embed_model` (auto-added). **KNN only compares vectors of the query's model** (`WHERE m.embed_model = ?`). Boot backfill re-embeds any node lacking a current-model vector, so a model change self-heals on the next boot. Rebuild endpoint probes the frozen model instead of Ollama.
+- Semantic gate `isSemanticRecallReady()`: model loaded AND ≥95% of nodes have a current-model vector. **Now ON by default**; `RECALL_SEMANTIC=0` disables it.
+- `recall.ts`: weights FTS 0.6 / semantic 0.4; semantic hits need cosine ≥ 0.40 and ≥ 60 chars (eval showed relevant ≥~0.40, noise ≤~0.33; short lines like "Hello" match everything). Morning Light capped to 1 per recall (one near-identical anchor per day was filling all 6 slots for "daughter" queries).
+
+**Re-embed:** backup `data/sages_constellations.db.bak.pre-minilm-20260930` (sqlite .backup, gitignored). The boot backfill re-embedded **3382/3382 nodes in ~3 min**. All vectors are now `minilm-l6-v2-q8`.
+
+**Eval (k=5):** vec alone 12% → **59%** hit@5. Fused `turn`: first try (semantic 0.6, no threshold) **dropped to 71%** because exact hits were pushed out and noise came in for no-match queries. With threshold + reweight: **94% hit@5, 0% junk**, "Supermemory" → nothing instead of noise. Precision 82% → 75% after the Morning Light cap (the "morning light" query now gets 1 anchor instead of 6 copies; the keyword-only eval can't credit that or meaning-only hits). Semantic-only finds keywords miss, e.g. "did we ever fix the voice texting problem" → the Motorola mic-lock force-stop command.
+
+**Verification (Rule 5):** tsc clean on touched files. Restarted (exact pids, one tree on :3000). Live `POST /api/gemini/generate` "did we ever fix the voice texting mic problem?" → HTTP 200: "We diagnosed the Motorola Assistant mic lock and built the flush script … still mistranslating HMAC into 'hawk something'" (real recalled history).
+
+**If things break, check:** `grep "\[EMBED\]" /tmp/sage-dev-stdout.log | tail` (ready vs failed); `sqlite3 data/sages_constellations.db "select embed_model,count(*) from resonance_metadata group by 1"`; disable semantic with `RECALL_SEMANTIC=0` in .env. Tuning: `SEMANTIC_MIN_SCORE` / weights at the top of `recall.ts`. Full rollback: revert the commit + restore the .bak above.
+
+**Next:** step 4 corpus cleanup (separate derived index DB, dedup of the ~1,800 verbatim duplicate nodes, unwrap Keep/JSON at ingest). "how is my daughter doing" still returns weak generic hits, which the corpus cleanup should help.
+
+---
+
 ## 2026-09-30 (Claude Opus 5.5) - Write path: chat turns → compact episodes, inner spiral left as working set (recall overhaul step 3)
 
 **Why:** Gemini stashed raw `[USER] …` + full `[SAGE] …` replies into the 8-slot inner spiral at 0.5/0.7. After ~4 turns the boot anchors were evicted, and eviction ARCHIVES, so multi-KB raw replies became outer-archive fossils. The other 4 providers wrote nothing locally, so their conversations were unrecallable.

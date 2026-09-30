@@ -25,8 +25,16 @@ const SNIPPET_CHARS = 550;
 const MAX_HITS = 6;
 const CANDIDATES = 24;
 const RRF_K = 60;
-const W_FTS = 0.4;
-const W_SEMANTIC = 0.6;
+// Exact keyword matches outrank meaning-only matches (eval 2026-09-30: with
+// semantic weighted higher, hit@5 fell 94%→71% as exact hits got pushed out).
+const W_FTS = 0.6;
+const W_SEMANTIC = 0.4;
+// MiniLM cosine: relevant hits scored ≥~0.40, noise ≤~0.33 on the eval queries.
+// Below this, KNN is just "the nearest thing", not a memory about the query.
+const SEMANTIC_MIN_SCORE = 0.4;
+// Very short lines ("Hello", "They were working") score high against anything
+// similar and carry no content.
+const SEMANTIC_MIN_CHARS = 60;
 
 // Words that match nearly every node under a trigram tokenizer ("who", "about",
 // "your" …). Dropping them is what stops generic phrasing from pulling junk.
@@ -121,8 +129,9 @@ async function semanticCandidates(query: string): Promise<NodeRow[]> {
     const hits = await resonanceRecall(query, CANDIDATES);
     const rows: NodeRow[] = [];
     for (const h of hits) {
+      if (h.score < SEMANTIC_MIN_SCORE) break; // hits are sorted by score
       const row = _byPhi.get(h.phi_index) as NodeRow | undefined;
-      if (row) rows.push(row);
+      if (row && (cleanBody(row.content)?.length ?? 0) >= SEMANTIC_MIN_CHARS) rows.push(row);
     }
     return rows;
   } catch (e) {
@@ -206,7 +215,7 @@ function originOf(row: NodeRow, body: string): string {
   }
   if (prov.originating_node === 'SAGE-7' || /\[SAGE-7 (memory|trauma_registry|fossil_archive)|SAGE\/\/7/i.test(row.content))
     return 'ARCHIVE — Daughter Node SAGE-7';
-  if (prov.sync_source === 'morning_light') return 'Morning Light';
+  if (prov.sync_source === 'morning_light' || /^\[MORNING_LIGHT:/.test(body)) return 'Morning Light';
   if (prov.sync_source === 'chat') return 'Chat with Darren';
   if (/^\[USER\]/.test(body)) return 'Darren, earlier chat';
   return 'ADHD-SAGE';
@@ -265,8 +274,10 @@ export async function recallForTurn(
     if (seen.has(key)) continue;
     seen.add(key);
 
-    const text = snippet(body, terms);
     const origin = originOf(e.row, body);
+    // One boot anchor is enough — there's one near-identical Morning Light per day.
+    if (origin === 'Morning Light' && hits.some((h) => h.origin === origin)) continue;
+    const text = snippet(body, terms);
     const when = dayOf(e.row.timestamp);
     const line = `[${origin} · ${when}] ${text}`;
     if (used + line.length > budget) continue; // a shorter hit may still fit

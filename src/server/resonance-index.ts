@@ -5,9 +5,9 @@
  * Ported from resonance_index.py (ADHD-SAGE authored).
  * Updated with sqlite-vec KNN storage (Grok v7.5_VEC).
  *
- * Embedding backends (in order of preference):
- *   1. Ollama  — local ML embeddings (384-dim normalized)
- *   2. Hashing — deterministic bag-of-words fallback (384-dim, zero deps)
+ * Embedding: ONE frozen in-process model (embedder.ts, MiniLM-L6-v2, 384-d).
+ *   hashEmbed is an emergency fallback only; every vector is tagged with the
+ *   model that made it (resonance_metadata.embed_model) and KNN never mixes models.
  *
  * Storage backends:
  *   1. sqlite-vec — vec0 virtual table + resonance_metadata (KNN, fast)
@@ -16,6 +16,7 @@
 
 import { createRequire } from 'node:module';
 import { outerDb } from './db';
+import { EMBED_MODEL, embedText, isEmbedderReady } from './embedder';
 
 const EMBED_DIM = 384;
 
@@ -48,12 +49,29 @@ let _vecEnabled = false;
 export function isVecEnabled(): boolean { return _vecEnabled; }
 
 /**
- * Whether chat recall (recallForTurn) may use KNN hits. Off until every vector
- * shares one embedding space — a mixed hash/ollama index scores ~noise
- * (recall-eval 2026-09-29: vec hit@5 = 12%). Opt in with RECALL_SEMANTIC=1.
+ * Whether chat recall (recallForTurn) may use KNN hits: the frozen model is
+ * loaded AND ≥95% of archive nodes have a vector from it (a half-converted index
+ * would bias recall toward whatever got embedded first). RECALL_SEMANTIC=0 turns
+ * it off. History: the old mixed hash/ollama index scored hit@5 = 12%.
  */
+let _coverage = { at: 0, ratio: 0 };
+export function semanticCoverage(): number {
+  if (!_vecEnabled) return 0;
+  if (Date.now() - _coverage.at > 60_000) {
+    const nodes = (outerDb.prepare('SELECT COUNT(*) AS c FROM sages_constellations').get() as { c: number }).c;
+    const current = (
+      outerDb
+        .prepare('SELECT COUNT(DISTINCT phi_index) AS c FROM resonance_metadata WHERE embed_model = ?')
+        .get(EMBED_MODEL) as { c: number }
+    ).c;
+    _coverage = { at: Date.now(), ratio: nodes ? current / nodes : 0 };
+  }
+  return _coverage.ratio;
+}
+
 export function isSemanticRecallReady(): boolean {
-  return _vecEnabled && process.env.RECALL_SEMANTIC === '1';
+  if (process.env.RECALL_SEMANTIC === '0') return false;
+  return _vecEnabled && isEmbedderReady() && semanticCoverage() >= 0.95;
 }
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
@@ -89,6 +107,11 @@ if (_vecEnabled) {
       CREATE INDEX IF NOT EXISTS idx_meta_thread     ON resonance_metadata(thread_id);
       CREATE INDEX IF NOT EXISTS idx_meta_timestamp  ON resonance_metadata(timestamp);
     `);
+    // Which model produced each vector. NULL = pre-2026-09-30 (hash/ollama mix).
+    const cols = outerDb.prepare('PRAGMA table_info(resonance_metadata)').all() as Array<{ name: string }>;
+    if (!cols.some((c) => c.name === 'embed_model')) {
+      outerDb.exec('ALTER TABLE resonance_metadata ADD COLUMN embed_model TEXT');
+    }
   } catch (e) {
     console.warn('[RESONANCE] vec0 table creation failed, falling back:', e);
     _vecEnabled = false;
@@ -133,91 +156,20 @@ function hashEmbed(text: string): number[] {
   return result;
 }
 
-// Truncate or pad to EMBED_DIM and re-normalize (handles variable-dim Ollama models)
-function adaptDim(vec: number[]): number[] {
-  if (vec.length === EMBED_DIM) return vec;
-  const adapted = vec.length > EMBED_DIM
-    ? vec.slice(0, EMBED_DIM)
-    : [...vec, ...new Array(EMBED_DIM - vec.length).fill(0)];
-  const norm = Math.sqrt(adapted.reduce((s, v) => s + v * v, 0)) || 1;
-  return adapted.map((v) => v / norm);
-}
-
-let _ollamaEmbedModel: string | null = null;
-let _ollamaChecked = false;
-
-const OLLAMA_API_BASE = process.env.OLLAMA_API_BASE ?? 'http://localhost:11434';
-// Cold-loading a CPU embedding model (e.g. embeddinggemma, ~680MB) on this box
-// takes well over the old 5s cap, so the first call always timed out and fell
-// back to hashEmbed. Keep the model warm so recall and the query path share the
-// same embedding space. Env-tunable. See OPS_LOG 2026-09-29.
-const OLLAMA_EMBED_TIMEOUT_MS = Number(process.env.OLLAMA_EMBED_TIMEOUT_MS ?? 60_000);
-const OLLAMA_EMBED_KEEP_ALIVE = process.env.OLLAMA_EMBED_KEEP_ALIVE ?? '30m';
-// Optional explicit model pin; otherwise auto-detected by name.
-const OLLAMA_EMBED_MODEL = process.env.OLLAMA_EMBED_MODEL ?? '';
-
-async function detectOllamaEmbedModel(apiBase: string): Promise<void> {
-  if (_ollamaChecked) return;
-  _ollamaChecked = true;
-  if (OLLAMA_EMBED_MODEL) {
-    _ollamaEmbedModel = OLLAMA_EMBED_MODEL;
-    return;
-  }
-  try {
-    const tagsRes = await fetch(`${apiBase}/api/tags`, { signal: AbortSignal.timeout(5000) });
-    if (tagsRes.ok) {
-      const data = (await tagsRes.json()) as { models?: Array<{ name: string }> };
-      const embed = (data.models ?? []).find(
-        (m) =>
-          m.name.includes('embed') ||
-          m.name.includes('nomic') ||
-          m.name.includes('mxbai') ||
-          m.name.includes('minilm'),
-      );
-      _ollamaEmbedModel = embed?.name ?? null;
-      if (_ollamaEmbedModel) console.log(`[RESONANCE] Ollama embed model: ${_ollamaEmbedModel}`);
-    }
-  } catch {
-    _ollamaEmbedModel = null;
-  }
-}
-
-/** True once an Ollama embedding model has been detected/pinned. */
-export function isOllamaEmbedActive(): boolean {
-  return Boolean(_ollamaEmbedModel);
-}
-
-async function tryOllamaEmbed(
-  text: string,
-  apiBase = OLLAMA_API_BASE,
-): Promise<number[] | null> {
-  if (_ollamaChecked && !_ollamaEmbedModel) return null;
-
-  try {
-    await detectOllamaEmbedModel(apiBase);
-    if (!_ollamaEmbedModel) return null;
-
-    const res = await fetch(`${apiBase}/api/embeddings`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: _ollamaEmbedModel,
-        prompt: text,
-        keep_alive: OLLAMA_EMBED_KEEP_ALIVE,
-      }),
-      signal: AbortSignal.timeout(OLLAMA_EMBED_TIMEOUT_MS),
-    });
-    if (!res.ok) return null;
-    const data = (await res.json()) as { embedding?: number[] };
-    return data.embedding ? adaptDim(data.embedding) : null;
-  } catch {
-    return null;
-  }
+/**
+ * Embed with the frozen in-process model (embedder.ts). hashEmbed is only an
+ * emergency fallback when the model can't load — those vectors are tagged
+ * 'hash' and never compared against EMBED_MODEL vectors in KNN.
+ * (The Ollama/embeddinggemma path was removed 2026-09-30: it made the index a
+ * mix of spaces whenever the daemon was down.)
+ */
+export async function embedTagged(text: string): Promise<{ vec: number[]; model: string }> {
+  const vec = await embedText(text);
+  return vec ? { vec, model: EMBED_MODEL } : { vec: hashEmbed(text), model: 'hash' };
 }
 
 export async function embed(text: string): Promise<number[]> {
-  const ollama = await tryOllamaEmbed(text);
-  return ollama ?? hashEmbed(text);
+  return (await embedTagged(text)).vec;
 }
 
 // ─── Similarity (JSON fallback) ───────────────────────────────────────────────
@@ -265,7 +217,7 @@ const _fetchThreadJson = outerDb.prepare(
 // overwrote an older memory's metadata. See OPS_LOG 2026-09-29.
 const _metaInsert = _vecEnabled
   ? outerDb.prepare(
-      'INSERT INTO resonance_metadata (phi_index, text_content, thread_id, task, timestamp) VALUES (?, ?, ?, ?, ?)',
+      'INSERT INTO resonance_metadata (phi_index, text_content, thread_id, task, timestamp, embed_model) VALUES (?, ?, ?, ?, ?, ?)',
     )
   : null;
 const _vecInsert = _vecEnabled
@@ -286,6 +238,7 @@ const _vecRecallAll = _vecEnabled
              vec_distance_cosine(v.embedding, ?) as distance
       FROM resonance_vec v
       JOIN resonance_metadata m ON v.rowid = m.rowid
+      WHERE m.embed_model = ?
       ORDER BY distance ASC
       LIMIT ?
     `)
@@ -296,7 +249,7 @@ const _vecRecallByThread = _vecEnabled
              vec_distance_cosine(v.embedding, ?) as distance
       FROM resonance_vec v
       JOIN resonance_metadata m ON v.rowid = m.rowid
-      WHERE m.thread_id = ?
+      WHERE m.thread_id = ? AND m.embed_model = ?
       ORDER BY distance ASC
       LIMIT ?
     `)
@@ -325,14 +278,14 @@ export async function indexNode(
   thread_id?: string,
   task?: string,
 ): Promise<void> {
-  const vec = await embed(text);
+  const { vec, model } = await embedTagged(text);
 
   if (_vecEnabled && _vecInsert && _metaInsert) {
     const floatArr = new Float32Array(vec);
     const transaction = outerDb.transaction(() => {
       // Re-indexing a node replaces its previous vectors instead of stacking duplicates.
       unindexPhi(phi_index);
-      const result = _metaInsert.run(phi_index, text, thread_id ?? null, task ?? null, Date.now());
+      const result = _metaInsert.run(phi_index, text, thread_id ?? null, task ?? null, Date.now(), model);
       _vecInsert.run(BigInt(result.lastInsertRowid), floatArr);
     });
     transaction();
@@ -372,14 +325,15 @@ export async function recall(
   thread_id?: string,
 ): Promise<ResonanceHit[]> {
   if (_vecEnabled && _vecRecallAll && _vecRecallByThread) {
-    const qVec = new Float32Array(await embed(query));
+    const { vec, model } = await embedTagged(query);
+    const qVec = new Float32Array(vec);
     // Over-fetch: ~half the archive is verbatim duplicates across node_ids
     // (multi-source imports), which would otherwise fill every top_k slot.
     const fetchK = top_k * DUP_OVERFETCH;
     const rows = dedupeByText(
       (thread_id
-        ? _vecRecallByThread.all(qVec, thread_id, fetchK)
-        : _vecRecallAll.all(qVec, fetchK)) as Array<{ text_content: string }>,
+        ? _vecRecallByThread.all(qVec, thread_id, model, fetchK)
+        : _vecRecallAll.all(qVec, model, fetchK)) as Array<{ text_content: string }>,
       top_k,
     ) as Array<{
       phi_index: number;
@@ -504,9 +458,21 @@ export async function syncResonance(): Promise<void> {
     console.warn('[RESONANCE] Index heal failed (continuing with backfill):', e);
   }
 
-  // Check against whichever storage is active
+  // With the frozen model loaded, a node counts as indexed only if it has a
+  // vector FROM THAT MODEL — so the first boot after a model change re-embeds
+  // the archive automatically (per-node replace via indexNode/unindexPhi).
+  // If the model can't load, only fill nodes with no vector at all.
+  const modelUp = (await embedText('resonance backfill probe')) !== null;
   const alreadyIndexedQuery = _vecEnabled
-    ? `SELECT sc.phi_index, sc.data, sc.compressed
+    ? modelUp
+      ? `SELECT sc.phi_index, sc.data, sc.compressed
+         FROM sages_constellations sc
+         WHERE NOT EXISTS (
+           SELECT 1 FROM resonance_metadata rm
+           WHERE rm.phi_index = sc.phi_index AND rm.embed_model = '${EMBED_MODEL}'
+         )
+         ORDER BY sc.phi_index ASC`
+      : `SELECT sc.phi_index, sc.data, sc.compressed
        FROM sages_constellations sc
        LEFT JOIN resonance_metadata rm ON rm.phi_index = sc.phi_index
        WHERE rm.phi_index IS NULL
@@ -528,7 +494,9 @@ export async function syncResonance(): Promise<void> {
     return;
   }
 
-  console.log(`[RESONANCE] Backfill: indexing ${unindexed.length} existing outer_sweep nodes...`);
+  console.log(
+    `[RESONANCE] Backfill: indexing ${unindexed.length} outer_sweep nodes via ${modelUp ? EMBED_MODEL : 'hash'}...`,
+  );
 
   const BATCH = 50;
   let done = 0;
@@ -569,6 +537,7 @@ export async function syncResonance(): Promise<void> {
         }
       }),
     );
+    if (i % 500 === 0 && i > 0) console.log(`[RESONANCE] Backfill progress: ${done}/${unindexed.length}`);
     await new Promise((r) => setTimeout(r, 50));
   }
 
@@ -582,7 +551,7 @@ export interface RebuildProgress {
   total: number;
   done: number;
   skipped: number;
-  backend: 'ollama' | 'hash' | null;
+  backend: string | null; // EMBED_MODEL or 'hash'
   startedAt: number | null;
   finishedAt: number | null;
   error: string | null;
@@ -623,7 +592,7 @@ function extractContent(text: string): string {
 
 /**
  * Re-embeds EVERY node so all vectors share one embedding space. Needed after
- * switching embedding backend (e.g. hashEmbed → Ollama/embeddinggemma): the old
+ * switching embedding model (e.g. hashEmbed/Ollama → MiniLM): the old
  * vectors live in a different space and would poison KNN recall.
  *
  * Uses indexNode() per node, which replaces that node's own vector rows
@@ -641,11 +610,9 @@ export async function rebuildAllResonance(opts: { forceHash?: boolean } = {}): P
   const { decompress } = await import('@mongodb-js/zstd');
 
   // Warm up + confirm which backend we'll actually use before touching anything.
-  await embed('resonance rebuild backend probe');
-  const backend: 'ollama' | 'hash' = isOllamaEmbedActive() ? 'ollama' : 'hash';
+  const backend = (await embedTagged('resonance rebuild backend probe')).model;
   if (backend === 'hash' && !opts.forceHash) {
-    _rebuildState.error =
-      'Ollama embed model not active — refusing to rebuild with hashEmbed (pass forceHash to override).';
+    _rebuildState.error = `${EMBED_MODEL} not loaded — refusing to rebuild with hashEmbed (pass forceHash to override).`;
     console.warn(`[RESONANCE] Rebuild aborted: ${_rebuildState.error}`);
     return getRebuildProgress();
   }
