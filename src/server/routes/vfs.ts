@@ -133,10 +133,18 @@ router.post('/outer/archive', lockGuard, asyncHandler(async (req, res) => {
   res.json({ ok: true });
 }));
 
+// Paged: this used to return (and decompress) the entire archive in one
+// response, which grows without bound. ?limit= (default 100, max 500) &offset=.
 router.get('/outer', lockGuard, asyncHandler(async (req, res) => {
+  const limit = Math.min(500, Math.max(1, parseInt(req.query.limit as string) || 100));
+  const offset = Math.max(0, parseInt(req.query.offset as string) || 0);
   const rows = outerDb
-    .prepare('SELECT * FROM sages_constellations ORDER BY phi_index ASC')
-    .all() as Array<Record<string, unknown>>;
+    .prepare('SELECT * FROM sages_constellations ORDER BY phi_index ASC LIMIT ? OFFSET ?')
+    .all(limit, offset) as Array<Record<string, unknown>>;
+  const { total } = outerDb.prepare('SELECT COUNT(*) AS total FROM sages_constellations').get() as {
+    total: number;
+  };
+  res.setHeader('X-Total-Count', String(total));
   const decompressed = await Promise.all(
     rows.map(async (r) => {
       let text: string;
@@ -310,6 +318,12 @@ router.post('/resonance/index', lockGuard, asyncHandler(async (req, res) => {
   };
   if (typeof phi_index !== 'number' || typeof text !== 'string') {
     res.status(400).json({ error: 'phi_index (number) and text (string) required' });
+    return;
+  }
+  // Only (re)index real archive nodes: a vector for a nonexistent phi is an
+  // orphan recall can't resolve, and it skews the semantic-readiness count.
+  if (!outerDb.prepare('SELECT 1 FROM sages_constellations WHERE phi_index = ?').get(phi_index)) {
+    res.status(404).json({ error: `no archive node with phi_index ${phi_index}` });
     return;
   }
   await indexNode(phi_index, text, thread_id, task);

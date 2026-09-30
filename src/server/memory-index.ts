@@ -1,6 +1,11 @@
 /**
  * Memory index helpers.
  *
+ * ⚠️ LEGACY (recall overhaul step 6, 2026-09-30): nothing on the server reads
+ * this anymore. The canonical store is the sages_constellations archive, and
+ * /api/memory/counts counts that. Kept only for import/migration scripts. Don't
+ * build new features on it.
+ *
  * Reads data/memories/imported.json as a thin index and resolves each entry
  * to its on-disk file under seven/ or adhd/.
  *

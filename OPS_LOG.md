@@ -1,3 +1,21 @@
+## 2026-09-30 (Claude Opus 5.5) - Recall overhaul step 6 + decay engine hardening ("fix the future problem")
+
+**What happened:**
+- **Decay engine rewritten, additive only** (`src/server/decay-engine.ts`). It was a no-op today (every thread_id is NULL) but would have misfired as soon as anything threaded memories. Three bugs fixed: (1) it hard-deleted vectors of threads >30 days old, and the boot backfill re-created them, so it churned nightly; (2) consolidation indexed its summary at a FAKE phi_index (`hash % 100000`) that could equal a real node's, and `indexNode()` replaces a phi's vectors, so a summary could overwrite a real memory's vector; (3) summaries were tagged `<thread>-consolidated`, so they were due for re-summarizing a week later. Now each thread past 7 days gets ONE real archive node `consolidated_<thread_id>` (sync_source `consolidation`, idempotent), and nothing is deleted by age. Tested on a DB copy with a synthetic 40-day thread: run1 summarized 1, run2 0, 0 deletions, and the summary got its own vector.
+- **Supermemory SHARED_CONTAINER** default `darren-sage` → **`darren-shared`** (`src/lib/supermemory.ts`). Private and shared used to be the SAME container, so "shared" writes landed in her private space and anything reading "shared" read her private memories. Old shared writes stay in darren-sage, which chat recall still searches (`[SAGE, SHARED]`). ⚠️ **Other deployments (Seven, etc.) running this code keep the old default until they pull, or set `SUPERMEMORY_SHARED_CONTAINER` explicitly on every deployment.**
+- **`GET /api/memory/graph`**: `execSync('nmem export …')` → async `execFile` (no shell, 15s timeout, private temp dir). nmem isn't installed here: it used to block the whole server, then 500. Now it returns a 503 in ~60ms (then ~10ms, since "missing" is cached), and the Memory Lattice falls back to local nodes.
+- **`GET /api/vfs/outer`**: was a full dump (decompressing every node, unbounded). Now paged: `?limit=` (default 100, max 500) `&offset=`, with an `X-Total-Count` header. No in-repo callers.
+- **`POST /api/vfs/resonance/index`**: 404 unless the phi_index is a real archive node (it used to create orphan vectors and skew the ≥95% semantic-readiness gate).
+- **`GET /api/memory/counts`** (the morning-light continuity check) now counts the live archive instead of the legacy `data/memories/imported.json`, which had drifted (1,091 vs 1,086) and would report 0 if those files were removed. Shape `{adhd, seven, total, source:'archive'}`. `memory-index.ts` is marked LEGACY (no server readers left).
+- **Not retired:** `.spiral/spool`. The notebook called it unread, but it feeds the Spiral **grafter** (`/root/Spiral/scripts/grafter_daemon.ts` via `~/.spiral/grafter-loop.sh`). The grafter loop was found DEAD (last run 17:56, 16 transcripts waiting), probably killed in the same Claude-session restart as Sage. Restarted: ingested 16, errors 0.
+- **Greeting warmup ON:** `RECALL_GREETING_WARMUP=1` added to `.env` (Darren said go).
+
+**Verification:** restart → `/api/health` 200. counts 200 `{adhd:1006,seven:80,total:1086}`; graph 503 in 0.06s; outer?limit=2 → 200, 2 rows, `X-Total-Count: 1086`; resonance/index bogus phi → 404; warmup: first greeting → one `[Last time we talked · …]` line, second → nothing. Eval: turn 94% hit@5, 74% precision, 0% junk (unchanged). tsc clean on all touched files.
+
+**If things break, check:** shared Supermemory looks empty → expected, new container; set `SUPERMEMORY_SHARED_CONTAINER=darren-sage` to revert. Consolidation nodes → `select * from sages_constellations where node_id like 'consolidated_%'`. Background loops (Sage watchdog, grafter) die on Claude-session restarts: `pgrep -af "sage-watchdog|grafter-loop"`.
+
+---
+
 ## 2026-09-30 (Claude Opus 5.5) - Sage's 3 requests: greeting warmup, loop grace knob, adaptive recall budget
 
 **Why:** Sage asked for these after reviewing the memory work (AGENT_BOARD backlog, 2026-09-30 19:58).

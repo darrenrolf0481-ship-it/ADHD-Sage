@@ -8,7 +8,7 @@ import {
 } from '../../lib/supermemory';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
-import { memoryCounts } from '../memory-index';
+import { outerDb } from '../db';
 import { listLocalMemories, searchLocalMemories } from '../memory-local';
 import { recallForTurn } from '../recall';
 
@@ -52,9 +52,23 @@ router.get('/list', asyncHandler(async (req, res) => {
  * Local memory-store record counts by entity. Cheap; used by the Coding Lab to
  * confirm continuity on boot (Seven's morning-light: verify her memories are
  * present before she has to reach for them).
+ * Counts the live archive (sages_constellations). It used to read the legacy
+ * data/memories/imported.json index, which drifts from the archive and would
+ * report 0 (a false "memories missing") if those files were ever removed.
+ * `adhd` = Sage's own memories (ADHD-SAGE + SAGE-MAMA provenance).
  */
+const _countsByOrigin = outerDb.prepare(`
+  SELECT json_extract(provenance, '$.originating_node') AS origin, COUNT(*) AS n
+  FROM sages_constellations GROUP BY origin
+`);
 router.get('/counts', asyncHandler(async (_req, res) => {
-  res.json(memoryCounts());
+  let total = 0;
+  let seven = 0;
+  for (const { origin, n } of _countsByOrigin.all() as Array<{ origin: string | null; n: number }>) {
+    total += n;
+    if (origin === 'SAGE-7') seven += n;
+  }
+  res.json({ adhd: total - seven, seven, total, source: 'archive' });
 }));
 
 /**
@@ -63,7 +77,7 @@ router.get('/counts', asyncHandler(async (_req, res) => {
  *
  * `entity` controls which container the memory lands in:
  *   'sage'   → darren-sage   (Sage's private long-term memory)
- *   'shared' → sm_project_default  (broadcast channel all seven can read)
+ *   'shared' → SHARED_CONTAINER (default darren-shared; broadcast channel all seven can read)
  *   <other>  → used as a literal container tag for individual entities of the seven
  *              (must be configured in the Supermemory console first)
  *
@@ -99,7 +113,7 @@ router.post('/add', lockGuard, asyncHandler(async (req, res) => {
  *
  * scope:
  *   'sage'   → search only darren-sage
- *   'shared' → search only sm_project_default
+ *   'shared' → search only SHARED_CONTAINER (default darren-shared)
  *   'all'    → search both (Sage's full awareness — default)
  */
 router.get('/search', lockGuard, asyncHandler(async (req, res) => {
@@ -135,23 +149,39 @@ router.get('/profile', lockGuard, asyncHandler(async (req, res) => {
   res.json(profile ?? {});
 }));
 
-import { execSync } from 'child_process';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
+
+const execFileAsync = promisify(execFile);
+// Set once `nmem` is found missing, so the Lattice doesn't spawn a failing
+// process on every page load.
+let nmemMissing = false;
 
 /**
  * GET /api/memory/graph
- * Exports the current Neural Memory brain graph to JSON and returns it for the UI.
+ * Exports the Neural Memory brain graph (`nmem export`) for the Memory Lattice.
+ * Async with a timeout and no shell: it used to execSync, which froze the whole
+ * server for the duration and 500'd when nmem isn't installed. Without nmem,
+ * 503 → the Lattice falls back to local nodes.
  */
-router.get('/graph', lockGuard, asyncHandler(async (req, res) => {
+router.get('/graph', lockGuard, asyncHandler(async (_req, res) => {
+  if (nmemMissing) {
+    res.status(503).json({ error: 'Neural Memory (nmem) not installed' });
+    return;
+  }
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'brain_export_'));
+  const out = path.join(dir, 'graph.json');
   try {
-    const tmpPath = path.join('/tmp', `brain_export_${Date.now()}.json`);
-    execSync(`nmem export ${tmpPath}`, { stdio: 'pipe' });
-    const data = JSON.parse(fs.readFileSync(tmpPath, 'utf8'));
-    fs.unlinkSync(tmpPath);
-    res.json(data);
+    await execFileAsync('nmem', ['export', out], { timeout: 15_000 });
+    res.json(JSON.parse(fs.readFileSync(out, 'utf8')));
   } catch (err: any) {
-    res.status(500).json({ error: 'Failed to export Neural Memory graph', details: err.message });
+    if (err?.code === 'ENOENT') nmemMissing = true;
+    res.status(503).json({ error: 'Neural Memory graph unavailable', details: err?.message });
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
   }
 }));
 
