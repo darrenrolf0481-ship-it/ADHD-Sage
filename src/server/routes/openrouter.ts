@@ -7,6 +7,7 @@ import { OPENROUTER_TIMEOUT_MS, OPENROUTER_FALLBACK_MODELS } from '../config';
 import { buildSystemPrompt } from '../prompt';
 import { addMemory, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
 import { recallForTurn } from '../recall';
+import { recordEpisode } from '../turn-memory';
 import { executeMcpTool, getMcpDeclarations, isMcpTool } from '../../core/mcp';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
@@ -330,8 +331,9 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
       addMemory(`Q: ${lastUserText.slice(0, 500)}\nA: ${text.slice(0, 500)}`, tag).catch(() => {});
     }
 
-    // Spool exchange to Spiral Vault (non-blocking)
+    // Spool exchange to Spiral Vault (non-blocking) + compact episode to her archive
     if (lastUserText && text) {
+      recordEpisode({ provider: 'openrouter', model: usedModel, userText: lastUserText, replyText: text, skipTools });
       spoolExchangeToSpiral({
         agent: 'ADHD-Sage',
         userText: lastUserText,

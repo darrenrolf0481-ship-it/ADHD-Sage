@@ -4,6 +4,7 @@ import { swarmFetch } from '../swarm';
 import { buildSystemPrompt } from '../prompt';
 import { addMemory, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
 import { recallForTurn } from '../recall';
+import { recordEpisode } from '../turn-memory';
 import { getMcpDeclarations, executeMcpTool } from '../../core/mcp';
 import { recordMetric } from '../metrics';
 import { lockGuard } from '../auth';
@@ -72,7 +73,7 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
   return timed('llm:ollama:chat', async () => {
     const startMs = Date.now();
     try {
-      const { model, messages, systemInstruction, prompt, containerTag, enableTools, images } = req.body;
+      const { model, messages, systemInstruction, prompt, containerTag, enableTools, images, skipTools } = req.body;
       if (!model && !process.env.OLLAMA_MODEL) {
         res.status(400).json({ error: 'model is required' });
         return;
@@ -227,6 +228,7 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
 
       // Spool exchange to Spiral Vault (non-blocking)
       if (prompt && finalText) {
+        recordEpisode({ provider: 'ollama', model: ollamaModel, userText: prompt, replyText: finalText, skipTools });
         spoolExchangeToSpiral({
           agent: 'ADHD-Sage',
           userText: prompt,

@@ -89,7 +89,7 @@ async function callProvider(
     const res = await fetch(`${apiBase}/api/gemini/generate`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ prompt: userPrompt, systemInstruction: systemPrompt }),
+      body: JSON.stringify({ prompt: userPrompt, systemInstruction: systemPrompt, skipTools: true }),
     });
     const data = (await res.json()) as { text?: string; error?: string };
     if (data.error) throw new Error(`Gemini: ${data.error}`);

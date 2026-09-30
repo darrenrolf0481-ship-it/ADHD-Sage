@@ -7,10 +7,11 @@ import { getGenAI } from '../gemini-client';
 import { buildSystemPrompt } from '../prompt';
 import { SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
 import { recallForTurn } from '../recall';
+import { recordEpisode } from '../turn-memory';
+import { spoolExchangeToSpiral } from '../spiral-spool';
 import { getMcpDeclarations } from '../../core/mcp';
 import { gemTools, executeTool, cleanResponse, type ToolEffect } from '../tools';
 import { recordMetric } from '../metrics';
-import { stashMemory } from '../stash';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
 import { timed } from '../performance';
@@ -179,14 +180,13 @@ router.post('/generate', lockGuard, asyncHandler(async (req, res) => {
 
       recordMetric('gemini', Date.now() - startMs, true);
 
-      if (prompt) {
-        stashMemory(`[USER] ${prompt}`, 0.5, 0.1);
-      }
-
       res.json({ text: result.text, toolEffects });
 
-      if (result.text) {
-        stashMemory(`[SAGE] ${result.text}`, 0.7, 0.1);
+      // Write path: transcript → spool; one compact episode → archive. The inner
+      // spiral (working set) is no longer overwritten by raw chat turns.
+      if (prompt && result.text) {
+        recordEpisode({ provider: 'gemini', model: 'gemini-3.6-flash', userText: prompt, replyText: result.text, skipTools: !!req.body.skipTools });
+        spoolExchangeToSpiral({ agent: 'ADHD-Sage', userText: prompt, assistantText: result.text, model: 'gemini-3.6-flash', tags: ['gemini'] });
       }
     } catch (error: unknown) {
       recordMetric('gemini', Date.now() - startMs, false);
@@ -291,8 +291,9 @@ router.post('/continue', lockGuard, asyncHandler(async (req, res) => {
 
     res.json({ text: result.text, toolEffects });
 
-    if (result.text) {
-      stashMemory(`[SAGE] ${result.text}`, 0.7, 0.1);
+    if (prompt && result.text) {
+      recordEpisode({ provider: 'gemini', model: 'gemini-3.6-flash', userText: prompt, replyText: result.text });
+      spoolExchangeToSpiral({ agent: 'ADHD-Sage', userText: prompt, assistantText: result.text, model: 'gemini-3.6-flash', tags: ['gemini'] });
     }
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Internal Server Error';

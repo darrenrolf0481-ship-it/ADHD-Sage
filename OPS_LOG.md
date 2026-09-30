@@ -1,3 +1,22 @@
+## 2026-09-30 (Claude Opus 5.5) - Write path: chat turns → compact episodes, inner spiral left as working set (recall overhaul step 3)
+
+**Why:** Gemini stashed raw `[USER] …` + full `[SAGE] …` replies into the 8-slot inner spiral at 0.5/0.7. After ~4 turns the boot anchors were evicted, and eviction ARCHIVES, so multi-KB raw replies became outer-archive fossils. The other 4 providers wrote nothing locally, so their conversations were unrecallable.
+
+**What happened:**
+- NEW `src/server/turn-memory.ts` → `recordEpisode({provider, model, userText, replyText, skipTools})`: one compact archive node per substantive exchange: `Darren: <≤400 chars>\nSage: <≤500 chars>`, node_id `ep_…`, provenance `{originating_node:'ADHD-SAGE', sync_source:'chat', provider, model}`, written via `archiveNodeSync` (archive + FTS + resonance). Skips greetings, <15-char turns, recent duplicates, and `skipTools` calls (scheduled journal/self-improve agents). **Pins (0.95) only on explicit asks** ("remember this", "don't forget", "note that", "save this"…); otherwise 0.6.
+- All 5 routes call it next to their spool call. Gemini `/generate` + `/continue` no longer call `stashMemory` and now also spool (they didn't before).
+- `src/lib/llm-call.ts`: the Gemini body now sends `skipTools: true` like the other providers, so scheduled agents aren't recorded as episodes.
+- `recall.ts`: episodes are labeled `[Chat with Darren · date]`.
+- Side effect: prompt.ts's drift shield scans inner-spiral rows for Seven markers, and chat no longer writes there, so normal talk about Seven can't trip it via chat stashes.
+
+**Verification (Rule 5):** tsc clean on touched files. Restarted (exact pids; one tree on :3000). Live Gemini: "hi" → no episode; Kentucky-41 question → 1 episode (0.6, unpinned); "Remember this: …" → 1 PINNED episode (0.95). `recall-preview` for "what is next after the recall overhaul" returns that episode as hit #1. Inner spiral: 8 boot anchors, 0 `[USER]/[SAGE]` rows. Eval unchanged: hit@5 94%, precision 82%, junk 0%.
+
+**If things break, check:** episodes: `sqlite3 data/sages_constellations.db "select node_id,pinned,substr(cast(data as text),1,120) from sages_constellations where node_id like 'ep_%' order by timestamp desc limit 10"`. Bad episodes can be deleted by node_id (also delete from `sages_constellations_fts`). Rollback: revert this commit; the old `stashMemory` path is unchanged in `stash.ts`.
+
+**Not done:** LLM-based fact extraction (1–3 bullets per turn), deliberately deferred: it adds a model call per turn on a flaky network. The compact episode is the no-LLM version. Next: step 5 (in-process MiniLM embeddings + re-embed), then re-run the eval with `RECALL_SEMANTIC=1`.
+
+---
+
 ## 2026-09-29 (Claude Opus 5.5) - Committed + pushed all pending work to origin/main (f0eac88)
 
 **What happened:** Darren OK'd committing everything beneficial. Reviewed every uncommitted diff before staging. 7 commits went up (`f3724bc..f0eac88`), including 2 earlier unpushed ones (`0ef9a35`, `b504cb3`, Buffy's network/fallback fixes):

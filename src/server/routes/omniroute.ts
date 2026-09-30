@@ -7,6 +7,7 @@ import { swarmFetch } from '../swarm';
 import { buildSystemPrompt } from '../prompt';
 import { SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
 import { recallForTurn } from '../recall';
+import { recordEpisode } from '../turn-memory';
 import { executeMcpTool, getMcpDeclarations } from '../../core/mcp';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
@@ -324,6 +325,7 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
     // Asynchronously spool exchange to cold Spiral storage
     const promptForSpool = lastUserText;
     if (promptForSpool && text) {
+      recordEpisode({ provider: 'omniroute', model: usedModel, userText: promptForSpool, replyText: text, skipTools });
       spoolExchangeToSpiral({
         agent: 'ADHD-Sage',
         userText: promptForSpool,

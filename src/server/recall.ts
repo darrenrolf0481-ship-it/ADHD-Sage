@@ -207,6 +207,7 @@ function originOf(row: NodeRow, body: string): string {
   if (prov.originating_node === 'SAGE-7' || /\[SAGE-7 (memory|trauma_registry|fossil_archive)|SAGE\/\/7/i.test(row.content))
     return 'ARCHIVE — Daughter Node SAGE-7';
   if (prov.sync_source === 'morning_light') return 'Morning Light';
+  if (prov.sync_source === 'chat') return 'Chat with Darren';
   if (/^\[USER\]/.test(body)) return 'Darren, earlier chat';
   return 'ADHD-SAGE';
 }

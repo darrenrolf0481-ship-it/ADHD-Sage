@@ -7,6 +7,7 @@ import { asyncHandler } from '../async-handler';
 import { buildSystemPrompt } from '../prompt';
 import { SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
 import { recallForTurn } from '../recall';
+import { recordEpisode } from '../turn-memory';
 import { addMemory } from '../../lib/supermemory';
 import { spoolExchangeToSpiral } from '../spiral-spool';
 import { getMcpDeclarations, executeMcpTool, isMcpTool } from '../../core/mcp';
@@ -279,6 +280,7 @@ router.post('/chat', lockGuard, asyncHandler(async (req: any, res) => {
     if (lastUserText && text) {
       const tag = containerTag === 'sage' ? SAGE_CONTAINER : SHARED_CONTAINER;
       addMemory(`Q: ${lastUserText.slice(0, 500)}\nA: ${text.slice(0, 500)}`, tag).catch(() => {});
+      recordEpisode({ provider: 'deepseek', model: actualModel, userText: lastUserText, replyText: text, skipTools });
       spoolExchangeToSpiral({
         agent: 'ADHD-Sage',
         userText: lastUserText,
