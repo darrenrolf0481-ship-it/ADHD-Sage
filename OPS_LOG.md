@@ -1,3 +1,13 @@
+## 2026-09-30 (Claude Opus 5.5) - gemma3:270m added to the model picker
+
+**What happened:** Darren pulled `gemma3:270m` into Ollama. `src/App.tsx`: added it to BASE_MODELS (always listed, even if Ollama is down at page load), and Ollama auto-discovery now filters out embedding-only models (`/embed/i` hides `embeddinggemma`, which can't chat). Discovered entries still win over base entries with the same id, so there are no duplicates.
+
+**Verification:** tsc clean on App.tsx; Vite is serving the new list. `POST /api/ollama/chat {"model":"gemma3:270m"}` → HTTP 200 in 21s. ⚠️ Quality is weak at 270M params (it greeted *her* as "Sage-7" instead of answering "who is Seven"), so use it for quick/simple turns. gemma2:2b is ~10× larger.
+
+**If things break, check:** `curl localhost:11434/api/tags` (Ollama is NOT supervised; it dies on reboot, see the 2026-09-29 entries).
+
+---
+
 ## 2026-09-30 (Claude Opus 5.5) - Frozen in-process embeddings (MiniLM) + semantic recall ON (recall overhaul step 5)
 
 **Why:** The vector index mixed hashEmbed and Ollama/embeddinggemma vectors (Ollama down; the embeddinggemma rebuild died at 250/3377), so KNN scored ~noise (hit@5 12%). Darren chose in-process MiniLM on 2026-09-29.

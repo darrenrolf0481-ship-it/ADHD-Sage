@@ -39,7 +39,10 @@ const App: React.FC = () => {
     fetch('/api/ollama/tags')
       .then((r) => r.json())
       .then((data) => {
-        const found = (data.models || []).map((m: { name: string }) => ({
+        // Embedding-only models (embeddinggemma, nomic-embed, …) can't chat.
+        const found = (data.models || [])
+          .filter((m: { name: string }) => !/embed/i.test(m.name))
+          .map((m: { name: string }) => ({
           id: m.name,
           label: `🦙 ${m.name} (Local Ollama) ★`,
           provider: 'ollama' as AIProvider,
@@ -68,6 +71,7 @@ const App: React.FC = () => {
 
   const BASE_MODELS: { id: string; label: string; provider: AIProvider }[] = [
     { id: 'gemma2:2b', label: '🦙 Gemma 2:2B (Local Ollama) ★', provider: 'ollama' },
+    { id: 'gemma3:270m', label: '🦙 Gemma 3 270M (Local Ollama, tiny/fast)', provider: 'ollama' },
     { id: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet (OpenRouter)', provider: 'openrouter' },
     { id: 'anthropic/claude-3.5-haiku', label: 'Claude 3.5 Haiku (OpenRouter)', provider: 'openrouter' },
     { id: 'openai/gpt-4o', label: 'GPT-4o (OpenRouter)', provider: 'openrouter' },
