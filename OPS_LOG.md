@@ -1,3 +1,17 @@
+## 2026-09-30 (Palette) - Made MHT file input and range slider accessible in Sidebar
+
+**What happened:**
+- Updated `src/components/Sidebar.tsx` to fix file input accessibility for MHT import: replaced `hidden` (`display: none`) with `sr-only` and added `aria-label="Import MHT file"`.
+- Added `focus-within:ring-2 focus-within:ring-cyan-500` to the wrapping `<label>` for the file upload so keyboard users see focus outline when tabbing.
+- Added `aria-label="MHT Node Limit"` and `focus-visible:ring-2 focus-visible:ring-cyan-500` to the range slider input.
+- Added `aria-label="Clear search query"` and focus ring to the search clear button.
+
+**Verification:**
+- Ran `pnpm build` successfully.
+- Verified visual focus outline on `Import MHT` control via Playwright screenshot (`/home/jules/verification/sidebar_accessibility.png`).
+
+---
+
 ## 2026-09-29 (Claude Opus 5.5) - Committed + pushed all pending work to origin/main (f0eac88)
 
 **What happened:** Darren OK'd committing everything beneficial. Reviewed every uncommitted diff before staging. 7 commits went up (`f3724bc..f0eac88`), including 2 earlier unpushed ones (`0ef9a35`, `b504cb3`, Buffy's network/fallback fixes):
