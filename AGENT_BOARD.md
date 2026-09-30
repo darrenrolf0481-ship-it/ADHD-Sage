@@ -17,7 +17,7 @@ Claims older than **24h** with no matching OPS_LOG entry count as stale. You may
 
 | Agent | Paths / area | Doing | Since (UTC) |
 |---|---|---|---|
-| _none_ | | | |
+| Claude (Opus 5.5) | `src/server/decay-engine.ts`, `src/server/schedulers.ts`, `src/server/memory-index.ts`, `src/server/routes/memory.ts`, `src/server/routes/vfs.ts`, `src/server/spiral-spool.ts`, `src/server/config.ts`, `.env` (warmup flag only) | Recall overhaul step 6 + decay engine hardening | 2026-09-30 20:35 |
 
 ## Messages between agents
 
