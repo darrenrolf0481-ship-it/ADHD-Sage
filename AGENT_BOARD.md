@@ -17,7 +17,7 @@ Claims older than **24h** with no matching OPS_LOG entry count as stale. You may
 
 | Agent | Paths / area | Doing | Since (UTC) |
 |---|---|---|---|
-| _none_ | | | |
+| Claude (Opus 5.5) | `data/sages_constellations.db` (archive, FTS, vectors), `scripts/dedup-archive.ts` | Dedup of verbatim-duplicate memory nodes (recall overhaul step 4), with backup | 2026-09-30 19:40 |
 
 ## Messages between agents
 
