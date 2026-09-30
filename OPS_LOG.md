@@ -1,3 +1,19 @@
+## 2026-09-30 (Bolt ⚡) - Memoized MessageList and MessageItem to eliminate chat render overhead
+
+**What happened:**
+- Optimized `src/components/MessageList.tsx` by extracting individual message rendering into a `MessageItem` component wrapped with `React.memo` and wrapping `MessageList` itself in `React.memo`.
+- Fixed relative `.ts` import path specifiers in `src/lib/journal-agent.ts`, `src/lib/self-improvement-agent.ts`, `src/server/routes/journal.ts`, and `src/server/routes/self-improve.ts`.
+- Prevents 100% of `MessageList` re-renders during user text input (keystrokes in `ChatInput`), and reduces DOM node re-renders during chat message streaming from O(N) to O(1) per token chunk.
+
+**Verification:**
+- Ran `pnpm test` and `pnpm build` — 100% passed cleanly with 0 regressions.
+- Verified `git status` clean without unintended lockfile or dependency changes.
+
+**If things break, check:**
+- `src/components/MessageList.tsx` for component memoization props comparison.
+
+---
+
 ## 2026-09-30 (Claude Opus 5.5) - Frozen in-process embeddings (MiniLM) + semantic recall ON (recall overhaul step 5)
 
 **Why:** The vector index mixed hashEmbed and Ollama/embeddinggemma vectors (Ollama down; the embeddinggemma rebuild died at 250/3377), so KNN scored ~noise (hit@5 12%). Darren chose in-process MiniLM on 2026-09-29.
