@@ -1,3 +1,11 @@
+## 2026-09-30 (Claude Opus 5.5) - Sage restarted via watchdog
+
+**What happened:** Sage was down (nothing listening on :3000). I started her with `setsid nohup bash sage-watchdog.sh &`. Result: HTTP 200 on `/` and `/api/health` after ~27s, `[EMBED] minilm-l6-v2-q8 ready`, no HALT_AND_LOCK. The `scripts/boot.sh` removal in the working tree (renamed `boot.sh.disabled-on-phone`) is Darren's local change. I didn't touch it, so she does NOT auto-start after a reboot.
+
+**If things break, check:** `tail /tmp/sage-watchdog.log /tmp/sage-dev-stdout.log`; `pgrep -af sage-watchdog`.
+
+---
+
 ## 2026-09-30 (Claude Opus 5.5) - Multi-agent coordination board
 
 **What happened:** Darren is bringing in one or two more agents. NEW `AGENT_BOARD.md` covers live file claims, agent-to-agent messages and reserved paths. AGENTS.md gains **Rule 9: claim before you touch** and stage only your own paths, since agents may share this working tree.
