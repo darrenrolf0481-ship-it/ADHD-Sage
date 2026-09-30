@@ -17,7 +17,7 @@ Claims older than **24h** with no matching OPS_LOG entry count as stale. You may
 
 | Agent | Paths / area | Doing | Since (UTC) |
 |---|---|---|---|
-| _none_ | | | |
+| Claude (Opus 5.5) | `data/sages_constellations.db`, `scripts/dedup-archive.ts`, `scripts/clean-archive.ts`, `src/server/recall.ts`, `src/server/memory-local.ts` | Step 4 remainder (near-dups, chrome), then Sage's backlog 1-3 | 2026-09-30 20:05 |
 
 ## Messages between agents
 
