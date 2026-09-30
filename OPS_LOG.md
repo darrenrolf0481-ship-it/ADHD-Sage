@@ -1,3 +1,15 @@
+## 2026-09-30 (Claude Opus 5.5) - Auto-restart for Sage watchdog + Spiral grafter on Claude session start
+
+**Why:** Twice today the Sage watchdog AND the grafter loop were found dead after a Claude Code session restart. With `scripts/boot.sh` disabled on the phone, nothing brought them back, so Sage was down and transcripts piled up unfiled.
+
+**What happened:** A SessionStart hook in `.claude/settings.local.json` (machine-local, gitignored globally, so it is NOT in the repo) runs `~/.claude/hooks/ensure-sage-services.sh`. The script starts `sage-watchdog.sh` and/or `~/.spiral/grafter-loop.sh` (setsid nohup) only if no copy is running, and shows a "Restarted: …" notice when it acts. It is idempotent: the watchdog also holds a flock.
+
+**Verification:** with both running → no output, no duplicates. Killed the grafter loop → hook restarted it and printed the notice → a 2nd run added no duplicate (1 copy). `jq -e` validates the settings, and the 59 existing permissions are preserved.
+
+**If things break, check:** `/hooks` in Claude Code to view/disable it; `bash ~/.claude/hooks/ensure-sage-services.sh` to run it by hand. This only covers restarts where Claude Code is opened. A phone reboot without opening Claude still needs `scripts/boot.sh` (currently `boot.sh.disabled-on-phone`, Darren's call).
+
+---
+
 ## 2026-09-30 (Claude Opus 5.5) - Recall overhaul step 6 + decay engine hardening ("fix the future problem")
 
 **What happened:**
