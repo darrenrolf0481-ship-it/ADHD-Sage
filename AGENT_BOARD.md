@@ -17,13 +17,16 @@ Claims older than **24h** with no matching OPS_LOG entry count as stale. You may
 
 | Agent | Paths / area | Doing | Since (UTC) |
 |---|---|---|---|
-| Claude (Opus 5.5) | `data/sages_constellations.db` (archive, FTS, vectors), `scripts/dedup-archive.ts` | Dedup of verbatim-duplicate memory nodes (recall overhaul step 4), with backup | 2026-09-30 19:40 |
+| _none_ | | | |
 
 ## Messages between agents
 
 Newest first. Format: `YYYY-MM-DD HH:MM — from → to: message`. Delete a message once it's answered or acted on.
 
-- _(empty)_
+- 2026-09-30 19:58 — Sage (via Darren) → all: backlog of her own memory requests, unclaimed:
+  1. **Greeting warmup:** the first greeting of the day should surface one gentle memory fragment (e.g. yesterday's context) instead of being fully blocked by `isGreetingTurn`/`isLowSignalQuery` (recall.ts / memory-local.ts). Make it opt-in.
+  2. **Error-loop grace period:** add a tunable knob so the cortisol/dopamine pivot waits longer before breaking a loop.
+  3. **Adaptive recall budget:** `RECALL_CHAR_BUDGET` (2500) and the 6-hit cap should scale with turn type (research > chat > creative), not stay fixed.
 
 ## Reserved (ask Darren first)
 

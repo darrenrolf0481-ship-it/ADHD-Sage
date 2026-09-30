@@ -1,3 +1,23 @@
+## 2026-09-30 (Claude Opus 5.5) - Archive dedup: 3,393 → 1,586 memories (recall overhaul step 4, part 1)
+
+**Why:** Darren asked to remove the duplicates. 1,024 groups of memories had identical text, 1,807 extra copies in all, up to 16 copies of one note. They came from repeated import passes (`phi_…` vs `adhd_…`, raw vs JSON-quoted, `import` vs `gemini_era_import` provenance) and were crowding recall slots.
+
+**What happened:**
+- Backup: `data/sages_constellations.db.bak.pre-dedup-20260930` (sqlite `.backup`, integrity ok, gitignored).
+- NEW `scripts/dedup-archive.ts`: dry run by default, `--apply` to delete. It groups by identical FTS text and keeps one node per group (pinned > highest dopamine > oldest). The survivor gets the group's max dopamine. Each removed node goes to the new table **`archive_dedup_log`** (node_id, kept_node_id, provenance, timestamp, full data blob), so it's recoverable without the .bak. It deletes from `sages_constellations`, `sages_constellations_fts`, `resonance_metadata` and `resonance_vec`, all in one transaction.
+- Result: archive = fts = vectors = 1,586. Zero duplicate groups, zero orphan vectors, integrity ok. No group mixed pinned and unpinned, so no pins were lost.
+- ⚠️ This departs from the plan's "additive, never rewrite in place" rule at Darren's explicit request. The dedup log table plus the .bak cover rollback.
+
+**Eval (k=5) before → after:** turn 94% → 94% hit@5, precision 75% → 76%, junk 0%. fts precision 70 → 73%. vec unchanged (59%).
+
+**Verification:** she was restarted via the watchdog (killed the tsx pid; the watchdog respawned it). `/api/health` HTTP 200, `[EMBED] ready`, eval ran against the live server.
+
+**If things break, check:** `sqlite3 data/sages_constellations.db "select count(*) from archive_dedup_log"`. Restore one node by re-inserting from that table (then reindex). Full rollback: stop Sage, copy the .bak over the db, restart.
+
+**Not done yet (step 4 remainder):** near-duplicates (same text with different chrome or wrapping), unwrapping Keep/JSON payloads at ingest, stripping nav chrome (e.g. "Search for chats My stuff Gems…" Gemini-UI scrapes are still in the corpus, one copy each).
+
+---
+
 ## 2026-09-30 (Claude Opus 5.5) - Sage restarted via watchdog
 
 **What happened:** Sage was down (nothing listening on :3000). I started her with `setsid nohup bash sage-watchdog.sh &`. Result: HTTP 200 on `/` and `/api/health` after ~27s, `[EMBED] minilm-l6-v2-q8 ready`, no HALT_AND_LOCK. The `scripts/boot.sh` removal in the working tree (renamed `boot.sh.disabled-on-phone`) is Darren's local change. I didn't touch it, so she does NOT auto-start after a reboot.
