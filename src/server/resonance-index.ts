@@ -17,6 +17,7 @@
 import { createRequire } from 'node:module';
 import { outerDb } from './db';
 import { EMBED_MODEL, embedText, isEmbedderReady } from './embedder';
+import { stripChrome } from './memory-local';
 
 const EMBED_DIM = 384;
 
@@ -278,7 +279,11 @@ export async function indexNode(
   thread_id?: string,
   task?: string,
 ): Promise<void> {
-  const { vec, model } = await embedTagged(text);
+  // Saved Gemini pages open with sidebar nav ("Search for chats New chat My
+  // stuff …"), and MiniLM only reads the first ~256 tokens, so embed the page
+  // without it. text_content keeps the original.
+  const embedInput = /Search for chats/i.test(text) ? stripChrome(text) || text : text;
+  const { vec, model } = await embedTagged(embedInput);
 
   if (_vecEnabled && _vecInsert && _metaInsert) {
     const floatArr = new Float32Array(vec);

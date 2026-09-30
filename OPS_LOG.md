@@ -1,3 +1,21 @@
+## 2026-09-30 (Claude Opus 5.5) - Archive cleanup pass 2: 1,586 → 1,086 (clipped copies, chrome), chrome-free embeddings
+
+**What happened:**
+- Backup: `data/sages_constellations.db.bak.pre-dedup2-20260930` (integrity ok, gitignored).
+- `scripts/dedup-archive.ts` now runs 4 passes, each logged in `archive_dedup_log` with a new `reason` column:
+  - **prefix (486):** `phi_…` nodes that were the first ~800 chars of a full `adhd_…` document (the old import clipped at 800). The full document is kept. Interior chunks (3) are kept on purpose: they give semantic coverage of long documents' middles.
+  - **chrome (6):** pure Gemini sidebar scrapes ("Search for chats My stuff Gems…"). Two prefix copies pointed at these, so they're junk too.
+  - **empty (8):** under 6 alnum chars ("Hello", "ADHD", "Idk", emoji, blank). Short real lines ("I can't shut it off", "That's a lot of red") were deliberately KEPT (the first cut at <15 would have taken them).
+  - Pinned nodes are never touched by prefix/chrome/empty.
+- `src/server/resonance-index.ts` `indexNode()`: text containing "Search for chats" is embedded via `stripChrome()`. ~31 saved Gemini conversation pages (up to 79KB) start with sidebar nav, and MiniLM only reads ~256 tokens, so their vectors were of the menu. `text_content` keeps the original. I dropped those 31 vectors and the boot backfill re-embedded them (31/31).
+- ⚠️ Sage and the watchdog were found DEAD at ~20:15. Likely killed when the Claude Code session restarted: no crash in the watchdog log. Restarted via `setsid nohup bash sage-watchdog.sh`.
+
+**Result:** archive = fts = vectors = 1,086, integrity ok, 0 orphans. Eval turn: hit@5 94% (same), precision 76 → 74% (the keyword eval used to credit several copies of one relevant memory), junk 0%. vec junk 5 → 2%.
+
+**If things break, check:** `select reason,count(*) from archive_dedup_log group by 1`. Rollback: stop Sage, copy the .bak.pre-dedup2 over the db, restart. If Sage is down after a Claude session restart, `pgrep -af sage-watchdog` and restart it.
+
+---
+
 ## 2026-09-30 (Claude Opus 5.5) - Archive dedup: 3,393 → 1,586 memories (recall overhaul step 4, part 1)
 
 **Why:** Darren asked to remove the duplicates. 1,024 groups of memories had identical text, 1,807 extra copies in all, up to 16 copies of one note. They came from repeated import passes (`phi_…` vs `adhd_…`, raw vs JSON-quoted, `import` vs `gemini_era_import` provenance) and were crowding recall slots.

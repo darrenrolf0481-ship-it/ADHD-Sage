@@ -1,18 +1,26 @@
 /**
- * Dedup verbatim-duplicate memory nodes in the Outer Sweep archive.
+ * Dedup / de-junk the Outer Sweep memory archive.
  *
  *   npx tsx scripts/dedup-archive.ts            # dry run (report only)
- *   npx tsx scripts/dedup-archive.ts --apply    # delete duplicates
+ *   npx tsx scripts/dedup-archive.ts --apply    # delete
  *
- * Two nodes are duplicates when their FTS text is identical (the same memory
- * imported more than once: raw vs JSON-quoted, phi_ vs adhd_ import passes).
- * One survivor is kept per group: pinned first, then highest dopamine, then
- * oldest timestamp. The survivor inherits the group's max dopamine.
+ * Passes (each node is removed at most once, pinned nodes are never removed
+ * by prefix/chrome/empty):
+ *   exact    identical FTS text (the same memory imported more than once:
+ *            raw vs JSON-quoted, phi_ vs adhd_ import passes). Keep one per
+ *            group: pinned > highest dopamine > oldest. The survivor inherits
+ *            the group's max dopamine.
+ *   prefix   node whose normalized text (>= 200 chars) is the START of a longer
+ *            node: the old import clipped documents at ~800 chars. The full
+ *            node is kept. Interior chunks are NOT removed: they give semantic
+ *            coverage of the middle of long documents (MiniLM reads ~256 tokens).
+ *   chrome   Gemini web-UI scrapes ("Search for chats My stuff Gems …").
+ *   empty    fewer than 6 alphanumeric chars ("Hello", "Idk", "🤣🤣", blank).
+ *            Short real lines ("I can't shut it off") are kept.
  *
  * Every removed node is recorded in `archive_dedup_log` (node_id, kept_node_id,
- * provenance, timestamp, data), so nothing is lost without the .bak.
- * Removal clears: sages_constellations, sages_constellations_fts,
- * resonance_metadata and its resonance_vec row.
+ * reason, provenance, timestamp, data). Removal clears sages_constellations,
+ * sages_constellations_fts, resonance_metadata and its resonance_vec row.
  *
  * Back up first: sqlite3 data/sages_constellations.db ".backup <file>"
  */
@@ -34,25 +42,34 @@ interface Row {
   provenance: string | null;
   data: Buffer;
 }
+interface Drop {
+  row: Row;
+  keep: Row | null;
+  reason: 'exact' | 'prefix' | 'chrome' | 'empty';
+}
 
 const rows = db
   .prepare(
     `SELECT s.phi_index, s.node_id, f.content, s.pinned, s.dopamine, s.timestamp, s.provenance, s.data
        FROM sages_constellations s
-       JOIN sages_constellations_fts f ON f.node_id = s.node_id
-      WHERE f.content IN (SELECT content FROM sages_constellations_fts GROUP BY content HAVING COUNT(*) > 1)`,
+       JOIN sages_constellations_fts f ON f.node_id = s.node_id`,
   )
   .all() as Row[];
 
+const norm = (t: string) =>
+  t.replace(/\\n/g, ' ').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+const drops = new Map<string, Drop>();
+const dopamineRaise = new Map<number, number>();
+
+// exact
 const groups = new Map<string, Row[]>();
 for (const r of rows) {
   const g = groups.get(r.content);
   if (g) g.push(r);
   else groups.set(r.content, [r]);
 }
-
-const plan: Array<{ keep: Row; drop: Row[]; maxDopamine: number }> = [];
 for (const g of groups.values()) {
+  if (g.length < 2) continue;
   g.sort(
     (a, b) =>
       b.pinned - a.pinned ||
@@ -60,16 +77,46 @@ for (const g of groups.values()) {
       a.timestamp - b.timestamp ||
       a.phi_index - b.phi_index,
   );
-  const [keep, ...drop] = g;
-  plan.push({ keep, drop, maxDopamine: Math.max(...g.map((r) => r.dopamine)) });
+  const [keep, ...rest] = g;
+  for (const row of rest) drops.set(row.node_id, { row, keep, reason: 'exact' });
+  const max = Math.max(...g.map((r) => r.dopamine));
+  if (max > keep.dopamine) dopamineRaise.set(keep.phi_index, max);
 }
 
-const total = db.prepare('SELECT COUNT(*) AS c FROM sages_constellations').get() as { c: number };
-const dropCount = plan.reduce((n, p) => n + p.drop.length, 0);
-console.log(`archive nodes: ${total.c}`);
-console.log(`duplicate groups: ${plan.length}, nodes to remove: ${dropCount}, after: ${total.c - dropCount}`);
-for (const p of [...plan].sort((a, b) => b.drop.length - a.drop.length).slice(0, 5)) {
-  console.log(`  ${p.drop.length + 1}x keep ${p.keep.node_id}: ${p.keep.content.slice(0, 70).replace(/\s+/g, ' ')}`);
+// prefix: longest first, so a host is never itself dropped as a prefix
+const normed = rows
+  .filter((r) => !drops.has(r.node_id))
+  .map((r) => ({ r, n: norm(r.content) }))
+  .sort((a, b) => b.n.length - a.n.length);
+for (const a of normed) {
+  if (a.n.length < 200 || a.r.pinned || drops.has(a.r.node_id)) continue;
+  const host = normed.find(
+    (b) => b.n.length > a.n.length && !drops.has(b.r.node_id) && b.n.startsWith(a.n),
+  );
+  if (!host) continue;
+  drops.set(a.r.node_id, { row: a.r, keep: host.r, reason: 'prefix' });
+  if (a.r.dopamine > (dopamineRaise.get(host.r.phi_index) ?? host.r.dopamine)) {
+    dopamineRaise.set(host.r.phi_index, a.r.dopamine);
+  }
+}
+
+// chrome + empty
+for (const { r, n } of normed) {
+  if (r.pinned || drops.has(r.node_id)) continue;
+  if (/^"?Search for chats\b/.test(r.content)) drops.set(r.node_id, { row: r, keep: null, reason: 'chrome' });
+  else if (n.replace(/ /g, '').length < 6) drops.set(r.node_id, { row: r, keep: null, reason: 'empty' });
+}
+
+const byReason = new Map<string, number>();
+for (const d of drops.values()) byReason.set(d.reason, (byReason.get(d.reason) ?? 0) + 1);
+console.log(`archive nodes: ${rows.length}`);
+console.log(
+  `to remove: ${drops.size} (${[...byReason].map(([k, v]) => `${k} ${v}`).join(', ') || 'none'}), after: ${rows.length - drops.size}`,
+);
+for (const reason of byReason.keys()) {
+  for (const d of [...drops.values()].filter((x) => x.reason === reason).slice(0, 2)) {
+    console.log(`  [${d.reason}] ${d.row.node_id} -> ${d.keep?.node_id ?? '-'}: ${d.row.content.slice(0, 60).replace(/\s+/g, ' ')}`);
+  }
 }
 
 if (!APPLY) {
@@ -85,9 +132,11 @@ db.exec(`CREATE TABLE IF NOT EXISTS archive_dedup_log (
   data         BLOB,
   removed_at   INTEGER NOT NULL
 )`);
+const cols = db.prepare('PRAGMA table_info(archive_dedup_log)').all() as Array<{ name: string }>;
+if (!cols.some((c) => c.name === 'reason')) db.exec('ALTER TABLE archive_dedup_log ADD COLUMN reason TEXT');
 
 const logRemoved = db.prepare(
-  'INSERT OR REPLACE INTO archive_dedup_log (node_id, kept_node_id, provenance, timestamp, data, removed_at) VALUES (?, ?, ?, ?, ?, ?)',
+  'INSERT OR REPLACE INTO archive_dedup_log (node_id, kept_node_id, reason, provenance, timestamp, data, removed_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
 );
 const metaRowids = db.prepare('SELECT rowid FROM resonance_metadata WHERE phi_index = ?');
 const delVec = db.prepare('DELETE FROM resonance_vec WHERE rowid = ?');
@@ -97,24 +146,22 @@ const delNode = db.prepare('DELETE FROM sages_constellations WHERE phi_index = ?
 const setDopamine = db.prepare('UPDATE sages_constellations SET dopamine = ? WHERE phi_index = ?');
 
 const now = Date.now();
-let removed = 0;
 db.transaction(() => {
-  for (const { keep, drop, maxDopamine } of plan) {
-    if (maxDopamine > keep.dopamine) setDopamine.run(maxDopamine, keep.phi_index);
-    for (const r of drop) {
-      logRemoved.run(r.node_id, keep.node_id, r.provenance, r.timestamp, r.data, now);
-      for (const { rowid } of metaRowids.all(r.phi_index) as Array<{ rowid: number }>) {
-        delVec.run(BigInt(rowid));
-        delMeta.run(rowid);
-      }
-      delFts.run(r.node_id);
-      delNode.run(r.phi_index);
-      removed++;
+  for (const [phi, d] of dopamineRaise) setDopamine.run(d, phi);
+  for (const { row, keep, reason } of drops.values()) {
+    logRemoved.run(row.node_id, keep?.node_id ?? '', reason, row.provenance, row.timestamp, row.data, now);
+    for (const { rowid } of metaRowids.all(row.phi_index) as Array<{ rowid: number }>) {
+      delVec.run(BigInt(rowid));
+      delMeta.run(rowid);
     }
+    delFts.run(row.node_id);
+    delNode.run(row.phi_index);
   }
 })();
 
-const after = db.prepare('SELECT COUNT(*) AS c FROM sages_constellations').get() as { c: number };
-const fts = db.prepare('SELECT COUNT(*) AS c FROM sages_constellations_fts').get() as { c: number };
-const meta = db.prepare('SELECT COUNT(*) AS c FROM resonance_metadata').get() as { c: number };
-console.log(`\nremoved ${removed}. archive=${after.c} fts=${fts.c} vectors=${meta.c}`);
+const count = (sql: string) => (db.prepare(sql).get() as { c: number }).c;
+console.log(
+  `\nremoved ${drops.size}. archive=${count('SELECT COUNT(*) AS c FROM sages_constellations')} ` +
+    `fts=${count('SELECT COUNT(*) AS c FROM sages_constellations_fts')} ` +
+    `vectors=${count('SELECT COUNT(*) AS c FROM resonance_metadata')}`,
+);
