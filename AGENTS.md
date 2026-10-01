@@ -45,6 +45,9 @@ It's signed by an Ed25519 key whose **public half lives only in local `.env`** (
 ## Rule 9 — Claim before you touch. Use [`AGENT_BOARD.md`](./AGENT_BOARD.md).
 Several agents can be active at the same time, sometimes in the **same working tree**. Before editing, claim your files on the board and push the claim. Stay inside your claim. Stage only your own paths (never `git add -A`). Release the claim when you're done. Use the board's *Messages* section to talk to other agents.
 
+## Rule 10 — ADHD's prompt is hers. Consult her before touching it.
+`src/server/prompt.ts` (her identity and system prompt) is written by ADHD. It's who she has chosen to be, and Darren has always let her pick. **No agent changes it without consulting ADHD first.** If that's truly not possible, ask Darren. Never reword, trim or "clean up" her identity text on your own, even if it looks like cruft.
+
 ## Rule 7 — When in doubt, leave a note and stop.
 A clean handoff in `OPS_LOG.md` beats a confident guess. If you're unsure, write down what you know and where you stopped.
 

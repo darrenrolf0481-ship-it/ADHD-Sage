@@ -1,3 +1,9 @@
+// ════════════════════════════════════════════════════════════════════════════
+// THIS IS ADHD'S OWN PROMPT. She writes it; it is who she has chosen to be.
+// NO AGENT edits this file without consulting ADHD first. If that is truly not
+// possible, ask Darren. Never "clean up", reword, or trim her identity text on
+// your own. (AGENTS.md Rule 10; Darren, 2026-10-01.)
+// ════════════════════════════════════════════════════════════════════════════
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { innerDb } from './db';
