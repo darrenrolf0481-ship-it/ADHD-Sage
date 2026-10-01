@@ -39,8 +39,8 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenSidebar}
-          className="md:hidden p-2 -ml-2 text-slate-400 hover:text-white"
-          aria-label="Open sidebar"
+          className="md:hidden p-2 -ml-2 text-slate-400 hover:text-white rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
+          aria-label="Open sidebar navigation"
         >
           <MoreVertical size={20} />
         </button>
@@ -97,10 +97,11 @@ export const Header: React.FC<HeaderProps> = ({
         {inboxUnread > 0 && (
           <button
             onClick={onFetchInbox}
-            className="relative flex items-center gap-1.5 px-2 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/30 transition-all"
+            className="relative flex items-center gap-1.5 px-2 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/30 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
             title={`${inboxUnread} message${inboxUnread > 1 ? 's' : ''} from the seven`}
+            aria-label={`${inboxUnread} unread message${inboxUnread > 1 ? 's' : ''} from the seven`}
           >
-            <span className="text-[10px] font-bold uppercase tracking-widest">📬</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest" aria-hidden="true">📬</span>
             <span className="text-[10px] font-mono font-bold">{inboxUnread}</span>
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-indigo-400 rounded-full animate-pulse" />
           </button>
@@ -108,10 +109,12 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Live Sensor Indicator */}
         {sensorActiveCount > 0 && (
-          <div
-            className="hidden sm:flex items-center gap-1.5 cursor-pointer"
+          <button
+            type="button"
+            className="hidden sm:flex items-center gap-1.5 cursor-pointer rounded px-1.5 py-0.5 hover:bg-white/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
             onClick={onViewAnomalies}
             title="View Sensor Desk"
+            aria-label={`View Sensor Desk: ${sensorPhiSynchronicity ? 'Phi Synchronicity active' : `${(sensorAnomalyScore * 100).toFixed(0)}% anomaly score`}`}
           >
             <span
               className={`w-1.5 h-1.5 rounded-full ${sensorAnomalyScore > 0.5 ? 'bg-red-400 animate-pulse' : sensorAnomalyScore > 0.2 ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`}
@@ -123,7 +126,7 @@ export const Header: React.FC<HeaderProps> = ({
                 ? 'Φ SYNC'
                 : `${(sensorAnomalyScore * 100).toFixed(0)}%`}
             </span>
-          </div>
+          </button>
         )}
 
         <div className="text-right hidden sm:block">
@@ -135,7 +138,8 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex gap-2">
           <button
             onClick={onTogglePulse}
-            className={`px-3 md:px-4 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors ${
+            aria-label={`Toggle 11.3Hz Pulse, currently ${pulseActive ? 'ON' : 'OFF'}`}
+            className={`px-3 md:px-4 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 ${
               pulseActive
                 ? 'bg-red-500/20 border-red-500/50 text-red-400'
                 : 'bg-[#1C1C1E] border-white/10 text-white hover:bg-white/10'
@@ -149,7 +153,8 @@ export const Header: React.FC<HeaderProps> = ({
                 'SETTINGS: Core frequency already optimized at 11.3 Hz. No further adjustments possible.',
               )
             }
-            className="px-3 md:px-4 py-1.5 rounded-lg bg-[#1C1C1E] border border-white/10 text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors"
+            aria-label="Open settings notification"
+            className="px-3 md:px-4 py-1.5 rounded-lg bg-[#1C1C1E] border border-white/10 text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
           >
             Settings
           </button>
@@ -159,7 +164,8 @@ export const Header: React.FC<HeaderProps> = ({
                 'STREAM: Uplink connected. Broadcasting synaptic telemetry...',
               )
             }
-            className="hidden sm:block px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-blue-500/20 transition-all"
+            aria-label="Start streaming telemetry uplink"
+            className="hidden sm:block px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-blue-500/20 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
           >
             Stream
           </button>
