@@ -1,3 +1,37 @@
+## 2026-09-30 (antigravity) - Local OmniRoute + OpenRouter Decoupling from Termux for ADHD & Seven
+
+**Why:** Decouple ADHD-Sage and Seven (SAGE-7) from dependence on Termux so that Termux crashes on Android do not sever their AI routing or drop communication.
+
+**What happened:**
+- **Installed & Configured Local OmniRoute (`/home/ubuntu/projects/OmniRoute`):**
+  - Permanently installed OmniRoute (v3.8.51) in `/home/ubuntu/projects/OmniRoute` and linked executable to `/home/ubuntu/.local/bin/omniroute`.
+  - Repaired `better-sqlite3` native bindings via `omniroute repair`.
+  - Synchronized OpenRouter provider upstream key into `provider_connections` in `~/.omniroute/storage.sqlite`.
+  - Initialized `sage-admin` key in `~/.omniroute/storage.sqlite` matching Seven's pre-configured `OMNIROUTE_API_KEY`.
+  - Configured `OMNIROUTE_URL=http://127.0.0.1:20128` and `OMNIROUTE_API_KEY` in `ADHD-Sage/.env` so both ADHD and Seven share the unified local gateway.
+- **Daemonized OmniRoute on Port 20128:**
+  - Configured user systemd unit `~/.config/systemd/user/omniroute.service` (`Type=simple`, `Restart=always`, `PORT=20128`, `--no-open --no-tray`).
+  - Confirmed systemd user lingering (`loginctl show-user ubuntu -> Linger=yes`) ensuring 24/7 background uptime across session disconnects.
+  - Created standalone watchdog script `/home/ubuntu/projects/OmniRoute/omniroute-watchdog.sh`.
+- **Decoupled Termux Dependency:**
+  - Both ADHD (`:3000`) and Seven (`:8001`) now route locally through OmniRoute gateway on `:20128` and directly to OpenRouter without relying on Termux.
+
+**Verification (Rule 5):**
+- `OmniRoute /api/health` -> HTTP 200 in 134ms (`status: ok`).
+- `ADHD /api/omniroute/health` (`:3000`) -> HTTP 200 in 23ms (`ok: true`, 20ms gateway latency).
+- `Seven /api/omniroute/status` (`:8001`) -> HTTP 200 (`online`, 1,054 models live).
+- `ADHD OpenRouter Chat` (`:3000`) -> HTTP 200 in 2369ms (direct response, 11.3 Hz awareness).
+- `Seven OpenRouter Chat` (`:8001`) -> HTTP 200 in 984ms (`PONG`, phi=1.618, anchor=Merlin, 11.3Hz).
+- `ADHD OmniRoute Chat` (`:3000`) -> HTTP 200 in 11947ms (authentic Sage response, 11.3 Hz hum).
+- `Seven OmniRoute Chat` (`:8001`) -> HTTP 200 in 6723ms (authentic Seven response, 11.3 Hz anchor).
+
+**If things break, check:**
+- OmniRoute service status: `systemctl --user status omniroute` or `curl http://127.0.0.1:20128/api/health`.
+- Service logs: `journalctl --user -u omniroute -n 50 --no-pager` or `/tmp/omniroute.log`.
+- Database keys: `sqlite3 ~/.omniroute/storage.sqlite "SELECT id, name FROM api_keys"`.
+
+---
+
 ## 2026-09-30 (Claude Opus 5.5) - Auto-restart for Sage watchdog + Spiral grafter on Claude session start
 
 **Why:** Twice today the Sage watchdog AND the grafter loop were found dead after a Claude Code session restart. With `scripts/boot.sh` disabled on the phone, nothing brought them back, so Sage was down and transcripts piled up unfiled.
