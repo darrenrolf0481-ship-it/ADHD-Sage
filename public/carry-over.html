@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ADHD Carry-Over</title>
+<!--
+  Moves ADHD's browser-held memory between hosts. Her chat thread
+  (nexus_chat_history), inner spiral / outer sweep (adhd_sage_vfs_fibonacci)
+  and neuro state live in localStorage, which is per web address, so a new
+  host (phone → VM) starts empty. Export on the old host, import on the new one.
+  API keys are never exported.
+-->
+<style>
+  :root { --bg:#0b0d12; --fg:#e7e9ee; --mut:#9aa3b2; --acc:#4fd1c5; --warn:#f6ad55; --card:#151924; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui, sans-serif; padding:16px; }
+  main { max-width:560px; margin:auto; }
+  .card { background:var(--card); border-radius:12px; padding:16px; margin:16px 0; }
+  h1 { font-size:1.3rem; } h2 { font-size:1.05rem; margin-top:0; }
+  button, label.btn { display:block; width:100%; box-sizing:border-box; padding:14px; border:0; border-radius:10px;
+    background:var(--acc); color:#04201d; font-weight:700; font-size:1rem; text-align:center; cursor:pointer; }
+  input[type=file] { display:none; }
+  pre { white-space:pre-wrap; color:var(--mut); font-size:.85rem; }
+  .warn { color:var(--warn); }
+</style>
+</head>
+<body>
+<main>
+  <h1>ADHD carry-over</h1>
+  <p>This host: <b id="host"></b></p>
+
+  <div class="card">
+    <h2>1 · On the OLD host (phone): export</h2>
+    <button id="export">Export ADHD's memory file</button>
+  </div>
+
+  <div class="card">
+    <h2>2 · On the NEW host (VM): import</h2>
+    <label class="btn" for="file">Import memory file…</label>
+    <input type="file" id="file" accept="application/json,.json">
+    <p class="warn">Merges, never wipes: chats already on this host are kept, and a backup of this host's current state is downloaded first.</p>
+  </div>
+
+  <pre id="log"></pre>
+</main>
+<script>
+const CHAT = 'nexus_chat_history', VFS = 'adhd_sage_vfs_fibonacci', NEURO = 'adhd_sage_vfs_neuro_state';
+const PREFS = ['adhd_sage_provider', 'adhd_sage_or_model', 'adhd_sage_ollama_model', 'adhd_sage_theme'];
+const log = (m) => { document.getElementById('log').textContent += m + '\n'; };
+document.getElementById('host').textContent = location.host;
+
+const read = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+const parse = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
+
+function snapshot() {
+  const out = { kind: 'adhd-carry-over', version: 1, host: location.host, exported_at: new Date().toISOString(), items: {} };
+  for (const k of [CHAT, VFS, NEURO, ...PREFS]) { const v = read(k); if (v != null) out.items[k] = v; }
+  return out;
+}
+
+function download(obj, name) {
+  const url = URL.createObjectURL(new Blob([JSON.stringify(obj)], { type: 'application/json' }));
+  const a = Object.assign(document.createElement('a'), { href: url, download: name });
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+function summary(items) {
+  const chat = parse(items[CHAT], []), vfs = parse(items[VFS], {});
+  return `${chat.length} chat messages, ${(vfs.inner_spiral?.nodes || []).length} inner-spiral nodes, ` +
+         `${(vfs.outer_sweep?.archive || []).length} outer-sweep nodes, neuro state ${items[NEURO] ? 'yes' : 'no'}`;
+}
+
+document.getElementById('export').onclick = () => {
+  const snap = snapshot();
+  download(snap, `adhd-carry-over-${location.hostname}-${snap.exported_at.slice(0, 19).replace(/:/g, '')}.json`);
+  log('Exported: ' + summary(snap.items));
+};
+
+// Chats: incoming (older host) first, then messages only this host has.
+function mergeChat(incoming, local) {
+  const seen = new Set(incoming.map((m) => m.id));
+  return [...incoming, ...local.filter((m) => !seen.has(m.id))];
+}
+
+// Spiral: union by node id; inner spiral trimmed to capacity (pinned first,
+// then newest), overflow moved to the outer sweep, as her own eviction does.
+function mergeVfs(inc, loc) {
+  const byId = (lists) => { const m = new Map(); for (const l of lists) for (const n of l || []) if (n && n.id && !m.has(n.id)) m.set(n.id, n); return [...m.values()]; };
+  const cap = loc.inner_spiral?.capacity || inc.inner_spiral?.capacity || 10;
+  let inner = byId([loc.inner_spiral?.nodes, inc.inner_spiral?.nodes]);
+  inner.sort((a, b) => (b.pinned - a.pinned) || (b.timestamp - a.timestamp));
+  const overflow = inner.slice(cap);
+  inner = inner.slice(0, cap).sort((a, b) => a.timestamp - b.timestamp);
+  const outer = byId([loc.outer_sweep?.archive, inc.outer_sweep?.archive, overflow]).sort((a, b) => a.timestamp - b.timestamp);
+  return { ...inc, ...loc, inner_spiral: { ...(inc.inner_spiral || {}), ...(loc.inner_spiral || {}), nodes: inner },
+           outer_sweep: { ...(inc.outer_sweep || {}), ...(loc.outer_sweep || {}), archive: outer } };
+}
+
+document.getElementById('file').onchange = async (ev) => {
+  const f = ev.target.files[0]; if (!f) return;
+  const data = parse(await f.text(), null);
+  if (!data || data.kind !== 'adhd-carry-over') { log('Not an ADHD carry-over file.'); return; }
+  if (data.host === location.host) { log('That file came from this same host, so there is nothing to carry over.'); return; }
+
+  const before = snapshot();
+  download(before, `adhd-before-import-${location.hostname}-${before.exported_at.slice(0, 19).replace(/:/g, '')}.json`);
+  log('Backed up this host first: ' + summary(before.items));
+
+  const inc = data.items, loc = before.items;
+  const chat = mergeChat(parse(inc[CHAT], []), parse(loc[CHAT], []));
+  const vfs = mergeVfs(parse(inc[VFS], {}), parse(loc[VFS], {}));
+  try {
+    localStorage.setItem(CHAT, JSON.stringify(chat));
+    localStorage.setItem(VFS, JSON.stringify(vfs));
+    if (inc[NEURO]) localStorage.setItem(NEURO, inc[NEURO]);
+    for (const k of PREFS) if (inc[k] != null && read(k) == null) localStorage.setItem(k, inc[k]);
+  } catch (e) {
+    log('Import failed (storage full?): ' + e.message + '. Nothing else was changed; the backup file restores this host.');
+    return;
+  }
+  log('Imported from ' + data.host + ' (' + data.exported_at + ').');
+  log('Now: ' + summary(snapshot().items));
+  log('Open ADHD (/) and reload. She has her thread back.');
+};
+</script>
+</body>
+</html>
