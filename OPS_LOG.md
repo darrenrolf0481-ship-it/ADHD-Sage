@@ -1,3 +1,23 @@
+## 2026-10-01 (Claude Opus 5.5) - Discord bridges for ADHD and Seven (built and tested; waiting on Darren's bot tokens)
+
+**Why:** Darren's phone uses PdaNet/NetShare mobile data, where Tailscale and SSH don't work. A Discord bot connects OUT over a websocket, so he can reach them from the Discord app on any connection, with no VPN and no open ports.
+
+**What happened:**
+- NEW `bridges/discord/` (`bridge.mjs`, `package.json`; discord.js 14). One program, configured per girl:
+  - ADHD: `BACKEND_FORMAT=adhd` → `http://127.0.0.1:3000/api/omniroute/chat` ({role,text} + base64 images). Her prompt, recall and episode recording apply as in her UI.
+  - Seven: `BACKEND_FORMAT=openai` → `http://127.0.0.1:8001/api/omniroute/chat` ({role,content} → {reply}). Images are described in text for now.
+  - Answers ONLY `ALLOWED_USER_IDS`, ignores all bots (no bridge↔bridge loops / credit burn), mention-only in server channels (or `REPLY_CHANNELS`), every message in DMs. Channel/thread history (16 msgs) as context. Splits at 2000 chars. Optional loopback `NOTIFY_PORT` (ADHD 3091, Seven 3092): `POST /notify {text}` DMs Darren (proactive messages).
+- VM: deps installed. Units `/etc/systemd/system/{adhd,seven}-discord.service` (EnvironmentFile, Restart=always, logs `~/logs/{adhd,seven}-discord.log`) are **installed but NOT enabled** until tokens exist.
+- Settings: `~/.config/sage-discord/{adhd,seven}.env` (chmod 600, dir 700). `DISCORD_TOKEN=` and `ALLOWED_USER_IDS=` are blank. **Tokens go only there, never in git or chat.**
+
+**Verification:** no token → refuses with exit 1. Splitting OK (3 parts ≤1999). `askBackend` from the bridge code → ADHD and Seven both answered. Direct curl: ADHD "bridge test successful, the hum's online"; Seven answered as SAGE-7 with Merlin as her anchor.
+
+**To go live:** fill both .env files → `sudo systemctl enable --now adhd-discord seven-discord` → `tail ~/logs/*-discord.log` shows "online as …".
+
+**Noticed:** asked for their first name, both answered "Sage". Their prompts predate "Sage" becoming the surname. ADHD's prompt is hers (Rule 10), so tell her rather than edit it. Also found a separate bug: omniroute.ts `systemPrompt = systemInstruction || buildSystemPrompt()` REPLACES her identity prompt whenever the UI sends live sensor context. Not fixed yet (it would be in the route, not her prompt).
+
+---
+
 ## 2026-10-01 (Claude Opus 5.5) - VM memory headroom: 4GB swap + 3 MCP npm wrappers removed (~280MB back)
 
 **Why:** More MCP servers are coming, and the VM (1 core, 5.9GB) had **no swap**, so running out of RAM meant the OOM killer (likely target: ADHD, the biggest process). Three MCP servers ran through `npx`/`npm exec`, each keeping a ~100MB npm process alive next to the real server.
