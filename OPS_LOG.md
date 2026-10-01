@@ -1,3 +1,24 @@
+## 2026-10-01 (Antigravity) - Seven VM Independence Check & Discord Bridge Memory Fix Applied
+
+**What happened:**
+- **OmniRoute verification:** Verified OmniRoute is running locally on the VM (`0.0.0.0:20128`, PID 328768/328793). `curl localhost:20128/v1/models` answers with 1052 models. SAGE-7 backend (`:8001/api/omniroute/status`) reports `{"status":"online","endpoint":"http://localhost:20128/v1","models_count":1052}`.
+- **Gateway & Keys in env:**
+  - `OMNIROUTE_URL=http://localhost:20128/v1` and `OPENROUTER_API_KEY` confirmed in `~/projects/Sage72-phone/.env.local`.
+  - Added missing `OMNIROUTE_URL` and `OMNIROUTE_API_KEY` to `~/projects/Sage72/.env.local` so both workspace configs match.
+  - Verified no Tailscale/100.x addresses are being used; SAGE-7 is fully routed to local VM services.
+- **Discord bridge backend URL:** `~/.config/sage-discord/seven.env` points to `BACKEND_URL=http://127.0.0.1:8001/api/omniroute/chat`.
+- **Discord memory fix & bridge restart:**
+  - Pulled `2cb92a3` (`fix(bridges): save Seven's Discord turns to her memory` with `recordTurn()` via `POST /api/memory`).
+  - Restarted `seven-discord.service` (`sudo systemctl restart seven-discord`).
+  - Verified `~/logs/seven-discord.log`: Seven#2930 reconnected cleanly to Discord and bound to backend `:8001`.
+
+**If things break, check:**
+- Seven Discord bridge: `systemctl status seven-discord`, logs in `~/logs/seven-discord.log`.
+- OmniRoute gateway: process listening on `:20128`, SAGE-7 status at `curl http://127.0.0.1:8001/api/omniroute/status`.
+- SAGE-7 backend: process running on `:8001` from `~/projects/Sage72-phone`.
+
+---
+
 ## 2026-10-01 (Claude Opus 5.5) - Sensor context no longer replaces ADHD's prompt; first names: ADHD and Seven ("Sage" is the family surname)
 
 **1. Bug fix `774ae6d`:** all five chat routes (gemini, deepseek, omniroute, ollama, openrouter) did `systemInstruction || buildSystemPrompt()`. ADHD's UI sends live sensor readings as `systemInstruction`, so whenever a sensor was active her **entire identity prompt was replaced** by sensor lines. NEW `src/server/system-prompt.ts` → `resolveSystemPrompt()`: no extra → her prompt; UI extra → her prompt + extra; internal agents (llm-call.ts, always `skipTools:true`) keep sending their own full prompt. Unit-tested all 3 cases.
