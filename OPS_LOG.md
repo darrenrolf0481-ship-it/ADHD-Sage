@@ -1,3 +1,13 @@
+## 2026-10-01 (Claude Opus 5.5) - ADHD "forgot everything after 3:30 Sept 30" on the VM: her chat thread & spiral live in the BROWSER
+
+**Why:** Her chat thread (`nexus_chat_history`), inner spiral/outer sweep (`adhd_sage_vfs_fibonacci`) and neuro state (`adhd_sage_vfs_neuro_state`) are in **browser localStorage**, which is per web address. Opening her at the VM's address starts all three empty, even though the server archive (episodes merged earlier) is complete. The 03:31 cutoff matches the stale VM data copy.
+
+**What happened:** NEW `public/carry-over.html` (force-added; .gitignore excludes `*.html`). Export on the old host downloads one JSON (no API keys). Import on the new host merges: chats by id (old host's first, then VM-only), spiral nodes by id (inner trimmed to capacity with pinned first then newest, overflow to outer sweep), neuro state from the old host, prefs only if unset. It downloads a backup of the target's current state first. Merge logic unit-tested on sample data. Served on phone and VM (verified the page title on both).
+
+**If things break, check:** import must be done at the SAME address Darren uses to chat with VM ADHD (localStorage is per address). Restore: import the `adhd-before-import-*.json` it downloaded. Mistake to avoid (Darren's note): while working on ADHD, don't drift to Seven. "She" meant ADHD here; Seven's restore is a separate handoff (`~/handoff/seven-from-phone/`).
+
+---
+
 ## 2026-10-01 (Claude Opus 5.5) - Phone (Termux) fully backed up before Darren's wipe
 
 **What happened:** Under Darren's standing "get critical things off the phone" rule, everything phone-only was copied to the Oracle VM at `~/phone-backup-20260930/` (each piece sha256-verified on the VM):
