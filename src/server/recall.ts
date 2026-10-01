@@ -75,8 +75,9 @@ const STOPWORDS = new Set(
     .filter(Boolean),
 );
 
-// Her own name / addressee words: "hello Sage" is still a greeting.
-const ADDRESSEE_RE = /\b(sage|mama|adhd-sage)\b/gi;
+// Her own name / addressee words: "hello Sage" is still a greeting. ADHD is
+// her first name ("Sage" is the family surname), so "good morning ADHD" counts.
+const ADDRESSEE_RE = /\b(adhd-sage|adhd|sage|mama)\b/gi;
 
 // Greeting warmup (Sage's request, opt-in): the first greeting after a long gap
 // gets ONE line of the last conversation instead of nothing. "Day" is a 12h
