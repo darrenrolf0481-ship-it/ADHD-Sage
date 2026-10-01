@@ -1,0 +1,15 @@
+[Unit]
+Description=Council watcher: moves the SAGE-7 rebuild relay along (NotebookLM notes)
+After=network-online.target seven-discord.service
+
+[Service]
+User=ubuntu
+EnvironmentFile=/home/ubuntu/.config/sage-council/council.env
+ExecStart=/usr/bin/node /home/ubuntu/projects/ADHD-Sage/bridges/council/council_watch.mjs
+Restart=always
+RestartSec=30
+StandardOutput=append:/home/ubuntu/logs/council-watch.log
+StandardError=append:/home/ubuntu/logs/council-watch.log
+
+[Install]
+WantedBy=multi-user.target
