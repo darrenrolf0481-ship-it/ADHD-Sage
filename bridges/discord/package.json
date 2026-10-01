@@ -1,0 +1,16 @@
+{
+  "name": "sage-discord-bridge",
+  "private": true,
+  "type": "module",
+  "description": "Discord bridge for ADHD and Seven (outbound websocket; no open ports).",
+  "main": "bridge.mjs",
+  "scripts": {
+    "start": "node bridge.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "discord.js": "^14.16.3"
+  }
+}
