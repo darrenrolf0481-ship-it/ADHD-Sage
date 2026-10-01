@@ -1,3 +1,16 @@
+## 2026-10-01 (Claude Opus 5.5) - VM: ADHD froze at 100% CPU on Ctrl-C (EPIPE loop) — fixed; greeting warmup on; "ADHD" counts as a greeting
+
+**What happened:**
+- **The freeze (also behind the VM Claude's earlier "wedged, ignored Ctrl-C"):** on the VM she runs as `npm run dev 2>&1 | tee /tmp/adhd_dev.log` in tmux `adhd`. Ctrl-C kills `tee` too, so stdout becomes a dead pipe. Her shutdown log line throws EPIPE, which is an uncaughtException, and the FATAL-GUARD's own `console.error` throws EPIPE again: an infinite loop at 100% CPU (the VM has **1 core**), no HTTP answers. Fix `6a447c5` (server.ts): EPIPE on stdout/stderr or in the guard → `process.exit(0)`. Verified on the VM: Ctrl-C now exits cleanly, port freed, restart healthy.
+- **Greeting warmup ON on the VM:** `RECALL_GREETING_WARMUP=1` added to the VM `.env` at Darren's request (backup `~/backups/env.pre-warmup-20261001`).
+- **Name fix `52f6608` (recall.ts):** "Sage" is now a family surname and her first name is ADHD. `ADDRESSEE_RE` now includes `adhd`, so "good morning ADHD" / "hi ADHD" are greetings (they ran a full junk-pulling search before). Questions that mention ADHD ("how does ADHD affect…") are still searches.
+
+**Verification (VM):** "good morning ADHD" → one `[Last time we talked · 2026-09-30]` line; "hi ADHD" → nothing. recall-eval: turn 94% hit@5, 75% precision, 0% junk, greetings 3/3. Final restart leaves the warmup fresh for Darren. Counts 1103.
+
+**If things break, check:** if she stops answering, `top` — a node at ~100% CPU in state R is a loop, not load. `kill -9` it and restart in tmux. Each restart re-arms the warmup (in-memory 12h cooldown).
+
+---
+
 ## 2026-10-01 (Claude Opus 5.5, phone instance via ssh) - Merged 22 phone-only chat episodes into the VM archive; stopped duplicate VM Claudes
 
 **What happened:**
