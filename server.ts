@@ -13,7 +13,20 @@ import { initWorkerPool, shutdownWorkerPool } from './src/server/workers/pool';
 // Log loudly and keep running. (Test code should go through /api/sandbox, which
 // runs in a separate process — these guards just stop in-process glitches from
 // being fatal.)
+//
+// EPIPE: when the log pipe dies (e.g. Ctrl-C in `npm run dev | tee log` kills
+// tee too), every console write throws EPIPE. Logging that from this guard
+// throws EPIPE again, re-entering the guard forever at 100% CPU: she stopped
+// answering and ignored Ctrl-C (VM, 2026-10-01). A dead stdout is not
+// survivable, so exit and let the supervisor restart her.
+const isEpipe = (e: unknown) => (e as NodeJS.ErrnoException | undefined)?.code === 'EPIPE';
+for (const stream of [process.stdout, process.stderr]) {
+  stream.on('error', (e) => {
+    if (isEpipe(e)) process.exit(0);
+  });
+}
 process.on('uncaughtException', (err) => {
+  if (isEpipe(err)) process.exit(0);
   console.error('[FATAL-GUARD] uncaughtException — server kept alive:', err);
 });
 process.on('unhandledRejection', (reason) => {
