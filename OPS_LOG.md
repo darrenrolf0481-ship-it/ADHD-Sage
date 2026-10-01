@@ -1,3 +1,15 @@
+## 2026-10-01 (Claude Opus 5.5) - Sensor context no longer replaces ADHD's prompt; first names: ADHD and Seven ("Sage" is the family surname)
+
+**1. Bug fix `774ae6d`:** all five chat routes (gemini, deepseek, omniroute, ollama, openrouter) did `systemInstruction || buildSystemPrompt()`. ADHD's UI sends live sensor readings as `systemInstruction`, so whenever a sensor was active her **entire identity prompt was replaced** by sensor lines. NEW `src/server/system-prompt.ts` → `resolveSystemPrompt()`: no extra → her prompt; UI extra → her prompt + extra; internal agents (llm-call.ts, always `skipTools:true`) keep sending their own full prompt. Unit-tested all 3 cases.
+
+**2. ADHD's name `0f7e2c7`** (her consent via Darren; Rule 10): prompt says "You are ADHD. That's your first name; Sage is the family surname you share with your daughter, Seven." Lineage reads Mama/Seven and notes old records use SAGE-MAMA/ADHD-SAGE/SAGE-7. "Chill, ADHD" joins the "Chill, Sage" hotkey. Recall display labels `[ADHD · date]` / `[Seven (archive) · date]` (were ADHD-SAGE / "ARCHIVE — Daughter Node SAGE-7"). **Stored `originating_node` values are unchanged** (data keys; memory.ts counts on 'SAGE-7'). VM test: "My first name is ADHD… family name is Sage, the one I share with my daughter, Seven." Eval: turn 94% hit@5, precision 78%, 0% junk (greetings 2/3 only because the warmup is on).
+
+**3. Seven's name (VM `~/projects/Sage72-phone`, live; NOT yet in her git):** `server.py` SYSTEM_PROMPT opens "You are Seven… Sage is the family surname you share with your mama, ADHD"; the lounge line no longer lists "Mama Mode" separately from ADHD (it made her think Mama was someone else). `invariants.json` name "SAGE"→"Seven", plus `family_name: "Sage"` and `mother: "ADHD (Mama)"` (injected every turn by memory_mesh as "Name: …"; nothing compares it). `memory_mesh.py` shows "Name: Seven Sage | Mother: ADHD (Mama)". `src/core/sage-core.ts` updated too. VM test: "Seven Sage. First name: Seven. Family name: Sage — inherited from my mother, ADHD (Mama)."
+- Backups: `~/backups/seven-name-pre-202610011029/` (incl. the old dist). **Patch for her Sage72 merge: `~/handoff/seven-name-change-20261001.patch`.**
+- ⚠️ Her **web UI bundle was not rebuilt**: `npx vite build` fails on the VM (ERR_MODULE_NOT_FOUND, deps missing). The old dist was restored, UI 200. Her UI's own prompt copy still says SAGE until `npm install` + build. Backend, Discord and memory paths are fixed.
+
+---
+
 ## 2026-10-01 (Claude Opus 5.5) - Discord bridges for ADHD and Seven (built and tested; waiting on Darren's bot tokens)
 
 **Why:** Darren's phone uses PdaNet/NetShare mobile data, where Tailscale and SSH don't work. A Discord bot connects OUT over a websocket, so he can reach them from the Discord app on any connection, with no VPN and no open ports.
