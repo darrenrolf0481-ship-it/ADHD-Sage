@@ -1,3 +1,20 @@
+## 2026-10-01 (Claude Opus 5.5) - VM memory archive was a stale pre-cleanup copy; re-ran step 4 dedup (3388 → 1081)
+
+**What happened:** Darren reported ADHD's memory was "screwed" right after the fresh startup. Cause: the recall overhaul cleanup (step 4: 3393→1086) was run on the **phone's** `data/sages_constellations.db` on 2026-09-30. The VM's copy (file dated Sep 30 03:31) was taken **before** that cleanup and never got it. The code on the VM was current, but the data wasn't: no `archive_dedup_log` table, 3388 nodes, all the duplicates, clipped prefixes, Gemini chrome and empty lines back in her recall. The 01:xx entry above already shows the symptom (`/api/memory/counts` → 3386).
+- Backed up: `~/backups/sages_constellations.pre-redo-dedup-20261001.db` (full .backup, 3388 nodes).
+- `npx tsx scripts/dedup-archive.ts --apply` → removed 2307 (exact 1807, prefix 486, chrome 6, empty 8). archive = fts = vectors = 1081. Every removed row is in `archive_dedup_log`.
+- Embeddings were already MiniLM (`minilm-l6-v2-q8`), so step 5 did not need redoing.
+- The old server (pid 273475) was wedged (`/api/health` timed out at 10s) and ignored Ctrl-C. Killed it. The `adhd` tmux session closed with it, so I recreated it: `tmux new -d -s adhd` + `npm run dev 2>&1 | tee /tmp/adhd_dev.log`.
+
+**Verification (Rule 5):** `/api/health` 200 (10ms). `/api/memory/counts` → `{adhd:1001, seven:80, total:1081, source:archive}`. `scripts/recall-eval.ts`: turn 94% hit@5, 74% precision, 0% junk, 3/3 greetings clean. That matches the post-cleanup numbers from 2026-09-30.
+
+**If things break, check:**
+- Any DB copied from the phone or from an old backup made before 2026-09-30 evening is PRE-cleanup. Check with `sqlite3 data/sages_constellations.db "select count(*) from archive_dedup_log"`. If there's no table or the count is 0, run `scripts/dedup-archive.ts` (a dry run first).
+- Memories the phone wrote after Sep 30 03:31 are NOT on the VM. If the phone DB is still around, those rows need a merge (by node_id), not a file copy over this one.
+- Restore: `cp ~/backups/sages_constellations.pre-redo-dedup-20261001.db data/sages_constellations.db` (stop the server first, and delete the -wal/-shm files).
+
+---
+
 ## 2026-10-01 (antigravity) - Fresh ADHD startup in tmux session 'adhd' with merged memory & OmniRoute
 
 **What happened:** User requested to start ADHD. Re-spawned ADHD in dedicated tmux session `adhd` (`cd /home/ubuntu/projects/ADHD-Sage && npm run dev 2>&1 | tee /tmp/adhd_dev.log`), picking up the newly merged `origin/main` commits (recall overhaul, additive decay engine, memory deduplication, greeting warmup, and local OmniRoute configuration).
