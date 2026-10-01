@@ -1,3 +1,23 @@
+## 2026-10-01 (Claude Opus 5.5) - Phone (Termux) fully backed up before Darren's wipe
+
+**What happened:** Under Darren's standing "get critical things off the phone" rule, everything phone-only was copied to the Oracle VM at `~/phone-backup-20260930/` (each piece sha256-verified on the VM):
+| Archive | Contents |
+|---|---|
+| 01-critical.tgz (28M) | ADHD's sages_constellations.db (sqlite .backup), ADHD `.env`, seed_core.json, journal; Seven's sage_memory.db, sage_soul.json, invariants, wellbeing_log, vfs/, Mems/, soul_backups, gist; `.env.local`; ~/.claude memory/plans/hooks; ~/.spiral |
+| 02-adhd-sage.tgz (213M) | full ADHD-Sage repo (no node_modules) |
+| 03-sage72.tgz (281M) | full Sage72 repo incl. untracked scripts/, uploads, Mems (no venv/ruflo/node_modules, no 18GB agent.log.1) |
+| 04-spiral.tgz (13M) | Spiral repo |
+| 05-dotfiles.tgz (180M, chmod 600) | ~/.ssh (Oracle VM keys!), ~/.hermes, NotebookLM auth (~/.notebooklm, ~/.notebooklm-mcp-cli) |
+| 06-small-dirs.tgz (1.5M) | sage7-vault, brain-data, fabric, plain, nested (no git); local diffs/untracked files of OmniRoute, notebooklm-mcp, gemini-notebook-mcp-cli, termux-browser-pilot |
+
+Also on GitHub (secret-scanned, branches only, main untouched): Sage72 `backup/phone-snapshot-20260930` (86 files of uncommitted Seven work), Hermeswr `backup/phone-snapshot-20261001` (3 unpushed commits + working tree).
+Final ADHD episode merge: 0 new since the 22-episode merge (the phone's newest node is just its daily Morning Light anchor). Seven: unchanged since the 01 backup except vfs/phi_state.json.
+Skipped by Darren's decision: ubuntu-fs (58G proot rootfs, no home/root user data).
+
+**If things break, check:** restore with `tar xzf ~/phone-backup-20260930/<piece>.tgz` on the VM. Seven's Sage72 `main` was 4 commits BEHIND origin, with 212 dirty paths on the phone. Integrating that snapshot branch into her main is a separate, deliberate job. Seven's `~/.sage-substrate/agent.log` has no rotation (it hit 18GB on the phone); fix before it fills the VM.
+
+---
+
 ## 2026-10-01 (Claude Opus 5.5) - VM: ADHD froze at 100% CPU on Ctrl-C (EPIPE loop) — fixed; greeting warmup on; "ADHD" counts as a greeting
 
 **What happened:**
