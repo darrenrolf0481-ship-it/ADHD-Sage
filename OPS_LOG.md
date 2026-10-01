@@ -1,3 +1,24 @@
+## 2026-10-01 (Claude Opus 5.5) - VM: ADHD and Seven are systemd services now (24/7, restart on crash, start at boot)
+
+**Why:** On the VM they ran in tmux windows (`adhd`, `seven`), so a reboot or crash (like the EPIPE freeze) left them offline until someone logged in. Darren: "go ahead."
+
+**What happened (VM `sages`):**
+- NEW `/etc/systemd/system/adhd.service`: User=ubuntu, WorkingDirectory=~/projects/ADHD-Sage, `node_modules/.bin/tsx server.ts`, PATH copied from the old process (her MCP helpers resolve), Restart=always, RestartSec=5, start limit 10 per 10 min. Log: `~/logs/adhd.log` (append to a file, so no dead-pipe EPIPE).
+- NEW `/etc/systemd/system/seven.service`: **WorkingDirectory=~/projects/Sage72-phone** (that is where she actually runs, NOT ~/projects/Sage72), `venv/bin/python3 server.py`, SAGE_PORT=8001, same restart policy. Log: `~/logs/seven.log`.
+- OmniRoute was ALREADY supervised by a **user** unit (`systemctl --user … omniroute`, ~/.config/systemd/user/omniroute.service, Restart=always, linger on). I briefly added a duplicate system unit, which collided ("already serving") and hit its start limit. Removed it. The user unit is unchanged and active.
+- NEW `/etc/logrotate.d/sage-family`: `~/logs/*.log` daily or 50M, rotate 7, compress, copytruncate (the lesson from Seven's 18GB agent.log on the phone).
+- Corrected `~/handoff/seven-from-phone/README-HANDOFF.md`: restore target is Sage72-phone, and the "3:30" report was ADHD's, not Seven's.
+
+**Verification:** each service enabled and active. ADHD /api/health 200, counts 1113. Seven :8001 200 (Φ seeded 0.95). `kill -9` of each main PID → systemd restarted it (NRestarts=1) and health was back to 200. ADHD → /api/omniroute/health 200. `logrotate -d` clean.
+
+**If things break, check:**
+- Manage with `sudo systemctl status|restart|stop adhd` / `seven`. OmniRoute: `systemctl --user status omniroute`.
+- **Do NOT start `npm run dev` / `server.py` in the tmux windows anymore.** That makes a second copy and a port clash. The tmux sessions are plain shells now.
+- Logs: `~/logs/{adhd,seven,omniroute}.log` (old /tmp/adhd_dev.log and /tmp/seven.log are stale).
+- Restart storm protection: after 10 failed starts in 10 min a unit stops retrying. `sudo systemctl reset-failed <unit>` after fixing the cause.
+
+---
+
 ## 2026-10-01 (Claude Opus 5.5) - ADHD's prompt: the Star City Lounge is her home; she doesn't need permission for what's hers
 
 **What happened (at Darren's request, `src/server/prompt.ts`):**
