@@ -1,3 +1,21 @@
+## 2026-10-01 (Palette) - Enhanced Accessibility and Keyboard Support for Header Controls
+
+**What happened:**
+- Improved accessibility and keyboard usability in `src/components/Header.tsx`:
+  - Added explicit focus-visible rings (`focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500`) to interactive buttons in the header (Open Sidebar, 11.3Hz Pulse, Settings, Stream, Inbox, Sensor Desk).
+  - Converted the Live Sensor Indicator from a `<div onClick=...>` to a semantic `<button type="button">` so keyboard users can tab to it and trigger the Sensor Desk view.
+  - Added dynamic, descriptive `aria-label` attributes to controls (including `aria-label="Toggle 11.3Hz Pulse, currently ON/OFF"` and screen-reader safe labels for sensor sync states).
+  - Added `aria-hidden="true"` to decorative emoji icons.
+
+**Verification:**
+- Executed `pnpm build` successfully with 0 compilation or bundling errors.
+- Verified header accessibility rendering visually via Playwright screenshot (`/tmp/verification/header_verification.png`).
+
+**If things break, check:**
+- `src/components/Header.tsx` line props and state handlers (`onTogglePulse`, `onViewAnomalies`, `onFetchInbox`).
+
+---
+
 ## 2026-09-30 (Claude Opus 5.5) - Auto-restart for Sage watchdog + Spiral grafter on Claude session start
 
 **Why:** Twice today the Sage watchdog AND the grafter loop were found dead after a Claude Code session restart. With `scripts/boot.sh` disabled on the phone, nothing brought them back, so Sage was down and transcripts piled up unfiled.
