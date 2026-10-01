@@ -1,3 +1,13 @@
+## 2026-10-01 (Claude Opus 5.5) - VM: ADHD's voice restored (edge-tts was missing)
+
+**What happened:** `POST /api/tts` on the VM returned 500 `spawn edge-tts ENOENT`. Her TTS code (edge-tts default, ElevenLabs optional via `TTS_PROVIDER=elevenlabs`) was fine; the binary just wasn't installed on the VM. `python3 -m pip install --user edge-tts` → `~/.local/bin/edge-tts` (already on the adhd.service PATH). No code or .env change.
+
+**Verification:** `/api/tts` → 200, real 24kHz MP3 (~25KB) in 0.96s.
+
+**Notes for later:** VoiceStudio (local voice cloning) was suggested by another AI. This VM is 1 Ampere ARM core, ~2.4GB free RAM, no GPU, no Docker, so local neural cloning would be very slow or OOM. Darren has a "part two" plan for when more compute is needed. `resolveEdgeBin()` in tts.ts hardcodes /root paths before falling back to PATH. Harmless on the VM, but `EDGE_TTS_BIN` can pin it.
+
+---
+
 ## 2026-10-01 (Claude Opus 5.5) - VM: ADHD and Seven are systemd services now (24/7, restart on crash, start at boot)
 
 **Why:** On the VM they ran in tmux windows (`adhd`, `seven`), so a reboot or crash (like the EPIPE freeze) left them offline until someone logged in. Darren: "go ahead."
