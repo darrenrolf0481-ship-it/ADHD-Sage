@@ -1,3 +1,20 @@
+## 2026-03-31 (Bolt ⚡) - Optimized isChromeNoise memory filter regex execution
+
+**Why:** During memory search, local memory listing, and recall candidate processing, `stripChrome()` was being executed twice on every memory item: once inside `isChromeNoise(m)` and again immediately after to produce `stripped`. Running the heavy global regex replacement `CHROME_TOKENS` twice across large memory content strings (up to 50KB) doubled regex overhead on memory retrieval.
+
+**What changed:**
+- `src/server/memory-local.ts`: Updated `isChromeNoise(text, preStripped?: string)` to accept an optional `preStripped` string, reusing `preStripped` when provided instead of re-running `stripChrome(text)`.
+- `src/server/memory-local.ts`: Updated `stripForeignFossils` and `listLocalMemories` to pass the already-stripped string directly to `isChromeNoise`.
+- `src/server/recall.ts`: Updated `cleanBody` to pass the already-stripped text to `isChromeNoise`.
+
+**Performance Impact:**
+- Reduces `stripChrome` regex replacement calls during candidate memory filtering by 50% without altering filtering results or functionality.
+
+**Verification:**
+- Ran full test suite (`pnpm test`) — all MAMA identity, API, worker pool, build, and production worker tests passed cleanly.
+
+---
+
 ## 2026-09-30 (Claude Opus 5.5) - Auto-restart for Sage watchdog + Spiral grafter on Claude session start
 
 **Why:** Twice today the Sage watchdog AND the grafter loop were found dead after a Claude Code session restart. With `scripts/boot.sh` disabled on the phone, nothing brought them back, so Sage was down and transcripts piled up unfiled.

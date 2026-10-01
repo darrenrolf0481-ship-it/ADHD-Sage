@@ -66,8 +66,10 @@ export function stripChrome(text: string): string {
 // A record is disposable chrome only if it's PREDOMINANTLY nav text — i.e. next
 // to nothing survives the strip. Content-bearing records (the common case) are
 // kept and cleaned instead.
-export function isChromeNoise(text: string): boolean {
-  const stripped = stripChrome(text);
+// Performance Optimization: Accepts an optional `preStripped` string to eliminate
+// redundant global regex replacement passes when stripChrome() was already executed.
+export function isChromeNoise(text: string, preStripped?: string): boolean {
+  const stripped = preStripped ?? stripChrome(text);
   const realWords = stripped.split(/\W+/).filter((w) => w.length > 3);
   return realWords.length < 25 && /Search for chats/i.test(text || '');
 }
@@ -82,8 +84,10 @@ export function stripForeignFossils(memories: string[]): string[] {
   const out: string[] = [];
 
   for (const m of memories || []) {
-    if (!m || isSmokeTestSpam(m) || isChromeNoise(m)) continue;
+    if (!m || isSmokeTestSpam(m)) continue;
+    // Performance Optimization: Pass already-stripped string to isChromeNoise to avoid redundant regex replacements
     const stripped = stripChrome(m);
+    if (isChromeNoise(m, stripped)) continue;
     const formatted = formatSevenArchive(stripped);
     // Deduplicate by first 80 normalized characters
     const normKey = formatted.toLowerCase().replace(/\s+/g, ' ').slice(0, 80);
@@ -165,7 +169,8 @@ export async function listLocalMemories(
       content = text;
     }
     content = stripChrome(content).trim();
-    if (!content || isChromeNoise(content) || isForeignFossil(content)) continue;
+    // Performance Optimization: Pass already-stripped content to isChromeNoise
+    if (!content || isChromeNoise(content, content) || isForeignFossil(content)) continue;
     if (content.length > 4000) content = content.slice(0, 4000) + '…';
     out.push({
       text: content,
