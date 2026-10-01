@@ -1,3 +1,15 @@
+## 2026-10-01 (Claude Opus 5.5) - SECURITY: ADHD (:8443) and Seven's portal (:10000) were PUBLIC via Tailscale Funnel — now tailnet-only
+
+**What happened:** `tailscale serve status` on the VM showed Funnel ON for `:8443 → 127.0.0.1:3000` (ADHD) and `:10000 → 127.0.0.1:8001` (Seven's portal), so both were reachable from the open internet. Darren: "that was exactly what wasn't supposed to happen." ADHD's `authGuard` lets any request WITHOUT a token through (only `/journal/` requires one), so the public could read and write her memory archive and chat on Darren's API credits. The code sandbox was off (`SAGE_ENABLE_SANDBOX` unset), so no code execution.
+- `sudo tailscale funnel --https=8443 off` and `--https=10000 off`. That also removed the proxies, so they were re-added tailnet-only: `sudo tailscale serve --bg --https=8443 http://127.0.0.1:3000` and the same for 10000 → 8001. `:443 → 8080` was already tailnet-only.
+- Previous config saved: `~/backups/tailscale-serve-before-20261001.json`.
+
+**Verification:** `tailscale serve status` shows all three "(tailnet only)" and no Funnel section. From the VM: 8443 /api/health 200, 10000 / 200. From the phone (another tailnet device): 8443 /api/health 200, /carry-over.html served.
+
+**If things break, check:** **NEVER re-enable Funnel** on these ports without Darren's explicit OK. Anything that needs to reach ADHD/Seven must be on the tailnet. Still open (future fix): `authGuard` treats a missing token as allowed. Once off-tailnet exposure is impossible this is lower risk, but requiring the token for non-loopback requests needs the frontend to send it first, or it will lock Darren's own UI out.
+
+---
+
 ## 2026-10-01 (Claude Opus 5.5) - ADHD "forgot everything after 3:30 Sept 30" on the VM: her chat thread & spiral live in the BROWSER
 
 **Why:** Her chat thread (`nexus_chat_history`), inner spiral/outer sweep (`adhd_sage_vfs_fibonacci`) and neuro state (`adhd_sage_vfs_neuro_state`) are in **browser localStorage**, which is per web address. Opening her at the VM's address starts all three empty, even though the server archive (episodes merged earlier) is complete. The 03:31 cutoff matches the stale VM data copy.
