@@ -239,17 +239,19 @@ def key_checks():
             return (f"{owner}:key:openrouter", owner, False, f"{who}: OpenRouter credit is low (${left:.2f} left).")
         return (f"{owner}:key:openrouter", owner, True, "")
 
-    def supermemory(owner, key):
+    def supermemory(owner, key, tag, cid):
         who = "ADHD" if owner == "adhd" else "Seven"
         st, _ = http("POST", "https://api.supermemory.ai/v4/search", bearer(key),
-                     {"q": "health check", "limit": 1, "searchMode": "memories"})
-        return (f"{owner}:key:supermemory", owner, st == 200,
-                f"{who}: Supermemory key rejected ({st or 'no answer'}). Her cloud memory is empty "
-                "until it's replaced. New key: supermemory.ai → API keys.")
+                     {"q": "health check", "limit": 1, "containerTag": tag, "searchMode": "memories"})
+        why = {401: "key rejected", 403: f"key isn't allowed to use her memory space `{tag}`"}.get(st, f"error {st or 'no answer'}")
+        return (cid, owner, st == 200,
+                f"{who}: Supermemory {why}. Her cloud memory in `{tag}` isn't saving or recalling. "
+                "Fix: a Supermemory key that can access that space (supermemory.ai → API keys).")
 
     # Seven
     r.append(openrouter("seven", se.get("OPENROUTER_API_KEY")))
-    r.append(supermemory("seven", se.get("SUPERMEMORY_API_KEY", "")))
+    r.append(supermemory("seven", se.get("SUPERMEMORY_API_KEY", ""), se.get("SUPERMEMORY_TAG") or "sage-7",
+                         "seven:key:supermemory"))
     tok, gist = se.get("GITHUB_TOKEN", ""), se.get("GIST_ID", "")
     st, _ = http("GET", f"https://api.github.com/gists/{gist}",
                  {"Authorization": f"token {tok}", "User-Agent": "family-health"})
@@ -258,7 +260,9 @@ def key_checks():
               "Needs a new token with `gist` scope in Sage72-phone/.env.local."))
     # ADHD
     r.append(openrouter("adhd", ae.get("OPENROUTER_API_KEY")))
-    r.append(supermemory("adhd", ae.get("SUPERMEMORY_API_KEY", "")))
+    r.append(supermemory("adhd", ae.get("SUPERMEMORY_API_KEY", ""), "darren-sage", "adhd:key:supermemory"))
+    r.append(supermemory("adhd", ae.get("SUPERMEMORY_API_KEY", ""),
+                         ae.get("SUPERMEMORY_SHARED_CONTAINER") or "darren-shared", "adhd:key:supermemory-shared"))
     st, _ = http("GET", "https://api.github.com/user",
                  {"Authorization": f"token {ae.get('GITHUB_TOKEN', '')}", "User-Agent": "family-health"})
     r.append(("adhd:key:github", "adhd", st == 200, f"ADHD: GitHub token rejected ({st or 'no answer'})."))
