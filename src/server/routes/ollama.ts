@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { OLLAMA_HOST, OLLAMA_TAGS_TIMEOUT_MS, OLLAMA_GEN_TIMEOUT_MS } from '../config';
 import { swarmFetch } from '../swarm';
 import { buildSystemPrompt } from '../prompt';
+import { resolveSystemPrompt } from '../system-prompt';
 import { addMemory, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
 import { recallForTurn } from '../recall';
 import { recordEpisode } from '../turn-memory';
@@ -79,7 +80,7 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
         return;
       }
 
-      let ollamaSystem = systemInstruction || buildSystemPrompt();
+      let ollamaSystem = resolveSystemPrompt(systemInstruction, skipTools);
       // recallForTurn skips greetings itself (incl. "hello Sage").
       if (prompt) {
         const tags =

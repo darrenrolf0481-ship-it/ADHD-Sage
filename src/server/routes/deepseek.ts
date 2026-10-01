@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';
 import { buildSystemPrompt } from '../prompt';
+import { resolveSystemPrompt } from '../system-prompt';
 import { SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
 import { recallForTurn } from '../recall';
 import { recordEpisode } from '../turn-memory';
@@ -37,7 +38,7 @@ router.post('/chat', lockGuard, asyncHandler(async (req: any, res) => {
     }
 
     // Enrich system prompt with long-term memory (same as openrouter/gemini).
-    let dsSystem = systemInstruction || buildSystemPrompt();
+    let dsSystem = resolveSystemPrompt(systemInstruction, skipTools);
     const lastUserMsg = [...(messages || [])].reverse().find((m: { role: string }) => m.role === 'user');
     let lastUserText: string = lastUserMsg?.text || lastUserMsg?.content || '';
 

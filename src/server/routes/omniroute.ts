@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import Database from 'better-sqlite3';
 import { swarmFetch } from '../swarm';
 import { buildSystemPrompt } from '../prompt';
+import { resolveSystemPrompt } from '../system-prompt';
 import { SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
 import { recallForTurn } from '../recall';
 import { recordEpisode } from '../turn-memory';
@@ -115,7 +116,7 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
     }
 
     // Enrich system prompt with substrate memories
-    let systemPrompt = systemInstruction || buildSystemPrompt();
+    let systemPrompt = resolveSystemPrompt(systemInstruction, skipTools);
     const lastUserMsg = [...(messages || [])]
       .reverse()
       .find((m: { role: string }) => m.role === 'user');

@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { FunctionCallingConfigMode } from '@google/genai';
 import { getGenAI } from '../gemini-client';
 import { buildSystemPrompt } from '../prompt';
+import { resolveSystemPrompt } from '../system-prompt';
 import { SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
 import { recallForTurn } from '../recall';
 import { recordEpisode } from '../turn-memory';
@@ -34,7 +35,7 @@ router.post('/generate', lockGuard, asyncHandler(async (req, res) => {
       if (!process.env.GEMINI_API_KEY) throw new Error('GEMINI_API_KEY not set');
 
       // Build system prompt: base + VFS memory state + live sensor telemetry
-      let fullSystemPrompt = systemInstruction || buildSystemPrompt();
+      let fullSystemPrompt = resolveSystemPrompt(systemInstruction, req.body.skipTools);
       if (sensorContext) {
         fullSystemPrompt += '\n' + sensorContext;
       }

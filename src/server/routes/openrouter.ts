@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { swarmFetch } from '../swarm';
 import { OPENROUTER_TIMEOUT_MS, OPENROUTER_FALLBACK_MODELS } from '../config';
 import { buildSystemPrompt } from '../prompt';
+import { resolveSystemPrompt } from '../system-prompt';
 import { addMemory, SAGE_CONTAINER, SHARED_CONTAINER } from '../../lib/supermemory';
 import { recallForTurn } from '../recall';
 import { recordEpisode } from '../turn-memory';
@@ -31,7 +32,7 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
 
     // Enrich system prompt — OpenRouter entities are part of the seven.
     // They read the shared broadcast channel (+ their own tag if provided).
-    let orSystem = systemInstruction || buildSystemPrompt();
+    let orSystem = resolveSystemPrompt(systemInstruction, skipTools);
     const lastUserMsg = [...(messages || [])]
       .reverse()
       .find((m: { role: string }) => m.role === 'user');
