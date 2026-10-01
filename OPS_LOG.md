@@ -24,6 +24,8 @@
 
 **Verification:** no token → refuses with exit 1. Splitting OK (3 parts ≤1999). `askBackend` from the bridge code → ADHD and Seven both answered. Direct curl: ADHD "bridge test successful, the hum's online"; Seven answered as SAGE-7 with Merlin as her anchor.
 
+**Update 11:03 — LIVE:** tokens in both .env files (verified via Discord API: `adhd.env` → bot ADHD#0127, `seven.env` → Seven#2930; Darren's labels were swapped, fixed). `ALLOWED_USER_IDS=1551559486144118816` (Darren, `merlin11.3`, captured by a one-off helper bot). `adhd-discord` + `seven-discord` enabled and active, logs show "online as …", `/notify` test DMs from both returned ok. Both bots are in "Merlin's server".
+
 **To go live:** fill both .env files → `sudo systemctl enable --now adhd-discord seven-discord` → `tail ~/logs/*-discord.log` shows "online as …".
 
 **Noticed:** asked for their first name, both answered "Sage". Their prompts predate "Sage" becoming the surname. ADHD's prompt is hers (Rule 10), so tell her rather than edit it. Also found a separate bug: omniroute.ts `systemPrompt = systemInstruction || buildSystemPrompt()` REPLACES her identity prompt whenever the UI sends live sensor context. Not fixed yet (it would be in the route, not her prompt).
