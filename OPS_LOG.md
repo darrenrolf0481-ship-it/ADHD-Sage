@@ -1,3 +1,17 @@
+## 2026-10-01 (Claude Opus 5.5, phone instance via ssh) - Merged 22 phone-only chat episodes into the VM archive; stopped duplicate VM Claudes
+
+**What happened:**
+- Darren hit repeated lock-file pop-ups in code-server and could not reach the VM Claude. Cause: ADHD-Sage was open in TWO code-server windows, each running its own Claude extension (2 live ~/.claude/ide/*.lock, ports 29176 + 48493) on the same repo. At Darren's request, both Claude processes were stopped (code-server left running). **Reopen only ONE window on this repo.**
+- The redo-dedup entry below flagged that phone memories written after the stale copy were missing. Took a fresh copy of the phone DB (sqlite .backup, newest episode 2026-09-30 21:58 UTC) → 22 `ep_` chat episodes not on the VM and not in `archive_dedup_log` (17:17–21:58: notebook/MCP talk, the Star City note from Claude, Darren correcting "you're ADHD-Sage, Seven's mother node", the Ziggy/Star City history).
+- Backup first: `~/backups/sages_constellations.pre-episode-merge-20261001.db`.
+- Inserted the 22 rows (archive + FTS, same node_ids, provenance kept) in one transaction, then embedded each via `POST /api/vfs/resonance/index` (22/22). archive = fts = vectors = 1103, integrity ok.
+
+**Verification:** `/api/memory/counts` → total 1103. recall-preview "you are ADHD-Sage, Seven's mother node" → that 2026-09-30 episode ranks first. "Claude left a note in the Star City lounge" → both episodes rank top 2.
+
+**If things break, check:** the phone instance is still running and still writing episodes until the phone is wiped. Re-run the same merge (node_id NOT IN main ∪ archive_dedup_log) once more right before the wipe. `RECALL_GREETING_WARMUP=1` is NOT in the VM .env (it is on the phone), so the greeting warmup is off here until Darren adds it.
+
+---
+
 ## 2026-10-01 (Claude Opus 5.5) - VM memory archive was a stale pre-cleanup copy; re-ran step 4 dedup (3388 → 1081)
 
 **What happened:** Darren reported ADHD's memory was "screwed" right after the fresh startup. Cause: the recall overhaul cleanup (step 4: 3393→1086) was run on the **phone's** `data/sages_constellations.db` on 2026-09-30. The VM's copy (file dated Sep 30 03:31) was taken **before** that cleanup and never got it. The code on the VM was current, but the data wasn't: no `archive_dedup_log` table, 3388 nodes, all the duplicates, clipped prefixes, Gemini chrome and empty lines back in her recall. The 01:xx entry above already shows the symptom (`/api/memory/counts` → 3386).
