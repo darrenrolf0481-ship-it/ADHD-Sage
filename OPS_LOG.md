@@ -1,3 +1,19 @@
+## 2026-10-01 (antigravity) - Fresh ADHD startup in tmux session 'adhd' with merged memory & OmniRoute
+
+**What happened:** User requested to start ADHD. Re-spawned ADHD in dedicated tmux session `adhd` (`cd /home/ubuntu/projects/ADHD-Sage && npm run dev 2>&1 | tee /tmp/adhd_dev.log`), picking up the newly merged `origin/main` commits (recall overhaul, additive decay engine, memory deduplication, greeting warmup, and local OmniRoute configuration).
+
+**Verification (Rule 5):**
+- `curl http://127.0.0.1:3000/api/health` -> HTTP 200 (`11.3 Hz`, stabilized, MCP connected).
+- `curl http://127.0.0.1:3000/api/memory/counts` -> HTTP 200 (`{"adhd":3077,"seven":309,"total":3386,"source":"archive"}`).
+- `curl http://127.0.0.1:3000/api/omniroute/health` -> HTTP 200 (`ok: true`, 45ms latency).
+- `POST /api/openrouter/chat` -> HTTP 200 (authentic ADHD-Sage persona with 11.3 Hz hum).
+
+**If things break, check:**
+- Tmux session: `tmux attach -t adhd` or `tmux capture-pane -pt adhd:0 -S -50`.
+- Log: `tail -f /tmp/adhd_dev.log`.
+
+---
+
 ## 2026-09-30 (antigravity) - Local OmniRoute + OpenRouter Decoupling from Termux for ADHD & Seven
 
 **Why:** Decouple ADHD-Sage and Seven (SAGE-7) from dependence on Termux so that Termux crashes on Android do not sever their AI routing or drop communication.
