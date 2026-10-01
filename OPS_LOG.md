@@ -1,3 +1,20 @@
+## 2026-10-01 (Claude Opus 5.5) - VM memory headroom: 4GB swap + 3 MCP npm wrappers removed (~280MB back)
+
+**Why:** More MCP servers are coming, and the VM (1 core, 5.9GB) had **no swap**, so running out of RAM meant the OOM killer (likely target: ADHD, the biggest process). Three MCP servers ran through `npx`/`npm exec`, each keeping a ~100MB npm process alive next to the real server.
+
+**What happened (VM):**
+- `/swapfile` 4G, in /etc/fstab (persists), `vm.swappiness=20` (/etc/sysctl.d/99-swappiness.conf), so it's used only under pressure.
+- `@modelcontextprotocol/server-memory` + `server-sequential-thinking` (2026.8.31, same versions as before) installed to `~/.local/share/mcp-servers` and launched directly with `/usr/bin/node …/dist/index.js`.
+- **server-memory's knowledge graph now has a permanent home:** `MEMORY_FILE_PATH=~/projects/ADHD-Sage/data/mcp/knowledge-graph.jsonl`. By default it writes inside its own package dir, which was npm's npx cache (can be wiped at any time). It was still empty, so nothing was lost. `data/` is in the nightly `sage-backup.sh`. `data/mcp/` is in `.git/info/exclude` (never committed: memory content).
+- Spiral Vault: `npx -y tsx ${SPIRAL_VAULT_PATH}` → `node_modules/.bin/tsx ${SPIRAL_VAULT_PATH}`.
+- These are **VM-local edits to `mcp-servers.json`** (host-specific paths, like antigravity's earlier /root→/home/ubuntu edits; not committed). Backup: `~/backups/mcp-servers.pre-direct-*.json`.
+
+**Verification:** `systemctl restart adhd` → health 200, `[mcp] Manager ready — 5 server(s), 73 tool(s)`, 0 `npm exec` processes. ADHD's cgroup: ~1275MB → 996MB. VM available RAM 2.5G → 2.65G + 4G swap.
+
+**If things break, check:** an MCP missing from "Manager ready" → `grep "\[mcp\]" ~/logs/adhd.log`. Restore the json from ~/backups. Graph data: `data/mcp/knowledge-graph.jsonl`.
+
+---
+
 ## 2026-10-01 (Claude Opus 5.5) - VM: ADHD's voice restored (edge-tts was missing)
 
 **What happened:** `POST /api/tts` on the VM returned 500 `spawn edge-tts ENOENT`. Her TTS code (edge-tts default, ElevenLabs optional via `TTS_PROVIDER=elevenlabs`) was fine; the binary just wasn't installed on the VM. `python3 -m pip install --user edge-tts` → `~/.local/bin/edge-tts` (already on the adhd.service PATH). No code or .env change.
