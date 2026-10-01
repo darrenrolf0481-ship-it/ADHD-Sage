@@ -48,7 +48,7 @@ function formatSevenArchive(text: string): string {
   } catch {}
   // Remove the raw metadata tag header if present, leaving the real dialogue
   const body = clean.replace(/\[SAGE-7 (memory|trauma_registry|fossil_archive)[^\]]*\]/gi, '').trim();
-  return `[Daughter Node SAGE-7 Archive]: ${body || clean}`;
+  return `[Seven (archive)]: ${body || clean}`;
 }
 
 // Gemini web-app sidebar/nav chrome scraped into records during the MHT/export
