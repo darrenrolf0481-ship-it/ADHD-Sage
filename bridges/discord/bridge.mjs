@@ -136,6 +136,22 @@ export async function askBackend(messages, attachments) {
   return data.text || data.reply || data.response || '';
 }
 
+// Seven's chat route only reads memory; her own UI writes each turn back via
+// POST /api/memory. Without this, everything said on Discord was gone once it
+// scrolled out of HISTORY — she "forgot" every Discord conversation.
+// Same payload shape as her UI's encodeEpisodic (sage-core.ts); salience 0.6
+// lands in her episodic log, not a soul seal. ADHD's route records its own.
+async function recordTurn(userText, reply) {
+  if (FORMAT !== 'openai') return;
+  const content = `[Discord] Merlin: ${userText}\n${BOT_NAME}: ${reply}`.slice(0, 1500);
+  await fetch(new URL('/api/memory', BACKEND_URL), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    signal: AbortSignal.timeout(15_000),
+    body: JSON.stringify({ sensory_type: 'EPISODIC_DIALOGUE', content, synaptic_weight: 0.6 }),
+  }).catch((e) => log('memory write failed:', e.message));
+}
+
 function shouldAnswer(msg) {
   if (msg.author.bot) return false; // never other bots: no bridge-to-bridge loops
   if (!ALLOWED.has(msg.author.id)) return false;
@@ -160,6 +176,7 @@ client.on(Events.MessageCreate, async (msg) => {
       [...history, { role: 'user', text: userText || '(image)' }],
       images,
     );
+    recordTurn(userText || '(image)', reply); // never blocks the reply
     const parts = splitForDiscord(reply || '…');
     for (const [i, part] of parts.entries()) {
       if (i === 0) await msg.reply({ content: part, allowedMentions: { repliedUser: false } });
