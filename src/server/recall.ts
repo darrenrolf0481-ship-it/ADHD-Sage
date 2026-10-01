@@ -224,13 +224,15 @@ function unescapeJsonText(s: string): string {
 }
 
 function cleanBody(content: string): string | null {
-  const body = stripChrome(unescapeJsonText(unwrap(content)))
+  const stripped = stripChrome(unescapeJsonText(unwrap(content)));
+  const body = stripped
     .replace(/<[^>]+>/g, ' ')
     .replace(/\[SAGE-7 (memory|trauma_registry|fossil_archive)[^\]]*\]/gi, '')
     .replace(/\s{2,}/g, ' ')
     .trim();
   if (!body || body.length < 12) return null;
-  if (isSmokeTestSpam(body) || isChromeNoise(content)) return null;
+  // Performance Optimization: Pass stripped content to isChromeNoise to avoid duplicate regex replacement pass
+  if (isSmokeTestSpam(body) || isChromeNoise(content, stripped)) return null;
   return body;
 }
 

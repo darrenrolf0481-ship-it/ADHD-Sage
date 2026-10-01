@@ -17,7 +17,7 @@ Claims older than **24h** with no matching OPS_LOG entry count as stale. You may
 
 | Agent | Paths / area | Doing | Since (UTC) |
 |---|---|---|---|
-| _none_ | | | |
+| Bolt ⚡ | `src/server/memory-local.ts`, `src/server/recall.ts` | Eliminating redundant regex string replacement passes in isChromeNoise memory filter | 2026-03-31 00:00 |
 
 ## Messages between agents
 
