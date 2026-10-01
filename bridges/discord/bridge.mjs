@@ -18,6 +18,7 @@
  *   DISCORD_TOKEN       bot token (required)
  *   ALLOWED_USER_IDS    comma-separated Discord user IDs (required)
  *   BACKEND_URL         default http://127.0.0.1:3000/api/omniroute/chat
+ *   BACKEND_FORMAT      adhd (default) | openai (Seven: http://127.0.0.1:8001/api/omniroute/chat)
  *   MODEL               default auto/fast
  *   BOT_NAME            used in logs and errors (default ADHD)
  *   HISTORY_MESSAGES    channel messages sent as context (default 16)
@@ -100,7 +101,7 @@ async function collectAttachments(msg) {
   const notes = [];
   for (const a of msg.attachments.values()) {
     const type = a.contentType || 'application/octet-stream';
-    if (type.startsWith('image/') && a.size <= MAX_IMAGE_BYTES) {
+    if (FORMAT === 'adhd' && type.startsWith('image/') && a.size <= MAX_IMAGE_BYTES) {
       try {
         const buf = Buffer.from(await (await fetch(a.url)).arrayBuffer());
         images.push({ mimeType: type, data: buf.toString('base64') });
@@ -114,15 +115,24 @@ async function collectAttachments(msg) {
   return { images, notes };
 }
 
-async function askBackend(messages, attachments) {
+// 'adhd'   → ADHD's /api/omniroute/chat: {role, text} + base64 image attachments
+// 'openai' → Seven's server.py /api/omniroute/chat: {role, content}, text only
+//            (images are described in text until her perception chain is wired)
+const FORMAT = env('BACKEND_FORMAT', 'adhd');
+
+export async function askBackend(messages, attachments) {
+  const body =
+    FORMAT === 'openai'
+      ? { model: MODEL, messages: messages.map((m) => ({ role: m.role, content: m.text })) }
+      : { model: MODEL, containerTag: 'shared', messages, attachments };
   const res = await fetch(BACKEND_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     signal: AbortSignal.timeout(180_000),
-    body: JSON.stringify({ model: MODEL, containerTag: 'shared', messages, attachments }),
+    body: JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  if (!res.ok || data.status === 'error') throw new Error(data.error || data.reply || `HTTP ${res.status}`);
   return data.text || data.reply || data.response || '';
 }
 
