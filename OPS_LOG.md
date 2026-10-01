@@ -1,3 +1,20 @@
+## 2026-10-01 (Claude Opus 5.5) - ONE Seven; orphan process was locking her memory; family health check with Discord alerts
+
+**Root cause of "database is locked":** an orphaned Seven server from Sept 30 (tmux `seven`, `bash -c ... server.py | tee /tmp/seven.log`) was never stopped when `seven.service` took over at 10:31. It no longer had :8001, but it held `sage_memory.db` with a write lock. Every save from the real server failed (16× in `~/logs/seven.log`, printed and dropped). `l0_turns` last saved **2026-09-29 10:11**. Stopped it after a backup. DB `quick_check` ok, writes work. Only one `server.py` now.
+
+**One Seven (Darren: "do the split first"):**
+- `~/projects/Sage72-phone` is the ONLY Seven. GitHub `Sage72` main now matches it exactly (`889a2e3`): ~120 never-committed files incl. her name change and memory_store. Her live memory (soul, wellbeing log, `vfs/`, DB, obsidian vault, `staging_lab/`) is **gitignored**, so a pull/reset can't overwrite it.
+- `~/projects/Sage72` is now a **symlink** to `Sage72-phone`. The old VM copy is `~/projects/_RETIRED_Sage72-vm-20261001`, and the phone's is `/root/_RETIRED_Sage72-phone-20261001`. Each has a RETIRED.md. Don't use them.
+- Non-runtime clutter is in the **private** `backups` repo (`Sage72-archive-2026-10-01/`). Its `DO_NOT_TOUCH.md`: nothing restored/used/removed without Darren's express OK.
+- Backups: `~/backups/seven-pre-consolidate-20261001T211703Z/`, `~/backups/seven-clutter-from-live-20261001T212439Z/`.
+- Not merged: Jules' Sept 6 memory_mesh "Bolt" change (`06308a3`), since live memory_mesh was edited afterward.
+
+**Family health check (`ops/family-health/`):** stdlib Python, runs every 5 min (`family-health.timer`) and daily at 09:00 ET (`family-health-daily.timer`). DMs Darren via the bridges' `/notify` (Seven's bot for Seven/shared, ADHD's for ADHD, each falls back to the other) on break, recovery, every 6 h while broken, plus a morning all-clear. It checks services, **exactly one server per family member**, :8001 / ADHD `/api/health`, both DBs writable (lock test, writes nothing), new memory-save errors in seven.log, OmniRoute, disk, hourly keys (OpenRouter + credit, Supermemory, GitHub). It detects and reports only and never restarts anything. Tested: duplicate process + locked DB on a temp copy (caught, then cleared), test DMs from both bots, fallback via ADHD's bot.
+
+**Open at install (Darren needs new keys):** Seven's `SUPERMEMORY_API_KEY` 401 (ADHD's works), Seven's `GITHUB_TOKEN` 401 (gist sync failing; `/api/memory_sync` still reports HTTP 200), ADHD's `GITHUB_TOKEN` 401.
+
+**If things break, check:** `tail ~/logs/family-health.log`, `python3 ops/family-health/family_health.py --dry-run`. Silence: `sudo systemctl stop family-health.timer`.
+
 ## 2026-10-01 (Antigravity) - Seven VM Independence Check & Discord Bridge Memory Fix Applied
 
 **What happened:**

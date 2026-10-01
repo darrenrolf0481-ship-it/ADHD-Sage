@@ -1,0 +1,10 @@
+[Unit]
+Description=Family health check, daily all-clear and DB integrity check
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Environment=HOME=/home/ubuntu
+ExecStart=/usr/bin/flock /tmp/family-health.lock /usr/bin/python3 /home/ubuntu/projects/ADHD-Sage/ops/family-health/family_health.py --daily
+TimeoutStartSec=300
