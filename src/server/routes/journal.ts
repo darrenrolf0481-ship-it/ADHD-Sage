@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { writeJournalEntry, type JournalConfig } from '../../lib/journal-agent';
-import { isLLMProvider } from '../../lib/llm-call';
+import { isLLMProvider } from '../../lib/llm-call.ts';
 import { PORT } from '../config';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';

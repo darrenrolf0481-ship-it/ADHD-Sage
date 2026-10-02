@@ -112,7 +112,7 @@ function extractList(block: string): string[] {
 
 // Shared provider-agnostic caller with automatic fallback
 // (omniroute → openrouter → deepseek → ollama → gemini).
-import { callLLMWithFallback, type LLMProvider } from './llm-call';
+import { callLLMWithFallback, type LLMProvider } from './llm-call.ts';
 
 // ─── Main Self-Improvement Run ─────────────────────────────────────────────────
 

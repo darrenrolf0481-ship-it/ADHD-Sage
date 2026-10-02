@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { runSelfImprovement, type SelfImproveConfig } from '../../lib/self-improvement-agent';
-import { isLLMProvider } from '../../lib/llm-call';
+import { isLLMProvider } from '../../lib/llm-call.ts';
 import { PORT } from '../config';
 import { lockGuard } from '../auth';
 import { asyncHandler } from '../async-handler';

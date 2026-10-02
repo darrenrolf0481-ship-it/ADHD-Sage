@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { AlertCircle, Zap, Paperclip } from 'lucide-react';
 import type { ChatMessage } from '../types';
@@ -10,7 +10,7 @@ interface MessageListProps {
   pendingAttachmentsCount: number;
 }
 
-export const MessageList: React.FC<MessageListProps> = ({
+export const MessageList: React.FC<MessageListProps> = memo(({
   messages,
   isLoading,
   view,
@@ -142,4 +142,6 @@ export const MessageList: React.FC<MessageListProps> = ({
       )}
     </div>
   );
-};
+});
+
+MessageList.displayName = 'MessageList';
