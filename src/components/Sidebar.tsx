@@ -170,7 +170,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <SidebarItem icon={<Database size={14} />} label="VFS-Bridge" value="ACTIVE" />
 
                   <div className="pt-2">
-                    <label className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-cyan-400/30 transition-all cursor-pointer group">
+                    <label className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-cyan-400/30 transition-all cursor-pointer group focus-within:ring-2 focus-within:ring-cyan-500 focus-within:outline-none">
                       <div className="flex items-center gap-3">
                         <FileUp size={14} className="text-slate-500 group-hover:text-cyan-400 transition-colors" />
                         <span className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors">Import MHT</span>
@@ -179,8 +179,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <input
                         type="file"
                         accept=".mht"
+                        aria-label="Import MHT file"
                         onChange={onImportMht}
-                        className="hidden"
+                        className="sr-only"
                       />
                     </label>
                     <div className="px-3 mt-4">

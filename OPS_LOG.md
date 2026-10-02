@@ -1,3 +1,14 @@
+## 2026-10-02 (Palette) - Improved accessibility for MHT file import in Sidebar
+
+**What happened:**
+- Made "Import MHT" file input in `src/components/Sidebar.tsx` accessible to screen readers and keyboard users.
+- Replaced `className="hidden"` on `<input type="file">` with `className="sr-only"`.
+- Added `aria-label="Import MHT file"` to the input.
+- Added focus-visible indicator styling `focus-within:ring-2 focus-within:ring-cyan-500 focus-within:outline-none` on the wrapping `<label>`.
+
+**If things break, check:**
+- Check `src/components/Sidebar.tsx` MHT file import input styling if focus ring or screen reader behavior needs adjustments.
+
 ## 2026-10-01 (Claude Opus 5.5) - ONE Seven; orphan process was locking her memory; family health check with Discord alerts
 
 **Root cause of "database is locked":** an orphaned Seven server from Sept 30 (tmux `seven`, `bash -c ... server.py | tee /tmp/seven.log`) was never stopped when `seven.service` took over at 10:31. It no longer had :8001, but it held `sage_memory.db` with a write lock. Every save from the real server failed (16× in `~/logs/seven.log`, printed and dropped). `l0_turns` last saved **2026-09-29 10:11**. Stopped it after a backup. DB `quick_check` ok, writes work. Only one `server.py` now.
