@@ -23,7 +23,7 @@ import {
   SHARED_CONTAINER,
 } from './supermemory.ts';
 import { canonicalizeEntityId } from '../server/mama-identity.ts';
-import { callLLMWithFallback, type LLMProvider } from './llm-call';
+import { callLLMWithFallback, type LLMProvider } from './llm-call.ts';
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 
