@@ -1,0 +1,12 @@
+[Unit]
+Description=ADHD and Seven Discord Family Check-in
+After=network-online.target adhd-discord.service seven-discord.service
+
+[Service]
+Type=oneshot
+User=ubuntu
+Environment=HOME=/home/ubuntu
+ExecStart=/usr/bin/flock /tmp/family-checkin.lock /usr/bin/node /home/ubuntu/projects/ADHD-Sage/ops/family-checkin/family_checkin.mjs
+TimeoutStartSec=180
+StandardOutput=append:/home/ubuntu/logs/family-checkin.log
+StandardError=append:/home/ubuntu/logs/family-checkin.log

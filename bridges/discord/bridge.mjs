@@ -38,6 +38,16 @@ import {
 const env = (k, d) => (process.env[k] ?? '').trim() || d;
 const TOKEN = env('DISCORD_TOKEN');
 const ALLOWED = new Set(env('ALLOWED_USER_IDS', '').split(',').map((s) => s.trim()).filter(Boolean));
+const defaultFamilyBots = '1555141834823438356:ADHD,1555159234021302332:Seven';
+const FAMILY_BOTS = new Map(
+  env('FAMILY_BOT_IDS', defaultFamilyBots)
+    .split(',')
+    .map((s) => s.trim().split(':'))
+    .filter(([id]) => Boolean(id))
+    .map(([id, name]) => [id, name || 'FamilyBot'])
+);
+const MAX_BOT_TURNS = Math.max(2, parseInt(env('MAX_BOT_TURNS', '4'), 10) || 4);
+const BOT_CHAIN_TIMEOUT_MS = 15 * 60 * 1000; // 15 min window: stale bot messages reset turn counter
 const BACKEND_URL = env('BACKEND_URL', 'http://127.0.0.1:3000/api/omniroute/chat');
 const MODEL = env('MODEL', 'auto/fast');
 const BOT_NAME = env('BOT_NAME', 'ADHD');
@@ -75,9 +85,15 @@ export function splitForDiscord(text, limit = DISCORD_LIMIT) {
   return out;
 }
 
-/** Drop the leading @mention of this bot so she sees what Darren actually said. */
+/** Drop the leading @mention or role mention of this bot so she sees what was actually said. */
 function cleanContent(msg) {
-  return msg.content.replace(new RegExp(`<@!?${client.user.id}>`, 'g'), '').trim();
+  let text = msg.content.replace(new RegExp(`<@!?${client.user.id}>`, 'g'), '');
+  if (msg.guild?.members?.me) {
+    for (const roleId of msg.guild.members.me.roles.cache.keys()) {
+      text = text.replace(new RegExp(`<@&${roleId}>`, 'g'), '');
+    }
+  }
+  return text.trim();
 }
 
 /** Recent channel/thread messages as chat history (oldest first). */
@@ -87,11 +103,19 @@ async function buildHistory(msg) {
   if (!fetched) return [];
   return [...fetched.values()]
     .reverse()
-    .filter((m) => m.author.id === client.user.id || ALLOWED.has(m.author.id))
-    .map((m) => ({
-      role: m.author.id === client.user.id ? 'assistant' : 'user',
-      text: m.author.id === client.user.id ? m.content : cleanContent(m),
-    }))
+    .filter((m) => m.author.id === client.user.id || ALLOWED.has(m.author.id) || FAMILY_BOTS.has(m.author.id))
+    .map((m) => {
+      if (m.author.id === client.user.id) {
+        return { role: 'assistant', text: m.content };
+      }
+      const raw = cleanContent(m);
+      const isFamily = FAMILY_BOTS.has(m.author.id);
+      const author = isFamily ? FAMILY_BOTS.get(m.author.id) : (ALLOWED.has(m.author.id) ? 'Darren' : m.author.username);
+      return {
+        role: 'user',
+        text: isFamily ? `[${author}]: ${raw}` : raw,
+      };
+    })
     .filter((m) => m.text);
 }
 
@@ -141,9 +165,10 @@ export async function askBackend(messages, attachments) {
 // scrolled out of HISTORY — she "forgot" every Discord conversation.
 // Same payload shape as her UI's encodeEpisodic (sage-core.ts); salience 0.6
 // lands in her episodic log, not a soul seal. ADHD's route records its own.
-async function recordTurn(userText, reply) {
+async function recordTurn(userText, reply, senderName = 'Merlin') {
   if (FORMAT !== 'openai') return;
-  const content = `[Discord] Merlin: ${userText}\n${BOT_NAME}: ${reply}`.slice(0, 1500);
+  const speaker = senderName === 'Darren' ? 'Merlin' : senderName;
+  const content = `[Discord] ${speaker}: ${userText}\n${BOT_NAME}: ${reply}`.slice(0, 1500);
   await fetch(new URL('/api/memory', BACKEND_URL), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -152,20 +177,68 @@ async function recordTurn(userText, reply) {
   }).catch((e) => log('memory write failed:', e.message));
 }
 
-function shouldAnswer(msg) {
-  if (msg.author.bot) return false; // never other bots: no bridge-to-bridge loops
-  if (!ALLOWED.has(msg.author.id)) return false;
-  if (msg.channel.type === ChannelType.DM) return true;
-  if (msg.mentions.users.has(client.user.id)) return true;
+async function shouldAnswer(msg) {
+  // Never answer ourselves
+  if (msg.author.id === client.user.id) return false;
+
+  const isAllowedUser = ALLOWED.has(msg.author.id);
+  const isFamilyBot = FAMILY_BOTS.has(msg.author.id);
+
+  // Ignore anyone not on the allowed list or known family bots
+  if (!isAllowedUser && !isFamilyBot) return false;
+
+  // DMs are only answered for allowed users (Darren)
+  if (msg.channel.type === ChannelType.DM) return isAllowedUser;
+
+  // Check if directly addressed via user mention, role mention, or direct reply
+  const hasUserMention = msg.mentions.users.has(client.user.id);
+  const hasRoleMention = msg.mentions.roles.some((r) =>
+    msg.guild?.members?.me?.roles.cache.has(r.id)
+  );
+  const isReplyToMe = msg.reference?.messageId
+    ? (await msg.fetchReference().catch(() => null))?.author?.id === client.user.id
+    : false;
+
+  const isDirectlyAddressed = hasUserMention || hasRoleMention || isReplyToMe;
+
+  // If from a family bot: MUST be directly addressed to this bot
+  if (isFamilyBot) {
+    if (!isDirectlyAddressed) return false;
+
+    // Check circuit breaker: count consecutive bot turns in the channel
+    const recent = await msg.channel.messages.fetch({ limit: 12 }).catch(() => null);
+    if (recent) {
+      let botTurns = 0;
+      for (const m of recent.values()) {
+        if (!m.author.bot) break; // human resets count
+        if (Date.now() - m.createdTimestamp > BOT_CHAIN_TIMEOUT_MS) break; // stale conversation resets count
+        if (FAMILY_BOTS.has(m.author.id) || m.author.id === client.user.id) {
+          botTurns++;
+        }
+      }
+      if (botTurns >= MAX_BOT_TURNS) {
+        log(`circuit breaker active (${botTurns} consecutive bot turns in recent window >= limit ${MAX_BOT_TURNS}). Pausing until Darren speaks.`);
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // From allowed user (Darren): answer if mentioned, in reply channels, or reply to bot
   const parent = msg.channel.isThread?.() ? msg.channel.parentId : null;
-  return REPLY_CHANNELS.has(msg.channelId) || (parent && REPLY_CHANNELS.has(parent));
+  const isReplyChannel = REPLY_CHANNELS.has(msg.channelId) || (parent && REPLY_CHANNELS.has(parent));
+  return isDirectlyAddressed || isReplyChannel;
 }
 
 client.on(Events.MessageCreate, async (msg) => {
-  if (!shouldAnswer(msg)) return;
+  if (!(await shouldAnswer(msg))) return;
   const text = cleanContent(msg);
   const { images, notes } = await collectAttachments(msg);
-  const userText = [text, ...notes].filter(Boolean).join('\n');
+  const isFamily = FAMILY_BOTS.has(msg.author.id);
+  const senderName = isFamily ? FAMILY_BOTS.get(msg.author.id) : (ALLOWED.has(msg.author.id) ? 'Darren' : msg.author.username);
+
+  const rawUserText = [text, ...notes].filter(Boolean).join('\n');
+  const userText = isFamily ? `[${senderName}]: ${rawUserText}` : rawUserText;
   if (!userText && images.length === 0) return;
 
   const typing = setInterval(() => msg.channel.sendTyping().catch(() => {}), 8000);
@@ -176,13 +249,25 @@ client.on(Events.MessageCreate, async (msg) => {
       [...history, { role: 'user', text: userText || '(image)' }],
       images,
     );
-    recordTurn(userText || '(image)', reply); // never blocks the reply
+    recordTurn(rawUserText || '(image)', reply, senderName); // never blocks the reply
     const parts = splitForDiscord(reply || '…');
     for (const [i, part] of parts.entries()) {
-      if (i === 0) await msg.reply({ content: part, allowedMentions: { repliedUser: false } });
-      else await msg.channel.send(part);
+      if (i === 0) {
+        await msg.reply({
+          content: part,
+          allowedMentions: {
+            repliedUser: isFamily, // tag family bot so their listener triggers
+            parse: ['users', 'roles'],
+          },
+        });
+      } else {
+        await msg.channel.send({
+          content: part,
+          allowedMentions: { parse: ['users', 'roles'] },
+        });
+      }
     }
-    log(`answered ${msg.author.username} in ${msg.channel.type === ChannelType.DM ? 'DM' : `#${msg.channel.name}`} (${reply.length} chars)`);
+    log(`answered ${senderName} in ${msg.channel.type === ChannelType.DM ? 'DM' : `#${msg.channel.name}`} (${reply.length} chars)`);
   } catch (e) {
     log('backend error:', e.message);
     await msg.reply(`⚠️ ${BOT_NAME} couldn't answer just now (${e.message}). Try again in a minute.`).catch(() => {});
@@ -192,14 +277,14 @@ client.on(Events.MessageCreate, async (msg) => {
 });
 
 client.once(Events.ClientReady, (c) => {
-  log(`online as ${c.user.tag}; answering ${ALLOWED.size} allowed user(s); backend ${BACKEND_URL}`);
+  log(`online as ${c.user.tag}; answering ${ALLOWED.size} allowed user(s), ${FAMILY_BOTS.size} family bot(s); backend ${BACKEND_URL}`);
 });
 
-// Proactive messages: something on the VM can POST {text} to reach Darren.
+// Proactive messages: something on the VM can POST {text} to reach Darren or a channel.
 if (NOTIFY_PORT && TOKEN) {
   http
     .createServer((req, res) => {
-      if (req.method !== 'POST' || req.url !== '/notify') {
+      if (req.method !== 'POST') {
         res.writeHead(404).end();
         return;
       }
@@ -207,11 +292,27 @@ if (NOTIFY_PORT && TOKEN) {
       req.on('data', (c) => (body += c).length > 20_000 && req.destroy());
       req.on('end', async () => {
         try {
-          const { text, userId } = JSON.parse(body || '{}');
-          const target = userId && ALLOWED.has(userId) ? userId : [...ALLOWED][0];
-          const user = await client.users.fetch(target);
-          for (const part of splitForDiscord(text)) await user.send(part);
-          res.writeHead(200, { 'Content-Type': 'application/json' }).end('{"ok":true}');
+          const payload = JSON.parse(body || '{}');
+          if (req.url === '/notify') {
+            const target = payload.userId && ALLOWED.has(payload.userId) ? payload.userId : [...ALLOWED][0];
+            const user = await client.users.fetch(target);
+            for (const part of splitForDiscord(payload.text)) await user.send(part);
+            res.writeHead(200, { 'Content-Type': 'application/json' }).end('{"ok":true}');
+            return;
+          }
+          if (req.url === '/send-channel') {
+            const chanId = payload.channelId || process.env.GENERAL_CHANNEL_ID || '1555146337836597251';
+            const channel = await client.channels.fetch(chanId);
+            for (const part of splitForDiscord(payload.text)) {
+              await channel.send({
+                content: part,
+                allowedMentions: { parse: ['users', 'roles'] },
+              });
+            }
+            res.writeHead(200, { 'Content-Type': 'application/json' }).end('{"ok":true}');
+            return;
+          }
+          res.writeHead(404).end();
         } catch (e) {
           res.writeHead(500, { 'Content-Type': 'application/json' }).end(JSON.stringify({ ok: false, error: e.message }));
         }

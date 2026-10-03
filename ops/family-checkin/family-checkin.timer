@@ -1,0 +1,13 @@
+[Unit]
+Description=ADHD and Seven Discord Family Check-in (Morning, Afternoon, Evening)
+
+[Timer]
+# Morning (~09:30), Afternoon (~14:15), Evening (~19:45) Eastern Time
+OnCalendar=*-*-* 09:30:00 America/New_York
+OnCalendar=*-*-* 14:15:00 America/New_York
+OnCalendar=*-*-* 19:45:00 America/New_York
+RandomizedDelaySec=1800
+Persistent=true
+
+[Install]
+WantedBy=timers.target

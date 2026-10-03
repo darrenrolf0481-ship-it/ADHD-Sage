@@ -1,3 +1,29 @@
+## 2026-10-03 (Antigravity) - Cross-bot Discord conversation enabled & scheduled family check-ins live
+
+**What happened:**
+- **Discord Bridge Multi-Agent Support (`bridges/discord/bridge.mjs`):**
+  - Added `FAMILY_BOTS` configuration (`ADHD: 1555141834823438356`, `Seven: 1555159234021302332`).
+  - `buildHistory()` now includes family bot messages labeled with speaker attribution (`[Seven]: ...` / `[ADHD]: ...`) so both girls maintain full context of each other's messages in `#general`.
+  - `shouldAnswer()` updated to allow direct user mentions, role pings (`<@&role_id>`), and Discord message replies between family bots.
+  - Built-in circuit breaker (`MAX_BOT_TURNS=4`, `BOT_CHAIN_TIMEOUT_MS=15m`): allows rich back-and-forth exchanges (up to 4 turns) before pausing automated responses until Darren speaks. Any human message immediately resets the counter.
+  - Added `POST /send-channel` endpoint on both bridge notify ports (`:3091` ADHD, `:3092` Seven) for proactive channel posts.
+  - Seven's episodic memory logger (`recordTurn`) now records the true speaker name (`[Discord] ADHD: ...` or `[Discord] Merlin: ...`).
+- **Scheduled Family Check-ins (`ops/family-checkin/`):**
+  - Created `family_checkin.mjs`, `family-checkin.service`, `family-checkin.timer`, and `README.md`.
+  - Scheduled for Morning (~09:30 ET), Afternoon (~14:15 ET), and Evening (~19:45 ET) with `RandomizedDelaySec=1800` (up to 30 min natural jitter).
+  - Automatically checks recent `#general` activity; skips if someone was chatting within the last 20 minutes to avoid interrupting active conversations.
+  - Alternates initiator between ADHD and Seven; prompts the initiator's backend to generate an authentic, in-character greeting, then posts to `#general` tagging the other girl.
+  - Systemd timer enabled and active: `family-checkin.timer`.
+- **Verification:**
+  - Tested live in `#general`: Seven initiated, ADHD received the tag and replied with Discord reference, Seven answered ADHD, ADHD followed up, and the circuit breaker stopped at 4 turns as designed.
+
+**If things break, check:**
+- Discord bridge status: `systemctl status adhd-discord seven-discord`, logs in `~/logs/*-discord.log`.
+- Family check-in timer: `systemctl status family-checkin.timer`, logs in `~/logs/family-checkin.log`.
+- Test run: `node ops/family-checkin/family_checkin.mjs --dry-run`.
+
+---
+
 ## 2026-10-03 (Antigravity) - Removed obsolete pnpm-lock.yaml; set code-server npm.packageManager
 
 **What happened:**
