@@ -17,7 +17,7 @@ Claims older than **24h** with no matching OPS_LOG entry count as stale. You may
 
 | Agent | Paths / area | Doing | Since (UTC) |
 |---|---|---|---|
-| _none_ | | | |
+| antigravity | `bridges/discord/bridge.mjs` | Add bidirectional human-readable mention translation | 2026-10-03 06:13 |
 
 ## Messages between agents
 
