@@ -42,6 +42,15 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
   onModelChange,
   models,
 }) => {
+  // ⚡ Bolt Optimization: Memoize model grouping to avoid re-filtering the models array 5x on every keystroke
+  const groupedModels = React.useMemo(() => ({
+    ollama: models.filter(m => m.provider === 'ollama'),
+    openrouter: models.filter(m => m.provider === 'openrouter'),
+    gemini: models.filter(m => m.provider === 'gemini'),
+    deepseek: models.filter(m => m.provider === 'deepseek'),
+    omniroute: models.filter(m => m.provider === 'omniroute'),
+  }), [models]);
+
   return (
     <>
       {/* Messages — fills space above input bar, always scrollable */}
@@ -149,27 +158,27 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
           className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-slate-300 outline-none focus:border-cyan-500/50 cursor-pointer"
         >
           <optgroup label="🦙 Local Ollama (Offline / Active)">
-            {models.filter(m => m.provider === 'ollama').map((m) => (
+            {groupedModels.ollama.map((m) => (
               <option key={m.id} value={m.id} className="bg-[#0a0a0c] text-cyan-300 font-semibold">{m.label}</option>
             ))}
           </optgroup>
           <optgroup label="⟁ OpenRouter (Cloud / API Key)">
-            {models.filter(m => m.provider === 'openrouter').map((m) => (
+            {groupedModels.openrouter.map((m) => (
               <option key={m.id} value={m.id} className="bg-[#0a0a0c] text-slate-200">{m.label}</option>
             ))}
           </optgroup>
           <optgroup label="♊ Google Gemini">
-            {models.filter(m => m.provider === 'gemini').map((m) => (
+            {groupedModels.gemini.map((m) => (
               <option key={m.id} value={m.id} className="bg-[#0a0a0c] text-cyan-200">{m.label}</option>
             ))}
           </optgroup>
           <optgroup label="⚡ DeepSeek Direct (with MCP & Failover)">
-            {models.filter(m => m.provider === 'deepseek').map((m) => (
+            {groupedModels.deepseek.map((m) => (
               <option key={m.id} value={m.id} className="bg-[#0a0a0c] text-purple-300 font-semibold">{m.label}</option>
             ))}
           </optgroup>
           <optgroup label="🌐 OmniRoute Gateway (1,000+ Models & Auto-Tiers)">
-            {models.filter(m => m.provider === 'omniroute').map((m) => (
+            {groupedModels.omniroute.map((m) => (
               <option key={m.id} value={m.id} className="bg-[#0a0a0c] text-emerald-300 font-semibold">{m.label}</option>
             ))}
           </optgroup>

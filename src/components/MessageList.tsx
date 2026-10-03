@@ -10,7 +10,9 @@ interface MessageListProps {
   pendingAttachmentsCount: number;
 }
 
-export const MessageList: React.FC<MessageListProps> = ({
+// ⚡ Bolt Optimization: Memoize MessageList to prevent re-rendering the entire message history list
+// and associated Framer Motion animations on every single keystroke in ChatInput.
+export const MessageList: React.FC<MessageListProps> = React.memo(({
   messages,
   isLoading,
   view,
@@ -142,4 +144,6 @@ export const MessageList: React.FC<MessageListProps> = ({
       )}
     </div>
   );
-};
+});
+
+MessageList.displayName = 'MessageList';

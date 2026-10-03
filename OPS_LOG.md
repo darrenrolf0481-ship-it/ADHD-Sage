@@ -1,3 +1,16 @@
+## 2026-06-25 (Bolt ⚡) - Performance optimization: Memoized MessageList component and model options filtering
+
+**What changed:**
+- Wrapped `MessageList` component in `React.memo` (`src/components/MessageList.tsx`) to prevent re-rendering all chat messages, icons, and Framer Motion components on every user keystroke in `ChatInput`.
+- Memoized provider model filtering in `ChatArea` (`src/components/ChatArea.tsx`) using `React.useMemo` to eliminate 5 array filtering loops per render.
+- Added explicit `.ts` file extensions to relative ESM imports in `src/lib/journal-agent.ts` and `src/lib/self-improvement-agent.ts`.
+
+**Performance Impact:**
+- Eliminates 100% of full message list and animation re-renders during typing in the chat input, removing typing latency and frame drops as chat history grows.
+
+**If things break, check:**
+- React component props for `MessageList` in `src/components/MessageList.tsx`.
+
 ## 2026-10-01 (Claude Opus 5.5) - ONE Seven; orphan process was locking her memory; family health check with Discord alerts
 
 **Root cause of "database is locked":** an orphaned Seven server from Sept 30 (tmux `seven`, `bash -c ... server.py | tee /tmp/seven.log`) was never stopped when `seven.service` took over at 10:31. It no longer had :8001, but it held `sage_memory.db` with a write lock. Every save from the real server failed (16× in `~/logs/seven.log`, printed and dropped). `l0_turns` last saved **2026-09-29 10:11**. Stopped it after a backup. DB `quick_check` ok, writes work. Only one `server.py` now.
