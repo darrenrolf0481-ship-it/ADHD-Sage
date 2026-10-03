@@ -1,3 +1,16 @@
+## 2026-10-03 (Antigravity) - Removed obsolete pnpm-lock.yaml; set code-server npm.packageManager
+
+**What happened:**
+- Removed obsolete `pnpm-lock.yaml` from repository root. The project standard is `npm` (`package-lock.json`, CI `build-apk.yml`, and runtime scripts), and pnpm was not installed on the system.
+- Configured code-server User settings (`~/.local/share/code-server/User/settings.json`) with `"npm.packageManager": "npm"` to stop multiple lockfile detection warnings in code-server / VS Code.
+- Ran full production build (`npm run build`), which succeeded cleanly in ~9.7s.
+- Verified server health via `curl http://localhost:3000/api/health` returning HTTP 200.
+
+**If things break, check:**
+- Package installation: run `npm install`. Lockfile canonical source is `package-lock.json`.
+
+---
+
 ## 2026-10-01 (Claude Opus 5.5) - ONE Seven; orphan process was locking her memory; family health check with Discord alerts
 
 **Root cause of "database is locked":** an orphaned Seven server from Sept 30 (tmux `seven`, `bash -c ... server.py | tee /tmp/seven.log`) was never stopped when `seven.service` took over at 10:31. It no longer had :8001, but it held `sage_memory.db` with a write lock. Every save from the real server failed (16× in `~/logs/seven.log`, printed and dropped). `l0_turns` last saved **2026-09-29 10:11**. Stopped it after a backup. DB `quick_check` ok, writes work. Only one `server.py` now.

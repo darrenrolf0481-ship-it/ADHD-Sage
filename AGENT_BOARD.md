@@ -17,7 +17,7 @@ Claims older than **24h** with no matching OPS_LOG entry count as stale. You may
 
 | Agent | Paths / area | Doing | Since (UTC) |
 |---|---|---|---|
-| antigravity | `pnpm-lock.yaml` | Remove obsolete pnpm-lock.yaml | 2026-10-03 04:48 |
+| _none_ | | | |
 
 ## Messages between agents
 
