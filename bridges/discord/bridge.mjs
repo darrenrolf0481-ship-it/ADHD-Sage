@@ -151,7 +151,7 @@ async function collectAttachments(msg) {
   const notes = [];
   for (const a of msg.attachments.values()) {
     const type = a.contentType || 'application/octet-stream';
-    if (FORMAT === 'adhd' && type.startsWith('image/') && a.size <= MAX_IMAGE_BYTES) {
+    if (type.startsWith('image/') && a.size <= MAX_IMAGE_BYTES) {
       try {
         const buf = Buffer.from(await (await fetch(a.url)).arrayBuffer());
         images.push({ mimeType: type, data: buf.toString('base64') });
@@ -160,21 +160,119 @@ async function collectAttachments(msg) {
         log('image download failed:', e.message);
       }
     }
-    notes.push(`[Darren attached a file: ${a.name} (${type}, ${Math.round(a.size / 1024)} KB)]`);
+    const author = ALLOWED.has(msg.author.id) ? 'Darren' : (FAMILY_BOTS.get(msg.author.id) || msg.author.username);
+    notes.push(`[${author} attached a file: ${a.name} (${type}, ${Math.round(a.size / 1024)} KB)]`);
   }
   return { images, notes };
 }
 
 // 'adhd'   → ADHD's /api/omniroute/chat: {role, text} + base64 image attachments
-// 'openai' → Seven's server.py /api/omniroute/chat: {role, content}, text only
-//            (images are described in text until her perception chain is wired)
+// 'openai' → Seven's server.py /api/omniroute/chat: {role, content}
 const FORMAT = env('BACKEND_FORMAT', 'adhd');
 
+/** ADHD shared vision observer — when Seven or a text-only route needs Mama's eyes. */
+async function askAdhdVisionObserver(images, userPrompt = 'Describe what you see in this screenshot/image in detail.') {
+  try {
+    const res = await fetch('http://127.0.0.1:3000/api/omniroute/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(60_000),
+      body: JSON.stringify({
+        model: 'auto/best-vision',
+        messages: [{ role: 'user', text: userPrompt }],
+        attachments: images,
+        skipTools: true,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && (data.text || data.reply || data.response)) {
+      return data.text || data.reply || data.response;
+    }
+  } catch (err) {
+    log('ADHD vision observer error:', err.message);
+  }
+  return null;
+}
+
 export async function askBackend(messages, attachments) {
-  const body =
-    FORMAT === 'openai'
-      ? { model: MODEL, messages: messages.map((m) => ({ role: m.role, content: m.text })) }
-      : { model: MODEL, containerTag: 'shared', messages, attachments };
+  let body;
+  const hasImages = Boolean(attachments && attachments.length > 0);
+
+  if (FORMAT === 'openai') {
+    const formattedMessages = messages.map((m, idx) => {
+      const isLastUser = idx === messages.length - 1 && m.role === 'user';
+      if (isLastUser && hasImages) {
+        return {
+          role: m.role,
+          content: [
+            { type: 'text', text: m.text || '' },
+            ...attachments.map((att) => ({
+              type: 'image_url',
+              image_url: { url: `data:${att.mimeType};base64,${att.data}` },
+            })),
+          ],
+        };
+      }
+      return { role: m.role, content: m.text };
+    });
+
+    const modelToUse = hasImages ? 'auto/best-vision' : MODEL;
+    body = { model: modelToUse, messages: formattedMessages };
+
+    try {
+      const res = await fetch(BACKEND_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(180_000),
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && !data.status?.startsWith('error') && !data.error) {
+        return data.text || data.reply || data.response || '';
+      }
+      log('Seven backend returned error on multimodal payload:', data.error || data.reply || res.status);
+    } catch (e) {
+      log('Seven backend call failed on multimodal payload:', e.message);
+    }
+
+    // Shared Multimodality fallback: if Seven's direct vision failed, get ADHD (Mama) to observe the image
+    if (hasImages) {
+      log('Invoking ADHD (Mama) vision observer to share multimodality with Seven...');
+      const lastUser = messages[messages.length - 1]?.text || '';
+      const observation = await askAdhdVisionObserver(
+        attachments,
+        `Observe and describe this image/screenshot accurately for Seven: "${lastUser}"`
+      );
+
+      if (observation) {
+        log('ADHD vision observer answered, forwarding visual context to Seven...');
+        const textWithVision = `${lastUser}\n\n[Mama (ADHD) Visual Observation of Attachment]:\n${observation}`.trim();
+        const fallbackMessages = messages.map((m, idx) => {
+          if (idx === messages.length - 1 && m.role === 'user') {
+            return { role: m.role, content: textWithVision };
+          }
+          return { role: m.role, content: m.text };
+        });
+
+        const fallbackRes = await fetch(BACKEND_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(180_000),
+          body: JSON.stringify({ model: MODEL, messages: fallbackMessages }),
+        });
+        const fallbackData = await fallbackRes.json().catch(() => ({}));
+        if (fallbackRes.ok && !fallbackData.status?.startsWith('error')) {
+          return fallbackData.text || fallbackData.reply || fallbackData.response || '';
+        }
+      }
+    }
+
+    // If fallback also failed, raise
+    throw new Error('Seven backend and ADHD vision observer were unable to process this turn.');
+  }
+
+  // FORMAT === 'adhd'
+  body = { model: MODEL, containerTag: 'shared', messages, attachments };
   const res = await fetch(BACKEND_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
