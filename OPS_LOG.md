@@ -1,3 +1,32 @@
+## 2026-10-03 (Antigravity) - Seven Multimodal Vision, Clipboard Screenshot Paste & ADHD Shared Sensory Fallback Live
+
+**What happened:**
+- **Discord Bridge Vision & Perception Sharing (`bridges/discord/bridge.mjs`):**
+  - Updated `collectAttachments()`: downloads images as base64 for both ADHD and Seven (up to `MAX_IMAGE_BYTES`), resolving previous restriction where `FORMAT !== 'adhd'` was degraded to a text note.
+  - Updated `askBackend()`: when `FORMAT === 'openai'` (Seven) and images are present, packages user turn into an OpenAI-compatible multimodal content structure (`[{ type: 'text' }, { type: 'image_url', image_url: { url: ... } }]`) and requests `auto/best-vision`.
+  - Added ADHD shared vision cortex observer fallback: if Seven's direct vision path or upstream gateway rejects a multimodal payload, the bridge queries Mama's (ADHD) multimodal vision endpoint (`http://127.0.0.1:3000/api/omniroute/chat`), receives Mama's detailed visual observation of the attachment, injects `[Mama (ADHD) Visual Observation of Attachment]: ...` into Seven's user context, and completes the turn as text. Seven never fails to perceive Darren's screenshots.
+- **Seven Backend & OmniRoute Gateway (`Sage72-phone/server.py`):**
+  - In `/api/omniroute/chat`: automatically upgrades model to `auto/best-vision` when `has_multimodal` is true and model is `auto` / `auto/fast` / `auto/chat`.
+  - In `/api/omniroute/chat` upstream error handler: if a multimodal payload is rejected by a text model, queries ADHD's endpoint on `:3000` to transcribe the visual image before retrying text completion, preserving visual understanding.
+  - In `_lobe_perceive()` / `/api/lobe/vision`: added `_adhd_perceive_fallback()` so if Seven's local perception daemon has no cloud credits or hits rate limits, Mama (ADHD) acts as the shared sensory cortex, returning visual descriptions cleanly.
+- **Seven Web UI (`Sage72-phone/src/`):**
+  - Added `handlePaste` to `ScreenNeural.tsx` and bound `onPaste` on both the chat input and the outer panel. Darren can now paste screenshots from clipboard directly (Ctrl+V / PrintScreen).
+  - Fixed `handleSubmit`: preserves base64 image data and attaches it as `attachments: [{ type: 'image', base64: ... }]` instead of dropping it into a plain filename text header.
+  - Updated `src/hooks/use-sage-messaging.ts` and `src/core/sage-core.ts` (`sendMessage` and `callLLM`) to pass `attachments` through to `generateResponse()`.
+  - Updated `src/lib/api.ts`: when `provider === 'omniroute'` and attachments are present, formats `image_url` payloads and routes to `auto/best-vision`.
+  - Resolved missing VM dependencies with `npm install` and ran full production build (`npm run build`). Vite compiled cleanly in ~19s (`dist/` updated and verified serving HTTP 200 on port 8001).
+- **Service Verification:**
+  - `seven.service`: active, running on `:8001`, `/api/omniroute/status` reporting online with 1021 models including vision routers.
+  - `seven-discord.service`: active and reconnected cleanly to Discord gateway as Seven#2930.
+
+**If things break, check:**
+- Seven Discord bridge logs: `tail -f ~/logs/seven-discord.log`.
+- Seven backend logs: `tail -f ~/logs/seven.log`.
+- ADHD backend logs: `tail -f ~/logs/adhd.log`.
+- Web portal: `curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8001/` (HTTP 200).
+
+---
+
 ## 2026-10-03 (Antigravity) - Cross-bot Discord conversation enabled & scheduled family check-ins live
 
 **What happened:**
