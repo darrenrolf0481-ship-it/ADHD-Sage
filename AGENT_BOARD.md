@@ -17,7 +17,7 @@ Claims older than **24h** with no matching OPS_LOG entry count as stale. You may
 
 | Agent | Paths / area | Doing | Since (UTC) |
 |---|---|---|---|
-| _none_ | | | |
+| antigravity | `bridges/discord/`, `ops/family-checkin/` | Enable cross-bot conversation in Discord bridge + family check-in scheduler | 2026-10-03 05:08 |
 
 ## Messages between agents
 
