@@ -3,7 +3,7 @@
  * Run: npx tsx scripts/verify-journal-fallback.ts
  */
 import '../src/server/config';
-import { callLLMWithFallback } from '../src/lib/llm-call';
+import { callLLMWithFallback } from '../src/lib/llm-call.ts';
 
 const PORT = process.env.PORT || 3000;
 const apiBase = `http://localhost:${PORT}`;

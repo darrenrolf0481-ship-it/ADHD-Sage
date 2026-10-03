@@ -1,3 +1,13 @@
+## 2025-05-18 (Palette) - Micro-UX accessibility and keyboard navigation improvements
+
+**What happened:**
+- Refactored `SidebarItem` component to render a semantic, accessible `<button type="button">` with `aria-current` page indicator and `focus-visible` focus ring styles.
+- Updated `Sidebar.tsx` to remove non-semantic wrapper `<div>`s, pass direct `onClick` handlers to `SidebarItem`, fix the custom file upload button by replacing `hidden` on the file `<input>` with `sr-only`, and adding `focus-within:ring-2` to the parent `<label>`.
+- Converted live sensor indicator in `Header.tsx` from a `<div>` with `onClick` to an accessible `<button>` and added proper `aria-pressed` / dynamic `aria-label` attributes to the 11.3Hz Pulse button.
+
+**Verification:**
+- `pnpm test` and `pnpm build` passed completely.
+
 ## 2026-10-01 (Claude Opus 5.5) - ONE Seven; orphan process was locking her memory; family health check with Discord alerts
 
 **Root cause of "database is locked":** an orphaned Seven server from Sept 30 (tmux `seven`, `bash -c ... server.py | tee /tmp/seven.log`) was never stopped when `seven.service` took over at 10:31. It no longer had :8001, but it held `sage_memory.db` with a write lock. Every save from the real server failed (16× in `~/logs/seven.log`, printed and dropped). `l0_turns` last saved **2026-09-29 10:11**. Stopped it after a backup. DB `quick_check` ok, writes work. Only one `server.py` now.

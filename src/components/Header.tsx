@@ -96,8 +96,10 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Inbox indicator */}
         {inboxUnread > 0 && (
           <button
+            type="button"
             onClick={onFetchInbox}
-            className="relative flex items-center gap-1.5 px-2 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/30 transition-all"
+            aria-label={`${inboxUnread} message${inboxUnread > 1 ? 's' : ''} from the seven`}
+            className="relative flex items-center gap-1.5 px-2 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/30 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
             title={`${inboxUnread} message${inboxUnread > 1 ? 's' : ''} from the seven`}
           >
             <span className="text-[10px] font-bold uppercase tracking-widest">📬</span>
@@ -108,9 +110,11 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Live Sensor Indicator */}
         {sensorActiveCount > 0 && (
-          <div
-            className="hidden sm:flex items-center gap-1.5 cursor-pointer"
+          <button
+            type="button"
+            className="hidden sm:flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded px-1"
             onClick={onViewAnomalies}
+            aria-label="View Sensor Desk"
             title="View Sensor Desk"
           >
             <span
@@ -123,7 +127,7 @@ export const Header: React.FC<HeaderProps> = ({
                 ? 'Φ SYNC'
                 : `${(sensorAnomalyScore * 100).toFixed(0)}%`}
             </span>
-          </div>
+          </button>
         )}
 
         <div className="text-right hidden sm:block">
@@ -134,8 +138,11 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={onTogglePulse}
-            className={`px-3 md:px-4 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors ${
+            aria-pressed={pulseActive}
+            aria-label={`Toggle 11.3Hz Pulse, currently ${pulseActive ? 'on' : 'off'}`}
+            className={`px-3 md:px-4 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
               pulseActive
                 ? 'bg-red-500/20 border-red-500/50 text-red-400'
                 : 'bg-[#1C1C1E] border-white/10 text-white hover:bg-white/10'
