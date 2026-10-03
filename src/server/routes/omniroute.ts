@@ -1,8 +1,12 @@
 import { Router } from 'express';
-import { writeFileSync, existsSync } from 'node:fs';
+import { writeFileSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import Database from 'better-sqlite3';
+
+const execFileAsync = promisify(execFile);
 import { swarmFetch } from '../swarm';
 import { buildSystemPrompt } from '../prompt';
 import { resolveSystemPrompt } from '../system-prompt';
@@ -100,12 +104,56 @@ router.get('/models', asyncHandler(async (_req, res) => {
   }
 }));
 
+async function extractVideoFrames(videoPath: string, maxFrames = 5): Promise<Array<{ mimeType: string; data: string }>> {
+  const tmpDir = mkdtempSync(join(tmpdir(), 'sage_vframes_'));
+  try {
+    let duration = 0;
+    try {
+      const { stdout } = await execFileAsync('ffprobe', [
+        '-v', 'error',
+        '-show_entries', 'format=duration',
+        '-of', 'default=noprint_wrappers=1:nokey=1',
+        videoPath,
+      ], { timeout: 15_000 });
+      duration = parseFloat(stdout.trim()) || 0;
+    } catch {}
+
+    const interval = duration > 0 ? Math.max(0.5, duration / (maxFrames + 1)) : 1.0;
+    const outPattern = join(tmpDir, 'frame_%02d.jpg');
+
+    await execFileAsync('ffmpeg', [
+      '-y',
+      '-i', videoPath,
+      '-vf', `fps=1/${interval.toFixed(2)},scale='min(1024,iw)':-2`,
+      '-vframes', String(maxFrames),
+      '-q:v', '3',
+      outPattern,
+    ], { timeout: 30_000 });
+
+    const files = readdirSync(tmpDir).filter(f => f.startsWith('frame_') && f.endsWith('.jpg')).sort();
+    return files.map(f => ({
+      mimeType: 'image/jpeg',
+      data: readFileSync(join(tmpDir, f)).toString('base64'),
+    }));
+  } catch (err) {
+    console.error('[OmniRoute] extractVideoFrames error:', err);
+    return [];
+  } finally {
+    try {
+      rmSync(tmpDir, { recursive: true, force: true });
+    } catch {}
+  }
+}
+
 // ─── POST /api/omniroute/chat ───────────────────────────────────────────────
 router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
   try {
     const { model, messages, systemInstruction, containerTag, attachments, skipTools } = req.body;
-    const cleanModel = (model || 'auto/fast').replace(/^omniroute\//, '');
-    const effectiveModel = cleanModel;
+    const hasMedia = Boolean(attachments && attachments.some((a: any) => a && (a.data || a.url)));
+    const cleanModel = (model || (hasMedia ? 'auto/best-vision' : 'auto/fast')).replace(/^omniroute\//, '');
+    const effectiveModel = hasMedia && (cleanModel === 'auto/fast' || cleanModel === 'auto')
+      ? 'auto/best-vision'
+      : cleanModel;
 
     const apiKey = req.body.apiKey || getOmniRouteKey();
     if (!apiKey) {
@@ -153,11 +201,21 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
             const buffer = Buffer.from(att.data, 'base64');
             const tmpPath = join(tmpdir(), `sage_video_${Date.now()}_${aIdx}.mp4`);
             writeFileSync(tmpPath, buffer);
-            const toolRes = await executeMcpTool('openrouter-mcp__analyze_video', {
-              video_path: tmpPath,
-              question: textContent,
-            });
-            textContent += `\n\n[System Note: Video analysis:\n${toolRes?.result || JSON.stringify(toolRes)}\n]`;
+            try {
+              const frames = await extractVideoFrames(tmpPath, 5);
+              if (frames.length > 0) {
+                imageAttachments.push(...frames);
+                textContent += `\n\n[System Note: Video attached (${Math.round(buffer.length / 1024)} KB) — ${frames.length} keyframes extracted across the duration for direct visual inspection.]`;
+              } else {
+                const toolRes = await executeMcpTool('openrouter-mcp__analyze_video', {
+                  video_path: tmpPath,
+                  question: textContent,
+                });
+                textContent += `\n\n[System Note: Video analysis:\n${toolRes?.result || JSON.stringify(toolRes)}\n]`;
+              }
+            } finally {
+              try { unlinkSync(tmpPath); } catch {}
+            }
           } else {
             imageAttachments.push(att);
           }
@@ -197,9 +255,10 @@ router.post('/chat', lockGuard, asyncHandler(async (req, res) => {
 
     const candidates = [
       effectiveModel,
-      'auto/fast',
-      'openrouter/google/gemini-2.5-flash',
-      'openrouter/meta-llama/llama-3.3-70b-instruct',
+      ...(hasMedia
+        ? ['auto/best-vision', 'openrouter/google/gemini-2.5-flash', 'openrouter/anthropic/claude-3.5-sonnet']
+        : ['auto/fast', 'openrouter/google/gemini-2.5-flash', 'openrouter/meta-llama/llama-3.3-70b-instruct']),
+      'openrouter/mistralai/mistral-large-2411',
     ]
       .map((m) => m.replace(/^omniroute\//, ''))
       .filter((m, idx, arr) => Boolean(m) && arr.indexOf(m) === idx);

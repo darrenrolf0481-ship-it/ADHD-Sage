@@ -27,6 +27,11 @@
  *                       sends a message to Darren (proactive; loopback only)
  */
 import http from 'node:http';
+import { writeFileSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import {
   Client,
   GatewayIntentBits,
@@ -34,6 +39,8 @@ import {
   ChannelType,
   Events,
 } from 'discord.js';
+
+const execFileAsync = promisify(execFile);
 
 const env = (k, d) => (process.env[k] ?? '').trim() || d;
 const TOKEN = env('DISCORD_TOKEN');
@@ -55,6 +62,7 @@ const HISTORY = Math.max(0, Math.min(50, parseInt(env('HISTORY_MESSAGES', '16'),
 const REPLY_CHANNELS = new Set(env('REPLY_CHANNELS', '').split(',').map((s) => s.trim()).filter(Boolean));
 const NOTIFY_PORT = parseInt(env('NOTIFY_PORT', '0'), 10) || 0;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
 const DISCORD_LIMIT = 2000;
 
 const log = (...a) => console.log(new Date().toISOString(), `[${BOT_NAME}-discord]`, ...a);
@@ -145,21 +153,85 @@ async function buildHistory(msg) {
     .filter((m) => m.text);
 }
 
-/** Images go to her as attachments; anything else is described in text. */
+async function extractVideoFrames(videoBuffer, maxFrames = 5) {
+  const tmpDir = mkdtempSync(join(tmpdir(), 'discord_vframes_'));
+  const inputPath = join(tmpDir, 'input.mp4');
+  try {
+    writeFileSync(inputPath, videoBuffer);
+    let duration = 0;
+    try {
+      const { stdout } = await execFileAsync('ffprobe', [
+        '-v', 'error',
+        '-show_entries', 'format=duration',
+        '-of', 'default=noprint_wrappers=1:nokey=1',
+        inputPath,
+      ], { timeout: 15_000 });
+      duration = parseFloat(stdout.trim()) || 0;
+    } catch {}
+
+    const interval = duration > 0 ? Math.max(0.5, duration / (maxFrames + 1)) : 1.0;
+    const outPattern = join(tmpDir, 'frame_%02d.jpg');
+
+    await execFileAsync('ffmpeg', [
+      '-y',
+      '-i', inputPath,
+      '-vf', `fps=1/${interval.toFixed(2)},scale='min(1024,iw)':-2`,
+      '-vframes', String(maxFrames),
+      '-q:v', '3',
+      outPattern,
+    ], { timeout: 30_000 });
+
+    const files = readdirSync(tmpDir).filter((f) => f.startsWith('frame_') && f.endsWith('.jpg')).sort();
+    return files.map((f) => ({
+      mimeType: 'image/jpeg',
+      data: readFileSync(join(tmpDir, f)).toString('base64'),
+    }));
+  } catch (err) {
+    log('extractVideoFrames error:', err.message);
+    return [];
+  } finally {
+    try {
+      rmSync(tmpDir, { recursive: true, force: true });
+    } catch {}
+  }
+}
+
+/** Images go to her as attachments; videos are sliced into keyframes; anything else is described in text. */
 async function collectAttachments(msg) {
   const images = [];
   const notes = [];
   for (const a of msg.attachments.values()) {
     const type = a.contentType || 'application/octet-stream';
-    if (type.startsWith('image/') && a.size <= MAX_IMAGE_BYTES) {
+    const isImage = type.startsWith('image/') || /\.(png|jpe?g|webp|gif)$/i.test(a.name || '');
+    const isVideo = type.startsWith('video/') || /\.(mp4|mov|webm|m4v|mkv)$/i.test(a.name || '');
+
+    if (isImage && a.size <= MAX_IMAGE_BYTES) {
       try {
+        const mime = type.startsWith('image/') ? type : (a.name?.endsWith('.png') ? 'image/png' : 'image/jpeg');
         const buf = Buffer.from(await (await fetch(a.url)).arrayBuffer());
-        images.push({ mimeType: type, data: buf.toString('base64') });
+        images.push({ mimeType: mime, data: buf.toString('base64') });
         continue;
       } catch (e) {
         log('image download failed:', e.message);
       }
     }
+
+    if (isVideo && a.size <= MAX_VIDEO_BYTES) {
+      try {
+        log(`Processing video attachment ${a.name} (${Math.round(a.size / 1024)} KB)...`);
+        const buf = Buffer.from(await (await fetch(a.url)).arrayBuffer());
+        const frames = await extractVideoFrames(buf, 5);
+        if (frames.length > 0) {
+          images.push(...frames);
+          const author = ALLOWED.has(msg.author.id) ? 'Darren' : (FAMILY_BOTS.get(msg.author.id) || msg.author.username);
+          notes.push(`[${author} attached video: ${a.name} (${Math.round(a.size / 1024)} KB) — ${frames.length} keyframes extracted across the video for visual inspection]`);
+          continue;
+        }
+      } catch (e) {
+        log('video frame extraction failed:', e.message);
+      }
+    }
+
     const author = ALLOWED.has(msg.author.id) ? 'Darren' : (FAMILY_BOTS.get(msg.author.id) || msg.author.username);
     notes.push(`[${author} attached a file: ${a.name} (${type}, ${Math.round(a.size / 1024)} KB)]`);
   }

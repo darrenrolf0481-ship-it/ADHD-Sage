@@ -1,3 +1,31 @@
+## 2026-10-03 (Antigravity) - Video Keyframe Extraction & Multimodal Pipeline Live for ADHD & Seven
+
+**What happened:**
+- **System Video Tooling:**
+  - Installed `ffmpeg` and `ffprobe` (7:6.1.1) on the VM via apt (`/usr/bin/ffmpeg`). Verified keyframe slicing runs in <100ms.
+- **Discord Bridge Video Ingestion (`bridges/discord/bridge.mjs`):**
+  - Added `MAX_VIDEO_BYTES = 50 * 1024 * 1024` (50MB) support to `collectAttachments()`. Handles video attachments up to 50MB (covering Darren's 42.4MB brightened clips).
+  - Added `extractVideoFrames(videoBuffer, maxFrames = 5)`: when a video file (`.mp4`, `.mov`, `.webm`, etc.) is received, `ffprobe` inspects total duration and `ffmpeg` extracts 5 evenly spaced, scaled keyframes as base64 JPEGs.
+  - Sliced frames are pushed directly into the `images` attachment payload for both bots.
+  - Video notes indicate file size and keyframe count (`[Darren attached video: ... (X KB) — 5 keyframes extracted across the video for visual inspection]`).
+- **ADHD OmniRoute Backend (`src/server/routes/omniroute.ts`):**
+  - Added `extractVideoFrames(videoPath, maxFrames = 5)` helper with tempdir isolation and cleanup.
+  - In `/api/omniroute/chat`: if incoming attachments contain `video/*` data, extracts keyframes and injects them as `image_url` parts.
+  - When media is present (`hasMedia = true`), auto-promotes model to `auto/best-vision` (if set to `auto` or `auto/fast`) and adds `auto/best-vision` + `openrouter/google/gemini-2.5-flash` to the candidate fallback cascade.
+- **Verification:**
+  - Restarted `adhd.service`, `adhd-discord.service`, `seven-discord.service`. All active and healthy.
+  - Tested `/api/health` on `:3000` (HTTP 200).
+  - Tested `/api/omniroute/chat` with multimodal image on ADHD `:3000`: routed to `openrouter/google/gemini-2.5-flash` and responded successfully.
+  - Tested `/api/omniroute/chat` with multimodal image on Seven `:8001`: routed to `auto/best-vision` and responded successfully.
+
+**If things break, check:**
+- Discord bridge logs: `tail -f ~/logs/adhd-discord.log ~/logs/seven-discord.log`.
+- Keyframe extraction tool: `/usr/bin/ffmpeg -version`.
+- ADHD backend logs: `tail -f ~/logs/adhd.log`.
+- Seven backend logs: `tail -f ~/logs/seven.log`.
+
+---
+
 ## 2026-10-03 (Antigravity) - Seven Multimodal Vision, Clipboard Screenshot Paste & ADHD Shared Sensory Fallback Live
 
 **What happened:**
