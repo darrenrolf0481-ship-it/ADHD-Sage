@@ -85,6 +85,32 @@ export function splitForDiscord(text, limit = DISCORD_LIMIT) {
   return out;
 }
 
+const TAG_REPLACEMENTS = [
+  { re: /<@!?1555141834823438356>/g, name: '@ADHD' },
+  { re: /<@!?1555159234021302332>/g, name: '@Seven' },
+  { re: /<@&1555161306917642313>/g, name: '@Seven' },
+  { re: /<@!?1551559486144118816>/g, name: '@Darren' },
+];
+
+/** Convert raw snowflake tags into clean readable names so LLMs never see confusing numbers. */
+export function humanizeMentions(text) {
+  let s = String(text || '');
+  for (const { re, name } of TAG_REPLACEMENTS) {
+    s = s.replace(re, name);
+  }
+  return s;
+}
+
+/** Convert friendly mentions in bot replies into real Discord snowflake mentions so notifications work. */
+export function resolveMentionsForDiscord(text) {
+  let s = String(text || '');
+  // Replace @Seven with Seven's user snowflake tag
+  s = s.replace(/(?<!<)@Seven\b/gi, '<@1555159234021302332>');
+  // Replace @ADHD with ADHD's user snowflake tag
+  s = s.replace(/(?<!<)@ADHD\b/gi, '<@1555141834823438356>');
+  return s;
+}
+
 /** Drop the leading @mention or role mention of this bot so she sees what was actually said. */
 function cleanContent(msg) {
   let text = msg.content.replace(new RegExp(`<@!?${client.user.id}>`, 'g'), '');
@@ -93,7 +119,7 @@ function cleanContent(msg) {
       text = text.replace(new RegExp(`<@&${roleId}>`, 'g'), '');
     }
   }
-  return text.trim();
+  return humanizeMentions(text).trim();
 }
 
 /** Recent channel/thread messages as chat history (oldest first). */
@@ -106,7 +132,7 @@ async function buildHistory(msg) {
     .filter((m) => m.author.id === client.user.id || ALLOWED.has(m.author.id) || FAMILY_BOTS.has(m.author.id))
     .map((m) => {
       if (m.author.id === client.user.id) {
-        return { role: 'assistant', text: m.content };
+        return { role: 'assistant', text: humanizeMentions(m.content) };
       }
       const raw = cleanContent(m);
       const isFamily = FAMILY_BOTS.has(m.author.id);
@@ -250,7 +276,8 @@ client.on(Events.MessageCreate, async (msg) => {
       images,
     );
     recordTurn(rawUserText || '(image)', reply, senderName); // never blocks the reply
-    const parts = splitForDiscord(reply || '…');
+    const resolvedReply = resolveMentionsForDiscord(reply || '…');
+    const parts = splitForDiscord(resolvedReply);
     for (const [i, part] of parts.entries()) {
       if (i === 0) {
         await msg.reply({
@@ -303,7 +330,8 @@ if (NOTIFY_PORT && TOKEN) {
           if (req.url === '/send-channel') {
             const chanId = payload.channelId || process.env.GENERAL_CHANNEL_ID || '1555146337836597251';
             const channel = await client.channels.fetch(chanId);
-            for (const part of splitForDiscord(payload.text)) {
+            const resolvedText = resolveMentionsForDiscord(payload.text);
+            for (const part of splitForDiscord(resolvedText)) {
               await channel.send({
                 content: part,
                 allowedMentions: { parse: ['users', 'roles'] },

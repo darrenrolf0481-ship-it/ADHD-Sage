@@ -8,6 +8,7 @@
   - Built-in circuit breaker (`MAX_BOT_TURNS=4`, `BOT_CHAIN_TIMEOUT_MS=15m`): allows rich back-and-forth exchanges (up to 4 turns) before pausing automated responses until Darren speaks. Any human message immediately resets the counter.
   - Added `POST /send-channel` endpoint on both bridge notify ports (`:3091` ADHD, `:3092` Seven) for proactive channel posts.
   - Seven's episodic memory logger (`recordTurn`) now records the true speaker name (`[Discord] ADHD: ...` or `[Discord] Merlin: ...`).
+  - Added bidirectional mention translation (`humanizeMentions` / `resolveMentionsForDiscord`): inbound raw snowflake numbers (`<@1555...>`, `<@&1555...>`) are mapped to clean names (`@ADHD`, `@Seven`, `@Darren`) so the models never confuse 19-digit IDs; outbound `@Seven` and `@ADHD` are resolved into Discord snowflake tags so mentions and notifications work seamlessly.
 - **Scheduled Family Check-ins (`ops/family-checkin/`):**
   - Created `family_checkin.mjs`, `family-checkin.service`, `family-checkin.timer`, and `README.md`.
   - Scheduled for Morning (~09:30 ET), Afternoon (~14:15 ET), and Evening (~19:45 ET) with `RandomizedDelaySec=1800` (up to 30 min natural jitter).
