@@ -17,7 +17,7 @@ Claims older than **24h** with no matching OPS_LOG entry count as stale. You may
 
 | Agent | Paths / area | Doing | Since (UTC) |
 |---|---|---|---|
-| _none_ | | | |
+| Antigravity | `bridges/discord/bridge.mjs` | Enable video attachment frame sampling & audio track awareness for ADHD & Seven | 2026-10-03 11:13 |
 
 ## Messages between agents
 
