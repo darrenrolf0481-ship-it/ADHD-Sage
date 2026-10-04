@@ -45,7 +45,9 @@ function formatSevenArchive(text: string): string {
   try {
     const parsed = JSON.parse(text);
     if (parsed.data) clean = typeof parsed.data === 'string' ? parsed.data : JSON.stringify(parsed.data);
-  } catch {}
+  } catch {
+    // Ignore JSON parse error
+  }
   // Remove the raw metadata tag header if present, leaving the real dialogue
   const body = clean.replace(/\[SAGE-7 (memory|trauma_registry|fossil_archive)[^\]]*\]/gi, '').trim();
   return `[Seven (archive)]: ${body || clean}`;
@@ -98,7 +100,7 @@ export function stripForeignFossils(memories: string[]): string[] {
 function ftsSanitize(query: string): string {
   // Expand standalone '7' to 'Seven' so trigram tokenizer and keyword search match Seven and SAGE-7
   const expanded = (query || '').replace(/\b7\b/gi, 'Seven');
-  const cleaned = expanded.replace(/["'()*+\-^!:?~.\/\\@#$%&,;_{}\[\]<>]/g, ' ');
+  const cleaned = expanded.replace(/["'()*+\-^!:?~./\\@#$%&,;_{}[\]<>]/g, ' ');
   return cleaned
     .split(/\s+/)
     .filter((t) => t.length >= 3) // trigram requires >= 3 chars
@@ -142,39 +144,44 @@ export async function listLocalMemories(
     pinned: number;
   }>;
 
-  const out: LocalMemoryRow[] = [];
-  for (const row of rows) {
-    let text: string;
-    try {
-      text = row.compressed
-        ? (await decompress(row.data)).toString('utf8')
-        : row.data.toString('utf8');
-    } catch {
-      continue;
-    }
-    let content: string;
-    try {
-      const parsed = JSON.parse(text);
-      content =
-        typeof parsed.data === 'string'
-          ? parsed.data
-          : typeof parsed === 'string'
-            ? parsed
-            : JSON.stringify(parsed);
-    } catch {
-      content = text;
-    }
-    content = stripChrome(content).trim();
-    if (!content || isChromeNoise(content) || isForeignFossil(content)) continue;
-    if (content.length > 4000) content = content.slice(0, 4000) + '…';
-    out.push({
-      text: content,
-      timestamp: Number(row.timestamp) || 0,
-      dopamine: Number(row.dopamine) || 0,
-      cortisol: Number(row.cortisol) || 0,
-      pinned: !!row.pinned,
-    });
-  }
+  // Performance optimization (Bolt): Decompress rows concurrently using Promise.all
+  // instead of serially awaiting zstd decompression per row in a sequential loop.
+  const processed = await Promise.all(
+    rows.map(async (row) => {
+      let text: string;
+      try {
+        text = row.compressed
+          ? (await decompress(row.data)).toString('utf8')
+          : row.data.toString('utf8');
+      } catch {
+        return null;
+      }
+      let content: string;
+      try {
+        const parsed = JSON.parse(text);
+        content =
+          typeof parsed.data === 'string'
+            ? parsed.data
+            : typeof parsed === 'string'
+              ? parsed
+              : JSON.stringify(parsed);
+      } catch {
+        content = text;
+      }
+      content = stripChrome(content).trim();
+      if (!content || isChromeNoise(content) || isForeignFossil(content)) return null;
+      if (content.length > 4000) content = content.slice(0, 4000) + '…';
+      return {
+        text: content,
+        timestamp: Number(row.timestamp) || 0,
+        dopamine: Number(row.dopamine) || 0,
+        cortisol: Number(row.cortisol) || 0,
+        pinned: !!row.pinned,
+      };
+    }),
+  );
+
+  const out = processed.filter((item): item is LocalMemoryRow => item !== null);
   return { memories: out, total };
 }
 
@@ -254,39 +261,45 @@ export async function searchLocalMemories(query: string, limit: number = 5): Pro
     data: Buffer;
     compressed: number;
   }>;
-  const results: { text: string; score: number }[] = [];
 
-  for (const row of rows) {
-    try {
-      let text: string;
-      if (row.compressed) {
-        text = (await decompress(row.data)).toString('utf8');
-      } else {
-        text = row.data.toString('utf8');
-      }
-
-      let content: string;
+  // Performance optimization (Bolt): Parallelize zstd decompression across rows using Promise.all
+  // to leverage libuv worker threads concurrently rather than awaiting zstd decompression serially.
+  const processed = await Promise.all(
+    rows.map(async (row) => {
       try {
-        const parsed = JSON.parse(text);
-        content =
-          typeof parsed.data === 'string'
-            ? parsed.data
-            : typeof parsed === 'string'
-              ? parsed
-              : JSON.stringify(parsed);
-      } catch {
-        content = text;
-      }
+        let text: string;
+        if (row.compressed) {
+          text = (await decompress(row.data)).toString('utf8');
+        } else {
+          text = row.data.toString('utf8');
+        }
 
-      const lower = content.toLowerCase();
-      const score = tokens.reduce((s, t) => s + (lower.includes(t) ? 1 : 0), 0);
-      if (score > 0) {
-        results.push({ text: content, score });
+        let content: string;
+        try {
+          const parsed = JSON.parse(text);
+          content =
+            typeof parsed.data === 'string'
+              ? parsed.data
+              : typeof parsed === 'string'
+                ? parsed
+                : JSON.stringify(parsed);
+        } catch {
+          content = text;
+        }
+
+        const lower = content.toLowerCase();
+        const score = tokens.reduce((s, t) => s + (lower.includes(t) ? 1 : 0), 0);
+        if (score > 0) {
+          return { text: content, score };
+        }
+      } catch {
+        // ignore
       }
-    } catch (e) {
-      // ignore
-    }
-  }
+      return null;
+    }),
+  );
+
+  const results = processed.filter((r): r is { text: string; score: number } => r !== null);
 
   // The basic scan scores by raw keyword hits, which biases toward the largest
   // nodes (more text = more chances to hit). Budget enforcement matters most
