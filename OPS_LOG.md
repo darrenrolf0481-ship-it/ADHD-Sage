@@ -1,3 +1,18 @@
+## 2026-10-03 (Bolt) - Parallelized zstd memory decompression in local recall & Vault search
+
+**What happened:**
+- **Parallelized zstd memory decompression in `src/server/memory-local.ts`:**
+  - Replaced sequential `for (const row of rows)` loops that awaited `decompress(row.data)` serially per row in both `listLocalMemories` and `searchLocalMemories` (fallback token scan) with parallel `Promise.all` maps.
+  - Offloaded zstd C++ decompression across libuv threadpool workers concurrently instead of serializing async ticks in sequential loops.
+- **Linter & Test Verification:**
+  - Cleaned up regex escape warnings and empty catch block in `src/server/memory-local.ts`.
+  - Verified full test suite (`pnpm test`) — all MAMA identity assertions, generateResponse API mocks, worker pool smoke tests, and production worker tests passed.
+
+**If things break, check:**
+- Memory local list/search: inspect `src/server/memory-local.ts` (`listLocalMemories` and `searchLocalMemories`).
+
+---
+
 ## 2026-10-03 (Antigravity) - Video Keyframe Extraction & Multimodal Pipeline Live for ADHD & Seven
 
 **What happened:**
