@@ -1,3 +1,15 @@
+## 2026-06-22 (Palette) - Improved File Input and Button Accessibility
+
+**What happened:**
+- Fixed file inputs in `Sidebar.tsx` (.MHT import) and `ChatArea.tsx` (media/doc upload) that were hidden via `className="hidden"`, which completely excluded them from keyboard navigation and screen readers.
+- Replaced `className="hidden"` with `className="sr-only"`, added `aria-label` attributes to file inputs, and applied `focus-within:ring-2` focus rings to parent `<label>` controls for visual focus feedback.
+- Added explicit `aria-label` and `focus-visible:ring-2` focus rings to icon-only buttons in `ChatArea.tsx` (mute/unmute voice toggle, attachment removal, mobile message send).
+
+**If things break, check:**
+- File inputs in `src/components/Sidebar.tsx` and `src/components/ChatArea.tsx`.
+
+---
+
 ## 2026-10-03 (Antigravity) - Video Keyframe Extraction & Multimodal Pipeline Live for ADHD & Seven
 
 **What happened:**

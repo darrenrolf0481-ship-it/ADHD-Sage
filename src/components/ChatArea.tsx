@@ -120,7 +120,8 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
               <span className="text-[10px] sm:text-xs text-white max-w-[150px] truncate">{att.name}</span>
               <button
                 onClick={() => setPendingAttachments(prev => prev.filter((_, idx) => idx !== i))}
-                className="ml-2 text-slate-400 hover:text-red-400"
+                aria-label="Remove attachment"
+                className="ml-2 text-slate-400 hover:text-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 rounded"
               >
                 &times;
               </button>
@@ -133,6 +134,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
       <div className="flex items-center gap-2 px-1 shrink-0">
         <button
           onClick={onToggleMute}
+          aria-label={isMuted ? 'Unmute voice' : 'Mute voice'}
           title={isMuted ? 'Voice off — tap to unmute Mama' : 'Voice on — tap to mute'}
           className={`p-1.5 rounded-lg border transition-colors ${
             isMuted
@@ -189,11 +191,15 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
           className="bg-transparent border-none outline-none flex-1 text-xs md:text-sm text-white placeholder-slate-500 font-sans"
         />
         <div className="flex items-center">
-          <label className="cursor-pointer p-2 text-slate-500 hover:text-cyan-400 transition-colors rounded-lg hover:bg-white/5" title="Upload Media/Docs">
+          <label
+            className="cursor-pointer p-2 text-slate-500 hover:text-cyan-400 transition-colors rounded-lg hover:bg-white/5 focus-within:ring-2 focus-within:ring-cyan-500 focus-within:outline-none"
+            title="Upload Media/Docs"
+            aria-label="Attach file"
+          >
             <Paperclip size={18} />
             <input
               type="file"
-              className="hidden"
+              className="sr-only"
               multiple
               accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.md,.json"
               onChange={onAttach}
@@ -206,7 +212,8 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
         <button
           onClick={onSend}
           disabled={isLoading || !input.trim()}
-          className="md:hidden p-2 text-cyan-400 disabled:text-slate-600"
+          aria-label="Send message"
+          className="md:hidden p-2 text-cyan-400 disabled:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-lg"
         >
           <Zap size={18} fill={input.trim() ? 'currentColor' : 'none'} />
         </button>
